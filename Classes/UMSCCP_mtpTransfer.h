@@ -1,0 +1,51 @@
+//
+//  UMSCCP_mtpTransfer.h
+//  ulibsccp
+//
+//  Created by Andreas Fink on 05.04.16.
+//  Copyright (c) 2016 Andreas Fink
+//
+
+#import <ulib/ulib.h>
+#import <ulibmtp3/ulibmtp3.h>
+#import <ulibgt/ulibgt.h>
+
+@class UMLayerSCCP;
+
+@interface UMSCCP_mtpTransfer : UMLayerTask
+{
+    NSData *data;
+    int si;
+    int ni;
+    UMMTP3PointCode *opc;
+    UMMTP3PointCode *dpc;
+    NSDictionary *options;
+    
+    
+    UMLayerSCCP *sccpLayer;
+    UMLayerMTP3 *mtp3Layer;
+
+    SccpAddress     *src;
+    SccpAddress     *dst;
+    NSData          *sccp_pdu;
+    int             m_protocol_class;
+    int             m_hopcounter;
+    NSData          *segment;
+    int             importance;
+    int             end_of_optional_parameters;
+    int             m_return_cause;
+    //   int             m_handling;
+    NSMutableString *decodedText;
+}
+
+@property(readonly) NSString *decodedText;
+
+- (UMSCCP_mtpTransfer *)initForSccp:(UMLayerSCCP *)layer
+                               mtp3:(UMLayerMTP3 *)mtp3
+                                opc:(UMMTP3PointCode *)opc
+                                dpc:(UMMTP3PointCode *)dpc
+                                 si:(int)si
+                                 ni:(int)ni
+                               data:(NSData *)data
+                            options:(NSDictionary *)options;
+@end

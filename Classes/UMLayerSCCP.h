@@ -1,0 +1,198 @@
+//
+//  UMLayerSCCP.h
+//  ulibsccp
+//
+//  Created by Andreas Fink on 01/07/15.
+//  Copyright (c) 2016 Andreas Fink
+//
+
+#import <ulibsctp/ulibsctp.h>
+#import <ulibm2pa/ulibm2pa.h>
+#import <ulibmtp3/ulibmtp3.h>
+#import <ulibm3ua/ulibm3ua.h>
+#import <ulibgt/ulibgt.h>
+#import "UMSCCP_UserProtocol.h"
+#import "UMSCCPConnection.h"
+#import "UMSCCP_Defs.h"
+#import "UMSCCP_Segment.h"
+
+@interface UMLayerSCCP : UMLayer<UMLayerMTP3UserProtocol>
+{
+    SccpVariant                 sccpVariant;
+    SccpNextHop                 *defaultNextHop;
+    SccpL3Provider              *defaultProvider;
+    
+    SccpGttRegistry             *gttSelectorRegistry;
+    UMSynchronizedDictionary    *subsystemUsers;
+    
+    NSString                    *attachTo;
+    UMLayerMTP3                 *attachedTo;
+    UMSynchronizedDictionary    *dpcAvailability;
+    NSMutableDictionary         *pendingSegments;
+}
+
+@property(readwrite,assign) SccpVariant sccpVariant;
+@property(readwrite,strong) UMSynchronizedDictionary *allProviders;
+@property(readwrite,strong) SccpNextHop     *defaultNextHop;
+@property(readwrite,strong) SccpL3Provider  *defaultProvider;
+@property(readwrite,strong) SccpGttRegistry *gttSelectorRegistry;
+@property(readwrite,strong) NSString    *attachTo;
+@property(readwrite,strong) UMLayerMTP3  *attachedTo;
+@property(readwrite,strong) NSMutableDictionary *pendingSegments;
+- (NSString *)status;
+
+/* connection oriented primitives */
+- (void)sccpNConnectRequest:(UMSCCPConnection **)connection
+               callingLayer:(id<UMSCCP_UserProtocol>)userLayer
+                    calling:(SccpAddress *)src
+                     called:(SccpAddress *)dst
+                    options:(NSDictionary *)options;
+
+- (void)sccpNDataRequest:(NSData *)data
+              connection:(UMSCCPConnection *)connection
+                 options:(NSDictionary *)options;
+
+- (void)sccpNExpeditedData:(NSData *)data
+                connection:(UMSCCPConnection *)connection
+                   options:(NSDictionary *)options;
+
+- (void)sccpNResetRequest:(UMSCCPConnection *)connection
+                  options:(NSDictionary *)options;
+
+- (void)sccpNResetIndication:(UMSCCPConnection *)connection
+                     options:(NSDictionary *)options;
+
+- (void)sccpNDisconnectRequest:(UMSCCPConnection *)connection
+                       options:(NSDictionary *)options;
+
+- (void)sccpNDisconnectIndicaton:(UMSCCPConnection *)connection
+                         options:(NSDictionary *)options;
+
+- (void)sccpNInform:(UMSCCPConnection *)connection
+            options:(NSDictionary *)options;
+
+
+/* connectionless primitives */
+- (void)sccpNUnidata:(NSData *)data
+        callingLayer:(id<UMSCCP_UserProtocol>)userLayer
+             calling:(SccpAddress *)src
+              called:(SccpAddress *)dst
+    qualityOfService:(int)qos
+             options:(NSDictionary *)options;
+
+- (void)sccpNNotice:(NSData *)data
+       callingLayer:(id<UMSCCP_UserProtocol>)userLayer
+            calling:(SccpAddress *)src
+             called:(SccpAddress *)dst
+            options:(NSDictionary *)options;
+
+- (void)sccpNState:(NSData *)data
+      callingLayer:(id<UMSCCP_UserProtocol>)userLayer
+           calling:(SccpAddress *)src
+            called:(SccpAddress *)dst
+           options:(NSDictionary *)options;
+
+- (void)sccpNCoord:(NSData *)data
+      callingLayer:(id<UMSCCP_UserProtocol>)userLayer
+           calling:(SccpAddress *)src
+            called:(SccpAddress *)dst
+           options:(NSDictionary *)options;
+
+- (void)sccpNTraffic:(NSData *)data
+        callingLayer:(id<UMSCCP_UserProtocol>)userLayer
+             calling:(SccpAddress *)src
+              called:(SccpAddress *)dst
+             options:(NSDictionary *)options;
+
+- (void)sccpNPcState:(NSData *)data
+        callingLayer:(id<UMSCCP_UserProtocol>)userLayer
+             calling:(SccpAddress *)src
+              called:(SccpAddress *)dst
+             options:(NSDictionary *)options;
+
+
+- (void)mtpTransfer:(NSData *)data
+       callingLayer:(id)mtp3Layer
+                opc:(UMMTP3PointCode *)opc
+                dpc:(UMMTP3PointCode *)dpc
+                 si:(int)si
+                 ni:(int)ni
+            options:(NSDictionary *)options;
+
+- (void)mtpPause:(NSData *)data
+    callingLayer:(id)mtp3Layer
+      affectedPc:(UMMTP3PointCode *)opc
+              si:(int)si
+              ni:(int)ni
+         options:(NSDictionary *)options;
+
+- (void)mtpResume:(NSData *)data
+     callingLayer:(id)mtp3Layer
+       affectedPc:(UMMTP3PointCode *)opc
+               si:(int)si
+               ni:(int)ni
+          options:(NSDictionary *)options;
+
+- (void)mtpStatus:(NSData *)data
+     callingLayer:(id)mtp3Layer
+       affectedPc:(UMMTP3PointCode *)opc
+               si:(int)si
+               ni:(int)ni
+           status:(int)status
+          options:(NSDictionary *)options;
+
+- (id<UMSCCP_UserProtocol>)getUserForSubsystem:(SccpSubSystemNumber *)ssn number:(SccpAddress *)number;
+
+- (id<UMSCCP_UserProtocol>)getUserForSubsystem:(SccpSubSystemNumber *)ssn; /* DEPRECIATED */
+- (void)setUser:(id<UMSCCP_UserProtocol>)usr forSubsystem:(SccpSubSystemNumber *)ssn number:(SccpAddress *)number;
+- (void)setUser:(id<UMSCCP_UserProtocol>)usr forSubsystem:(SccpSubSystemNumber *)ssn;
+
+- (void)setDefaultUser:(id<UMSCCP_UserProtocol>)usr;
+
+
+-(UMMTP3_Error) sendUDT:(NSData *)pdu
+                calling:(SccpAddress *)src
+                 called:(SccpAddress *)dst
+                  class:(int)cls
+          returnOnError:(BOOL)reterr
+                    opc:(UMMTP3PointCode *)opc
+                    dpc:(UMMTP3PointCode *)dpc
+                options:(NSDictionary *)options
+               provider:(SccpL3Provider *)provider;
+
+-(UMMTP3_Error) sendXUDTsegment:(UMSCCP_Segment *)pdu
+                        calling:(SccpAddress *)src
+                         called:(SccpAddress *)dst
+                          class:(int)cls
+                    maxHopCount:(int)maxHopCount
+                  returnOnError:(BOOL)reterr
+                            opc:(UMMTP3PointCode *)opc
+                            dpc:(UMMTP3PointCode *)dpc
+                        options:(NSDictionary *)options
+                       provider:(SccpL3Provider *)provider;
+
+-(UMMTP3_Error) sendXUDTdata:(NSData *)pdu
+                     calling:(SccpAddress *)src
+                      called:(SccpAddress *)dst
+                       class:(int)cls
+                 maxHopCount:(int)maxHopCount
+               returnOnError:(BOOL)reterr
+                         opc:(UMMTP3PointCode *)opc
+                         dpc:(UMMTP3PointCode *)dpc
+                     options:(NSDictionary *)options
+                    provider:(SccpL3Provider *)provider;
+
+- (NSUInteger)maxPayloadSizeForServiceType:(SCCP_ServiceType) serviceType
+                        callingAddressSize:(NSUInteger)cas
+                         calledAddressSize:(NSUInteger)cds
+                             usingSegments:(BOOL)useSeg
+                                  provider:(SccpL3Provider *)provider;
+
+- (void)setConfig:(NSDictionary *)cfg;
+- (NSDictionary *)config;
+- (void)startUp;
+
++ (NSString *)reasonString:(SCCP_ReturnCause)reason;
+- (UMSynchronizedSortedDictionary *)decodePdu:(NSData *)data;
+
+@end

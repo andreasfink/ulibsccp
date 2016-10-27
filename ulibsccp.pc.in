@@ -1,0 +1,15 @@
+
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Cflags: -I${includedir}
+Libs: -L${libdir} -lulibsccp
+
+Name: ulibsccp
+Description: universal sccp library
+Version: @VERSION@
+Requires: ulibmtp3 ulibm2pa ulibsctp ulib ulibgt
+
+

@@ -1,0 +1,626 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A604D13F19B999BC0090FC94 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A604D13D19B999BC0090FC94 /* InfoPlist.strings */; };
+		A604D14A19B999BD0090FC94 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A604D14919B999BD0090FC94 /* XCTest.framework */; };
+		A604D14E19B999BD0090FC94 /* ulibsccp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A604D13119B999BC0090FC94 /* ulibsccp.framework */; };
+		A604D15419B999BD0090FC94 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A604D15219B999BD0090FC94 /* InfoPlist.strings */; };
+		A604D15619B999BD0090FC94 /* ulibsccpTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A604D15519B999BD0090FC94 /* ulibsccpTests.m */; };
+		A61571EE1CD4891200211137 /* UMSCCP_Segment.h in Headers */ = {isa = PBXBuildFile; fileRef = A61571EC1CD4891200211137 /* UMSCCP_Segment.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A61571EF1CD4891200211137 /* UMSCCP_Segment.m in Sources */ = {isa = PBXBuildFile; fileRef = A61571ED1CD4891200211137 /* UMSCCP_Segment.m */; };
+		A61571F61CD4AADF00211137 /* UMSCCP_ReceivedSegments.h in Headers */ = {isa = PBXBuildFile; fileRef = A61571F41CD4AADF00211137 /* UMSCCP_ReceivedSegments.h */; };
+		A61571F71CD4AADF00211137 /* UMSCCP_ReceivedSegments.m in Sources */ = {isa = PBXBuildFile; fileRef = A61571F51CD4AADF00211137 /* UMSCCP_ReceivedSegments.m */; };
+		A615D9071B4D587900854472 /* ulibgt.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A615D9061B4D587900854472 /* ulibgt.framework */; };
+		A615D9151B4D5FB000854472 /* sctp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A615D9141B4D5FB000854472 /* sctp.framework */; };
+		A645FFD11DA990EF0060380D /* ulibasn1.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A645FFD01DA990EF0060380D /* ulibasn1.framework */; };
+		A64DC0B11DA1FDA800EE4016 /* ulib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D8E1A2943B9006C66A2 /* ulib.framework */; };
+		A64DC0B21DA1FDAE00EE4016 /* ulibgt.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A615D9061B4D587900854472 /* ulibgt.framework */; };
+		A66DD09F1B4FC4300090FC94 /* sctp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A615D9141B4D5FB000854472 /* sctp.framework */; };
+		A68494D61CB31FA900211137 /* UMSCCP_dpcAvailability.h in Headers */ = {isa = PBXBuildFile; fileRef = A68494D41CB31FA900211137 /* UMSCCP_dpcAvailability.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A68494D71CB31FA900211137 /* UMSCCP_dpcAvailability.m in Sources */ = {isa = PBXBuildFile; fileRef = A68494D51CB31FA900211137 /* UMSCCP_dpcAvailability.m */; };
+		A68494DA1CB320AB00211137 /* UMSCCP_mtpTransfer.h in Headers */ = {isa = PBXBuildFile; fileRef = A68494D81CB320AB00211137 /* UMSCCP_mtpTransfer.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A68494DB1CB320AB00211137 /* UMSCCP_mtpTransfer.m in Sources */ = {isa = PBXBuildFile; fileRef = A68494D91CB320AB00211137 /* UMSCCP_mtpTransfer.m */; };
+		A68494DE1CB320B600211137 /* UMSCCP_mtpPause.h in Headers */ = {isa = PBXBuildFile; fileRef = A68494DC1CB320B600211137 /* UMSCCP_mtpPause.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A68494DF1CB320B600211137 /* UMSCCP_mtpPause.m in Sources */ = {isa = PBXBuildFile; fileRef = A68494DD1CB320B600211137 /* UMSCCP_mtpPause.m */; };
+		A68494E21CB320BF00211137 /* UMSCCP_mtpResume.h in Headers */ = {isa = PBXBuildFile; fileRef = A68494E01CB320BF00211137 /* UMSCCP_mtpResume.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A68494E31CB320BF00211137 /* UMSCCP_mtpResume.m in Sources */ = {isa = PBXBuildFile; fileRef = A68494E11CB320BF00211137 /* UMSCCP_mtpResume.m */; };
+		A68494E61CB320C800211137 /* UMSCCP_mtpStatus.h in Headers */ = {isa = PBXBuildFile; fileRef = A68494E41CB320C800211137 /* UMSCCP_mtpStatus.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A68494E71CB320C800211137 /* UMSCCP_mtpStatus.m in Sources */ = {isa = PBXBuildFile; fileRef = A68494E51CB320C800211137 /* UMSCCP_mtpStatus.m */; };
+		A6ADC5C71CADB25500211137 /* UMSCCP_sccpNUnitdata.h in Headers */ = {isa = PBXBuildFile; fileRef = A6ADC5C51CADB25500211137 /* UMSCCP_sccpNUnitdata.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A6ADC5C81CADB25500211137 /* UMSCCP_sccpNUnitdata.m in Sources */ = {isa = PBXBuildFile; fileRef = A6ADC5C61CADB25500211137 /* UMSCCP_sccpNUnitdata.m */; };
+		A6ADC5E51CAE8C7600211137 /* UMSCCP_Defs.h in Headers */ = {isa = PBXBuildFile; fileRef = A6ADC5E31CAE8C7600211137 /* UMSCCP_Defs.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A6C78D8F1A2943B9006C66A2 /* ulib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D8E1A2943B9006C66A2 /* ulib.framework */; };
+		A6C78D921A2943D0006C66A2 /* ulibmtp3.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D911A2943D0006C66A2 /* ulibmtp3.framework */; };
+		A6C78D931A2943D0006C66A2 /* ulibmtp3.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D911A2943D0006C66A2 /* ulibmtp3.framework */; };
+		A6C78D951A2943DD006C66A2 /* ulibm3ua.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D941A2943DD006C66A2 /* ulibm3ua.framework */; };
+		A6C78D961A2943DD006C66A2 /* ulibm3ua.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D941A2943DD006C66A2 /* ulibm3ua.framework */; };
+		A6C78D981A2943E8006C66A2 /* ulibm2pa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D971A2943E8006C66A2 /* ulibm2pa.framework */; };
+		A6C78D991A2943E8006C66A2 /* ulibm2pa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D971A2943E8006C66A2 /* ulibm2pa.framework */; };
+		A6C78D9B1A2943F7006C66A2 /* ulibsctp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D9A1A2943F7006C66A2 /* ulibsctp.framework */; };
+		A6C78D9C1A2943F7006C66A2 /* ulibsctp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D9A1A2943F7006C66A2 /* ulibsctp.framework */; };
+		A6DDA3F01CAD269000754B9E /* UMSCCP_UserProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = A6DDA3EE1CAD269000754B9E /* UMSCCP_UserProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A6ED5C6D1B435A8A00854472 /* UMLayerSCCP.h in Headers */ = {isa = PBXBuildFile; fileRef = A6ED5C6B1B435A8A00854472 /* UMLayerSCCP.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A6ED5C6E1B435A8A00854472 /* UMLayerSCCP.m in Sources */ = {isa = PBXBuildFile; fileRef = A6ED5C6C1B435A8A00854472 /* UMLayerSCCP.m */; };
+		A6ED5C931B435F3600854472 /* ulibsccp.h in Headers */ = {isa = PBXBuildFile; fileRef = A604D14119B999BC0090FC94 /* ulibsccp.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A6F442B21CB2595000C2B472 /* UMSCCPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = A6F442B01CB2595000C2B472 /* UMSCCPConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A6F442B31CB2595000C2B472 /* UMSCCPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = A6F442B11CB2595000C2B472 /* UMSCCPConnection.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A604D14C19B999BD0090FC94 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A604D12819B999BC0090FC94 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A604D13019B999BC0090FC94;
+			remoteInfo = ulibsccp;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		A604D13119B999BC0090FC94 /* ulibsccp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ulibsccp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		A604D13C19B999BC0090FC94 /* ulibsccp-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "ulibsccp-Info.plist"; sourceTree = "<group>"; };
+		A604D13E19B999BC0090FC94 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		A604D14019B999BC0090FC94 /* ulibsccp-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ulibsccp-Prefix.pch"; sourceTree = "<group>"; };
+		A604D14119B999BC0090FC94 /* ulibsccp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ulibsccp.h; sourceTree = "<group>"; };
+		A604D14819B999BD0090FC94 /* ulibsccpTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ulibsccpTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A604D14919B999BD0090FC94 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+		A604D15119B999BD0090FC94 /* ulibsccpTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "ulibsccpTests-Info.plist"; sourceTree = "<group>"; };
+		A604D15319B999BD0090FC94 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		A604D15519B999BD0090FC94 /* ulibsccpTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ulibsccpTests.m; sourceTree = "<group>"; };
+		A61571EC1CD4891200211137 /* UMSCCP_Segment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_Segment.h; sourceTree = "<group>"; };
+		A61571ED1CD4891200211137 /* UMSCCP_Segment.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_Segment.m; sourceTree = "<group>"; };
+		A61571F41CD4AADF00211137 /* UMSCCP_ReceivedSegments.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_ReceivedSegments.h; sourceTree = "<group>"; };
+		A61571F51CD4AADF00211137 /* UMSCCP_ReceivedSegments.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_ReceivedSegments.m; sourceTree = "<group>"; };
+		A615D9061B4D587900854472 /* ulibgt.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibgt.framework; path = /Library/Frameworks/ulibgt.framework; sourceTree = "<absolute>"; };
+		A615D9141B4D5FB000854472 /* sctp.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = sctp.framework; path = /Library/Frameworks/sctp.framework; sourceTree = "<absolute>"; };
+		A645FFD01DA990EF0060380D /* ulibasn1.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibasn1.framework; path = ../../../../../Library/Frameworks/ulibasn1.framework; sourceTree = "<group>"; };
+		A68494D41CB31FA900211137 /* UMSCCP_dpcAvailability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_dpcAvailability.h; sourceTree = "<group>"; };
+		A68494D51CB31FA900211137 /* UMSCCP_dpcAvailability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_dpcAvailability.m; sourceTree = "<group>"; };
+		A68494D81CB320AB00211137 /* UMSCCP_mtpTransfer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_mtpTransfer.h; sourceTree = "<group>"; };
+		A68494D91CB320AB00211137 /* UMSCCP_mtpTransfer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_mtpTransfer.m; sourceTree = "<group>"; };
+		A68494DC1CB320B600211137 /* UMSCCP_mtpPause.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_mtpPause.h; sourceTree = "<group>"; };
+		A68494DD1CB320B600211137 /* UMSCCP_mtpPause.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_mtpPause.m; sourceTree = "<group>"; };
+		A68494E01CB320BF00211137 /* UMSCCP_mtpResume.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_mtpResume.h; sourceTree = "<group>"; };
+		A68494E11CB320BF00211137 /* UMSCCP_mtpResume.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_mtpResume.m; sourceTree = "<group>"; };
+		A68494E41CB320C800211137 /* UMSCCP_mtpStatus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_mtpStatus.h; sourceTree = "<group>"; };
+		A68494E51CB320C800211137 /* UMSCCP_mtpStatus.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_mtpStatus.m; sourceTree = "<group>"; };
+		A6ADC5C51CADB25500211137 /* UMSCCP_sccpNUnitdata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_sccpNUnitdata.h; sourceTree = "<group>"; };
+		A6ADC5C61CADB25500211137 /* UMSCCP_sccpNUnitdata.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_sccpNUnitdata.m; sourceTree = "<group>"; };
+		A6ADC5E31CAE8C7600211137 /* UMSCCP_Defs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_Defs.h; sourceTree = "<group>"; };
+		A6C78D8E1A2943B9006C66A2 /* ulib.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulib.framework; path = /Library/Frameworks/ulib.framework; sourceTree = "<absolute>"; };
+		A6C78D911A2943D0006C66A2 /* ulibmtp3.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibmtp3.framework; path = /Library/Frameworks/ulibmtp3.framework; sourceTree = "<absolute>"; };
+		A6C78D941A2943DD006C66A2 /* ulibm3ua.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibm3ua.framework; path = /Library/Frameworks/ulibm3ua.framework; sourceTree = "<absolute>"; };
+		A6C78D971A2943E8006C66A2 /* ulibm2pa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibm2pa.framework; path = /Library/Frameworks/ulibm2pa.framework; sourceTree = "<absolute>"; };
+		A6C78D9A1A2943F7006C66A2 /* ulibsctp.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibsctp.framework; path = /Library/Frameworks/ulibsctp.framework; sourceTree = "<absolute>"; };
+		A6DDA3EE1CAD269000754B9E /* UMSCCP_UserProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_UserProtocol.h; sourceTree = "<group>"; };
+		A6ED5C6B1B435A8A00854472 /* UMLayerSCCP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMLayerSCCP.h; sourceTree = "<group>"; };
+		A6ED5C6C1B435A8A00854472 /* UMLayerSCCP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMLayerSCCP.m; sourceTree = "<group>"; };
+		A6F442B01CB2595000C2B472 /* UMSCCPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCPConnection.h; sourceTree = "<group>"; };
+		A6F442B11CB2595000C2B472 /* UMSCCPConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCPConnection.m; sourceTree = "<group>"; };
+		A6F693FF1B4E84120090FC94 /* configure.in */ = {isa = PBXFileReference; lastKnownFileType = text; path = configure.in; sourceTree = "<group>"; };
+		A6F694001B4E84120090FC94 /* Makefile.linux.in */ = {isa = PBXFileReference; lastKnownFileType = text; path = Makefile.linux.in; sourceTree = "<group>"; };
+		A6F694011B4E84120090FC94 /* Makefile.osx.in */ = {isa = PBXFileReference; lastKnownFileType = text; path = Makefile.osx.in; sourceTree = "<group>"; };
+		A6F694021B4E84120090FC94 /* ulibsccp.pc.in */ = {isa = PBXFileReference; lastKnownFileType = text; path = ulibsccp.pc.in; sourceTree = "<group>"; };
+		A6F694031B4E84120090FC94 /* VERSION */ = {isa = PBXFileReference; lastKnownFileType = text; path = VERSION; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A604D12D19B999BC0090FC94 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A6C78D9B1A2943F7006C66A2 /* ulibsctp.framework in Frameworks */,
+				A615D9151B4D5FB000854472 /* sctp.framework in Frameworks */,
+				A6C78D951A2943DD006C66A2 /* ulibm3ua.framework in Frameworks */,
+				A6C78D921A2943D0006C66A2 /* ulibmtp3.framework in Frameworks */,
+				A615D9071B4D587900854472 /* ulibgt.framework in Frameworks */,
+				A645FFD11DA990EF0060380D /* ulibasn1.framework in Frameworks */,
+				A6C78D8F1A2943B9006C66A2 /* ulib.framework in Frameworks */,
+				A6C78D981A2943E8006C66A2 /* ulibm2pa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A604D14519B999BD0090FC94 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A6C78D931A2943D0006C66A2 /* ulibmtp3.framework in Frameworks */,
+				A66DD09F1B4FC4300090FC94 /* sctp.framework in Frameworks */,
+				A6C78D961A2943DD006C66A2 /* ulibm3ua.framework in Frameworks */,
+				A604D14E19B999BD0090FC94 /* ulibsccp.framework in Frameworks */,
+				A6C78D9C1A2943F7006C66A2 /* ulibsctp.framework in Frameworks */,
+				A604D14A19B999BD0090FC94 /* XCTest.framework in Frameworks */,
+				A64DC0B21DA1FDAE00EE4016 /* ulibgt.framework in Frameworks */,
+				A64DC0B11DA1FDA800EE4016 /* ulib.framework in Frameworks */,
+				A6C78D991A2943E8006C66A2 /* ulibm2pa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A604D12719B999BC0090FC94 = {
+			isa = PBXGroup;
+			children = (
+				A6F693FF1B4E84120090FC94 /* configure.in */,
+				A6F694001B4E84120090FC94 /* Makefile.linux.in */,
+				A6F694011B4E84120090FC94 /* Makefile.osx.in */,
+				A6F694021B4E84120090FC94 /* ulibsccp.pc.in */,
+				A6F694031B4E84120090FC94 /* VERSION */,
+				A604D13A19B999BC0090FC94 /* Classes */,
+				A604D13B19B999BC0090FC94 /* SupportingFiles */,
+				A604D14F19B999BD0090FC94 /* ulibsccpTests */,
+				A604D13219B999BC0090FC94 /* Products */,
+				A604D13319B999BC0090FC94 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		A604D13219B999BC0090FC94 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A604D13119B999BC0090FC94 /* ulibsccp.framework */,
+				A604D14819B999BD0090FC94 /* ulibsccpTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A604D13319B999BC0090FC94 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A645FFD01DA990EF0060380D /* ulibasn1.framework */,
+				A6C78D8E1A2943B9006C66A2 /* ulib.framework */,
+				A615D9141B4D5FB000854472 /* sctp.framework */,
+				A6C78D9A1A2943F7006C66A2 /* ulibsctp.framework */,
+				A6C78D971A2943E8006C66A2 /* ulibm2pa.framework */,
+				A6C78D911A2943D0006C66A2 /* ulibmtp3.framework */,
+				A6C78D941A2943DD006C66A2 /* ulibm3ua.framework */,
+				A615D9061B4D587900854472 /* ulibgt.framework */,
+				A604D14919B999BD0090FC94 /* XCTest.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		A604D13A19B999BC0090FC94 /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				A61571F41CD4AADF00211137 /* UMSCCP_ReceivedSegments.h */,
+				A61571F51CD4AADF00211137 /* UMSCCP_ReceivedSegments.m */,
+				A604D14119B999BC0090FC94 /* ulibsccp.h */,
+				A6DDA3EE1CAD269000754B9E /* UMSCCP_UserProtocol.h */,
+				A6ADC5E31CAE8C7600211137 /* UMSCCP_Defs.h */,
+				A6ED5C6B1B435A8A00854472 /* UMLayerSCCP.h */,
+				A6ED5C6C1B435A8A00854472 /* UMLayerSCCP.m */,
+				A61571EC1CD4891200211137 /* UMSCCP_Segment.h */,
+				A61571ED1CD4891200211137 /* UMSCCP_Segment.m */,
+				A68494D81CB320AB00211137 /* UMSCCP_mtpTransfer.h */,
+				A68494D91CB320AB00211137 /* UMSCCP_mtpTransfer.m */,
+				A68494DC1CB320B600211137 /* UMSCCP_mtpPause.h */,
+				A68494DD1CB320B600211137 /* UMSCCP_mtpPause.m */,
+				A68494E01CB320BF00211137 /* UMSCCP_mtpResume.h */,
+				A68494E11CB320BF00211137 /* UMSCCP_mtpResume.m */,
+				A68494E41CB320C800211137 /* UMSCCP_mtpStatus.h */,
+				A68494E51CB320C800211137 /* UMSCCP_mtpStatus.m */,
+				A68494D41CB31FA900211137 /* UMSCCP_dpcAvailability.h */,
+				A68494D51CB31FA900211137 /* UMSCCP_dpcAvailability.m */,
+				A6ADC5C51CADB25500211137 /* UMSCCP_sccpNUnitdata.h */,
+				A6ADC5C61CADB25500211137 /* UMSCCP_sccpNUnitdata.m */,
+				A6F442B01CB2595000C2B472 /* UMSCCPConnection.h */,
+				A6F442B11CB2595000C2B472 /* UMSCCPConnection.m */,
+			);
+			path = Classes;
+			sourceTree = "<group>";
+		};
+		A604D13B19B999BC0090FC94 /* SupportingFiles */ = {
+			isa = PBXGroup;
+			children = (
+				A604D13C19B999BC0090FC94 /* ulibsccp-Info.plist */,
+				A604D13D19B999BC0090FC94 /* InfoPlist.strings */,
+				A604D14019B999BC0090FC94 /* ulibsccp-Prefix.pch */,
+			);
+			path = SupportingFiles;
+			sourceTree = "<group>";
+		};
+		A604D14F19B999BD0090FC94 /* ulibsccpTests */ = {
+			isa = PBXGroup;
+			children = (
+				A604D15519B999BD0090FC94 /* ulibsccpTests.m */,
+				A604D15019B999BD0090FC94 /* Supporting Files */,
+			);
+			path = ulibsccpTests;
+			sourceTree = "<group>";
+		};
+		A604D15019B999BD0090FC94 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				A604D15119B999BD0090FC94 /* ulibsccpTests-Info.plist */,
+				A604D15219B999BD0090FC94 /* InfoPlist.strings */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		A604D12E19B999BC0090FC94 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A68494DE1CB320B600211137 /* UMSCCP_mtpPause.h in Headers */,
+				A6ED5C931B435F3600854472 /* ulibsccp.h in Headers */,
+				A6ED5C6D1B435A8A00854472 /* UMLayerSCCP.h in Headers */,
+				A68494E21CB320BF00211137 /* UMSCCP_mtpResume.h in Headers */,
+				A6F442B21CB2595000C2B472 /* UMSCCPConnection.h in Headers */,
+				A6DDA3F01CAD269000754B9E /* UMSCCP_UserProtocol.h in Headers */,
+				A68494E61CB320C800211137 /* UMSCCP_mtpStatus.h in Headers */,
+				A6ADC5C71CADB25500211137 /* UMSCCP_sccpNUnitdata.h in Headers */,
+				A68494DA1CB320AB00211137 /* UMSCCP_mtpTransfer.h in Headers */,
+				A6ADC5E51CAE8C7600211137 /* UMSCCP_Defs.h in Headers */,
+				A61571EE1CD4891200211137 /* UMSCCP_Segment.h in Headers */,
+				A61571F61CD4AADF00211137 /* UMSCCP_ReceivedSegments.h in Headers */,
+				A68494D61CB31FA900211137 /* UMSCCP_dpcAvailability.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		A604D13019B999BC0090FC94 /* ulibsccp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A604D15919B999BD0090FC94 /* Build configuration list for PBXNativeTarget "ulibsccp" */;
+			buildPhases = (
+				A604D12C19B999BC0090FC94 /* Sources */,
+				A604D12D19B999BC0090FC94 /* Frameworks */,
+				A604D12E19B999BC0090FC94 /* Headers */,
+				A604D12F19B999BC0090FC94 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ulibsccp;
+			productName = ulibsccp;
+			productReference = A604D13119B999BC0090FC94 /* ulibsccp.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		A604D14719B999BD0090FC94 /* ulibsccpTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A604D15C19B999BD0090FC94 /* Build configuration list for PBXNativeTarget "ulibsccpTests" */;
+			buildPhases = (
+				A604D14419B999BD0090FC94 /* Sources */,
+				A604D14519B999BD0090FC94 /* Frameworks */,
+				A604D14619B999BD0090FC94 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A604D14D19B999BD0090FC94 /* PBXTargetDependency */,
+			);
+			name = ulibsccpTests;
+			productName = ulibsccpTests;
+			productReference = A604D14819B999BD0090FC94 /* ulibsccpTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A604D12819B999BC0090FC94 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0800;
+				ORGANIZATIONNAME = "Andreas Fink";
+				TargetAttributes = {
+					A604D13019B999BC0090FC94 = {
+						DevelopmentTeam = 2GSNWPNR77;
+						ProvisioningStyle = Automatic;
+					};
+					A604D14719B999BD0090FC94 = {
+						TestTargetID = A604D13019B999BC0090FC94;
+					};
+				};
+			};
+			buildConfigurationList = A604D12B19B999BC0090FC94 /* Build configuration list for PBXProject "ulibsccp" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = A604D12719B999BC0090FC94;
+			productRefGroup = A604D13219B999BC0090FC94 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A604D13019B999BC0090FC94 /* ulibsccp */,
+				A604D14719B999BD0090FC94 /* ulibsccpTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A604D12F19B999BC0090FC94 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A604D13F19B999BC0090FC94 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A604D14619B999BD0090FC94 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A604D15419B999BD0090FC94 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A604D12C19B999BC0090FC94 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A6F442B31CB2595000C2B472 /* UMSCCPConnection.m in Sources */,
+				A61571EF1CD4891200211137 /* UMSCCP_Segment.m in Sources */,
+				A68494E31CB320BF00211137 /* UMSCCP_mtpResume.m in Sources */,
+				A68494D71CB31FA900211137 /* UMSCCP_dpcAvailability.m in Sources */,
+				A68494E71CB320C800211137 /* UMSCCP_mtpStatus.m in Sources */,
+				A6ADC5C81CADB25500211137 /* UMSCCP_sccpNUnitdata.m in Sources */,
+				A68494DF1CB320B600211137 /* UMSCCP_mtpPause.m in Sources */,
+				A61571F71CD4AADF00211137 /* UMSCCP_ReceivedSegments.m in Sources */,
+				A6ED5C6E1B435A8A00854472 /* UMLayerSCCP.m in Sources */,
+				A68494DB1CB320AB00211137 /* UMSCCP_mtpTransfer.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A604D14419B999BD0090FC94 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A604D15619B999BD0090FC94 /* ulibsccpTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A604D14D19B999BD0090FC94 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A604D13019B999BC0090FC94 /* ulibsccp */;
+			targetProxy = A604D14C19B999BD0090FC94 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		A604D13D19B999BC0090FC94 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				A604D13E19B999BC0090FC94 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		A604D15219B999BD0090FC94 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				A604D15319B999BD0090FC94 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		A604D15719B999BD0090FC94 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = NO;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEPLOYMENT_LOCATION = YES;
+				DSTROOT = /;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INSTALL_PATH = /Library/Frameworks;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				STRIP_INSTALLED_PRODUCT = NO;
+			};
+			name = Debug;
+		};
+		A604D15819B999BD0090FC94 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = NO;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEPLOYMENT_LOCATION = YES;
+				DSTROOT = /;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INSTALL_PATH = /Library/Frameworks;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				SDKROOT = macosx;
+				STRIP_INSTALLED_PRODUCT = NO;
+			};
+			name = Release;
+		};
+		A604D15A19B999BD0090FC94 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 2GSNWPNR77;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+				);
+				FRAMEWORK_VERSION = A;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				INFOPLIST_FILE = "$(SRCROOT)/SupportingFiles/ulibsccp-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				PRODUCT_BUNDLE_IDENTIFIER = me.fink.ulibsccp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = framework;
+			};
+			name = Debug;
+		};
+		A604D15B19B999BD0090FC94 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 2GSNWPNR77;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+				);
+				FRAMEWORK_VERSION = A;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				INFOPLIST_FILE = "$(SRCROOT)/SupportingFiles/ulibsccp-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				PRODUCT_BUNDLE_IDENTIFIER = me.fink.ulibsccp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = framework;
+			};
+			name = Release;
+		};
+		A604D15D19B999BD0090FC94 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/ulibsccp.framework/Versions/A/ulibsccp";
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(inherited)",
+					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = "ulibsccpTests/ulibsccpTests-Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.messagemover.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Debug;
+		};
+		A604D15E19B999BD0090FC94 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/ulibsccp.framework/Versions/A/ulibsccp";
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(inherited)",
+					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				INFOPLIST_FILE = "ulibsccpTests/ulibsccpTests-Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.messagemover.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A604D12B19B999BC0090FC94 /* Build configuration list for PBXProject "ulibsccp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A604D15719B999BD0090FC94 /* Debug */,
+				A604D15819B999BD0090FC94 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A604D15919B999BD0090FC94 /* Build configuration list for PBXNativeTarget "ulibsccp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A604D15A19B999BD0090FC94 /* Debug */,
+				A604D15B19B999BD0090FC94 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A604D15C19B999BD0090FC94 /* Build configuration list for PBXNativeTarget "ulibsccpTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A604D15D19B999BD0090FC94 /* Debug */,
+				A604D15E19B999BD0090FC94 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A604D12819B999BC0090FC94 /* Project object */;
+}
