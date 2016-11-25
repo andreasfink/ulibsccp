@@ -23,7 +23,7 @@
                           options:(NSDictionary *)xoptions
 
 {
-    self = [super initWithName:@"UMSCCP_mtpStatus" receiver:layer sender:mtp3 requiresSynchronisation:YES];
+    self = [super initWithName:@"UMSCCP_mtpStatus" receiver:layer sender:mtp3 requiresSynchronisation:NO];
     if(self)
     {
         affectedPointCode = affPC;

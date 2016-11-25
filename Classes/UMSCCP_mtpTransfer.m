@@ -27,7 +27,7 @@
                                data:(NSData *)xdata
                             options:(NSDictionary *)xoptions;
 {
-    self = [super initWithName:@"UMSCCP_mtpTransfer" receiver:layer sender:mtp3 requiresSynchronisation:YES];
+    self = [super initWithName:@"UMSCCP_mtpTransfer" receiver:layer sender:mtp3 requiresSynchronisation:NO];
     if(self)
     {
         opc = xopc;

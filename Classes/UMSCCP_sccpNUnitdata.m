@@ -39,7 +39,7 @@ static int segmentReferenceId;
     self = [super initWithName:@"UMSCCP_sccpNUnitdata"
                       receiver:sccp
                         sender:xuser
-       requiresSynchronisation:YES];
+       requiresSynchronisation:NO];
     if(self)
     {
         sccpLayer = sccp;
@@ -65,7 +65,7 @@ static int segmentReferenceId;
     self = [super initWithName:@"UMSCCP_sccpNUnitdata"
                       receiver:sccp
                         sender:xuser
-       requiresSynchronisation:YES];
+       requiresSynchronisation:NO];
     if(self)
     {
         sccpLayer = sccp;
