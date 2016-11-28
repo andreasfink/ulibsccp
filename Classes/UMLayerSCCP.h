@@ -12,7 +12,6 @@
 #import <ulibsctp/ulibsctp.h>
 #import <ulibm2pa/ulibm2pa.h>
 #import <ulibmtp3/ulibmtp3.h>
-#import <ulibm3ua/ulibm3ua.h>
 #import <ulibgt/ulibgt.h>
 #import "UMSCCP_UserProtocol.h"
 #import "UMSCCPConnection.h"

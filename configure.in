@@ -14,7 +14,7 @@ AUTHOR="Andreas Fink <andreas@fink.org>"
 CONFIG_DEFINE="ULIBSCCP_CONFIG"
 VERSION=`head -n 1 VERSION`
 CONFIG_HEADER=ulibsccp_config.h
-DEPENDENT_PKGCONFIGS="ulibm3ua"
+DEPENDENT_PKGCONFIGS="ulibmtp3"
 PKG_CONFIG_PATH="/usr/local/lib/pkgconfig"
 export PKG_CONFIG_PATH
 
@@ -48,7 +48,7 @@ LIBTOOL="ar rc"
 RANLIB="ranlib"
 LIBRARY_NAME=$PROJECT_NAME
 BUILD_DIR=.
-FRAMEWORKS="-framework ulib -framework ulibsctp -framework ulibm2pa -framework ulibmtp3 -framework ulibm3ua"
+FRAMEWORKS="-framework ulib -framework ulibsctp -framework ulibm2pa -framework ulibmtp3"
 
 dnl Apply system specific rules.
 dnl Executable extension for systems that need one, i.e. Cygwin
