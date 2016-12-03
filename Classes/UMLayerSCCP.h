@@ -26,7 +26,6 @@
     
     SccpGttRegistry             *gttSelectorRegistry;
     UMSynchronizedDictionary    *subsystemUsers;
-    
     NSString                    *attachTo;
     UMLayerMTP3                 *attachedTo;
     UMSynchronizedDictionary    *dpcAvailability;

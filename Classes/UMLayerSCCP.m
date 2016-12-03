@@ -131,7 +131,9 @@
 
 - (id<UMSCCP_UserProtocol>)getUserForSubsystem:(SccpSubSystemNumber *)ssn number:(SccpAddress *)sccpAddr
 {
-    NSString *number = [sccpAddr description];
+    NSString *number = [sccpAddr address];
+    NSString *any = [[sccpAddr anyAddress] address];
+
     @synchronized(subsystemUsers)
     {
         int subsystem = ssn.ssn;
@@ -141,9 +143,7 @@
             id<UMSCCP_UserProtocol>  user = a[number];
             if(user==NULL)
             {
-                SccpAddress *sccpAddr2 = [sccpAddr anyAddress];
-                number = [sccpAddr2 description];
-                user = a[number];
+                user = a[any];
             }
             if(user)
             {
@@ -153,13 +153,10 @@
         a = subsystemUsers[@(0)];
         if(a)
         {
-            SccpAddress *sccpAddr3 = [sccpAddr anySsnAddress];
             id<UMSCCP_UserProtocol>  user = a[number];
             if(user==NULL)
             {
-                SccpAddress *sccpAddr4 = [sccpAddr3 anyAddress];
-                number = [sccpAddr4 description];
-                user = a[number];
+                user = a[any];
             }
             return user;
         }
