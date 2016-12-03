@@ -863,6 +863,8 @@
 
 - (NSString *)status
 {
-    return @"IS";
+    NSString *s = [NSString stringWithFormat:"Routing %@",subsystemUsers];
+    return s;
 }
+
 @end
