@@ -174,7 +174,7 @@
         {
             a = [[NSMutableDictionary alloc]init];
         }
-        a[sccpAddress.description] = usr;
+        a[sccpAddress.address] = usr;
         subsystemUsers[@(subsystem)] = a;
     }
 }
