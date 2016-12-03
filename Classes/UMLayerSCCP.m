@@ -863,7 +863,8 @@
 
 - (NSString *)status
 {
-    NSString *s = [NSString stringWithFormat:"Routing %@",subsystemUsers];
+    NSMutableDictionary *m = [subsystemUsers mutableCopy]
+    NSString *s = [NSString stringWithFormat:@"Routing %@",m.description];
     return s;
 }
 

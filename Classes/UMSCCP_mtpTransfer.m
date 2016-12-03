@@ -365,7 +365,10 @@
 - (void)processUDT
 {
     id<UMSCCP_UserProtocol> upperLayer = [sccpLayer getUserForSubsystem:dst.ssn number:dst];
-    
+    if(upperLayer == NULL)
+    {
+        NSLog(@"no upper layer found for %@",dst.debugDescription);
+    }
     [upperLayer sccpNUnitdata:sccp_pdu
                  callingLayer:sccpLayer
                       calling:src
