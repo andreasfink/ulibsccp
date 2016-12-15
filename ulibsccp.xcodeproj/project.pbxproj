@@ -38,8 +38,6 @@
 		A6C78D8F1A2943B9006C66A2 /* ulib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D8E1A2943B9006C66A2 /* ulib.framework */; };
 		A6C78D921A2943D0006C66A2 /* ulibmtp3.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D911A2943D0006C66A2 /* ulibmtp3.framework */; };
 		A6C78D931A2943D0006C66A2 /* ulibmtp3.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D911A2943D0006C66A2 /* ulibmtp3.framework */; };
-		A6C78D951A2943DD006C66A2 /* ulibm3ua.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D941A2943DD006C66A2 /* ulibm3ua.framework */; };
-		A6C78D961A2943DD006C66A2 /* ulibm3ua.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D941A2943DD006C66A2 /* ulibm3ua.framework */; };
 		A6C78D981A2943E8006C66A2 /* ulibm2pa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D971A2943E8006C66A2 /* ulibm2pa.framework */; };
 		A6C78D991A2943E8006C66A2 /* ulibm2pa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D971A2943E8006C66A2 /* ulibm2pa.framework */; };
 		A6C78D9B1A2943F7006C66A2 /* ulibsctp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D9A1A2943F7006C66A2 /* ulibsctp.framework */; };
@@ -95,7 +93,6 @@
 		A6ADC5E31CAE8C7600211137 /* UMSCCP_Defs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_Defs.h; sourceTree = "<group>"; };
 		A6C78D8E1A2943B9006C66A2 /* ulib.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulib.framework; path = /Library/Frameworks/ulib.framework; sourceTree = "<absolute>"; };
 		A6C78D911A2943D0006C66A2 /* ulibmtp3.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibmtp3.framework; path = /Library/Frameworks/ulibmtp3.framework; sourceTree = "<absolute>"; };
-		A6C78D941A2943DD006C66A2 /* ulibm3ua.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibm3ua.framework; path = /Library/Frameworks/ulibm3ua.framework; sourceTree = "<absolute>"; };
 		A6C78D971A2943E8006C66A2 /* ulibm2pa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibm2pa.framework; path = /Library/Frameworks/ulibm2pa.framework; sourceTree = "<absolute>"; };
 		A6C78D9A1A2943F7006C66A2 /* ulibsctp.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibsctp.framework; path = /Library/Frameworks/ulibsctp.framework; sourceTree = "<absolute>"; };
 		A6DDA3EE1CAD269000754B9E /* UMSCCP_UserProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_UserProtocol.h; sourceTree = "<group>"; };
@@ -117,7 +114,6 @@
 			files = (
 				A6C78D9B1A2943F7006C66A2 /* ulibsctp.framework in Frameworks */,
 				A615D9151B4D5FB000854472 /* sctp.framework in Frameworks */,
-				A6C78D951A2943DD006C66A2 /* ulibm3ua.framework in Frameworks */,
 				A6C78D921A2943D0006C66A2 /* ulibmtp3.framework in Frameworks */,
 				A615D9071B4D587900854472 /* ulibgt.framework in Frameworks */,
 				A645FFD11DA990EF0060380D /* ulibasn1.framework in Frameworks */,
@@ -132,7 +128,6 @@
 			files = (
 				A6C78D931A2943D0006C66A2 /* ulibmtp3.framework in Frameworks */,
 				A66DD09F1B4FC4300090FC94 /* sctp.framework in Frameworks */,
-				A6C78D961A2943DD006C66A2 /* ulibm3ua.framework in Frameworks */,
 				A604D14E19B999BD0090FC94 /* ulibsccp.framework in Frameworks */,
 				A6C78D9C1A2943F7006C66A2 /* ulibsctp.framework in Frameworks */,
 				A604D14A19B999BD0090FC94 /* XCTest.framework in Frameworks */,
@@ -179,7 +174,6 @@
 				A6C78D9A1A2943F7006C66A2 /* ulibsctp.framework */,
 				A6C78D971A2943E8006C66A2 /* ulibm2pa.framework */,
 				A6C78D911A2943D0006C66A2 /* ulibmtp3.framework */,
-				A6C78D941A2943DD006C66A2 /* ulibm3ua.framework */,
 				A615D9061B4D587900854472 /* ulibgt.framework */,
 				A604D14919B999BD0090FC94 /* XCTest.framework */,
 			);
