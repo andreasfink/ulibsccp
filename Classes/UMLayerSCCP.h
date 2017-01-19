@@ -194,6 +194,6 @@
 - (void)startUp;
 
 + (NSString *)reasonString:(SCCP_ReturnCause)reason;
-- (UMSynchronizedSortedDictionary *)decodePdu:(NSData *)data;
+- (id)decodePdu:(NSData *)data;
 
 @end

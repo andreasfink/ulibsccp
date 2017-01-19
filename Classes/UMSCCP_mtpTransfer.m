@@ -16,7 +16,10 @@
 
 @implementation UMSCCP_mtpTransfer
 
-@synthesize decodedText;
+-(UMSynchronizedSortedDictionary *)decodedJson
+{
+    return decodedJson;
+}
 
 - (UMSCCP_mtpTransfer *)initForSccp:(UMLayerSCCP *)layer
                                mtp3:(UMLayerMTP3 *)mtp3
@@ -57,7 +60,7 @@
     BOOL decodeOnly = [options[@"decode-only"] boolValue];
     if(decodeOnly)
     {
-        decodedText = [[NSMutableString alloc]init];
+        decodedJson = [[UMSynchronizedSortedDictionary alloc]init];
     }
     @try
     {
@@ -79,11 +82,11 @@
         switch(m_type)
         {
             case SCCP_UDT:
-                [decodedText appendString:@"SCCP-PDU Type: UDT\r\n"];
+                decodedJson[@"sccp-pdu-type"]=@"UDT";
                 m_protocol_class = d[i] & 0x0F;
-                [decodedText appendFormat:@"SCCP-ProtocolClass: %d\r\n",m_protocol_class];
+                decodedJson[@"sccp-protocol-class"]=@(m_protocol_class);
                 m_handling = (d[i++]>>4) & 0x0F;
-                [decodedText appendFormat:@"SCCP-Handling: %d\r\n",m_handling];
+                decodedJson[@"sccp-protocol-handling"]=@(m_handling);
                 param_called_party_address = d[i] + i;
                 i++;
                 param_calling_party_address = d[i] + i;
@@ -94,9 +97,9 @@
                 break;
                 
             case SCCP_UDTS:
-                [decodedText appendString:@"SCCP-PDU Type: UDTS\r\n"];
+                decodedJson[@"sccp-pdu-type"]=@"UDTS";
                 m_return_cause = d[i++] & 0x0F;
-                [decodedText appendFormat:@"SCCP-ReturnCause: %d\r\n",m_return_cause];
+                decodedJson[@"sccp-return-cause"]=@(m_return_cause);
                 param_called_party_address = d[i] + i;
                 i++;
                 param_calling_party_address = d[i] + i;
@@ -107,11 +110,11 @@
                 break;
                 
             case SCCP_XUDT:
-                [decodedText appendString:@"SCCP-PDU Type: XUDT\r\n"];
+                decodedJson[@"sccp-pdu-type"]=@"XUDT";
                 m_protocol_class = d[i] & 0x0F;
-                [decodedText appendFormat:@"SCCP-ProtocolClass: %d\r\n",m_protocol_class];
+                decodedJson[@"sccp-protocol-class"]=@(m_protocol_class);
                 m_handling = (d[i++]>>4) & 0x0F;
-                [decodedText appendFormat:@"SCCP-Handling: %d\r\n",m_handling];
+                decodedJson[@"sccp-protocol-handling"]=@(m_handling);
                 param_called_party_address = d[i] + i;
                 i++;
                 param_calling_party_address = d[i] + i;
@@ -122,14 +125,11 @@
                 break;
                 
             case SCCP_XUDTS:
-                [decodedText appendString:@"SCCP-PDU Type: XUDTS\r\n"];
-
+                decodedJson[@"sccp-pdu-type"]=@"XUDTS";
                 m_return_cause = d[i++] & 0x0F;
-                [decodedText appendFormat:@"SCCP-ReturnCause: %d\r\n",m_return_cause];
-
+                decodedJson[@"sccp-protocol-return-cause"]=@(m_return_cause);
                 m_hopcounter = d[i++] & 0x0F;
-                [decodedText appendFormat:@"SCCP-HopCounter: %d\r\n",m_hopcounter];
-
+                decodedJson[@"sccp-hop-counter"]=@(m_hopcounter);
                 param_called_party_address = d[i] + i;
                 i++;
                 param_calling_party_address = d[i] + i;
@@ -173,33 +173,32 @@
             i = (int)d[param_called_party_address];
             dstData = [NSData dataWithBytes:&d[param_called_party_address+1] length:i];
             dst = [[SccpAddress alloc]initWithItuData:dstData];
-            [decodedText appendFormat:@"SCCP-CalledPartyAddress:\r\n%@\r\n",[dst debugDescription]];
+            decodedJson[@"sccp-called-party-address"]=[dst dictionaryValue];
         }
         if(param_calling_party_address>0)
         {
             i = (int)d[param_calling_party_address];
             srcData = [NSData dataWithBytes:&d[param_calling_party_address+1] length:i];
             src = [[SccpAddress alloc]initWithItuData:srcData];
-            [decodedText appendFormat:@"SCCP-CallingPartyAddress:\r\n%@\r\n",[src debugDescription]];
+            decodedJson[@"sccp-calling-party-address"]=[src dictionaryValue];
         }
         if(param_data > 0)
         {
             i = (int)d[param_data];
             sccp_pdu = [NSData dataWithBytes:&d[param_data+1] length:i];
-            [decodedText appendFormat:@"SCCP-Payload: %@\r\n",[sccp_pdu hexString]];
+            decodedJson[@"sccp-payload-bytes"]=[sccp_pdu hexString];
             if(decodeOnly)
             {
                 id<UMSCCP_UserProtocol> user = [sccpLayer getUserForSubsystem:dst.ssn number:dst];
-                NSString *decodedUserPdu = [user decodePdu:sccp_pdu];
-                [decodedText appendFormat:@"%@\r\n",decodedUserPdu];
+                id decodedUserPdu = [user decodePdu:sccp_pdu];
+                decodedJson[@"sccp-payload"]=decodedUserPdu;
             }
         }
         if(param_segment > 0)
         {
             i = (int)d[param_segment];
             segment = [NSData dataWithBytes:&d[param_segment+1] length:i];
-            [decodedText appendFormat:@"SCCP-Segment: %@\r\n",[segment hexString]];
-            
+            decodedJson[@"sccp-segment"] = segment.hexString;
         }
         
         if(src == NULL)
@@ -246,7 +245,7 @@
         NSLog(@"Error: %@",e);
         if(decodeOnly)
         {
-            [decodedText appendFormat:@"Error while decoding: %@\r\n",e];
+            decodedJson[@"decode-error"] = e.description;
         }
     }
 }

@@ -660,7 +660,7 @@
 }
 
 
-- (UMSynchronizedSortedDictionary *)decodePdu:(NSData *)data
+- (id)decodePdu:(NSData *)data /* should return a type which can be converted to json */
 {
     SccpAddress *dst = NULL;
     SccpAddress *src = NULL;
@@ -694,7 +694,6 @@
         {
             case SCCP_UDT:
                 m_protocol_class = d[i] & 0x0F;
-
                 m_handling = (d[i++]>>4) & 0x0F;
                 param_called_party_address = d[i] + i;
                 i++;

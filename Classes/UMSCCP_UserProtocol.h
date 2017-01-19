@@ -37,7 +37,7 @@
              reason:(int)reason
             options:(NSDictionary *)options;
 
-- (NSString *)decodePdu:(NSData *)data;
+- (id)decodePdu:(NSData *)data; /* should return a type which can be converted to json */
 
 @end
 

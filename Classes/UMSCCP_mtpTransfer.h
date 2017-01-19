@@ -37,11 +37,10 @@
     int             importance;
     int             end_of_optional_parameters;
     int             m_return_cause;
-    //   int             m_handling;
-    NSMutableString *decodedText;
+    UMSynchronizedSortedDictionary *decodedJson;
 }
 
-@property(readonly) NSString *decodedText;
+@property(readonly) UMSynchronizedSortedDictionary *decodedJson;
 
 - (UMSCCP_mtpTransfer *)initForSccp:(UMLayerSCCP *)layer
                                mtp3:(UMLayerMTP3 *)mtp3
