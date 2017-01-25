@@ -19,6 +19,7 @@
 #import "UMSCCP_mtpTransfer.h"
 #import "UMSCCP_Defs.h"
 #import "UMSCCP_Segment.h"
+#import "UMLayerSCCPApplicationContextProtocol.h"
 
 @implementation UMLayerSCCP
 
@@ -358,12 +359,20 @@
     return  (maxSccpSize - 8  - cas - cds);
 }
 
-- (void)setConfig:(NSDictionary *)cfg
+- (void)setConfig:(NSDictionary *)cfg applicationContext:(id<UMLayerSCCPApplicationContextProtocol>)appContext
 {
     [self readLayerConfig:cfg];
     if (cfg[@"attach-to"])
     {
-        attachTo =  [cfg[@"attach-to"] stringValue];
+        mtp3_name =  [cfg[@"attach-to"] stringValue];
+        mtp3 = [appContext getMTP3:mtp3_name];
+        if(mtp3)
+        {
+            NSString *s = [NSString stringWithFormat:@"Can not find mtp3 layer '%@' referred from sccp '%@'",mtp3_name,name];
+            @throw(CONFIG_ERROR(s));
+        }
+        [mtp3 setUserPart:MTP3_SERVICE_INDICATOR_SCCP user:sccp];
+
     }
     if (cfg[@"variant"])
     {

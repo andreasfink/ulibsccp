@@ -26,8 +26,8 @@
     
     SccpGttRegistry             *gttSelectorRegistry;
     UMSynchronizedDictionary    *subsystemUsers;
-    NSString                    *attachTo;
-    UMLayerMTP3                 *attachedTo;
+    NSString                    *mtp3_name;
+    UMLayerMTP3                 *mtp3;
     UMSynchronizedDictionary    *dpcAvailability;
     NSMutableDictionary         *pendingSegments;
 }
@@ -189,7 +189,7 @@
                              usingSegments:(BOOL)useSeg
                                   provider:(SccpL3Provider *)provider;
 
-- (void)setConfig:(NSDictionary *)cfg;
+- (void)setConfig:(NSDictionary *)cfg applicationContext:(id<UMSS7Stack_ApplicationContext_protocol>)appContext;
 - (NSDictionary *)config;
 - (void)startUp;
 
