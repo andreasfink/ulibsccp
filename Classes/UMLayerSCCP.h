@@ -17,6 +17,7 @@
 #import "UMSCCPConnection.h"
 #import "UMSCCP_Defs.h"
 #import "UMSCCP_Segment.h"
+#import "UMLayerSCCPApplicationContextProtocol.h"
 
 @interface UMLayerSCCP : UMLayer<UMLayerMTP3UserProtocol>
 {
@@ -189,7 +190,7 @@
                              usingSegments:(BOOL)useSeg
                                   provider:(SccpL3Provider *)provider;
 
-- (void)setConfig:(NSDictionary *)cfg applicationContext:(id<UMSS7Stack_ApplicationContext_protocol>)appContext;
+- (void)setConfig:(NSDictionary *)cfg applicationContext:(id<UMLayerSCCPApplicationContextProtocol>)appContext;
 - (NSDictionary *)config;
 - (void)startUp;
 
