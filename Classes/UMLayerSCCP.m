@@ -366,7 +366,7 @@
     for(id key in [cfg allKeys])
     {
         id value = cfg[key];
-        if([key isCaseInsensitiveLike:@"attach-to"])
+        if([key isEqualToStringCaseInsensitive:@"attach-to"])
         {
             mtp3_name =  [cfg[@"attach-to"] stringValue];
             mtp3 = [appContext getMTP3:mtp3_name];
@@ -379,7 +379,7 @@
             }
             [mtp3 setUserPart:MTP3_SERVICE_INDICATOR_SCCP user:self];
         }
-        else if([key isCaseInsensitiveLike:@"variant"])
+        else if([key isEqualToStringCaseInsensitive:@"variant"])
         {
             NSString *v = [value stringValue];
             if([v isEqualToString:@"itu"])
