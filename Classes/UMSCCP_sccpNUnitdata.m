@@ -115,8 +115,8 @@ static int segmentReferenceId;
             NSUInteger cds = dstEncoded.length;
             NSUInteger maxPdu = 0;
             
-            BOOL useXUDT     = [options[@"sccp-xudt"] boolValue];
-            BOOL useSegments  = [options[@"sccp-segment"] boolValue];
+            BOOL useXUDT        = [options[@"sccp-xudt"] boolValue];
+            BOOL useSegments    = [options[@"sccp-segment"] boolValue];
         
             if(data.length > 0)
             {

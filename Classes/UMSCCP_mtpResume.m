@@ -32,4 +32,9 @@
     return self;
 }
 
+- (void)main
+{
+
+}
+
 @end
