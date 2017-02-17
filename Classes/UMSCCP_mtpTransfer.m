@@ -141,7 +141,9 @@
                 break;
                 
             default:
-                @throw([NSException exceptionWithName:@"SCCP_UNKNOWN_PACKET_TYPE" reason:NULL userInfo:@{@"backtrace": UMBacktrace(NULL,0)}] );
+                @throw([NSException exceptionWithName:@"SCCP_UNKNOWN_PACKET_TYPE" reason:NULL
+                                             userInfo:@{@"backtrace": UMBacktrace(NULL,0),
+                                                        @"sccp-data ": data}]);
         }
         if(param_called_party_address > len)
         {
