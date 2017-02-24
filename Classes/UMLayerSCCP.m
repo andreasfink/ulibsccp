@@ -32,6 +32,7 @@
 @synthesize attachedTo;
 @synthesize pendingSegments;
 
+
 - (UMLayerSCCP *)init
 {
     self = [super init];
@@ -58,8 +59,10 @@
     subsystemUsers = [[UMSynchronizedDictionary alloc]init];
     dpcAvailability = [[UMSynchronizedDictionary alloc]init];
     pendingSegments  = [[NSMutableDictionary alloc]init];
+    traceSendDestinations =[[UMSynchronizedArray alloc]init];
+    traceReceiveDestinations =[[UMSynchronizedArray alloc]init];
+    traceDroppedDestinations =[[UMSynchronizedArray alloc]init];
 }
-
 
 - (void)mtpTransfer:(NSData *)data
        callingLayer:(id)mtp3Layer
@@ -86,7 +89,6 @@
                                                              si:si
                                                              ni:ni
                                                         options:options];
-    
     [self queueFromLowerWithPriority:task];
 }
 
@@ -121,7 +123,6 @@
                                                                si:si
                                                                ni:ni
                                                           options:options];
-
     [self queueFromLowerWithPriority:task];
 }
 
@@ -241,13 +242,21 @@
     [sccp_pdu appendByte:optionsData.length];
     [sccp_pdu appendData:optionsData];
     
-    id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-destination"];
+    id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-tx-destination"];
     [u sccpTraceSentPdu:sccp_pdu options:options];
-
+    for(id a in traceSendDestinations)
+    {
+        NSMutableDictionary *o = [[NSMutableDictionary alloc]init];
+        o[@"type"]=@"XUDT-Segment";
+        o[@"opc"]=opc.stringValue;
+        o[@"dpc"]=dpc.stringValue;
+        o[@"provider"]=provider.name;
+        o[@"mtp3"]=provider.mtp3Layer.layerName;
+        [a sccpTraceSentPdu:sccp_pdu options:o];
+    }
     UMMTP3_Error result = [provider sendPDU:sccp_pdu opc:opc dpc:dpc];
     return result;
 }
-
 
 
 -(UMMTP3_Error) sendXUDTdata:(NSData *)data
@@ -286,9 +295,19 @@
     [sccp_pdu appendByte:data.length];
     [sccp_pdu appendData:data];
 
-    id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-destination"];
+    id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-tx-destination"];
     [u sccpTraceSentPdu:sccp_pdu options:options];
-    
+    for(id a in traceSendDestinations)
+    {
+        NSMutableDictionary *o = [[NSMutableDictionary alloc]init];
+        o[@"type"]=@"XUDT-Data";
+        o[@"opc"]=opc.stringValue;
+        o[@"dpc"]=dpc.stringValue;
+        o[@"provider"]=provider.name;
+        o[@"mtp3"]=provider.mtp3Layer.layerName;
+        [a sccpTraceSentPdu:sccp_pdu options:o];
+    }
+
     UMMTP3_Error result = [provider sendPDU:sccp_pdu opc:opc dpc:dpc];
     return result;
 }
@@ -325,8 +344,18 @@
     [sccp_pdu appendByte:data.length];
     [sccp_pdu appendData:data];
     
-    id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-destination"];
+    id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-tx-destination"];
     [u sccpTraceSentPdu:sccp_pdu options:options];
+    for(id a in traceSendDestinations)
+    {
+        NSMutableDictionary *o = [[NSMutableDictionary alloc]init];
+        o[@"type"]=@"UDT";
+        o[@"opc"]=opc.stringValue;
+        o[@"dpc"]=dpc.stringValue;
+        o[@"provider"]=provider.name;
+        o[@"mtp3"]=provider.mtp3Layer.layerName;
+        [a sccpTraceSentPdu:sccp_pdu options:o];
+    }
 
     UMMTP3_Error result = [provider sendPDU:sccp_pdu opc:opc dpc:dpc];
     return result;
@@ -879,4 +908,48 @@
     return s;
 }
 
+
+- (void)addSendTraceDestination:(id<UMSCCP_TraceProtocol>)destination
+{
+    [traceSendDestinations addObject:destination];
+}
+
+- (void)addReceiveTraceDestination:(id<UMSCCP_TraceProtocol>)destination
+{
+    [traceReceiveDestinations addObject:destination];
+}
+
+- (void)removeSendTraceDestination:(id<UMSCCP_TraceProtocol>)destination
+{
+    [traceSendDestinations removeObject:destination];
+}
+
+- (void)removeReceiveTraceDestination:(id<UMSCCP_TraceProtocol>)destination
+{
+    [traceReceiveDestinations removeObject:destination];
+}
+
+- (void)traceSentPdu:(NSData *)pdu options:(NSDictionary *)o
+{
+    for(id a in traceSendDestinations)
+    {
+        [a sccpTraceSentPdu:pdu options:o];
+    }
+}
+
+- (void)traceReceivedPdu:(NSData *)pdu options:(NSDictionary *)o
+{
+    for(id a in traceReceiveDestinations)
+    {
+        [a sccpTraceReceivedPdu:pdu options:o];
+    }
+}
+
+- (void)traceDroppedPdu:(NSData *)pdu options:(NSDictionary *)o
+{
+    for(id a in traceDroppedDestinations)
+    {
+        [a sccpTraceReceivedPdu:pdu options:o];
+    }
+}
 @end

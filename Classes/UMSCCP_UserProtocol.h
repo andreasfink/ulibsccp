@@ -47,4 +47,7 @@
                  options:(NSDictionary *)options;
 
 
+- (void)sccpTraceReceivedPdu:(NSData *)data
+                     options:(NSDictionary *)options;
+
 @end

@@ -31,6 +31,10 @@
     UMLayerMTP3                 *mtp3;
     UMSynchronizedDictionary    *dpcAvailability;
     NSMutableDictionary         *pendingSegments;
+
+    UMSynchronizedArray         *traceSendDestinations;
+    UMSynchronizedArray         *traceReceiveDestinations;
+    UMSynchronizedArray         *traceDroppedDestinations;
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;
@@ -41,6 +45,7 @@
 @property(readwrite,strong) NSString    *attachTo;
 @property(readwrite,strong) UMLayerMTP3  *attachedTo;
 @property(readwrite,strong) NSMutableDictionary *pendingSegments;
+
 - (NSString *)status;
 
 /* connection oriented primitives */
@@ -196,5 +201,8 @@
 
 + (NSString *)reasonString:(SCCP_ReturnCause)reason;
 - (id)decodePdu:(NSData *)data;
+- (void)traceSentPdu:(NSData *)pdu options:(NSDictionary *)dict;
+- (void)traceReceivedPdu:(NSData *)pdu options:(NSDictionary *)dict;
+- (void)traceDroppedPdu:(NSData *)pdu options:(NSDictionary *)dict;
 
 @end

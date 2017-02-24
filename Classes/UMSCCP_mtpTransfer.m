@@ -78,11 +78,13 @@
         int param_calling_party_address;
         int param_data;
         int param_segment;
-        
+        NSString *type;
+
         switch(m_type)
         {
             case SCCP_UDT:
-                decodedJson[@"sccp-pdu-type"]=@"UDT";
+                type = @"UDT";
+                decodedJson[@"sccp-pdu-type"]=type;
                 m_protocol_class = d[i] & 0x0F;
                 decodedJson[@"sccp-protocol-class"]=@(m_protocol_class);
                 m_handling = (d[i++]>>4) & 0x0F;
@@ -97,7 +99,8 @@
                 break;
                 
             case SCCP_UDTS:
-                decodedJson[@"sccp-pdu-type"]=@"UDTS";
+                type=@"UDTS";
+                decodedJson[@"sccp-pdu-type"]=type;
                 m_return_cause = d[i++] & 0x0F;
                 decodedJson[@"sccp-return-cause"]=@(m_return_cause);
                 param_called_party_address = d[i] + i;
@@ -110,7 +113,8 @@
                 break;
                 
             case SCCP_XUDT:
-                decodedJson[@"sccp-pdu-type"]=@"XUDT";
+                type=@"XUDT";
+                decodedJson[@"sccp-pdu-type"]=type;
                 m_protocol_class = d[i] & 0x0F;
                 decodedJson[@"sccp-protocol-class"]=@(m_protocol_class);
                 m_handling = (d[i++]>>4) & 0x0F;
@@ -125,7 +129,8 @@
                 break;
                 
             case SCCP_XUDTS:
-                decodedJson[@"sccp-pdu-type"]=@"XUDTS";
+                type=@"XUDTS";
+                decodedJson[@"sccp-pdu-type"]=type;
                 m_return_cause = d[i++] & 0x0F;
                 decodedJson[@"sccp-protocol-return-cause"]=@(m_return_cause);
                 m_hopcounter = d[i++] & 0x0F;
@@ -211,7 +216,14 @@
         {
             @throw([NSException exceptionWithName:@"SCCP_MISSING_CALLED_PARTY_ADDRESS" reason:NULL userInfo:@{@"backtrace": UMBacktrace(NULL,0)}] );
         }
-        
+
+        NSMutableDictionary *o = [[NSMutableDictionary alloc]init];
+        o[@"type"]=type;
+        o[@"opc"]=opc.stringValue;
+        o[@"dpc"]=dpc.stringValue;
+        o[@"mtp3"]=mtp3Layer.layerName;
+        [sccpLayer traceReceivedPdu:data options:o];
+
         if(!decodeOnly)
         {
             switch(m_type)
