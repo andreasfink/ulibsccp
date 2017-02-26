@@ -931,24 +931,30 @@
 
 - (void)traceSentPdu:(NSData *)pdu options:(NSDictionary *)o
 {
-    for(id a in traceSendDestinations)
+    NSInteger n = [traceSendDestinations count];
+    for (NSInteger i=0;i<n;i++)
     {
+        id a = [traceSendDestinations objectAtIndex:i];
         [a sccpTraceSentPdu:pdu options:o];
     }
 }
 
 - (void)traceReceivedPdu:(NSData *)pdu options:(NSDictionary *)o
 {
-    for(id a in traceReceiveDestinations)
+    NSInteger n = [traceReceiveDestinations count];
+    for (NSInteger i=0;i<n;i++)
     {
+        id a = [traceReceiveDestinations objectAtIndex:i];
         [a sccpTraceReceivedPdu:pdu options:o];
     }
 }
 
 - (void)traceDroppedPdu:(NSData *)pdu options:(NSDictionary *)o
 {
-    for(id a in traceDroppedDestinations)
+    NSInteger n = [traceDroppedDestinations count];
+    for (NSInteger i=0;i<n;i++)
     {
+        id a = [traceDroppedDestinations objectAtIndex:i];
         [a sccpTraceReceivedPdu:pdu options:o];
     }
 }
