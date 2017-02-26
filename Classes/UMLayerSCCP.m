@@ -244,8 +244,11 @@
     
     id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-tx-destination"];
     [u sccpTraceSentPdu:sccp_pdu options:options];
-    for(id a in traceSendDestinations)
+
+    NSInteger n = [traceSendDestinations count];
+    for (NSInteger i=0;i<n;i++)
     {
+        id a = [traceSendDestinations objectAtIndex:i];
         NSMutableDictionary *o = [[NSMutableDictionary alloc]init];
         o[@"type"]=@"XUDT-Segment";
         o[@"opc"]=opc.stringValue;
@@ -297,8 +300,12 @@
 
     id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-tx-destination"];
     [u sccpTraceSentPdu:sccp_pdu options:options];
-    for(id a in traceSendDestinations)
+
+
+    NSInteger n = [traceSendDestinations count];
+    for (NSInteger i=0;i<n;i++)
     {
+        id a = [traceSendDestinations objectAtIndex:i];
         NSMutableDictionary *o = [[NSMutableDictionary alloc]init];
         o[@"type"]=@"XUDT-Data";
         o[@"opc"]=opc.stringValue;
@@ -346,8 +353,11 @@
     
     id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-tx-destination"];
     [u sccpTraceSentPdu:sccp_pdu options:options];
-    for(id a in traceSendDestinations)
+
+    NSInteger n = [traceSendDestinations count];
+    for (NSInteger i=0;i<n;i++)
     {
+        id a = [traceSendDestinations objectAtIndex:i];
         NSMutableDictionary *o = [[NSMutableDictionary alloc]init];
         o[@"type"]=@"UDT";
         o[@"opc"]=opc.stringValue;
