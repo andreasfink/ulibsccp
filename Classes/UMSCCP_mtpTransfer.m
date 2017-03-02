@@ -127,7 +127,7 @@
                 i++;
                 param_segment = -1;
                 break;
-                
+
             case SCCP_XUDTS:
                 type=@"XUDTS";
                 decodedJson[@"sccp-pdu-type"]=type;
@@ -144,7 +144,7 @@
                 param_segment   = d[i] + i;
                 i++;
                 break;
-                
+
             default:
                 @throw([NSException exceptionWithName:@"SCCP_UNKNOWN_PACKET_TYPE" reason:NULL
                                              userInfo:@{@"backtrace": UMBacktrace(NULL,0),
