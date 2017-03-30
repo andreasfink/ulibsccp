@@ -124,6 +124,7 @@
                 dpc:(UMMTP3PointCode *)dpc
                  si:(int)si
                  ni:(int)ni
+        linksetName:(NSString *)linksetName
             options:(NSDictionary *)options;
 
 - (void)mtpPause:(NSData *)data
