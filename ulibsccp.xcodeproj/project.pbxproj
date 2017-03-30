@@ -78,7 +78,7 @@
 		A61571F51CD4AADF00211137 /* UMSCCP_ReceivedSegments.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_ReceivedSegments.m; sourceTree = "<group>"; };
 		A615D9061B4D587900854472 /* ulibgt.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibgt.framework; path = /Library/Frameworks/ulibgt.framework; sourceTree = "<absolute>"; };
 		A615D9141B4D5FB000854472 /* sctp.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = sctp.framework; path = /Library/Frameworks/sctp.framework; sourceTree = "<absolute>"; };
-		A645FFD01DA990EF0060380D /* ulibasn1.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibasn1.framework; path = ../../../../../Library/Frameworks/ulibasn1.framework; sourceTree = "<group>"; };
+		A645FFD01DA990EF0060380D /* ulibasn1.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibasn1.framework; path = /Library/Frameworks/ulibasn1.framework; sourceTree = "<absolute>"; };
 		A6827E181E380FC900F3048B /* UMLayerSCCPApplicationContextProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMLayerSCCPApplicationContextProtocol.h; sourceTree = "<group>"; };
 		A68494D41CB31FA900211137 /* UMSCCP_dpcAvailability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_dpcAvailability.h; sourceTree = "<group>"; };
 		A68494D51CB31FA900211137 /* UMSCCP_dpcAvailability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_dpcAvailability.m; sourceTree = "<group>"; };
@@ -170,8 +170,8 @@
 		A604D13319B999BC0090FC94 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				A645FFD01DA990EF0060380D /* ulibasn1.framework */,
 				A6C78D8E1A2943B9006C66A2 /* ulib.framework */,
+				A645FFD01DA990EF0060380D /* ulibasn1.framework */,
 				A615D9141B4D5FB000854472 /* sctp.framework */,
 				A6C78D9A1A2943F7006C66A2 /* ulibsctp.framework */,
 				A6C78D971A2943E8006C66A2 /* ulibm2pa.framework */,
