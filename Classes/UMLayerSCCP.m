@@ -32,6 +32,10 @@
 @synthesize attachedTo;
 @synthesize pendingSegments;
 
+-(UMMTP3Variant) variant
+{
+    return mtp3.variant;
+}
 
 - (UMLayerSCCP *)init
 {

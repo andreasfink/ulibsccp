@@ -45,6 +45,7 @@
 @property(readwrite,strong) NSString    *attachTo;
 @property(readwrite,strong) UMLayerMTP3  *attachedTo;
 @property(readwrite,strong) NSMutableDictionary *pendingSegments;
+-(UMMTP3Variant) variant;
 
 - (NSString *)status;
 
