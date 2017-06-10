@@ -5,7 +5,7 @@ libdir=${exec_prefix}/lib
 includedir=${prefix}/include
 
 Cflags: -I${includedir}
-Libs: -L${libdir} -lulibsccp
+Libs: -L${libdir} -l:libulibsccp.@SHARED_LIBRARY_EXTENSION@.@MAJORVER@.@MINORVER@
 
 Name: ulibsccp
 Description: universal sccp library
