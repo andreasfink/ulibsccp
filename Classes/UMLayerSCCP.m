@@ -422,6 +422,7 @@
                                              userInfo:NULL]);
             }
             [mtp3 setUserPart:MTP3_SERVICE_INDICATOR_SCCP user:self];
+            self.attachedTo = mtp3;
         }
         else if([key isEqualToStringCaseInsensitive:@"variant"])
         {
