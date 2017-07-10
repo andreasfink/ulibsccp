@@ -96,14 +96,19 @@ static int segmentReferenceId;
              
             UMMTP3PointCode         *xopc =sccpLayer.attachedTo.opc;
             UMMTP3PointCode         *xdpc = nextHop.dpc;
-            if(options[@"dpc"])
+
+            NSString *xopc_string = options[@"opc"];
+            NSString *xdpc_string = options[@"dpc"];
+
+            if((xdpc_string.length > 0) && (![xdpc_string isEqualToString:@"default"]))
             {
-                xdpc = [[UMMTP3PointCode alloc] initWithString:options[@"dpc"]
+                xdpc = [[UMMTP3PointCode alloc] initWithString:xdpc_string
                                                        variant:nextHop.provider.variant];
             }
-            if(options[@"opc"])
+
+            if((xopc_string.length > 0) && (![xopc_string isEqualToString:@"default"]))
             {
-                xopc = [[UMMTP3PointCode alloc] initWithString:options[@"opc"]
+                xopc = [[UMMTP3PointCode alloc] initWithString:xopc_string
                                                        variant:nextHop.provider.variant];
             }
             
