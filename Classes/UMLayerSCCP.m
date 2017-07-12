@@ -365,10 +365,38 @@
         id a = [traceSendDestinations objectAtIndex:i];
         NSMutableDictionary *o = [[NSMutableDictionary alloc]init];
         o[@"type"]=@"UDT";
-        o[@"opc"]=opc.stringValue;
-        o[@"dpc"]=dpc.stringValue;
-        o[@"provider"]=provider.name;
-        o[@"mtp3"]=provider.mtp3Layer.layerName;
+        if(opc)
+        {
+            o[@"opc"]=opc.stringValue;
+        }
+        else
+        {
+            o[@"opc"]=@"(not-set)";
+        }
+        if(dpc)
+        {
+            o[@"dpc"]=dpc.stringValue;
+        }
+        else
+        {
+            o[@"dpc"]=@"(not-set)";
+        }
+        if(provider)
+        {
+            o[@"provider"]=provider.name;
+            if(provider.mtp3Layer)
+            {
+                o[@"mtp3"]=provider.mtp3Layer.layerName;
+            }
+            else
+            {
+                o[@"mtp3"]=@"(not-set)";
+            }
+        }
+        else
+        {
+            o[@"provider"]=@"(not-set)";
+        }
         [a sccpTraceSentPdu:sccp_pdu options:o];
     }
 

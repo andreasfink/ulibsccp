@@ -37,10 +37,16 @@
     int             importance;
     int             end_of_optional_parameters;
     int             m_return_cause;
-    UMSynchronizedSortedDictionary *decodedJson;
+    UMSynchronizedSortedDictionary *_decodedJson;
+    SccpAddress *_decodedCalling;
+    SccpAddress *_decodedCalled;
+    NSData *_decodedPdu;
 }
 
-@property(readonly) UMSynchronizedSortedDictionary *decodedJson;
+@property(readwrite,strong,atomic)  UMSynchronizedSortedDictionary *decodedJson;
+@property(readwrite,strong,atomic)  SccpAddress *decodedCalling;
+@property(readwrite,strong,atomic)  SccpAddress *decodedCalled;
+@property(readwrite,strong,atomic)  NSData *decodedData;
 
 - (UMSCCP_mtpTransfer *)initForSccp:(UMLayerSCCP *)layer
                                mtp3:(UMLayerMTP3 *)mtp3
