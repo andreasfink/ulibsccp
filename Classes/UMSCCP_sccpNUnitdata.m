@@ -272,7 +272,7 @@ static int segmentReferenceId;
     }
     @catch(NSException *ex)
     {
-        NSLog(@"Exception: %@",ex);
+        [sccpLayer.logFeed majorErrorText:[NSString stringWithFormat:@"Error: %@",ex]];
     }
 }
 

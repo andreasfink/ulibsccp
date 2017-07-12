@@ -268,7 +268,7 @@
     }
     @catch(NSException *e)
     {
-        NSLog(@"Error: %@",e);
+        [logFeed majorErrorText:[NSString stringWithFormat:@"Error: %@",e]];
         if(decodeOnly)
         {
             _decodedJson[@"decode-error"] = e.description;
@@ -392,7 +392,7 @@
     id<UMSCCP_UserProtocol> upperLayer = [sccpLayer getUserForSubsystem:dst.ssn number:dst];
     if(upperLayer == NULL)
     {
-        NSLog(@"no upper layer found for %@",dst.debugDescription);
+        [logFeed majorErrorText:[NSString stringWithFormat:@"no upper layer found for %@",dst.debugDescription]];
     }
     [upperLayer sccpNUnitdata:sccp_pdu
                  callingLayer:sccpLayer

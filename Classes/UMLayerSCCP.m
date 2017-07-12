@@ -506,7 +506,7 @@
                  options:(NSDictionary *)options
              synchronous:(BOOL)sync
 {
-    NSLog(@"not implemented");
+    [logFeed majorErrorText:@"sccpNDataRequest: not implemented"];
 }
 
 - (void)sccpNExpeditedData:(NSData *)data
@@ -514,14 +514,14 @@
                    options:(NSDictionary *)options
                synchronous:(BOOL)sync
 {
-    NSLog(@"not implemented");
+    [logFeed majorErrorText:@"sccpNExpeditedData: not implemented"];
 }
 
 - (void)sccpNResetRequest:(UMSCCPConnection *)connection
                   options:(NSDictionary *)options
               synchronous:(BOOL)sync
 {
-    NSLog(@"not implemented");
+    [logFeed majorErrorText:@"sccpNResetRequest: not implemented"];
 }
 
 
@@ -529,7 +529,7 @@
                      options:(NSDictionary *)options
                  synchronous:(BOOL)sync
 {
-    NSLog(@"not implemented");
+    [logFeed majorErrorText:@"sccpNResetIndication: not implemented"];
 }
 
 
@@ -537,7 +537,7 @@
                        options:(NSDictionary *)options
                    synchronous:(BOOL)sync
 {
-    NSLog(@"not implemented");
+    [logFeed majorErrorText:@"sccpNDisconnectRequest: not implemented"];
 }
 
 
@@ -545,7 +545,7 @@
                          options:(NSDictionary *)options
                      synchronous:(BOOL)sync
 {
-    NSLog(@"not implemented");
+    [logFeed majorErrorText:@"sccpNDisconnectIndicaton: not implemented"];
 }
 
 
