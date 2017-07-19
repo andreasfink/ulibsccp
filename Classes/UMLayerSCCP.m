@@ -416,11 +416,11 @@
         case UMMTP3_no_error:
             if(logLevel <= UMLOG_DEBUG)
             {
-                [self.logFeed debugText:[NSString stringWithFormat:@"sendPDU %@->%@ success",opc,dpc]];
+                [self.logFeed debugText:[NSString stringWithFormat:@"sendPDU to %@: %@->%@ success",provider.name, opc,dpc]];
             }
             break;
         default:
-            [self.logFeed majorErrorText:[NSString stringWithFormat:@"sendPDU %@->%@ returns unknown error %d",opc,dpc,result]];
+            [self.logFeed majorErrorText:[NSString stringWithFormat:@"sendPDU %@: %@->%@ returns unknown error %d",provider.name,opc,dpc,result]];
 
     }
     return result;
