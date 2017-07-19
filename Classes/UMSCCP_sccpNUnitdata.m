@@ -122,7 +122,9 @@ static int segmentReferenceId;
             
             BOOL useXUDT        = [options[@"sccp-xudt"] boolValue];
             BOOL useSegments    = [options[@"sccp-segment"] boolValue];
-        
+            
+            
+            
             if(data.length > 0)
             {
                 /* we have single data as input, no segments yet */

@@ -401,6 +401,28 @@
     }
 
     UMMTP3_Error result = [provider sendPDU:sccp_pdu opc:opc dpc:dpc];
+    
+    switch(result)
+    {
+        case UMMTP3_error_pdu_too_big:
+            [self.logFeed majorErrorText:@"PDU too big"];
+            break;
+        case UMMTP3_error_no_route_to_destination:
+            [self.logFeed majorErrorText:@"No route to destination"];
+            break;
+        case UMMTP3_error_invalid_variant:
+            [self.logFeed majorErrorText:@"Invalid variant"];
+            break;
+        case UMMTP3_no_error:
+            if(logLevel <= UMLOG_DEBUG)
+            {
+                [self.logFeed debugText:[NSString stringWithFormat:@"sendPDU %@->%@ success",opc,dpc]];
+            }
+            break;
+        default:
+            [self.logFeed majorErrorText:[NSString stringWithFormat:@"sendPDU %@->%@ returns unknown error %d",opc,dpc,result]];
+
+    }
     return result;
 }
 
