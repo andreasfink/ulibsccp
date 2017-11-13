@@ -456,39 +456,34 @@
 - (void)setConfig:(NSDictionary *)cfg applicationContext:(id<UMLayerSCCPApplicationContextProtocol>)appContext
 {
     [self readLayerConfig:cfg];
-
-    for(id key in [cfg allKeys])
+    if(cfg[@"attach-to"])
     {
-        id value = cfg[key];
-        if([key isEqualToStringCaseInsensitive:@"attach-to"])
+        mtp3_name =  [cfg[@"attach-to"] stringValue];
+        mtp3 = [appContext getMTP3:mtp3_name];
+        if(mtp3 == NULL)
         {
-            mtp3_name =  [cfg[@"attach-to"] stringValue];
-            mtp3 = [appContext getMTP3:mtp3_name];
-            if(mtp3 == NULL)
-            {
-                NSString *s = [NSString stringWithFormat:@"Can not find mtp3 layer '%@' referred from sccp '%@'",mtp3_name,layerName];
-                @throw([NSException exceptionWithName:[NSString stringWithFormat:@"CONFIG_ERROR FILE %s line:%ld",__FILE__,(long)__LINE__]
-                                               reason:s
-                                             userInfo:NULL]);
-            }
-            [mtp3 setUserPart:MTP3_SERVICE_INDICATOR_SCCP user:self];
-            self.attachedTo = mtp3;
+            NSString *s = [NSString stringWithFormat:@"Can not find mtp3 layer '%@' referred from sccp '%@'",mtp3_name,layerName];
+            @throw([NSException exceptionWithName:[NSString stringWithFormat:@"CONFIG_ERROR FILE %s line:%ld",__FILE__,(long)__LINE__]
+                                           reason:s
+                                         userInfo:NULL]);
         }
-        else if([key isEqualToStringCaseInsensitive:@"variant"])
+        [mtp3 setUserPart:MTP3_SERVICE_INDICATOR_SCCP user:self];
+        self.attachedTo = mtp3;
+    }
+    if(cfg[@"variant"])
+    {
+        NSString *v = [cfg[@"variant"] stringValue];
+        if([v isEqualToString:@"itu"])
         {
-            NSString *v = [value stringValue];
-            if([v isEqualToString:@"itu"])
-            {
-                sccpVariant = SCCP_VARIANT_ITU;
-            }
-            if([v isEqualToString:@"ansi"])
-            {
-                sccpVariant = SCCP_VARIANT_ANSI;
-            }
-            else
-            {
-                sccpVariant = SCCP_VARIANT_ITU;
-            }
+            sccpVariant = SCCP_VARIANT_ITU;
+        }
+        if([v isEqualToString:@"ansi"])
+        {
+            sccpVariant = SCCP_VARIANT_ANSI;
+        }
+        else
+        {
+            sccpVariant = SCCP_VARIANT_ITU;
         }
     }
 }
