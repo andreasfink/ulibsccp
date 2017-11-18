@@ -141,7 +141,8 @@
     NSString *number = [sccpAddr address];
     NSString *any = [[sccpAddr anyAddress] address];
 
-    @synchronized(subsystemUsers)
+    [subsystemUsers lock];
+    @try
     {
         int subsystem = ssn.ssn;
         NSMutableDictionary *a = subsystemUsers[@(subsystem)];
@@ -168,22 +169,25 @@
             return user;
         }
     }
+    @finally
+    {
+        [subsystemUsers unlock];
+    }
     return NULL;
 }
 
 - (void)setUser:(id<UMSCCP_UserProtocol>)usr forSubsystem:(SccpSubSystemNumber *)ssn number:(SccpAddress *)sccpAddress
 {
     int subsystem = ssn.ssn;
-    @synchronized(subsystemUsers)
+    [subsystemUsers lock];
+    NSMutableDictionary *a = subsystemUsers[@(ssn.ssn)];
+    if(a==NULL)
     {
-        NSMutableDictionary *a = subsystemUsers[@(ssn.ssn)];
-        if(a==NULL)
-        {
-            a = [[NSMutableDictionary alloc]init];
-        }
-        a[sccpAddress.address] = usr;
-        subsystemUsers[@(subsystem)] = a;
+        a = [[NSMutableDictionary alloc]init];
     }
+    a[sccpAddress.address] = usr;
+    subsystemUsers[@(subsystem)] = a;
+    [subsystemUsers unlock];
 }
 
 
