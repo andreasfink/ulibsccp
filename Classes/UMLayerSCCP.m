@@ -206,16 +206,23 @@
                   returnOnError:(BOOL)reterr
                             opc:(UMMTP3PointCode *)opc
                             dpc:(UMMTP3PointCode *)dpc
+                    optionsData:(NSData *)xoptionsdata
                         options:(NSDictionary *)options
                        provider:(SccpL3Provider *)provider
 {
-    
     NSMutableData *optionsData = [[NSMutableData alloc]init];
-    
+
     [optionsData appendByte:0x10]; /* optional parameter "segmentation" */
     [optionsData appendByte:0x04]; /* length of optional parameter */
     [optionsData appendData:[segment segmentationHeader]];
-    
+    if(xoptionsdata)
+    {
+        [optionsData appendData:xoptionsdata]; /* length of optional parameter */
+    }
+    else
+    {
+        [optionsData appendByte:0x00]; /* end of optional parameters */
+    }
     NSData *srcEncoded = [src encode:sccpVariant];
     NSData *dstEncoded = [dst encode:sccpVariant];
     if(reterr)
@@ -239,7 +246,7 @@
     [sccp_pdu appendData:srcEncoded];
     [sccp_pdu appendByte:segment.data.length];
     [sccp_pdu appendData:segment.data];
-    [sccp_pdu appendByte:optionsData.length];
+    //[sccp_pdu appendByte:optionsData.length];
     [sccp_pdu appendData:optionsData];
     
     id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-tx-destination"];
@@ -270,6 +277,7 @@
                returnOnError:(BOOL)reterr
                          opc:(UMMTP3PointCode *)opc
                          dpc:(UMMTP3PointCode *)dpc
+                 optionsData:(NSData *)xoptionsdata
                      options:(NSDictionary *)options
                     provider:(SccpL3Provider *)provider
 {
@@ -288,8 +296,14 @@
     header[3] = 4;
     header[4] = 4 + dstEncoded.length;
     header[5] = 4 + dstEncoded.length + srcEncoded.length;
-    header[6] = 0; /* no segment pointer */
-
+    if(xoptionsdata.length > 0)
+    {
+        header[6] = 4 + dstEncoded.length + srcEncoded.length + xoptionsdata.length;
+    }
+    else
+    {
+        header[6] = 0;
+    }
     [sccp_pdu appendBytes:header length:7];
     [sccp_pdu appendByte:dstEncoded.length];
     [sccp_pdu appendData:dstEncoded];
@@ -297,7 +311,10 @@
     [sccp_pdu appendData:srcEncoded];
     [sccp_pdu appendByte:data.length];
     [sccp_pdu appendData:data];
-
+    if(xoptionsdata.length > 0)
+    {
+        [sccp_pdu appendData:xoptionsdata];
+    }
     id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-tx-destination"];
     [u sccpTraceSentPdu:sccp_pdu options:options];
 

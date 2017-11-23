@@ -22,7 +22,7 @@
     int ni;
     UMMTP3PointCode *opc;
     UMMTP3PointCode *dpc;
-    NSDictionary *options;
+    NSMutableDictionary *options;
     
     
     UMLayerSCCP *sccpLayer;
@@ -33,7 +33,8 @@
     NSData          *sccp_pdu;
     int             m_protocol_class;
     int             m_hopcounter;
-    NSData          *segment;
+    NSData          *sccp_optional;
+    NSMutableDictionary *optional_dict;
     int             importance;
     int             end_of_optional_parameters;
     int             m_return_cause;

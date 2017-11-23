@@ -123,8 +123,105 @@ static int segmentReferenceId;
             BOOL useXUDT        = [options[@"sccp-xudt"] boolValue];
             BOOL useSegments    = [options[@"sccp-segment"] boolValue];
             
-            
-            
+            NSDictionary *sccp_options = options[@"sccp-optional"];
+            NSMutableData *optional_data;
+            if(sccp_options)
+            {
+                optional_data = [[NSMutableData alloc]init];
+                NSArray *keys = [sccp_options allKeys];
+                int paramType;
+                for(NSString *key in keys)
+                {
+                    if([key isEqualToString:@"destination-local-reference"])
+                    {
+                        paramType = 0x01;
+                    }
+                    else if([key isEqualToString:@"source-local-reference"])
+                    {
+                        paramType = 0x02;
+                    }
+                    else if([key isEqualToString:@"called-party-address"])
+                    {
+                        paramType = 0x03;
+                    }
+                    else if([key isEqualToString:@"calling-party-address"])
+                    {
+                        paramType = 0x04;
+                    }
+                    else if([key isEqualToString:@"protocol-class"])
+                    {
+                        paramType = 0x05;
+                    }
+                    else if([key isEqualToString:@"segmenting-reassembling"])
+                    {
+                        paramType = 0x06;
+                    }
+                    else if([key isEqualToString:@"receive-sequence-number"])
+                    {
+                        paramType = 0x07;
+                    }
+                    else if([key isEqualToString:@"sequencing-segmenting"])
+                    {
+                        paramType = 0x08;
+                    }
+                    else if([key isEqualToString:@"credit"])
+                    {
+                        paramType = 0x09;
+                    }
+                    else if([key isEqualToString:@"release-cause"])
+                    {
+                        paramType = 0x0a;
+                    }
+                    else if([key isEqualToString:@"return-cause"])
+                    {
+                        paramType = 0x0b;
+                    }
+                    else if([key isEqualToString:@"reset-cause"])
+                    {
+                        paramType = 0x0c;
+                    }
+                    else if([key isEqualToString:@"error-cause"])
+                    {
+                        paramType = 0x0d;
+                    }
+                    else if([key isEqualToString:@"refusal-cause"])
+                    {
+                        paramType = 0x0e;
+                    }
+                    else if([key isEqualToString:@"data"])
+                    {
+                        paramType = 0x0f;
+                    }
+                    else if([key isEqualToString:@"segmentation"])
+                    {
+                        paramType = 0x10;
+                    }
+                    else if([key isEqualToString:@"hop-counter"])
+                    {
+                        paramType = 0x11;
+                    }
+                    else if([key isEqualToString:@"importance"])
+                    {
+                        paramType = 0x12;
+                    }
+                    else if([key isEqualToString:@"long-data"])
+                    {
+                        paramType = 0x13;
+                    }
+                    uint8_t header[2];
+                    NSData *d = sccp_options[key];
+                    header[0] = paramType;
+                    header[1] = d.length & 0xFF;
+                    [optional_data appendBytes:&header[0] length:2];
+                    [optional_data appendData:d];
+                }
+                if(optional_data.length>0)
+                {
+                    [optional_data appendByte:0x00]; /* end of parameter */
+                    useXUDT = YES;
+                }
+            }
+
             if(data.length > 0)
             {
                 /* we have single data as input, no segments yet */
@@ -229,6 +326,7 @@ static int segmentReferenceId;
                                       returnOnError:YES
                                                 opc:xopc
                                                 dpc:xdpc
+                                        optionsData:optional_data
                                             options:options
                                            provider:nextHop.provider];
                     }
@@ -262,6 +360,7 @@ static int segmentReferenceId;
                                      returnOnError:YES
                                                opc:xopc
                                                dpc:xdpc
+                                       optionsData:optional_data
                                            options:options
                                           provider:nextHop.provider];
                     if(e != UMMTP3_no_error)

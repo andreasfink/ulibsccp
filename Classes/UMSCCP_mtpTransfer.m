@@ -34,7 +34,14 @@
         si = xsi;
         ni = xni;
         data = xdata;
-        options = xoptions;
+        if(xoptions)
+        {
+            options = [xoptions mutableCopy];
+        }
+        else
+        {
+            options = [[NSMutableDictionary alloc]init];
+        }
         sccpLayer = layer;
         mtp3Layer = mtp3;
     }
@@ -43,16 +50,7 @@
 
 - (void)main
 {
-    if(options)
-    {
-        NSMutableDictionary *o = [options mutableCopy];
-        o[@"sccp-pdu"] = [data hexString];
-        options = o;
-    }
-    else
-    {
-        options = @{@"sccp-pdu":[data hexString]};
-    }
+    options[@"sccp-pdu"] = [data hexString];
     BOOL decodeOnly = [options[@"decode-only"] boolValue];
     if(decodeOnly)
     {
@@ -73,7 +71,8 @@
         int param_called_party_address;
         int param_calling_party_address;
         int param_data;
-        int param_segment;
+        int param_optional;
+        int param_hop_counter = 0;
         NSString *type;
 
         switch(m_type)
@@ -91,7 +90,7 @@
                 i++;
                 param_data = d[i] + i;
                 i++;
-                param_segment = -1;
+                param_optional = -1;
                 break;
                 
             case SCCP_UDTS:
@@ -105,7 +104,7 @@
                 i++;
                 param_data      = d[i] + i;
                 i++;
-                param_segment   = -1;
+                param_optional   = -1;
                 break;
                 
             case SCCP_XUDT:
@@ -115,13 +114,16 @@
                 _decodedJson[@"sccp-protocol-class"]=@(m_protocol_class);
                 m_handling = (d[i++]>>4) & 0x0F;
                 _decodedJson[@"sccp-protocol-handling"]=@(m_handling);
+                param_hop_counter=d[i];
+                i++;
                 param_called_party_address = d[i] + i;
                 i++;
                 param_calling_party_address = d[i] + i;
                 i++;
                 param_data = d[i] + i;
                 i++;
-                param_segment = -1;
+                param_optional = d[i] + i;
+                i++;
                 break;
 
             case SCCP_XUDTS:
@@ -137,7 +139,7 @@
                 i++;
                 param_data      = d[i] + i;
                 i++;
-                param_segment   = d[i] + i;
+                param_optional   = d[i] + i;
                 i++;
                 break;
 
@@ -162,12 +164,11 @@
             @throw([NSException exceptionWithName:@"SCCP_PTR3_POINTS_BEYOND_END" reason:NULL userInfo:@{@"backtrace": UMBacktrace(NULL,0)}] );
             return;
         }
-        if((param_segment > len) && (param_segment > 0))
+        if((param_optional > len) && (param_optional > 0))
         {
             @throw([NSException exceptionWithName:@"SCCP_PTR4_POINTS_BEYOND_END" reason:NULL userInfo:@{@"backtrace": UMBacktrace(NULL,0)}] );
             return;
         }
-        
         NSData *dstData = NULL;
         NSData *srcData = NULL;
 
@@ -200,11 +201,92 @@
                 _decodedJson[@"sccp-payload"]=decodedUserPdu;
             }
         }
-        if(param_segment > 0)
+        if(param_optional > 0)
         {
-            i = (int)d[param_segment];
-            segment = [NSData dataWithBytes:&d[param_segment+1] length:i];
-            _decodedJson[@"sccp-segment"] = segment.hexString;
+            sccp_optional = [NSData dataWithBytes:&d[param_optional] length:len-param_optional];
+            _decodedJson[@"sccp-optional-raw"] = sccp_optional.hexString;
+            const uint8_t *bytes = sccp_optional.bytes;
+            NSUInteger m = sccp_optional.length;
+            NSUInteger j=0;
+            while(j<m)
+            {
+                int paramType = bytes[j++];
+                if(j<m)
+                {
+                    int len = bytes[j++];
+                    if((j+len)<m)
+                    {
+                        optional_dict = [[NSMutableDictionary alloc]init];
+                        NSData *param = [NSData dataWithBytes:&bytes[j] length:len];
+                        j = j+len;
+                        if(paramType==0x00)
+                        {
+                            break; /*end of optional parameters */
+                        }
+                        switch(paramType)
+                        {
+                            case 0x01:
+                                optional_dict[@"destination-local-reference"] = param;
+                                break;
+                            case 0x02:
+                                optional_dict[@"source-local-reference"] = param;
+                                break;
+                            case 0x03:
+                                optional_dict[@"called-party-address"] = param;
+                                break;
+                            case 0x04:
+                                optional_dict[@"calling-party-address"] = param;
+                                break;
+                            case 0x05:
+                                optional_dict[@"protocol-class"] = param;
+                                break;
+                            case 0x06:
+                                optional_dict[@"segmenting-reassembling"] = param;
+                                break;
+                            case 0x07:
+                                optional_dict[@"receive-sequence-number"] = param;
+                                break;
+                            case 0x08:
+                                optional_dict[@"sequencing-segmenting"] = param;
+                                break;
+                            case 0x09:
+                                optional_dict[@"credit"] = param;
+                                break;
+                            case 0x0a:
+                                optional_dict[@"release-cause"] = param;
+                                break;
+                            case 0x0b:
+                                optional_dict[@"return-cause"] = param;
+                                break;
+                            case 0x0c:
+                                optional_dict[@"reset-cause"] = param;
+                                break;
+                            case 0x0d:
+                                optional_dict[@"error-cause"] = param;
+                                break;
+                            case 0x0e:
+                                optional_dict[@"refusal-cause"] = param;
+                                break;
+                            case 0x0f:
+                                optional_dict[@"data"] = param;
+                                break;
+                            case 0x10:
+                                optional_dict[@"segmentation"] = param;
+                                break;
+                            case 0x11:
+                                optional_dict[@"hop-counter"] = param;
+                                break;
+                            case 0x12:
+                                optional_dict[@"importance"] = param;
+                                break;
+                            case 0x13:
+                                optional_dict[@"long-data"] = param;
+                                break;
+                        }
+                    }
+                }
+            }
+            _decodedJson[@"sccp-optional"] = optional_dict;
         }
         
         if(src == NULL)
@@ -215,7 +297,6 @@
         {
             @throw([NSException exceptionWithName:@"SCCP_MISSING_CALLED_PARTY_ADDRESS" reason:NULL userInfo:@{@"backtrace": UMBacktrace(NULL,0)}] );
         }
-
         NSMutableDictionary *o = [[NSMutableDictionary alloc]init];
         o[@"type"]=type;
         if(opc)
@@ -234,13 +315,18 @@
         {
             o[@"mtp3"]=@"(not-set)";
         }
+        if(optional_dict)
+        {
+            o[@"sccp-optional"] = optional_dict;
+            options[@"sccp-optional"] = optional_dict;
+        }
         [sccpLayer traceReceivedPdu:data options:o];
-
         if(!decodeOnly)
         {
             switch(m_type)
             {
                 case SCCP_UDT:
+                    options[@"sccp-udt"] = @(YES);
                     if(dst.ssn.ssn==SCCP_SSN_SCCP_MG)
                     {
                         [self process_udt_sccp_mg];
@@ -251,12 +337,15 @@
                     }
                     break;
                 case SCCP_UDTS:
+                    options[@"sccp-udts"] = @(YES);
                     [self processUDTS];
                     break;
                 case SCCP_XUDT:
+                    options[@"sccp-xudt"] = @(YES);
                     [self processXUDT];
                     break;
                 case SCCP_XUDTS:
+                    options[@"sccp-xudts"] = @(YES);
                     [self processXUDTS];
                     break;
             }
@@ -418,7 +507,10 @@
 {
     id<UMSCCP_UserProtocol> upperLayer = [sccpLayer getUserForSubsystem:dst.ssn number:dst];
     
-    if(segment == NULL)
+    if((optional_dict == NULL) ||
+        (      (optional_dict[@"segmenting-reassembling"]==NULL)
+            && (optional_dict[@"sequencing-segmenting"]==NULL)
+            && (optional_dict[@"segmentation"]==NULL)))
     {
         [upperLayer sccpNUnitdata:sccp_pdu
                      callingLayer:sccpLayer
@@ -429,7 +521,7 @@
     }
     else
     {
-        UMSCCP_Segment *s = [[UMSCCP_Segment alloc]initWithData:segment];
+        UMSCCP_Segment *s = [[UMSCCP_Segment alloc]initWithData:sccp_optional];
         s.data = sccp_pdu;
         NSData *reassembled = NULL;
         NSString *key = MAKE_SEGMENT_KEY(src,dst,s.reference);

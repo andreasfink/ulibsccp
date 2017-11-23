@@ -177,6 +177,7 @@
                   returnOnError:(BOOL)reterr
                             opc:(UMMTP3PointCode *)opc
                             dpc:(UMMTP3PointCode *)dpc
+                    optionsData:(NSData *)xoptionsdata
                         options:(NSDictionary *)options
                        provider:(SccpL3Provider *)provider;
 
@@ -188,6 +189,7 @@
                returnOnError:(BOOL)reterr
                          opc:(UMMTP3PointCode *)opc
                          dpc:(UMMTP3PointCode *)dpc
+                 optionsData:(NSData *)xoptionsdata
                      options:(NSDictionary *)options
                     provider:(SccpL3Provider *)provider;
 
