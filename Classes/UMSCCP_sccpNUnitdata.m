@@ -75,7 +75,18 @@ static int segmentReferenceId;
         dst = xdst;
         options = xoptions;
         qos = xqos;
-        maxHopCount = 255;
+        if(options)
+        {
+            NSString *s = options[@"hop-counter"];
+            if(s)
+            {
+                maxHopCount = [s intValue] -1;
+            }
+        }
+        else
+        {
+            maxHopCount = 15;
+        }
     }
     return self;
 }
