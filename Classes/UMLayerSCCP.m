@@ -237,7 +237,7 @@
     header[3] = 4;
     header[4] = 4 + dstEncoded.length;
     header[5] = 4 + dstEncoded.length + srcEncoded.length;
-    header[6] = 4 + dstEncoded.length + srcEncoded.length + optionsData.length;
+    header[6] = 4 + dstEncoded.length + srcEncoded.length + segment.data.length;
     
     [sccp_pdu appendBytes:header length:7];
     [sccp_pdu appendByte:dstEncoded.length];
@@ -298,7 +298,7 @@
     header[5] = 4 + dstEncoded.length + srcEncoded.length;
     if(xoptionsdata.length > 0)
     {
-        header[6] = 4 + dstEncoded.length + srcEncoded.length + xoptionsdata.length;
+        header[6] = 4 + dstEncoded.length + srcEncoded.length + data.length;
     }
     else
     {
