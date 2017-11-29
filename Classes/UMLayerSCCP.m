@@ -36,6 +36,10 @@
 {
     return mtp3.variant;
 }
+- (UMLayerMTP3 *)mtp3
+{
+    return mtp3;
+}
 
 - (UMLayerSCCP *)init
 {

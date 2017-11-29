@@ -50,6 +50,17 @@
 
 - (void)main
 {
+
+    /* we build a pseudo MTP3 raw packet for debugging logging */
+    UMMTP3Label *label = [[UMMTP3Label alloc]init];
+    label.opc = opc;
+    label.dpc = dpc;
+    NSMutableData *rawMtp3 = [[NSMutableData alloc]init];
+    int sio = ((ni & 0x03) << 6) | (si & 0x0F);
+    [rawMtp3 appendByte:sio];
+    [label appendToMutableData:rawMtp3];
+
+    options[@"mtp3-pdu"] = rawMtp3;
     options[@"sccp-pdu"] = [data hexString];
     BOOL decodeOnly = [options[@"decode-only"] boolValue];
     if(decodeOnly)
@@ -145,28 +156,27 @@
 
             default:
                 @throw([NSException exceptionWithName:@"SCCP_UNKNOWN_PACKET_TYPE" reason:NULL
-                                             userInfo:@{@"backtrace": UMBacktrace(NULL,0),
-                                                        @"sccp-data ": data}]);
+                                             userInfo:@{@"mtp3": [rawMtp3 hexString] } ]);
         }
         if(param_called_party_address > len)
         {
-            @throw([NSException exceptionWithName:@"SCCP_PTR1_POINTS_BEYOND_END" reason:NULL userInfo:@{@"backtrace": UMBacktrace(NULL,0)}] );
+            @throw([NSException exceptionWithName:@"SCCP_PTR1_POINTS_BEYOND_END" reason:NULL userInfo:@{@"mtp3": [rawMtp3 hexString] }] );
             return;
         }
         
         if(param_calling_party_address > len)
         {
-            @throw([NSException exceptionWithName:@"SCCP_PTR2_POINTS_BEYOND_END" reason:NULL userInfo:@{@"backtrace": UMBacktrace(NULL,0)}] );
+            @throw([NSException exceptionWithName:@"SCCP_PTR2_POINTS_BEYOND_END" reason:NULL userInfo:@{@"mtp3": [rawMtp3 hexString] }] );
             return;
         }
         if(param_data > len)
         {
-            @throw([NSException exceptionWithName:@"SCCP_PTR3_POINTS_BEYOND_END" reason:NULL userInfo:@{@"backtrace": UMBacktrace(NULL,0)}] );
+            @throw([NSException exceptionWithName:@"SCCP_PTR3_POINTS_BEYOND_END" reason:NULL userInfo:@{@"mtp3": [rawMtp3 hexString] }] );
             return;
         }
         if((param_optional > len) && (param_optional > 0))
         {
-            @throw([NSException exceptionWithName:@"SCCP_PTR4_POINTS_BEYOND_END" reason:NULL userInfo:@{@"backtrace": UMBacktrace(NULL,0)}] );
+            @throw([NSException exceptionWithName:@"SCCP_PTR4_POINTS_BEYOND_END" reason:NULL userInfo:@{@"mtp3": [rawMtp3 hexString] }] );
             return;
         }
         NSData *dstData = NULL;
@@ -291,11 +301,11 @@
         
         if(src == NULL)
         {
-            @throw([NSException exceptionWithName:@"SCCP_MISSING_CALLING_PARTY_ADDRESS" reason:NULL userInfo:@{@"backtrace": UMBacktrace(NULL,0)}] );
+            @throw([NSException exceptionWithName:@"SCCP_MISSING_CALLING_PARTY_ADDRESS" reason:NULL userInfo:@{@"mtp3": [rawMtp3 hexString] }] );
         }
         if(dst==NULL)
         {
-            @throw([NSException exceptionWithName:@"SCCP_MISSING_CALLED_PARTY_ADDRESS" reason:NULL userInfo:@{@"backtrace": UMBacktrace(NULL,0)}] );
+            @throw([NSException exceptionWithName:@"SCCP_MISSING_CALLED_PARTY_ADDRESS" reason:NULL userInfo:@{@"mtp3": [rawMtp3 hexString] }] );
         }
         NSMutableDictionary *o = [[NSMutableDictionary alloc]init];
         o[@"type"]=type;
@@ -357,6 +367,11 @@
     }
     @catch(NSException *e)
     {
+        if(mtp3Layer.problematicPacketDumper)
+        {
+            [mtp3Layer.problematicPacketDumper logRawPacket:rawMtp3];
+        }
+
         [logFeed majorErrorText:[NSString stringWithFormat:@"Error: %@",e]];
         if(decodeOnly)
         {
