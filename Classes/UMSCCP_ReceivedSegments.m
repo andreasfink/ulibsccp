@@ -23,7 +23,7 @@
     self = [super init];
     if(self)
     {
-        created = [NSDate date];
+        created = [NSDate new];
     }
     return self;
 }

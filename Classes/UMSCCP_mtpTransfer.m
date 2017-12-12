@@ -510,7 +510,7 @@
 {
     id<UMSCCP_UserProtocol> upperLayer = [sccpLayer getUserForSubsystem:dst.ssn number:dst];
     
-    NSDate *ts = [NSDate date];
+    NSDate *ts = [NSDate new];
     options[@"sccp-timestamp-udt"] = ts;
 
     [upperLayer sccpNNotice:sccp_pdu
@@ -524,7 +524,7 @@
 - (void)processXUDT
 {
     id<UMSCCP_UserProtocol> upperLayer = [sccpLayer getUserForSubsystem:dst.ssn number:dst];
-    NSDate *ts = [NSDate date];
+    NSDate *ts = [NSDate new];
     options[@"sccp-timestamp-udt"] = ts;
 
     if((optional_dict == NULL) ||
