@@ -531,7 +531,7 @@
                     options:(NSDictionary *)options
                 synchronous:(BOOL)sync
 {
-    NSLog(@"not implemented");
+    NSLog(@"sccpNConnectRequest not implemented");
 }
 
 - (void)sccpNDataRequest:(NSData *)data
@@ -587,7 +587,7 @@
             options:(NSDictionary *)options
         synchronous:(BOOL)sync
 {
-    NSLog(@"not implemented");
+    NSLog(@"sccpNInform not implemented");
 }
 
 /* connectionless primitives */
@@ -616,7 +616,7 @@
              called:(SccpAddress *)dst
             options:(NSDictionary *)options
 {
-    NSLog(@"not implemented");
+    NSLog(@"sccpNNotice not implemented");
 }
 
 - (void)sccpNState:(NSData *)data
@@ -625,7 +625,7 @@
             called:(SccpAddress *)dst
            options:(NSDictionary *)options
 {
-    NSLog(@"not implemented");
+    NSLog(@"sccpNState not implemented");
 }
 
 
@@ -635,7 +635,7 @@
             called:(SccpAddress *)dst
            options:(NSDictionary *)options
 {
-    NSLog(@"not implemented");
+    NSLog(@"sccpNCoord not implemented");
 }
 
 
@@ -645,7 +645,7 @@
               called:(SccpAddress *)dst
              options:(NSDictionary *)options
 {
-    NSLog(@"not implemented");
+    NSLog(@"sccpNTraffic not implemented");
 }
 
 
@@ -655,7 +655,7 @@
               called:(SccpAddress *)dst
              options:(NSDictionary *)options
 {
-    NSLog(@"not implemented");
+    NSLog(@"sccpNPcState not implemented");
 }
 
 
