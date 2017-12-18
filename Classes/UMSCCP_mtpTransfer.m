@@ -59,8 +59,10 @@
     int sio = ((ni & 0x03) << 6) | (si & 0x0F);
     [rawMtp3 appendByte:sio];
     [label appendToMutableData:rawMtp3];
+    [rawMtp3 appendData:data];
 
     options[@"mtp3-pdu"] = rawMtp3;
+
     options[@"sccp-pdu"] = [data hexString];
     BOOL decodeOnly = [options[@"decode-only"] boolValue];
     if(decodeOnly)
