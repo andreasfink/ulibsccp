@@ -19,6 +19,7 @@
 #import "UMSCCP_Segment.h"
 #import "UMLayerSCCPApplicationContextProtocol.h"
 
+@class UMSCCP_MTP3RoutingTable;
 @interface UMLayerSCCP : UMLayer<UMLayerMTP3UserProtocol>
 {
     SccpVariant                 sccpVariant;
@@ -35,6 +36,9 @@
     UMSynchronizedArray         *traceSendDestinations;
     UMSynchronizedArray         *traceReceiveDestinations;
     UMSynchronizedArray         *traceDroppedDestinations;
+
+    UMSCCP_MTP3RoutingTable *_routingTable;
+
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;

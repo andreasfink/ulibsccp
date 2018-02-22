@@ -20,6 +20,7 @@
 #import "UMSCCP_Defs.h"
 #import "UMSCCP_Segment.h"
 #import "UMLayerSCCPApplicationContextProtocol.h"
+#import "UMSCCP_MTP3RoutingTable.h"
 
 @implementation UMLayerSCCP
 
@@ -36,6 +37,7 @@
 {
     return mtp3.variant;
 }
+
 - (UMLayerMTP3 *)mtp3
 {
     return mtp3;
@@ -70,6 +72,7 @@
     traceSendDestinations =[[UMSynchronizedArray alloc]init];
     traceReceiveDestinations =[[UMSynchronizedArray alloc]init];
     traceDroppedDestinations =[[UMSynchronizedArray alloc]init];
+    _routingTable = [[UMSCCP_MTP3RoutingTable alloc]init];
 }
 
 - (void)mtpTransfer:(NSData *)data

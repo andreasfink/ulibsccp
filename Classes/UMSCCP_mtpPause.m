@@ -11,6 +11,8 @@
 
 #import "UMSCCP_mtpPause.h"
 #import "UMLayerSCCP.h"
+#import "UMSCCP_MTP3RoutingTable.h"
+#import "UMSCCP_MTP3Route.h"
 
 @implementation UMSCCP_mtpPause
 
@@ -35,6 +37,10 @@
 
 - (void)main
 {
+    /* FIXME
+    UMSCCP_MTP3Route *r = [layer.routingTable routeForPointCode:affPC];
+    [r pause];
 
+     */
 }
 @end

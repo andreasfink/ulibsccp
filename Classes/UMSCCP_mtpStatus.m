@@ -11,7 +11,7 @@
 
 #import "UMSCCP_mtpStatus.h"
 #import "UMLayerSCCP.h"
-
+#import "UMSCCP_MTP3Route.h"
 @implementation UMSCCP_mtpStatus
 
 - (UMSCCP_mtpStatus *)initForSccp:(UMLayerSCCP *)layer
@@ -31,13 +31,18 @@
         si = xsi;
         ni = xni;
         options = xoptions;
+        _sccp = layer;
     }
     return self;
 }
 
 - (void)main
 {
+    /* FIXME: update SCCP MTP3 routing table view
+    UMSCCP_MTP3Route *r = [sccp.routingTable routeForPointCode:affPC];
+    [r status:status];
 
+     */
 }
 
 @end

@@ -34,7 +34,10 @@
 
 - (void)main
 {
-
+    /*
+    UMSCCP_MTP3Route *r = [layer.routingTable routeForPointCode:affPC];
+    [r resume];
+     */
 }
 
 @end

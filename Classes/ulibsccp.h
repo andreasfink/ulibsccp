@@ -20,3 +20,5 @@
 #import "UMSCCP_Defs.h"
 #import "UMSCCP_mtpTransfer.h"
 #import "UMLayerSCCPApplicationContextProtocol.h"
+#import "UMSCCP_MTP3Route.h"
+#import "UMSCCP_MTP3RoutingTable.h"

@@ -21,6 +21,7 @@
     int ni;
     NSDictionary *options;
     int status;
+    UMLayerSCCP *_sccp;
 }
 
 - (UMSCCP_mtpStatus *)initForSccp:(UMLayerSCCP *)layer
