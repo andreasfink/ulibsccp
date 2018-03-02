@@ -583,7 +583,16 @@
 
 - (void)processXUDTS
 {
+    id<UMSCCP_UserProtocol> upperLayer = [sccpLayer getUserForSubsystem:dst.ssn number:dst];
     
+    NSDate *ts = [NSDate new];
+    options[@"sccp-timestamp-udt"] = ts;
+    
+    [upperLayer sccpNNotice:sccp_pdu
+               callingLayer:sccpLayer
+                    calling:src
+                     called:dst
+                     reason:m_return_cause
+                    options:options];
 }
-
 @end
