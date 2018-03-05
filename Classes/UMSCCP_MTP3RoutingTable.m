@@ -17,7 +17,7 @@
     self = [super init];
     if(self)
     {
-        _lock = [[UMMutex alloc]init];
+        _lock = [[UMMutex alloc]initWithName:@"mtp3-routing-table-lock"];
         _routes = [[NSMutableDictionary alloc]init];
     }
     return self;
