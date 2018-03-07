@@ -214,5 +214,6 @@
 - (void)traceSentPdu:(NSData *)pdu options:(NSDictionary *)dict;
 - (void)traceReceivedPdu:(NSData *)pdu options:(NSDictionary *)dict;
 - (void)traceDroppedPdu:(NSData *)pdu options:(NSDictionary *)dict;
+- (NSDictionary *)apiStatus;
 
 @end

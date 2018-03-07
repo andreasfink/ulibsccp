@@ -1044,4 +1044,9 @@
         [a sccpTraceReceivedPdu:pdu options:o];
     }
 }
+- (NSDictionary *)apiStatus
+{
+    NSDictionary *d = [[NSDictionary alloc]init];
+    return d;
+}
 @end
