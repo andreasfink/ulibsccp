@@ -216,4 +216,6 @@
 - (void)traceDroppedPdu:(NSData *)pdu options:(NSDictionary *)dict;
 - (NSDictionary *)apiStatus;
 
+- (void)stopDetachAndDestroy;
+
 @end

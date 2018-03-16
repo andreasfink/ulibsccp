@@ -1049,4 +1049,9 @@
     NSDictionary *d = [[NSDictionary alloc]init];
     return d;
 }
+
+- (void)stopDetachAndDestroy
+{
+    /* FIXME: do something here */
+}
 @end
