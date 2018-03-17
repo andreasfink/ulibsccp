@@ -11,6 +11,7 @@
 
 #import "UMSCCP_sccpNUnitdata.h"
 #import <ulibmtp3/ulibmtp3.h>
+#import <ulibgt/ulibgt.h>
 #import "UMLayerSCCP.h"
 
 static int segmentReferenceId;
@@ -114,13 +115,13 @@ static int segmentReferenceId;
             if((xdpc_string.length > 0) && (![xdpc_string isEqualToString:@"default"]))
             {
                 xdpc = [[UMMTP3PointCode alloc] initWithString:xdpc_string
-                                                       variant:nextHop.provider.variant];
+                                                       variant:sccpLayer.mtp3.variant];
             }
 
             if((xopc_string.length > 0) && (![xopc_string isEqualToString:@"default"]))
             {
                 xopc = [[UMMTP3PointCode alloc] initWithString:xopc_string
-                                                       variant:nextHop.provider.variant];
+                                                       variant:sccpLayer.mtp3.variant];
             }
             
             UMMTP3_Error e = UMMTP3_no_error;
@@ -242,7 +243,7 @@ static int segmentReferenceId;
                                                   callingAddressSize:cas
                                                    calledAddressSize:cds
                                                        usingSegments:useSegments
-                                                            provider:nextHop.provider];
+                                                            provider:sccpLayer.mtp3];
                     
                     if(data.length > maxPdu)
                     {
@@ -253,7 +254,7 @@ static int segmentReferenceId;
                                                       callingAddressSize:cas
                                                        calledAddressSize:cds
                                                            usingSegments:YES
-                                                                provider:nextHop.provider];
+                                                                provider:sccpLayer.mtp3];
                         
                     }
                 }
@@ -263,7 +264,7 @@ static int segmentReferenceId;
                                                   callingAddressSize:cas
                                                    calledAddressSize:cds
                                                        usingSegments:useSegments
-                                                            provider:nextHop.provider];
+                                                            provider:sccpLayer.mtp3];
                     
                     if(data.length > maxPdu)
                     {
@@ -274,7 +275,7 @@ static int segmentReferenceId;
                                                       callingAddressSize:cas
                                                        calledAddressSize:cds
                                                            usingSegments:useSegments
-                                                                provider:nextHop.provider];
+                                                                provider:sccpLayer.mtp3];
                         
                     }
                 }
@@ -339,7 +340,7 @@ static int segmentReferenceId;
                                                 dpc:xdpc
                                         optionsData:optional_data
                                             options:options
-                                           provider:nextHop.provider];
+                                           provider:sccpLayer.mtp3];
                     }
                     else
                     {
@@ -351,7 +352,7 @@ static int segmentReferenceId;
                                            opc:xopc
                                            dpc:xdpc
                                        options:options
-                                      provider:nextHop.provider];
+                                      provider:sccpLayer.mtp3];
                         
                     }
                 }
@@ -373,7 +374,7 @@ static int segmentReferenceId;
                                                dpc:xdpc
                                        optionsData:optional_data
                                            options:options
-                                          provider:nextHop.provider];
+                                          provider:sccpLayer.mtp3];
                     if(e != UMMTP3_no_error)
                     {
                         break;

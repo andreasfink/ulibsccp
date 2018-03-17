@@ -468,12 +468,7 @@
             response_called_sccp.pc = opc;
             [response_called_sccp setSsnFromInt:0x01]; /* SCCP MGMT */
             [response_called_sccp setAiFromInt:0x43]; /* route on SSN (0x40), SSn present (0x02), PC present (0x01); */
-            
-            SccpL3Provider *provider = [[SccpL3Provider alloc]init];
-            provider.opc = dpc;
-            provider.dpc = opc;
-            provider.mtp3Layer = mtp3Layer;
-            
+
             /*UMMTP3_Error err = */[sccpLayer sendUDT:rpdu
                                               calling:response_calling_sccp
                                                called:response_called_sccp
@@ -482,7 +477,7 @@
                                                   opc:opc
                                                   dpc:dpc
                                               options:@{}
-                                             provider:provider];
+                                             provider:sccpLayer.mtp3];
             break;
         }
         case 0x04: /* SOR subsystem-out-of-service-request */

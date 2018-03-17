@@ -25,9 +25,7 @@
 @implementation UMLayerSCCP
 
 @synthesize sccpVariant;
-@synthesize allProviders;
 @synthesize defaultNextHop;
-@synthesize defaultProvider;
 @synthesize gttSelectorRegistry;
 @synthesize attachTo;
 @synthesize attachedTo;
@@ -71,7 +69,6 @@
 
 - (void)genericInitialisation
 {
-    allProviders = [[UMSynchronizedDictionary alloc]init];
     subsystemUsers = [[UMSynchronizedDictionary alloc]init];
     dpcAvailability = [[UMSynchronizedDictionary alloc]init];
     pendingSegments  = [[NSMutableDictionary alloc]init];
@@ -273,14 +270,23 @@
         o[@"type"]=@"XUDT-Segment";
         o[@"opc"]=opc.stringValue;
         o[@"dpc"]=dpc.stringValue;
-        o[@"provider"]=provider.name;
-        o[@"mtp3"]=provider.mtp3Layer.layerName;
+        o[@"mtp3"]=mtp3.layerName;
         [a sccpTraceSentPdu:sccp_pdu options:o];
     }
-    UMMTP3_Error result = [provider sendPDU:sccp_pdu opc:opc dpc:dpc];
+    UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc];
     return result;
 }
 
+-(UMMTP3_Error) sendPDU:(NSData *)pdu
+                    opc:(UMMTP3PointCode *)opc
+                    dpc:(UMMTP3PointCode *)dpc
+{
+    return [mtp3 sendPDU:pdu
+                          opc:opc
+                          dpc:dpc
+                           si:MTP3_SERVICE_INDICATOR_SCCP
+                           mp:0];
+}
 
 -(UMMTP3_Error) sendXUDTdata:(NSData *)data
                      calling:(SccpAddress *)src
@@ -292,7 +298,7 @@
                          dpc:(UMMTP3PointCode *)dpc
                  optionsData:(NSData *)xoptionsdata
                      options:(NSDictionary *)options
-                    provider:(SccpL3Provider *)provider
+                    provider:(UMLayerMTP3 *)provider
 {
     NSData *srcEncoded = [src encode:sccpVariant];
     NSData *dstEncoded = [dst encode:sccpVariant];
@@ -340,12 +346,11 @@
         o[@"type"]=@"XUDT-Data";
         o[@"opc"]=opc.stringValue;
         o[@"dpc"]=dpc.stringValue;
-        o[@"provider"]=provider.name;
-        o[@"mtp3"]=provider.mtp3Layer.layerName;
+        o[@"mtp3"]=mtp3.layerName;
         [a sccpTraceSentPdu:sccp_pdu options:o];
     }
 
-    UMMTP3_Error result = [provider sendPDU:sccp_pdu opc:opc dpc:dpc];
+    UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc];
     return result;
 }
 
@@ -357,7 +362,7 @@
                     opc:(UMMTP3PointCode *)opc
                     dpc:(UMMTP3PointCode *)dpc
                 options:(NSDictionary *)options
-               provider:(SccpL3Provider *)provider
+               provider:(UMLayerMTP3 *)provider
 {
     NSData *srcEncoded = [src encode:sccpVariant];
     NSData *dstEncoded = [dst encode:sccpVariant];
@@ -408,10 +413,9 @@
         }
         if(provider)
         {
-            o[@"provider"]=provider.name;
-            if(provider.mtp3Layer)
+            if(mtp3)
             {
-                o[@"mtp3"]=provider.mtp3Layer.layerName;
+                o[@"mtp3"]=mtp3.layerName;
             }
             else
             {
@@ -425,7 +429,7 @@
         [a sccpTraceSentPdu:sccp_pdu options:o];
     }
 
-    UMMTP3_Error result = [provider sendPDU:sccp_pdu opc:opc dpc:dpc];
+    UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc];
     
     switch(result)
     {
@@ -441,11 +445,11 @@
         case UMMTP3_no_error:
             if(logLevel <= UMLOG_DEBUG)
             {
-                [self.logFeed debugText:[NSString stringWithFormat:@"sendPDU to %@: %@->%@ success",provider.name, opc,dpc]];
+                [self.logFeed debugText:[NSString stringWithFormat:@"sendPDU to %@: %@->%@ success",mtp3.layerName, opc,dpc]];
             }
             break;
         default:
-            [self.logFeed majorErrorText:[NSString stringWithFormat:@"sendPDU %@: %@->%@ returns unknown error %d",provider.name,opc,dpc,result]];
+            [self.logFeed majorErrorText:[NSString stringWithFormat:@"sendPDU %@: %@->%@ returns unknown error %d",mtp3.layerName,opc,dpc,result]];
 
     }
     return result;
@@ -455,7 +459,7 @@
                         callingAddressSize:(NSUInteger)cas
                          calledAddressSize:(NSUInteger)cds
                              usingSegments:(BOOL)useSeg
-                                  provider:(SccpL3Provider *)provider
+                                  provider:(UMLayerMTP3 *)provider
 {
     NSUInteger maxSccpSize = provider.maxPduSize - 5;
 

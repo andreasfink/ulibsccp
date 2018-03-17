@@ -23,9 +23,8 @@
 @interface UMLayerSCCP : UMLayer<UMLayerMTP3UserProtocol>
 {
     SccpVariant                 sccpVariant;
-    SccpNextHop                 *defaultNextHop;
-    SccpL3Provider              *defaultProvider;
-    
+    SccpDestination             *defaultNextHop;
+
     SccpGttRegistry             *gttSelectorRegistry;
     UMSynchronizedDictionary    *subsystemUsers;
     NSString                    *mtp3_name;
@@ -42,9 +41,7 @@
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;
-@property(readwrite,strong) UMSynchronizedDictionary *allProviders;
-@property(readwrite,strong) SccpNextHop     *defaultNextHop;
-@property(readwrite,strong) SccpL3Provider  *defaultProvider;
+@property(readwrite,strong) SccpDestination *defaultNextHop;
 @property(readwrite,strong) SccpGttRegistry *gttSelectorRegistry;
 @property(readwrite,strong) NSString    *attachTo;
 @property(readwrite,strong) UMLayerMTP3  *attachedTo;
@@ -173,7 +170,7 @@
                     opc:(UMMTP3PointCode *)opc
                     dpc:(UMMTP3PointCode *)dpc
                 options:(NSDictionary *)options
-               provider:(SccpL3Provider *)provider;
+               provider:(UMLayerMTP3 *)provider;
 
 -(UMMTP3_Error) sendXUDTsegment:(UMSCCP_Segment *)pdu
                         calling:(SccpAddress *)src
@@ -185,7 +182,7 @@
                             dpc:(UMMTP3PointCode *)dpc
                     optionsData:(NSData *)xoptionsdata
                         options:(NSDictionary *)options
-                       provider:(SccpL3Provider *)provider;
+                       provider:(UMLayerMTP3 *)provider;
 
 -(UMMTP3_Error) sendXUDTdata:(NSData *)pdu
                      calling:(SccpAddress *)src
@@ -197,13 +194,13 @@
                          dpc:(UMMTP3PointCode *)dpc
                  optionsData:(NSData *)xoptionsdata
                      options:(NSDictionary *)options
-                    provider:(SccpL3Provider *)provider;
+                    provider:(UMLayerMTP3 *)provider;
 
 - (NSUInteger)maxPayloadSizeForServiceType:(SCCP_ServiceType) serviceType
                         callingAddressSize:(NSUInteger)cas
                          calledAddressSize:(NSUInteger)cds
                              usingSegments:(BOOL)useSeg
-                                  provider:(SccpL3Provider *)provider;
+                                  provider:(UMLayerMTP3 *)provider;
 
 - (void)setConfig:(NSDictionary *)cfg applicationContext:(id<UMLayerSCCPApplicationContextProtocol>)appContext;
 - (NSDictionary *)config;
