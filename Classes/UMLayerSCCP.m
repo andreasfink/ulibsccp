@@ -218,7 +218,7 @@
                             dpc:(UMMTP3PointCode *)dpc
                     optionsData:(NSData *)xoptionsdata
                         options:(NSDictionary *)options
-                       provider:(SccpL3Provider *)provider
+                       provider:(UMLayerMTP3 *)provider
 {
     NSMutableData *optionsData = [[NSMutableData alloc]init];
 
