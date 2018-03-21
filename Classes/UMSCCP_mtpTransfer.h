@@ -42,6 +42,7 @@
     SccpAddress *_decodedCalling;
     SccpAddress *_decodedCalled;
     NSData *_decodedPdu;
+    int m_type;
 }
 
 @property(readwrite,strong,atomic)  UMSynchronizedSortedDictionary *decodedJson;

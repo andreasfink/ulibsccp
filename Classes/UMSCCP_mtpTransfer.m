@@ -335,31 +335,14 @@
         [sccpLayer traceReceivedPdu:data options:o];
         if(!decodeOnly)
         {
-            switch(m_type)
+            if(dst.ai.routingIndicatorBit==YES)
             {
-                case SCCP_UDT:
-                    options[@"sccp-udt"] = @(YES);
-                    if(dst.ssn.ssn==SCCP_SSN_SCCP_MG)
-                    {
-                        [self process_udt_sccp_mg];
-                    }
-                    else
-                    {
-                        [self processUDT];
-                    }
-                    break;
-                case SCCP_UDTS:
-                    options[@"sccp-udts"] = @(YES);
-                    [self processUDTS];
-                    break;
-                case SCCP_XUDT:
-                    options[@"sccp-xudt"] = @(YES);
-                    [self processXUDT];
-                    break;
-                case SCCP_XUDTS:
-                    options[@"sccp-xudts"] = @(YES);
-                    [self processXUDTS];
-                    break;
+                [self routeOnSubsystem];
+            }
+            else
+            {
+                /* route on global title */
+                [self routeOnGlobalTitle];
             }
         }
         else
@@ -379,6 +362,68 @@
         {
             _decodedJson[@"decode-error"] = e.description;
         }
+    }
+}
+
+- (void)routeOnGlobalTitle
+{
+    /* route on subsystem number */
+    switch(m_type)
+    {
+        case SCCP_UDT:
+            options[@"sccp-udt"] = @(YES);
+            if(dst.ssn.ssn==SCCP_SSN_SCCP_MG)
+            {
+                [self process_udt_sccp_mg];
+            }
+            else
+            {
+                [self processUDT];
+            }
+            break;
+        case SCCP_UDTS:
+            options[@"sccp-udts"] = @(YES);
+            [self processUDTS];
+            break;
+        case SCCP_XUDT:
+            options[@"sccp-xudt"] = @(YES);
+            [self processXUDT];
+            break;
+        case SCCP_XUDTS:
+            options[@"sccp-xudts"] = @(YES);
+            [self processXUDTS];
+            break;
+    }
+}
+
+- (void)routeOnSubsystem
+{
+    /* route on subsystem number */
+    switch(m_type)
+    {
+        case SCCP_UDT:
+            options[@"sccp-udt"] = @(YES);
+            if(dst.ssn.ssn==SCCP_SSN_SCCP_MG)
+            {
+                [self process_udt_sccp_mg];
+            }
+            else
+            {
+                [self processUDT];
+            }
+            break;
+        case SCCP_UDTS:
+            options[@"sccp-udts"] = @(YES);
+            [self processUDTS];
+            break;
+        case SCCP_XUDT:
+            options[@"sccp-xudt"] = @(YES);
+            [self processXUDT];
+            break;
+        case SCCP_XUDTS:
+            options[@"sccp-xudts"] = @(YES);
+            [self processXUDTS];
+            break;
     }
 }
 
