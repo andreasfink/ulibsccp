@@ -22,30 +22,31 @@
 @class UMSCCP_MTP3RoutingTable;
 @interface UMLayerSCCP : UMLayer<UMLayerMTP3UserProtocol>
 {
-    SccpVariant                 sccpVariant;
-    SccpDestination             *defaultNextHop;
+    SccpVariant                 _sccpVariant;
+    SccpDestination             *_defaultNextHop;
 
-    SccpGttRegistry             *gttSelectorRegistry;
-    UMSynchronizedDictionary    *subsystemUsers;
-    NSString                    *mtp3_name;
-    UMLayerMTP3                 *mtp3;
-    UMSynchronizedDictionary    *dpcAvailability;
-    NSMutableDictionary         *pendingSegments;
+    SccpGttRegistry             *_gttSelectorRegistry;
+    UMSynchronizedDictionary    *_subsystemUsers;
+    NSString                    *_mtp3_name;
+    UMLayerMTP3                 *_mtp3;
+    UMSynchronizedDictionary    *_dpcAvailability;
+    NSMutableDictionary         *_pendingSegments;
 
-    UMSynchronizedArray         *traceSendDestinations;
-    UMSynchronizedArray         *traceReceiveDestinations;
-    UMSynchronizedArray         *traceDroppedDestinations;
+    UMSynchronizedArray         *_traceSendDestinations;
+    UMSynchronizedArray         *_traceReceiveDestinations;
+    UMSynchronizedArray         *_traceDroppedDestinations;
 
-    UMSCCP_MTP3RoutingTable *_routingTable;
+    SccpL3RoutingTable          *_mtp3RoutingTable;
+    UMSCCP_MTP3RoutingTable     *_routingTable;
 
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;
 @property(readwrite,strong) SccpDestination *defaultNextHop;
 @property(readwrite,strong) SccpGttRegistry *gttSelectorRegistry;
-@property(readwrite,strong) NSString    *attachTo;
-@property(readwrite,strong) UMLayerMTP3  *attachedTo;
 @property(readwrite,strong) NSMutableDictionary *pendingSegments;
+@property(readwrite,strong) SccpL3RoutingTable *mtp3RoutingTable;
+
 
 - (UMLayerMTP3 *)mtp3;
 - (UMMTP3Variant) variant;
@@ -171,6 +172,15 @@
                     dpc:(UMMTP3PointCode *)dpc
                 options:(NSDictionary *)options
                provider:(UMLayerMTP3 *)provider;
+
+- (UMMTP3_Error) sendUDTS:(NSData *)data
+                  calling:(SccpAddress *)src
+                   called:(SccpAddress *)dst
+                   reason:(int)reasonCode
+                      opc:(UMMTP3PointCode *)opc
+                      dpc:(UMMTP3PointCode *)dpc
+                  options:(NSDictionary *)options
+                 provider:(UMLayerMTP3 *)provider;
 
 -(UMMTP3_Error) sendXUDTsegment:(UMSCCP_Segment *)pdu
                         calling:(SccpAddress *)src

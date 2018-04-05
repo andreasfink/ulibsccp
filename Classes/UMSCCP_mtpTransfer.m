@@ -335,14 +335,31 @@
         [sccpLayer traceReceivedPdu:data options:o];
         if(!decodeOnly)
         {
-            if(dst.ai.routingIndicatorBit==YES)
+            switch(m_type)
             {
-                [self routeOnSubsystem];
-            }
-            else
-            {
-                /* route on global title */
-                [self routeOnGlobalTitle];
+                case SCCP_UDT:
+                    options[@"sccp-udt"] = @(YES);
+                    if(dst.ssn.ssn==SCCP_SSN_SCCP_MG)
+                    {
+                        [self process_udt_sccp_mg];
+                    }
+                    else
+                    {
+                        [self processUDT];
+                    }
+                    break;
+                case SCCP_UDTS:
+                    options[@"sccp-udts"] = @(YES);
+                    [self processUDTS];
+                    break;
+                case SCCP_XUDT:
+                    options[@"sccp-xudt"] = @(YES);
+                    [self processXUDT];
+                    break;
+                case SCCP_XUDTS:
+                    options[@"sccp-xudts"] = @(YES);
+                    [self processXUDTS];
+                    break;
             }
         }
         else
@@ -367,7 +384,7 @@
 
 - (void)routeOnGlobalTitle
 {
-    /* route on subsystem number */
+    /* route on global number */
     switch(m_type)
     {
         case SCCP_UDT:
@@ -495,7 +512,7 @@
             /* we return exactly same packet as SSA */
         {
             unsigned char r[5];
-            r[0] = 0x01;
+            r[0] = 0x01; /* FIXME: should we maybe check here if the subsystem is really alive ? */
             r[1] = affected_ssn;
             r[2] = dat[2];
             r[3] = dat[3];
@@ -535,17 +552,158 @@
 
 - (void)processUDT
 {
-    id<UMSCCP_UserProtocol> upperLayer = [sccpLayer getUserForSubsystem:dst.ssn number:dst];
-    if(upperLayer == NULL)
+    if(dst.ai.routingIndicatorBit == ROUTE_BY_GLOBAL_TITLE)
     {
-        [logFeed majorErrorText:[NSString stringWithFormat:@"no upper layer found for %@",dst.debugDescription]];
+        SccpGttRegistry *registry = sccpLayer.gttSelectorRegistry;
+        SccpGttSelector *selector = [registry selectorForInstance:sccpLayer.layerName
+                                                               tt:dst.tt.tt
+                                                              gti:dst.ai.globalTitleIndicator
+                                                               np:dst.npi.npi
+                                                              nai:dst.nai.nai];
+        if(selector == NULL)
+        {
+            [sccpLayer sendUDTS:sccp_pdu
+                        calling:src
+                         called:dst
+                         reason:SCCP_ReturnCause_NoTranslationForThisSpecificAddress
+                            opc:sccpLayer.mtp3.opc
+                            dpc:opc
+                        options:@{}
+                       provider:sccpLayer.mtp3];
+
+        }
+        else
+        {
+            SccpDestination *destination = [selector chooseNextHopWithL3RoutingTable:sccpLayer.mtp3RoutingTable
+                                                                              digits:dst.address];
+            if(destination==NULL)
+            {
+                NSLog(@"SCCP: No route to destination for tt=%d gti=%d, np=%d, nai=%d address=%@",dst.tt.tt,dst.ai.globalTitleIndicator,dst.npi.npi,dst.nai.nai,dst.address);
+                [sccpLayer sendUDTS:sccp_pdu
+                            calling:src
+                             called:dst
+                             reason:SCCP_ReturnCause_NoTranslationForThisSpecificAddress
+                                opc:sccpLayer.mtp3.opc
+                                dpc:opc
+                            options:@{}
+                           provider:sccpLayer.mtp3];
+            }
+            else
+            {
+                if(destination.ssn)
+                {
+                    /* routed by subsystem */
+                    id<UMSCCP_UserProtocol> upperLayer = [sccpLayer getUserForSubsystem:dst.ssn number:dst];
+                    if(upperLayer == NULL)
+                    {
+                        [logFeed majorErrorText:[NSString stringWithFormat:@"no upper layer found for %@",dst.debugDescription]];
+                        [sccpLayer sendUDTS:sccp_pdu
+                                    calling:src
+                                     called:dst
+                                     reason:SCCP_ReturnCause_SubsystemFailure
+                                        opc:sccpLayer.mtp3.opc
+                                        dpc:opc
+                                    options:@{}
+                                   provider:sccpLayer.mtp3];
+                    }
+                    else
+                    {
+                        [upperLayer sccpNUnitdata:sccp_pdu
+                                     callingLayer:sccpLayer
+                                          calling:src
+                                           called:dst
+                                 qualityOfService:0
+                                          options:options];
+                    }
+                }
+                else if(destination.dpc)
+                {
+                    /* Forwarding */
+                    UMMTP3_Error e = [sccpLayer sendUDT:sccp_pdu
+                                                calling:src
+                                                 called:dst
+                                                  class:m_protocol_class   /* MGMT is class 0 */
+                                          returnOnError:m_return_on_error
+                                                    opc:sccpLayer.mtp3.opc
+                                                    dpc:destination.dpc
+                                                options:@{}
+                                               provider:sccpLayer.mtp3];
+                    switch(e)
+                    {
+                        case UMMTP3_error_no_route_to_destination:
+                            [sccpLayer sendUDTS:sccp_pdu
+                                        calling:src
+                                         called:dst
+                                         reason:SCCP_ReturnCause_MTPFailure
+                                            opc:sccpLayer.mtp3.opc
+                                            dpc:opc
+                                        options:@{}
+                                       provider:sccpLayer.mtp3];
+                            break;
+                        case UMMTP3_error_pdu_too_big:
+                            [sccpLayer sendUDTS:sccp_pdu
+                                        calling:src
+                                         called:dst
+                                         reason:SCCP_ReturnCause_ErrorInMessageTransport
+                                            opc:sccpLayer.mtp3.opc
+                                            dpc:opc
+                                        options:@{}
+                                       provider:sccpLayer.mtp3];
+
+                            break;
+                        case UMMTP3_error_invalid_variant:
+                            [sccpLayer sendUDTS:sccp_pdu
+                                        calling:src
+                                         called:dst
+                                         reason:SCCP_ReturnCause_ErrorInLocalProcessing
+                                            opc:sccpLayer.mtp3.opc
+                                            dpc:opc
+                                        options:@{}
+                                       provider:sccpLayer.mtp3];
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                else if(destination.m3uaAs)
+                {
+                    /* not yet implemented */
+                    [sccpLayer sendUDTS:sccp_pdu
+                                calling:src
+                                 called:dst
+                                 reason:SCCP_ReturnCause_ErrorInLocalProcessing
+                                    opc:sccpLayer.mtp3.opc
+                                    dpc:opc
+                                options:@{}
+                               provider:sccpLayer.mtp3];
+                }
+            }
+        }
     }
-    [upperLayer sccpNUnitdata:sccp_pdu
-                 callingLayer:sccpLayer
-                      calling:src
-                       called:dst
-             qualityOfService:0
-                      options:options];
+    else /* ROUTE_BY_SUBSYSTEM */
+    {
+        /* routed by subsystem */
+        id<UMSCCP_UserProtocol> upperLayer = [sccpLayer getUserForSubsystem:dst.ssn number:dst];
+        if(upperLayer == NULL)
+        {
+            [logFeed majorErrorText:[NSString stringWithFormat:@"no upper layer found for %@",dst.debugDescription]];
+            [sccpLayer sendUDTS:sccp_pdu
+                        calling:src
+                         called:dst
+                         reason:SCCP_ReturnCause_ErrorInLocalProcessing
+                            opc:sccpLayer.mtp3.opc
+                            dpc:opc
+                        options:@{}
+                       provider:sccpLayer.mtp3];
+
+        }
+        [upperLayer sccpNUnitdata:sccp_pdu
+                     callingLayer:sccpLayer
+                          calling:src
+                           called:dst
+                 qualityOfService:0
+                          options:options];
+    }
 }
 
 - (void)processUDTS

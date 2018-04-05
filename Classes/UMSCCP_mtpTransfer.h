@@ -32,6 +32,7 @@
     SccpAddress     *dst;
     NSData          *sccp_pdu;
     int             m_protocol_class;
+    BOOL            m_return_on_error;
     int             m_hopcounter;
     NSData          *sccp_optional;
     NSMutableDictionary *optional_dict;

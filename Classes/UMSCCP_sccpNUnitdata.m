@@ -106,7 +106,7 @@ static int segmentReferenceId;
         {
             /* int cls =0;*/
              
-            UMMTP3PointCode         *xopc =sccpLayer.attachedTo.opc;
+            UMMTP3PointCode         *xopc =sccpLayer.mtp3.opc;
             UMMTP3PointCode         *xdpc = nextHop.dpc;
 
             NSString *xopc_string = options[@"opc"];

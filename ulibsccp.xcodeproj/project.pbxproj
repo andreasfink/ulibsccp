@@ -101,6 +101,12 @@
 		A6ADC5C51CADB25500211137 /* UMSCCP_sccpNUnitdata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_sccpNUnitdata.h; sourceTree = "<group>"; };
 		A6ADC5C61CADB25500211137 /* UMSCCP_sccpNUnitdata.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_sccpNUnitdata.m; sourceTree = "<group>"; };
 		A6ADC5E31CAE8C7600211137 /* UMSCCP_Defs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_Defs.h; sourceTree = "<group>"; };
+		A6C6052C207698DE002DEBDD /* q-712 SCCP Messages.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "q-712 SCCP Messages.pdf"; sourceTree = "<group>"; };
+		A6C6052D207698DE002DEBDD /* q-714 SCCP Procedures.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "q-714 SCCP Procedures.pdf"; sourceTree = "<group>"; };
+		A6C6052E207698DE002DEBDD /* q-715 SCCP User Guide.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "q-715 SCCP User Guide.pdf"; sourceTree = "<group>"; };
+		A6C6052F207698DE002DEBDD /* q-711 SCCP Functional Description.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "q-711 SCCP Functional Description.pdf"; sourceTree = "<group>"; };
+		A6C60530207698DE002DEBDD /* q-713 SCCP Formats Codes.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "q-713 SCCP Formats Codes.pdf"; sourceTree = "<group>"; };
+		A6C60531207698DE002DEBDD /* q-716 SCCP Performance.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "q-716 SCCP Performance.pdf"; sourceTree = "<group>"; };
 		A6C78D8E1A2943B9006C66A2 /* ulib.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulib.framework; path = /Library/Frameworks/ulib.framework; sourceTree = "<absolute>"; };
 		A6C78D911A2943D0006C66A2 /* ulibmtp3.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibmtp3.framework; path = /Library/Frameworks/ulibmtp3.framework; sourceTree = "<absolute>"; };
 		A6C78D971A2943E8006C66A2 /* ulibm2pa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibm2pa.framework; path = /Library/Frameworks/ulibm2pa.framework; sourceTree = "<absolute>"; };
@@ -153,6 +159,7 @@
 		A604D12719B999BC0090FC94 = {
 			isa = PBXGroup;
 			children = (
+				A6C6052B207698DE002DEBDD /* doc */,
 				A6F693FF1B4E84120090FC94 /* configure.in */,
 				A6F694001B4E84120090FC94 /* Makefile.linux.in */,
 				A6F694011B4E84120090FC94 /* Makefile.osx.in */,
@@ -253,6 +260,19 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		A6C6052B207698DE002DEBDD /* doc */ = {
+			isa = PBXGroup;
+			children = (
+				A6C6052C207698DE002DEBDD /* q-712 SCCP Messages.pdf */,
+				A6C6052D207698DE002DEBDD /* q-714 SCCP Procedures.pdf */,
+				A6C6052E207698DE002DEBDD /* q-715 SCCP User Guide.pdf */,
+				A6C6052F207698DE002DEBDD /* q-711 SCCP Functional Description.pdf */,
+				A6C60530207698DE002DEBDD /* q-713 SCCP Formats Codes.pdf */,
+				A6C60531207698DE002DEBDD /* q-716 SCCP Performance.pdf */,
+			);
+			path = doc;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -324,7 +344,7 @@
 		A604D12819B999BC0090FC94 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0900;
+				LastUpgradeCheck = 0930;
 				ORGANIZATIONNAME = "Andreas Fink (andreas@fink.org)";
 				TargetAttributes = {
 					A604D13019B999BC0090FC94 = {
@@ -443,12 +463,14 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
@@ -497,12 +519,14 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;

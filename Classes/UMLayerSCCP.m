@@ -24,21 +24,14 @@
 
 @implementation UMLayerSCCP
 
-@synthesize sccpVariant;
-@synthesize defaultNextHop;
-@synthesize gttSelectorRegistry;
-@synthesize attachTo;
-@synthesize attachedTo;
-@synthesize pendingSegments;
-
 -(UMMTP3Variant) variant
 {
-    return mtp3.variant;
+    return _mtp3.variant;
 }
 
 - (UMLayerMTP3 *)mtp3
 {
-    return mtp3;
+    return _mtp3;
 }
 
 - (UMLayerSCCP *)init
@@ -69,13 +62,14 @@
 
 - (void)genericInitialisation
 {
-    subsystemUsers = [[UMSynchronizedDictionary alloc]init];
-    dpcAvailability = [[UMSynchronizedDictionary alloc]init];
-    pendingSegments  = [[NSMutableDictionary alloc]init];
-    traceSendDestinations =[[UMSynchronizedArray alloc]init];
-    traceReceiveDestinations =[[UMSynchronizedArray alloc]init];
-    traceDroppedDestinations =[[UMSynchronizedArray alloc]init];
+    _subsystemUsers = [[UMSynchronizedDictionary alloc]init];
+    _dpcAvailability = [[UMSynchronizedDictionary alloc]init];
+    _pendingSegments  = [[NSMutableDictionary alloc]init];
+    _traceSendDestinations =[[UMSynchronizedArray alloc]init];
+    _traceReceiveDestinations =[[UMSynchronizedArray alloc]init];
+    _traceDroppedDestinations =[[UMSynchronizedArray alloc]init];
     _routingTable = [[UMSCCP_MTP3RoutingTable alloc]init];
+    _mtp3RoutingTable = [[SccpL3RoutingTable alloc]init];
 }
 
 - (void)mtpTransfer:(NSData *)data
@@ -153,7 +147,7 @@
 
 
     int subsystem = ssn.ssn;
-    NSMutableDictionary *a = subsystemUsers[@(subsystem)];
+    NSMutableDictionary *a = _subsystemUsers[@(subsystem)];
     if(a)
     {
         id<UMSCCP_UserProtocol>  user = a[number];
@@ -166,7 +160,7 @@
             return user;
         }
     }
-    a = subsystemUsers[@(0)];
+    a = _subsystemUsers[@(0)];
     if(a)
     {
         id<UMSCCP_UserProtocol>  user = a[number];
@@ -182,13 +176,13 @@
 - (void)setUser:(id<UMSCCP_UserProtocol>)usr forSubsystem:(SccpSubSystemNumber *)ssn number:(SccpAddress *)sccpAddress
 {
     int subsystem = ssn.ssn;
-    NSMutableDictionary *a = subsystemUsers[@(ssn.ssn)];
+    NSMutableDictionary *a = _subsystemUsers[@(ssn.ssn)];
     if(a==NULL)
     {
         a = [[NSMutableDictionary alloc]init];
     }
     a[sccpAddress.address] = usr;
-    subsystemUsers[@(subsystem)] = a;
+    _subsystemUsers[@(subsystem)] = a;
 }
 
 
@@ -233,8 +227,8 @@
     {
         [optionsData appendByte:0x00]; /* end of optional parameters */
     }
-    NSData *srcEncoded = [src encode:sccpVariant];
-    NSData *dstEncoded = [dst encode:sccpVariant];
+    NSData *srcEncoded = [src encode:_sccpVariant];
+    NSData *dstEncoded = [dst encode:_sccpVariant];
     if(reterr)
     {
         class_and_handling = class_and_handling | 0x80;
@@ -262,15 +256,15 @@
     id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-tx-destination"];
     [u sccpTraceSentPdu:sccp_pdu options:options];
 
-    NSInteger n = [traceSendDestinations count];
+    NSInteger n = [_traceSendDestinations count];
     for (NSInteger i=0;i<n;i++)
     {
-        id a = [traceSendDestinations objectAtIndex:i];
+        id a = [_traceSendDestinations objectAtIndex:i];
         NSMutableDictionary *o = [[NSMutableDictionary alloc]init];
         o[@"type"]=@"XUDT-Segment";
         o[@"opc"]=opc.stringValue;
         o[@"dpc"]=dpc.stringValue;
-        o[@"mtp3"]=mtp3.layerName;
+        o[@"mtp3"]=_mtp3.layerName;
         [a sccpTraceSentPdu:sccp_pdu options:o];
     }
     UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc];
@@ -281,7 +275,7 @@
                     opc:(UMMTP3PointCode *)opc
                     dpc:(UMMTP3PointCode *)dpc
 {
-    return [mtp3 sendPDU:pdu
+    return [_mtp3 sendPDU:pdu
                           opc:opc
                           dpc:dpc
                            si:MTP3_SERVICE_INDICATOR_SCCP
@@ -300,8 +294,8 @@
                      options:(NSDictionary *)options
                     provider:(UMLayerMTP3 *)provider
 {
-    NSData *srcEncoded = [src encode:sccpVariant];
-    NSData *dstEncoded = [dst encode:sccpVariant];
+    NSData *srcEncoded = [src encode:_sccpVariant];
+    NSData *dstEncoded = [dst encode:_sccpVariant];
     
     if(reterr)
     {
@@ -338,15 +332,15 @@
     [u sccpTraceSentPdu:sccp_pdu options:options];
 
 
-    NSInteger n = [traceSendDestinations count];
+    NSInteger n = [_traceSendDestinations count];
     for (NSInteger i=0;i<n;i++)
     {
-        id a = [traceSendDestinations objectAtIndex:i];
+        id a = [_traceSendDestinations objectAtIndex:i];
         NSMutableDictionary *o = [[NSMutableDictionary alloc]init];
         o[@"type"]=@"XUDT-Data";
         o[@"opc"]=opc.stringValue;
         o[@"dpc"]=dpc.stringValue;
-        o[@"mtp3"]=mtp3.layerName;
+        o[@"mtp3"]=_mtp3.layerName;
         [a sccpTraceSentPdu:sccp_pdu options:o];
     }
 
@@ -364,8 +358,8 @@
                 options:(NSDictionary *)options
                provider:(UMLayerMTP3 *)provider
 {
-    NSData *srcEncoded = [src encode:sccpVariant];
-    NSData *dstEncoded = [dst encode:sccpVariant];
+    NSData *srcEncoded = [src encode:_sccpVariant];
+    NSData *dstEncoded = [dst encode:_sccpVariant];
     
     if(reterr)
     {
@@ -389,10 +383,10 @@
     id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-tx-destination"];
     [u sccpTraceSentPdu:sccp_pdu options:options];
 
-    NSInteger n = [traceSendDestinations count];
+    NSInteger n = [_traceSendDestinations count];
     for (NSInteger i=0;i<n;i++)
     {
-        id a = [traceSendDestinations objectAtIndex:i];
+        id a = [_traceSendDestinations objectAtIndex:i];
         NSMutableDictionary *o = [[NSMutableDictionary alloc]init];
         o[@"type"]=@"UDT";
         if(opc)
@@ -413,9 +407,9 @@
         }
         if(provider)
         {
-            if(mtp3)
+            if(_mtp3)
             {
-                o[@"mtp3"]=mtp3.layerName;
+                o[@"mtp3"]=_mtp3.layerName;
             }
             else
             {
@@ -445,11 +439,108 @@
         case UMMTP3_no_error:
             if(logLevel <= UMLOG_DEBUG)
             {
-                [self.logFeed debugText:[NSString stringWithFormat:@"sendPDU to %@: %@->%@ success",mtp3.layerName, opc,dpc]];
+                [self.logFeed debugText:[NSString stringWithFormat:@"sendPDU to %@: %@->%@ success",_mtp3.layerName, opc,dpc]];
             }
             break;
         default:
-            [self.logFeed majorErrorText:[NSString stringWithFormat:@"sendPDU %@: %@->%@ returns unknown error %d",mtp3.layerName,opc,dpc,result]];
+            [self.logFeed majorErrorText:[NSString stringWithFormat:@"sendPDU %@: %@->%@ returns unknown error %d",_mtp3.layerName,opc,dpc,result]];
+
+    }
+    return result;
+}
+
+
+- (UMMTP3_Error) sendUDTS:(NSData *)data
+                  calling:(SccpAddress *)src
+                   called:(SccpAddress *)dst
+                   reason:(int)reasonCode
+                      opc:(UMMTP3PointCode *)opc
+                      dpc:(UMMTP3PointCode *)dpc
+                  options:(NSDictionary *)options
+                 provider:(UMLayerMTP3 *)provider
+{
+    NSData *srcEncoded = [src encode:_sccpVariant];
+    NSData *dstEncoded = [dst encode:_sccpVariant];
+
+    NSMutableData *sccp_pdu = [[NSMutableData alloc]init];
+    uint8_t header[5];
+    header[0] = SCCP_UDTS;
+    header[1] = reasonCode;
+    header[2] = 3;
+    header[3] = 3 + dstEncoded.length;
+    header[4] = 3 + dstEncoded.length + srcEncoded.length;
+    [sccp_pdu appendBytes:header length:5];
+    [sccp_pdu appendByte:dstEncoded.length];
+    [sccp_pdu appendData:dstEncoded];
+    [sccp_pdu appendByte:srcEncoded.length];
+    [sccp_pdu appendData:srcEncoded];
+    [sccp_pdu appendByte:data.length];
+    [sccp_pdu appendData:data];
+
+    id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-tx-destination"];
+    [u sccpTraceSentPdu:sccp_pdu options:options];
+
+    NSInteger n = [_traceSendDestinations count];
+    for (NSInteger i=0;i<n;i++)
+    {
+        id a = [_traceSendDestinations objectAtIndex:i];
+        NSMutableDictionary *o = [[NSMutableDictionary alloc]init];
+        o[@"type"]=@"UDT";
+        if(opc)
+        {
+            o[@"opc"]=opc.stringValue;
+        }
+        else
+        {
+            o[@"opc"]=@"(not-set)";
+        }
+        if(dpc)
+        {
+            o[@"dpc"]=dpc.stringValue;
+        }
+        else
+        {
+            o[@"dpc"]=@"(not-set)";
+        }
+        if(provider)
+        {
+            if(_mtp3)
+            {
+                o[@"mtp3"]=_mtp3.layerName;
+            }
+            else
+            {
+                o[@"mtp3"]=@"(not-set)";
+            }
+        }
+        else
+        {
+            o[@"provider"]=@"(not-set)";
+        }
+        [a sccpTraceSentPdu:sccp_pdu options:o];
+    }
+
+    UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc];
+
+    switch(result)
+    {
+        case UMMTP3_error_pdu_too_big:
+            [self.logFeed majorErrorText:@"PDU too big"];
+            break;
+        case UMMTP3_error_no_route_to_destination:
+            [self.logFeed majorErrorText:@"No route to destination"];
+            break;
+        case UMMTP3_error_invalid_variant:
+            [self.logFeed majorErrorText:@"Invalid variant"];
+            break;
+        case UMMTP3_no_error:
+            if(logLevel <= UMLOG_DEBUG)
+            {
+                [self.logFeed debugText:[NSString stringWithFormat:@"sendPDU to %@: %@->%@ success",_mtp3.layerName, opc,dpc]];
+            }
+            break;
+        default:
+            [self.logFeed majorErrorText:[NSString stringWithFormat:@"sendPDU %@: %@->%@ returns unknown error %d",_mtp3.layerName,opc,dpc,result]];
 
     }
     return result;
@@ -487,32 +578,31 @@
     [self readLayerConfig:cfg];
     if(cfg[@"attach-to"])
     {
-        mtp3_name =  [cfg[@"attach-to"] stringValue];
-        mtp3 = [appContext getMTP3:mtp3_name];
-        if(mtp3 == NULL)
+        _mtp3_name =  [cfg[@"attach-to"] stringValue];
+        _mtp3 = [appContext getMTP3:_mtp3_name];
+        if(_mtp3 == NULL)
         {
-            NSString *s = [NSString stringWithFormat:@"Can not find mtp3 layer '%@' referred from sccp '%@'",mtp3_name,layerName];
+            NSString *s = [NSString stringWithFormat:@"Can not find mtp3 layer '%@' referred from sccp '%@'",_mtp3_name,layerName];
             @throw([NSException exceptionWithName:[NSString stringWithFormat:@"CONFIG_ERROR FILE %s line:%ld",__FILE__,(long)__LINE__]
                                            reason:s
                                          userInfo:NULL]);
         }
-        [mtp3 setUserPart:MTP3_SERVICE_INDICATOR_SCCP user:self];
-        self.attachedTo = mtp3;
+        [_mtp3 setUserPart:MTP3_SERVICE_INDICATOR_SCCP user:self];
     }
     if(cfg[@"variant"])
     {
         NSString *v = [cfg[@"variant"] stringValue];
         if([v isEqualToString:@"itu"])
         {
-            sccpVariant = SCCP_VARIANT_ITU;
+            _sccpVariant = SCCP_VARIANT_ITU;
         }
         if([v isEqualToString:@"ansi"])
         {
-            sccpVariant = SCCP_VARIANT_ANSI;
+            _sccpVariant = SCCP_VARIANT_ANSI;
         }
         else
         {
-            sccpVariant = SCCP_VARIANT_ITU;
+            _sccpVariant = SCCP_VARIANT_ITU;
         }
     }
 }
@@ -522,13 +612,13 @@
     NSMutableDictionary *cfg = [[NSMutableDictionary alloc]init];
     [self addLayerConfig:cfg];
     
-    cfg[@"attach-to"] = attachTo;
+    cfg[@"attach-to"] = _mtp3_name;
     
-    if(sccpVariant==SCCP_VARIANT_ITU)
+    if(_sccpVariant==SCCP_VARIANT_ITU)
     {
         cfg[@"variant"] = @"itu";
     }
-    else if(sccpVariant==SCCP_VARIANT_ANSI)
+    else if(_sccpVariant==SCCP_VARIANT_ANSI)
     {
         cfg[@"variant"] = @"ansi";
     }
@@ -993,7 +1083,7 @@
 
 - (NSString *)status
 {
-    NSMutableDictionary *m = [subsystemUsers mutableCopy];
+    NSMutableDictionary *m = [_subsystemUsers mutableCopy];
     NSString *s = [NSString stringWithFormat:@"Routing %@",m.description];
     return s;
 }
@@ -1001,50 +1091,50 @@
 
 - (void)addSendTraceDestination:(id<UMSCCP_TraceProtocol>)destination
 {
-    [traceSendDestinations addObject:destination];
+    [_traceSendDestinations addObject:destination];
 }
 
 - (void)addReceiveTraceDestination:(id<UMSCCP_TraceProtocol>)destination
 {
-    [traceReceiveDestinations addObject:destination];
+    [_traceReceiveDestinations addObject:destination];
 }
 
 - (void)removeSendTraceDestination:(id<UMSCCP_TraceProtocol>)destination
 {
-    [traceSendDestinations removeObject:destination];
+    [_traceSendDestinations removeObject:destination];
 }
 
 - (void)removeReceiveTraceDestination:(id<UMSCCP_TraceProtocol>)destination
 {
-    [traceReceiveDestinations removeObject:destination];
+    [_traceReceiveDestinations removeObject:destination];
 }
 
 - (void)traceSentPdu:(NSData *)pdu options:(NSDictionary *)o
 {
-    NSInteger n = [traceSendDestinations count];
+    NSInteger n = [_traceSendDestinations count];
     for (NSInteger i=0;i<n;i++)
     {
-        id a = [traceSendDestinations objectAtIndex:i];
+        id a = [_traceSendDestinations objectAtIndex:i];
         [a sccpTraceSentPdu:pdu options:o];
     }
 }
 
 - (void)traceReceivedPdu:(NSData *)pdu options:(NSDictionary *)o
 {
-    NSInteger n = [traceReceiveDestinations count];
+    NSInteger n = [_traceReceiveDestinations count];
     for (NSInteger i=0;i<n;i++)
     {
-        id a = [traceReceiveDestinations objectAtIndex:i];
+        id a = [_traceReceiveDestinations objectAtIndex:i];
         [a sccpTraceReceivedPdu:pdu options:o];
     }
 }
 
 - (void)traceDroppedPdu:(NSData *)pdu options:(NSDictionary *)o
 {
-    NSInteger n = [traceDroppedDestinations count];
+    NSInteger n = [_traceDroppedDestinations count];
     for (NSInteger i=0;i<n;i++)
     {
-        id a = [traceDroppedDestinations objectAtIndex:i];
+        id a = [_traceDroppedDestinations objectAtIndex:i];
         [a sccpTraceReceivedPdu:pdu options:o];
     }
 }
