@@ -50,7 +50,6 @@
 
 - (void)main
 {
-
     /* we build a pseudo MTP3 raw packet for debugging logging */
     UMMTP3Label *label = [[UMMTP3Label alloc]init];
     label.opc = opc;
