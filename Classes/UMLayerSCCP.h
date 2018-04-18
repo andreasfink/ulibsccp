@@ -38,7 +38,8 @@
 
     SccpL3RoutingTable          *_mtp3RoutingTable;
     UMSCCP_MTP3RoutingTable     *_routingTable;
-
+    int                         _xudt_max_hop_count;
+    int                         _xudts_max_hop_count;
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;
@@ -46,6 +47,8 @@
 @property(readwrite,strong) SccpGttRegistry *gttSelectorRegistry;
 @property(readwrite,strong) NSMutableDictionary *pendingSegments;
 @property(readwrite,strong) SccpL3RoutingTable *mtp3RoutingTable;
+@property(readwrite,assign) int xudt_max_hop_count;
+@property(readwrite,assign) int xudts_max_hop_count;
 
 
 - (UMLayerMTP3 *)mtp3;
@@ -182,11 +185,25 @@
                   options:(NSDictionary *)options
                  provider:(UMLayerMTP3 *)provider;
 
+
+-(UMMTP3_Error) sendXUDT:(NSData *)pdu
+                 calling:(SccpAddress *)src
+                  called:(SccpAddress *)dst
+                   class:(int)cls
+              hopCount:(int)hopCount
+           returnOnError:(BOOL)reterr
+                     opc:(UMMTP3PointCode *)opc
+                     dpc:(UMMTP3PointCode *)dpc
+             optionsData:(NSData *)xoptionsdata
+                 options:(NSDictionary *)options
+                provider:(UMLayerMTP3 *)provider;
+
+
 -(UMMTP3_Error) sendXUDTsegment:(UMSCCP_Segment *)pdu
                         calling:(SccpAddress *)src
                          called:(SccpAddress *)dst
                           class:(int)cls
-                    maxHopCount:(int)maxHopCount
+                     hopCount:(int)hopCount
                   returnOnError:(BOOL)reterr
                             opc:(UMMTP3PointCode *)opc
                             dpc:(UMMTP3PointCode *)dpc
@@ -194,17 +211,78 @@
                         options:(NSDictionary *)options
                        provider:(UMLayerMTP3 *)provider;
 
--(UMMTP3_Error) sendXUDTdata:(NSData *)pdu
-                     calling:(SccpAddress *)src
-                      called:(SccpAddress *)dst
-                       class:(int)cls
-                 maxHopCount:(int)maxHopCount
-               returnOnError:(BOOL)reterr
-                         opc:(UMMTP3PointCode *)opc
-                         dpc:(UMMTP3PointCode *)dpc
-                 optionsData:(NSData *)xoptionsdata
-                     options:(NSDictionary *)options
-                    provider:(UMLayerMTP3 *)provider;
+-(UMMTP3_Error) sendXUDTS:(NSData *)data
+                  calling:(SccpAddress *)src
+                   called:(SccpAddress *)dst
+              returnCause:(int)returnCause
+               hopCount:(int)hopCount
+                      opc:(UMMTP3PointCode *)opc
+                      dpc:(UMMTP3PointCode *)dpc
+              optionsData:(NSData *)xoptionsdata
+                  options:(NSDictionary *)options
+                 provider:(UMLayerMTP3 *)provider;
+
+
+-(void) routeUDT:(NSData *)pdu
+         calling:(SccpAddress *)src
+          called:(SccpAddress *)dst
+           class:(int)cls
+   returnOnError:(BOOL)reterr
+             opc:(UMMTP3PointCode *)opc
+             dpc:(UMMTP3PointCode *)dpc
+         options:(NSDictionary *)options
+        provider:(UMLayerMTP3 *)provider;
+
+- (void) routeUDTS:(NSData *)data
+           calling:(SccpAddress *)src
+            called:(SccpAddress *)dst
+            reason:(int)reasonCode
+               opc:(UMMTP3PointCode *)opc
+               dpc:(UMMTP3PointCode *)dpc
+           options:(NSDictionary *)options
+          provider:(UMLayerMTP3 *)provider;
+
+
+- (void) routeXUDT:(NSData *)data
+           calling:(SccpAddress *)src
+            called:(SccpAddress *)dst
+             class:(int)class_and_handling
+          hopCount:(int)hopCount
+     returnOnError:(BOOL)returnOnError
+               opc:(UMMTP3PointCode *)opc
+               dpc:(UMMTP3PointCode *)dpc
+       optionsData:(NSData *)xoptionsdata
+           options:(NSDictionary *)options
+          provider:(UMLayerMTP3 *)provider;
+
+-(void) routeXUDTsegment:(UMSCCP_Segment *)segment
+                 calling:(SccpAddress *)src
+                  called:(SccpAddress *)dst
+                   class:(int)class_and_handling
+                hopCount:(int)hopCount
+           returnOnError:(BOOL)reterr
+                     opc:(UMMTP3PointCode *)opc
+                     dpc:(UMMTP3PointCode *)dpc
+             optionsData:(NSData *)xoptionsdata
+                 options:(NSDictionary *)options
+                provider:(UMLayerMTP3 *)provider;
+
+- (void) routeXUDTS:(NSData *)data
+           calling:(SccpAddress *)src
+            called:(SccpAddress *)dst
+            reason:(int)reasonCode
+          hopCount:(int)maxHopCount
+               opc:(UMMTP3PointCode *)opc
+               dpc:(UMMTP3PointCode *)dpc
+        optionsData:(NSData *)xoptionsdata
+           options:(NSDictionary *)options
+          provider:(UMLayerMTP3 *)provider;
+
+- (void)findRoute:(SccpAddress *)dst
+       causeValue:(int *)cause
+        localUser:(id<UMSCCP_UserProtocol> *)user
+        pointCode:(UMMTP3PointCode **)pc;
+
 
 - (NSUInteger)maxPayloadSizeForServiceType:(SCCP_ServiceType) serviceType
                         callingAddressSize:(NSUInteger)cas

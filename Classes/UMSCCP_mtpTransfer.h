@@ -31,10 +31,10 @@
     SccpAddress     *src;
     SccpAddress     *dst;
     NSData          *sccp_pdu;
+    NSData          *sccp_optional;
     int             m_protocol_class;
     BOOL            m_return_on_error;
     int             m_hopcounter;
-    NSData          *sccp_optional;
     NSMutableDictionary *optional_dict;
     int             importance;
     int             end_of_optional_parameters;

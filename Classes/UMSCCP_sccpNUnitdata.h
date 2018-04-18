@@ -29,6 +29,7 @@
     NSMutableData           *sccp_pdu;
     UMASN1Object            *tcap_asn1;
     int                     maxHopCount;
+    BOOL                    returnOnError;
 }
 
 @property(readwrite,strong) id<UMSCCP_UserProtocol> sccpUser;

@@ -330,30 +330,30 @@ static int segmentReferenceId;
                 {
                     if(useXUDT)
                     {
-                        e = [sccpLayer sendXUDTdata:data
-                                            calling:src
-                                             called:dst
-                                              class:1
-                                        maxHopCount:maxHopCount
-                                      returnOnError:YES
-                                                opc:xopc
-                                                dpc:xdpc
-                                        optionsData:optional_data
-                                            options:options
-                                           provider:sccpLayer.mtp3];
+                        [sccpLayer routeXUDT:data
+                                     calling:src
+                                      called:dst
+                                       class:1
+                                    hopCount:maxHopCount
+                               returnOnError:returnOnError
+                                         opc:xopc
+                                         dpc:xdpc
+                                 optionsData:optional_data
+                                     options:options
+                                    provider:sccpLayer.mtp3];
                     }
                     else
                     {
-                        e = [sccpLayer sendUDT:data
-                                       calling:src
-                                        called:dst
-                                         class:1
-                                 returnOnError:YES
-                                           opc:xopc
-                                           dpc:xdpc
-                                       options:options
-                                      provider:sccpLayer.mtp3];
-                        
+                        [sccpLayer routeUDT:data
+                                    calling:src
+                                     called:dst
+                                      class:1
+                              returnOnError:returnOnError
+                                        opc:xopc
+                                        dpc:xdpc
+                                    options:options
+                                   provider:sccpLayer.mtp3];
+
                     }
                 }
             }
@@ -364,17 +364,17 @@ static int segmentReferenceId;
                 {
                     UMSCCP_Segment *s = [dataSegments objectAtIndex:(NSUInteger)i];
                     s.remainingSegment = (int)count - i -1;
-                    e = [sccpLayer sendXUDTsegment:s
-                                           calling:src
-                                            called:dst
-                                             class:1
-                                       maxHopCount:maxHopCount
-                                     returnOnError:YES
-                                               opc:xopc
-                                               dpc:xdpc
-                                       optionsData:optional_data
-                                           options:options
-                                          provider:sccpLayer.mtp3];
+                    [sccpLayer routeXUDTsegment:s
+                                        calling:src
+                                         called:dst
+                                          class:1
+                                       hopCount:maxHopCount
+                                  returnOnError:returnOnError
+                                            opc:xopc
+                                            dpc:xdpc
+                                    optionsData:optional_data
+                                        options:options
+                                       provider:sccpLayer.mtp3];
                     if(e != UMMTP3_no_error)
                     {
                         break;
