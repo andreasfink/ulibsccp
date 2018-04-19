@@ -97,291 +97,283 @@ static int segmentReferenceId;
 {
     @try
     {
-        [self route];
-        if(nextHop==NULL)
+        /* int cls =0;*/
+
+        UMMTP3PointCode         *xopc =sccpLayer.mtp3.opc;
+        UMMTP3PointCode         *xdpc = nextHop.dpc;
+
+        NSString *xopc_string = options[@"opc"];
+        NSString *xdpc_string = options[@"dpc"];
+
+        if((xdpc_string.length > 0) && (![xdpc_string isEqualToString:@"default"]))
         {
-            [self sendNoRouteError];
+            xdpc = [[UMMTP3PointCode alloc] initWithString:xdpc_string
+                                                   variant:sccpLayer.mtp3.variant];
         }
-        else
+
+        if((xopc_string.length > 0) && (![xopc_string isEqualToString:@"default"]))
         {
-            /* int cls =0;*/
-             
-            UMMTP3PointCode         *xopc =sccpLayer.mtp3.opc;
-            UMMTP3PointCode         *xdpc = nextHop.dpc;
+            xopc = [[UMMTP3PointCode alloc] initWithString:xopc_string
+                                                   variant:sccpLayer.mtp3.variant];
+        }
 
-            NSString *xopc_string = options[@"opc"];
-            NSString *xdpc_string = options[@"dpc"];
- 
-            if((xdpc_string.length > 0) && (![xdpc_string isEqualToString:@"default"]))
-            {
-                xdpc = [[UMMTP3PointCode alloc] initWithString:xdpc_string
-                                                       variant:sccpLayer.mtp3.variant];
-            }
+        UMMTP3_Error e = UMMTP3_no_error;
 
-            if((xopc_string.length > 0) && (![xopc_string isEqualToString:@"default"]))
-            {
-                xopc = [[UMMTP3PointCode alloc] initWithString:xopc_string
-                                                       variant:sccpLayer.mtp3.variant];
-            }
-            
-            UMMTP3_Error e = UMMTP3_no_error;
+        NSData *srcEncoded = [src encode:sccpLayer.sccpVariant];
+        NSData *dstEncoded = [dst encode:sccpLayer.sccpVariant];
+        NSUInteger cas = srcEncoded.length;
+        NSUInteger cds = dstEncoded.length;
+        NSUInteger maxPdu = 0;
 
-            NSData *srcEncoded = [src encode:sccpLayer.sccpVariant];
-            NSData *dstEncoded = [dst encode:sccpLayer.sccpVariant];
-            NSUInteger cas = srcEncoded.length;
-            NSUInteger cds = dstEncoded.length;
-            NSUInteger maxPdu = 0;
-            
-            BOOL useXUDT        = [options[@"sccp-xudt"] boolValue];
-            BOOL useSegments    = [options[@"sccp-segment"] boolValue];
-            
-            NSDictionary *sccp_options = options[@"sccp-optional"];
-            NSMutableData *optional_data;
-            if(sccp_options)
+        BOOL useXUDT        = [options[@"sccp-xudt"] boolValue];
+        BOOL useSegments    = [options[@"sccp-segment"] boolValue];
+
+        NSDictionary *sccp_options = options[@"sccp-optional"];
+        NSMutableData *optional_data;
+        if(sccp_options)
+        {
+            optional_data = [[NSMutableData alloc]init];
+            NSArray *keys = [sccp_options allKeys];
+            int paramType;
+            for(NSString *key in keys)
             {
-                optional_data = [[NSMutableData alloc]init];
-                NSArray *keys = [sccp_options allKeys];
-                int paramType;
-                for(NSString *key in keys)
+                if([key isEqualToString:@"destination-local-reference"])
                 {
-                    if([key isEqualToString:@"destination-local-reference"])
-                    {
-                        paramType = 0x01;
-                    }
-                    else if([key isEqualToString:@"source-local-reference"])
-                    {
-                        paramType = 0x02;
-                    }
-                    else if([key isEqualToString:@"called-party-address"])
-                    {
-                        paramType = 0x03;
-                    }
-                    else if([key isEqualToString:@"calling-party-address"])
-                    {
-                        paramType = 0x04;
-                    }
-                    else if([key isEqualToString:@"protocol-class"])
-                    {
-                        paramType = 0x05;
-                    }
-                    else if([key isEqualToString:@"segmenting-reassembling"])
-                    {
-                        paramType = 0x06;
-                    }
-                    else if([key isEqualToString:@"receive-sequence-number"])
-                    {
-                        paramType = 0x07;
-                    }
-                    else if([key isEqualToString:@"sequencing-segmenting"])
-                    {
-                        paramType = 0x08;
-                    }
-                    else if([key isEqualToString:@"credit"])
-                    {
-                        paramType = 0x09;
-                    }
-                    else if([key isEqualToString:@"release-cause"])
-                    {
-                        paramType = 0x0a;
-                    }
-                    else if([key isEqualToString:@"return-cause"])
-                    {
-                        paramType = 0x0b;
-                    }
-                    else if([key isEqualToString:@"reset-cause"])
-                    {
-                        paramType = 0x0c;
-                    }
-                    else if([key isEqualToString:@"error-cause"])
-                    {
-                        paramType = 0x0d;
-                    }
-                    else if([key isEqualToString:@"refusal-cause"])
-                    {
-                        paramType = 0x0e;
-                    }
-                    else if([key isEqualToString:@"data"])
-                    {
-                        paramType = 0x0f;
-                    }
-                    else if([key isEqualToString:@"segmentation"])
-                    {
-                        paramType = 0x10;
-                    }
-                    else if([key isEqualToString:@"hop-counter"])
-                    {
-                        paramType = 0x11;
-                    }
-                    else if([key isEqualToString:@"importance"])
-                    {
-                        paramType = 0x12;
-                    }
-                    else if([key isEqualToString:@"long-data"])
-                    {
-                        paramType = 0x13;
-                    }
-                    uint8_t header[2];
-                    NSData *d = sccp_options[key];
-                    header[0] = paramType;
-                    header[1] = d.length & 0xFF;
-                    [optional_data appendBytes:&header[0] length:2];
-                    [optional_data appendData:d];
+                    paramType = 0x01;
                 }
-                if(optional_data.length>0)
+                else if([key isEqualToString:@"source-local-reference"])
                 {
-                    [optional_data appendByte:0x00]; /* end of parameter */
+                    paramType = 0x02;
+                }
+                else if([key isEqualToString:@"called-party-address"])
+                {
+                    paramType = 0x03;
+                }
+                else if([key isEqualToString:@"calling-party-address"])
+                {
+                    paramType = 0x04;
+                }
+                else if([key isEqualToString:@"protocol-class"])
+                {
+                    paramType = 0x05;
+                }
+                else if([key isEqualToString:@"segmenting-reassembling"])
+                {
+                    paramType = 0x06;
+                }
+                else if([key isEqualToString:@"receive-sequence-number"])
+                {
+                    paramType = 0x07;
+                }
+                else if([key isEqualToString:@"sequencing-segmenting"])
+                {
+                    paramType = 0x08;
+                }
+                else if([key isEqualToString:@"credit"])
+                {
+                    paramType = 0x09;
+                }
+                else if([key isEqualToString:@"release-cause"])
+                {
+                    paramType = 0x0a;
+                }
+                else if([key isEqualToString:@"return-cause"])
+                {
+                    paramType = 0x0b;
+                }
+                else if([key isEqualToString:@"reset-cause"])
+                {
+                    paramType = 0x0c;
+                }
+                else if([key isEqualToString:@"error-cause"])
+                {
+                    paramType = 0x0d;
+                }
+                else if([key isEqualToString:@"refusal-cause"])
+                {
+                    paramType = 0x0e;
+                }
+                else if([key isEqualToString:@"data"])
+                {
+                    paramType = 0x0f;
+                }
+                else if([key isEqualToString:@"segmentation"])
+                {
+                    paramType = 0x10;
+                }
+                else if([key isEqualToString:@"hop-counter"])
+                {
+                    paramType = 0x11;
+                }
+                else if([key isEqualToString:@"importance"])
+                {
+                    paramType = 0x12;
+                }
+                else if([key isEqualToString:@"long-data"])
+                {
+                    paramType = 0x13;
+                }
+                uint8_t header[2];
+                NSData *d = sccp_options[key];
+                header[0] = paramType;
+                header[1] = d.length & 0xFF;
+                [optional_data appendBytes:&header[0] length:2];
+                [optional_data appendData:d];
+            }
+            if(optional_data.length>0)
+            {
+                [optional_data appendByte:0x00]; /* end of parameter */
+                useXUDT = YES;
+            }
+        }
+
+        if(data.length > 0)
+        {
+            /* we have single data as input, no segments yet */
+            if(useXUDT == NO)
+            {
+                maxPdu = [sccpLayer maxPayloadSizeForServiceType:SCCP_UDT
+                                              callingAddressSize:cas
+                                               calledAddressSize:cds
+                                                   usingSegments:useSegments
+                                                        provider:sccpLayer.mtp3];
+
+                if(data.length > maxPdu)
+                {
+                    /* no choice, we must segment */
+                    useSegments=YES;
                     useXUDT = YES;
-                }
-            }
-
-            if(data.length > 0)
-            {
-                /* we have single data as input, no segments yet */
-                if(useXUDT == NO)
-                {
-                    maxPdu = [sccpLayer maxPayloadSizeForServiceType:SCCP_UDT
+                    maxPdu = [sccpLayer maxPayloadSizeForServiceType:SCCP_XUDT
                                                   callingAddressSize:cas
                                                    calledAddressSize:cds
-                                                       usingSegments:useSegments
+                                                       usingSegments:YES
                                                             provider:sccpLayer.mtp3];
-                    
-                    if(data.length > maxPdu)
-                    {
-                        /* no choice, we must segment */
-                        useSegments=YES;
-                        useXUDT = YES;
-                        maxPdu = [sccpLayer maxPayloadSizeForServiceType:SCCP_XUDT
-                                                      callingAddressSize:cas
-                                                       calledAddressSize:cds
-                                                           usingSegments:YES
-                                                                provider:sccpLayer.mtp3];
-                        
-                    }
+
                 }
-                else
+            }
+            else
+            {
+                maxPdu = [sccpLayer maxPayloadSizeForServiceType:SCCP_XUDT
+                                              callingAddressSize:cas
+                                               calledAddressSize:cds
+                                                   usingSegments:useSegments
+                                                        provider:sccpLayer.mtp3];
+
+                if(data.length > maxPdu)
                 {
+                    /* no choice, we must segment */
+                    useSegments = YES;
+                    useXUDT = YES;
                     maxPdu = [sccpLayer maxPayloadSizeForServiceType:SCCP_XUDT
                                                   callingAddressSize:cas
                                                    calledAddressSize:cds
                                                        usingSegments:useSegments
                                                             provider:sccpLayer.mtp3];
-                    
-                    if(data.length > maxPdu)
-                    {
-                        /* no choice, we must segment */
-                        useSegments = YES;
-                        useXUDT = YES;
-                        maxPdu = [sccpLayer maxPayloadSizeForServiceType:SCCP_XUDT
-                                                      callingAddressSize:cas
-                                                       calledAddressSize:cds
-                                                           usingSegments:useSegments
-                                                                provider:sccpLayer.mtp3];
-                        
-                    }
+
                 }
-                if(useSegments) /* we want or must use segments. we prepare it only here */
+            }
+            if(useSegments) /* we want or must use segments. we prepare it only here */
+            {
+                int ref;
+                @synchronized(self)
                 {
-                    int ref;
-                    @synchronized(self)
-                    {
-                        segmentReferenceId = segmentReferenceId + 1;
-                        segmentReferenceId = segmentReferenceId % 0xFFFFFF;
-                        ref = segmentReferenceId;
-                    }
-                    
-                    dataSegments = [[NSMutableArray alloc]init];
-                    UMSCCP_Segment *segment = [[UMSCCP_Segment alloc]init];
-                    segment.first = YES;
-                    segment.class1 = YES;
-                    segmentReferenceId = ref;
-                    
-                    const uint8_t *bytes = data.bytes;
-                    NSUInteger n = data.length;
-                    NSUInteger p = 0;
-                    while(p < n)
-                    {
-                        NSUInteger m;
-                        if((n - p) > maxPdu)
-                        {
-                            m = maxPdu;
-                        }
-                        else
-                        {
-                            m = (n-p);
-                        }
-                        segment.data = [NSData dataWithBytes:&bytes[p] length:m];
-                        [dataSegments addObject:segment];
-                        
-                        segment = [[UMSCCP_Segment alloc]init];
-                        segment.first = NO;
-                        segment.class1 = YES;
-                        segmentReferenceId = ref;
-                        p = p + m;
-                    }
-                    NSUInteger count = dataSegments.count;
-                    for(int i=0;i<count;i++)
-                    {
-                        UMSCCP_Segment *s = [dataSegments objectAtIndex:(NSUInteger)i];
-                        s.remainingSegment = (int)count - i -1;
-                    }
-                    data = NULL;
+                    segmentReferenceId = segmentReferenceId + 1;
+                    segmentReferenceId = segmentReferenceId % 0xFFFFFF;
+                    ref = segmentReferenceId;
                 }
-                else /* we have pure data only */
+
+                dataSegments = [[NSMutableArray alloc]init];
+                UMSCCP_Segment *segment = [[UMSCCP_Segment alloc]init];
+                segment.first = YES;
+                segment.class1 = YES;
+                segmentReferenceId = ref;
+
+                const uint8_t *bytes = data.bytes;
+                NSUInteger n = data.length;
+                NSUInteger p = 0;
+                while(p < n)
                 {
-                    if(useXUDT)
+                    NSUInteger m;
+                    if((n - p) > maxPdu)
                     {
-                        [sccpLayer routeXUDT:data
-                                     calling:src
-                                      called:dst
-                                       class:1
-                                    hopCount:maxHopCount
-                               returnOnError:returnOnError
-                                         opc:xopc
-                                         dpc:xdpc
-                                 optionsData:optional_data
-                                     options:options
-                                    provider:sccpLayer.mtp3
-                                   fromLocal:YES];
+                        m = maxPdu;
                     }
                     else
                     {
-                        [sccpLayer routeUDT:data
-                                    calling:src
-                                     called:dst
-                                      class:1
-                              returnOnError:returnOnError
-                                        opc:xopc
-                                        dpc:xdpc
-                                    options:options
-                                   provider:sccpLayer.mtp3
-                                  fromLocal:YES];
-
+                        m = (n-p);
                     }
+                    segment.data = [NSData dataWithBytes:&bytes[p] length:m];
+                    [dataSegments addObject:segment];
+
+                    segment = [[UMSCCP_Segment alloc]init];
+                    segment.first = NO;
+                    segment.class1 = YES;
+                    segmentReferenceId = ref;
+                    p = p + m;
                 }
-            }
-            if(dataSegments)
-            {
                 NSUInteger count = dataSegments.count;
                 for(int i=0;i<count;i++)
                 {
                     UMSCCP_Segment *s = [dataSegments objectAtIndex:(NSUInteger)i];
                     s.remainingSegment = (int)count - i -1;
-                    [sccpLayer routeXUDTsegment:s
-                                        calling:src
-                                         called:dst
-                                          class:1
-                                       hopCount:maxHopCount
-                                  returnOnError:returnOnError
-                                            opc:xopc
-                                            dpc:xdpc
-                                    optionsData:optional_data
-                                        options:options
-                                       provider:sccpLayer.mtp3
-                                      fromLocal:YES];
-                    if(e != UMMTP3_no_error)
-                    {
-                        break;
-                    }
+                }
+                data = NULL;
+            }
+            else /* we have pure data only */
+            {
+                if(useXUDT)
+                {
+                    [sccpLayer routeXUDT:data
+                                 calling:src
+                                  called:dst
+                                   class:1
+                                hopCount:maxHopCount
+                           returnOnError:returnOnError
+                                     opc:xopc
+                                     dpc:xdpc
+                             optionsData:optional_data
+                                 options:options
+                                provider:sccpLayer.mtp3
+                               fromLocal:YES];
+                }
+                else
+                {
+                    [sccpLayer routeUDT:data
+                                calling:src
+                                 called:dst
+                                  class:1
+                          returnOnError:returnOnError
+                                    opc:xopc
+                                    dpc:xdpc
+                                options:options
+                               provider:sccpLayer.mtp3
+                              fromLocal:YES];
+
+                }
+            }
+        }
+        if(dataSegments)
+        {
+            NSUInteger count = dataSegments.count;
+            for(int i=0;i<count;i++)
+            {
+                UMSCCP_Segment *s = [dataSegments objectAtIndex:(NSUInteger)i];
+                s.remainingSegment = (int)count - i -1;
+                [sccpLayer routeXUDTsegment:s
+                                    calling:src
+                                     called:dst
+                                      class:1
+                                   hopCount:maxHopCount
+                              returnOnError:returnOnError
+                                        opc:xopc
+                                        dpc:xdpc
+                                optionsData:optional_data
+                                    options:options
+                                   provider:sccpLayer.mtp3
+                                  fromLocal:YES];
+                if(e != UMMTP3_no_error)
+                {
+                    break;
                 }
             }
         }
@@ -392,15 +384,7 @@ static int segmentReferenceId;
     }
 }
 
-- (void) route
-{
-    nextHop = sccpLayer.defaultNextHop;
-}
 
-- (void)sendNoRouteError
-{
-    
-}
 
 -(void)sendToL3
 {

@@ -424,67 +424,70 @@
             }
         }
     }
-    if(dst.ai.routingIndicatorBit == ROUTE_BY_GLOBAL_TITLE)
+    else /* STP mode */
     {
-        SccpGttRegistry *registry = self.gttSelectorRegistry;
-        SccpGttSelector *selector = [registry selectorForInstance:self.layerName
-                                                               tt:dst.tt.tt
-                                                              gti:dst.ai.globalTitleIndicator
-                                                               np:dst.npi.npi
-                                                              nai:dst.nai.nai];
-        if(selector == NULL)
+        if(dst.ai.routingIndicatorBit == ROUTE_BY_GLOBAL_TITLE)
         {
-            /* we send a UDTS back as we have no forward route */
-            *cause = SCCP_ReturnCause_NoTranslationForThisSpecificAddress;
-        }
-        else
-        {
-            SccpDestination *destination = [selector chooseNextHopWithL3RoutingTable:self.mtp3RoutingTable
-                                                                              digits:dst.address];
-            if(destination==NULL)
+            SccpGttRegistry *registry = self.gttSelectorRegistry;
+            SccpGttSelector *selector = [registry selectorForInstance:self.layerName
+                                                                   tt:dst.tt.tt
+                                                                  gti:dst.ai.globalTitleIndicator
+                                                                   np:dst.npi.npi
+                                                                  nai:dst.nai.nai];
+            if(selector == NULL)
             {
+                /* we send a UDTS back as we have no forward route */
                 *cause = SCCP_ReturnCause_NoTranslationForThisSpecificAddress;
             }
             else
             {
-                if(destination.ssn)
+                SccpDestination *destination = [selector chooseNextHopWithL3RoutingTable:self.mtp3RoutingTable
+                                                                                  digits:dst.address];
+                if(destination==NULL)
                 {
-                    /* routed by subsystem */
-                    id<UMSCCP_UserProtocol> upperLayer = [self getUserForSubsystem:dst.ssn number:dst];
-                    if(upperLayer == NULL)
-                    {
-                        [logFeed majorErrorText:[NSString stringWithFormat:@"no upper layer found for %@",dst.debugDescription]];
-                        *cause = SCCP_ReturnCause_Unequipped;
-                    }
-                    else
-                    {
-                        *user = upperLayer;
-                    }
+                    *cause = SCCP_ReturnCause_NoTranslationForThisSpecificAddress;
                 }
-                else if(destination.dpc)
+                else
                 {
-                    *pc =destination.dpc;
-                }
-                else if(destination.m3uaAs)
-                {
-                    /* not yet implemented */
-                    *cause = SCCP_ReturnCause_ErrorInLocalProcessing;
+                    if(destination.ssn)
+                    {
+                        /* routed by subsystem */
+                        id<UMSCCP_UserProtocol> upperLayer = [self getUserForSubsystem:dst.ssn number:dst];
+                        if(upperLayer == NULL)
+                        {
+                            [logFeed majorErrorText:[NSString stringWithFormat:@"no upper layer found for %@",dst.debugDescription]];
+                            *cause = SCCP_ReturnCause_Unequipped;
+                        }
+                        else
+                        {
+                            *user = upperLayer;
+                        }
+                    }
+                    else if(destination.dpc)
+                    {
+                        *pc =destination.dpc;
+                    }
+                    else if(destination.m3uaAs)
+                    {
+                        /* not yet implemented */
+                        *cause = SCCP_ReturnCause_ErrorInLocalProcessing;
+                    }
                 }
             }
         }
-    }
-    else /* ROUTE_BY_SUBSYSTEM */
-    {
-        /* routed by subsystem */
-        id<UMSCCP_UserProtocol> upperLayer = [self getUserForSubsystem:dst.ssn number:dst];
-        if(upperLayer == NULL)
+        else /* ROUTE_BY_SUBSYSTEM */
         {
-            [logFeed majorErrorText:[NSString stringWithFormat:@"no upper layer found for %@",dst.debugDescription]];
-            *cause = SCCP_ReturnCause_Unequipped;
-        }
-        else
-        {
-            *user = upperLayer;
+            /* routed by subsystem */
+            id<UMSCCP_UserProtocol> upperLayer = [self getUserForSubsystem:dst.ssn number:dst];
+            if(upperLayer == NULL)
+            {
+                [logFeed majorErrorText:[NSString stringWithFormat:@"no upper layer found for %@",dst.debugDescription]];
+                *cause = SCCP_ReturnCause_Unequipped;
+            }
+            else
+            {
+                *user = upperLayer;
+            }
         }
     }
 }
@@ -512,7 +515,6 @@
     {
         pc = dpc;
     }
-
     else
     {
         int causeValue = -1;
