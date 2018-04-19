@@ -519,7 +519,6 @@
     {
         int causeValue = -1;
         id<UMSCCP_UserProtocol> localUser =NULL;
-        UMMTP3PointCode *pc = NULL;
         provider = _mtp3;
         [self findRoute:dst
              causeValue:&causeValue
