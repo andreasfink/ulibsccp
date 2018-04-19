@@ -24,7 +24,6 @@
     UMMTP3PointCode *dpc;
     NSMutableDictionary *options;
     
-    
     UMLayerSCCP *sccpLayer;
     UMLayerMTP3 *mtp3Layer;
 

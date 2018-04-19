@@ -556,8 +556,8 @@
                  called:dst
                  class:m_return_on_error
           returnOnError:m_return_on_error
-                    opc:sccpLayer.mtp3.opc
-                    dpc:opc
+                    opc:opc
+                    dpc:dpc
                 options:@{}
                provider:sccpLayer.mtp3
               fromLocal:NO];

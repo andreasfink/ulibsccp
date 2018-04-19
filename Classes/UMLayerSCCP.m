@@ -511,14 +511,12 @@
     UMMTP3PointCode *pc = NULL;
 
 
-    if((dpc) && (provider))
+    if((dpc) && (provider) && (fromLocal))
     {
         pc = dpc;
     }
     else
     {
-        int causeValue = -1;
-        id<UMSCCP_UserProtocol> localUser =NULL;
         provider = _mtp3;
         [self findRoute:dst
              causeValue:&causeValue
