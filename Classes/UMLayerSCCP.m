@@ -1245,9 +1245,13 @@
         }
     }
 
-    if(cfg[@"next-pc"])
+    NSString *s = cfg[@"next-pc"];
+    if(s)
     {
-        _next_pc = [[UMMTP3PointCode alloc]initWithString:[cfg[@"next-dpc"] stringValue] variant:_mtp3.variant];
+        if(s.length > 0)
+        {
+            _next_pc = [[UMMTP3PointCode alloc]initWithString:s variant:_mtp3.variant];
+        }
     }
 
 }
