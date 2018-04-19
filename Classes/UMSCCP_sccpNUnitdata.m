@@ -340,7 +340,8 @@ static int segmentReferenceId;
                                          dpc:xdpc
                                  optionsData:optional_data
                                      options:options
-                                    provider:sccpLayer.mtp3];
+                                    provider:sccpLayer.mtp3
+                                   fromLocal:YES];
                     }
                     else
                     {
@@ -352,7 +353,8 @@ static int segmentReferenceId;
                                         opc:xopc
                                         dpc:xdpc
                                     options:options
-                                   provider:sccpLayer.mtp3];
+                                   provider:sccpLayer.mtp3
+                                  fromLocal:YES];
 
                     }
                 }
@@ -374,7 +376,8 @@ static int segmentReferenceId;
                                             dpc:xdpc
                                     optionsData:optional_data
                                         options:options
-                                       provider:sccpLayer.mtp3];
+                                       provider:sccpLayer.mtp3
+                                      fromLocal:YES];
                     if(e != UMMTP3_no_error)
                     {
                         break;

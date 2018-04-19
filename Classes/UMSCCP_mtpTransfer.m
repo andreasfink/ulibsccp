@@ -559,7 +559,8 @@
                     opc:sccpLayer.mtp3.opc
                     dpc:opc
                 options:@{}
-               provider:sccpLayer.mtp3];
+               provider:sccpLayer.mtp3
+              fromLocal:NO];
 }
 
 - (void)processUDTS
@@ -574,7 +575,8 @@
                     opc:opc
                     dpc:dpc
                 options:options
-               provider:sccpLayer.mtp3];
+               provider:sccpLayer.mtp3
+               fromLocal:NO];
 }
 
 - (void)processXUDT
@@ -591,7 +593,8 @@
                      dpc:dpc
               optionsData:sccp_optional
                  options:options
-                provider:sccpLayer.mtp3];
+                provider:sccpLayer.mtp3
+                fromLocal:NO];
 
     id<UMSCCP_UserProtocol> upperLayer = [sccpLayer getUserForSubsystem:dst.ssn number:dst];
     options[@"sccp-timestamp-udt"] = ts;
@@ -662,7 +665,8 @@
                       dpc:dpc
               optionsData:sccp_optional
                   options:options
-                 provider:sccpLayer.mtp3];
+                 provider:sccpLayer.mtp3
+                fromLocal:NO];
 }
 
 @end

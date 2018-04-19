@@ -21,6 +21,7 @@
 #import "UMSCCP_Segment.h"
 #import "UMLayerSCCPApplicationContextProtocol.h"
 #import "UMSCCP_MTP3RoutingTable.h"
+#import <ulibgt/ulibgt.h>
 
 @implementation UMLayerSCCP
 
@@ -386,7 +387,43 @@
        causeValue:(int *)cause
         localUser:(id<UMSCCP_UserProtocol> *)user
         pointCode:(UMMTP3PointCode **)pc
+        fromLocal:(BOOL)isLocal
 {
+    if(!_stpMode && _next_pc)
+    {
+        /* simple mode */
+        if(isLocal)
+        {
+            /* packet from upper layer going out to next_pc */
+            SccpL3RoutingTableEntry *rtentry = [_mtp3RoutingTable getEntryForPointCode:_next_pc];
+            if(rtentry.status==SccpL3RouteStatus_available)
+            {
+                *pc = _next_pc;
+            }
+            else if(rtentry.status==SccpL3RouteStatus_restricted)
+            {
+                *pc = _next_pc;
+            }
+            else
+            {
+                *cause = SCCP_ReturnCause_MTPFailure;
+            }
+        }
+        else
+        {
+            /* packet from lower layer going up to subsystem */
+            id<UMSCCP_UserProtocol> upperLayer = [self getUserForSubsystem:dst.ssn number:dst];
+            if(upperLayer == NULL)
+            {
+                [logFeed majorErrorText:[NSString stringWithFormat:@"no upper layer found for %@",dst.debugDescription]];
+                *cause = SCCP_ReturnCause_Unequipped;
+            }
+            else
+            {
+                *user = upperLayer;
+            }
+        }
+    }
     if(dst.ai.routingIndicatorBit == ROUTE_BY_GLOBAL_TITLE)
     {
         SccpGttRegistry *registry = self.gttSelectorRegistry;
@@ -462,6 +499,7 @@
               dpc:(UMMTP3PointCode *)dpc
           options:(NSDictionary *)options
          provider:(UMLayerMTP3 *)provider
+        fromLocal:(BOOL)fromLocal
 {
     /* predefined routing */
 
@@ -484,7 +522,8 @@
         [self findRoute:dst
              causeValue:&causeValue
               localUser:&localUser
-              pointCode:&pc];
+              pointCode:&pc
+              fromLocal:fromLocal];
     }
 
     if(pc)
@@ -591,6 +630,7 @@
                dpc:(UMMTP3PointCode *)dpc
            options:(NSDictionary *)options
           provider:(UMLayerMTP3 *)provider
+         fromLocal:(BOOL)fromLocal
 {
     id<UMSCCP_UserProtocol> localUser =NULL;
     UMMTP3PointCode *pc = NULL;
@@ -609,7 +649,8 @@
         [self findRoute:dst
              causeValue:&causeValue
               localUser:&localUser
-              pointCode:&pc];
+              pointCode:&pc
+              fromLocal:fromLocal];
     }
 
     if(pc)
@@ -669,6 +710,7 @@
        optionsData:(NSData *)xoptionsdata
            options:(NSDictionary *)options
           provider:(UMLayerMTP3 *)provider
+         fromLocal:(BOOL)fromLocal
 {
     /* predefined routing */
 
@@ -696,7 +738,8 @@
         [self findRoute:dst
              causeValue:&causeValue
               localUser:&localUser
-              pointCode:&pc];
+              pointCode:&pc
+              fromLocal:fromLocal];
     }
 
     if(pc)
@@ -815,6 +858,7 @@
              optionsData:(NSData *)xoptionsdata
                  options:(NSDictionary *)options
                 provider:(UMLayerMTP3 *)provider
+               fromLocal:(BOOL)fromLocal
 {
     NSMutableData *optionsData = [[NSMutableData alloc]init];
     [optionsData appendByte:0x10]; /* optional parameter "segmentation" */
@@ -838,7 +882,8 @@
                 dpc:dpc
         optionsData:optionsData
             options:options
-           provider:provider];
+           provider:provider
+          fromLocal:fromLocal];
 }
 
 - (void) routeXUDTS:(NSData *)data
@@ -851,6 +896,7 @@
         optionsData:(NSData *)xoptionsdata
             options:(NSDictionary *)options
            provider:(UMLayerMTP3 *)provider
+          fromLocal:(BOOL)fromLocal;
 {
     id<UMSCCP_UserProtocol> localUser =NULL;
     UMMTP3PointCode *pc = NULL;
@@ -876,7 +922,8 @@
         [self findRoute:dst
              causeValue:&causeValue
               localUser:&localUser
-              pointCode:&pc];
+              pointCode:&pc
+              fromLocal:fromLocal];
     }
 
     if(pc)
@@ -1168,6 +1215,23 @@
         }
         [_mtp3 setUserPart:MTP3_SERVICE_INDICATOR_SCCP user:self];
     }
+    if(cfg[@"mode"])
+    {
+        NSString *v = [cfg[@"mode"] stringValue];
+        if([v isEqualToString:@"stp"])
+        {
+            _stpMode = YES;
+        }
+        else if([v isEqualToString:@"ssp"])
+        {
+            _stpMode = NO;
+        }
+    }
+    if(cfg[@"next-pc"])
+    {
+        _next_pc = [[UMMTP3PointCode alloc]initWithString:[cfg[@"next-dpc"] stringValue] variant:UMMTP3Variant_Undefined];
+    }
+
     if(cfg[@"variant"])
     {
         NSString *v = [cfg[@"variant"] stringValue];

@@ -40,6 +40,8 @@
     UMSCCP_MTP3RoutingTable     *_routingTable;
     int                         _xudt_max_hop_count;
     int                         _xudts_max_hop_count;
+    BOOL                        _stpMode;
+    UMMTP3PointCode             *_next_pc;
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;
@@ -49,7 +51,8 @@
 @property(readwrite,strong) SccpL3RoutingTable *mtp3RoutingTable;
 @property(readwrite,assign) int xudt_max_hop_count;
 @property(readwrite,assign) int xudts_max_hop_count;
-
+@property(readwrite,assign) BOOL stpMode;
+@property(readwrite,strong) UMMTP3PointCode *next_pc;
 
 - (UMLayerMTP3 *)mtp3;
 - (UMMTP3Variant) variant;
@@ -231,7 +234,9 @@
              opc:(UMMTP3PointCode *)opc
              dpc:(UMMTP3PointCode *)dpc
          options:(NSDictionary *)options
-        provider:(UMLayerMTP3 *)provider;
+        provider:(UMLayerMTP3 *)provider
+       fromLocal:(BOOL)fromLocal;
+
 
 - (void) routeUDTS:(NSData *)data
            calling:(SccpAddress *)src
@@ -240,7 +245,9 @@
                opc:(UMMTP3PointCode *)opc
                dpc:(UMMTP3PointCode *)dpc
            options:(NSDictionary *)options
-          provider:(UMLayerMTP3 *)provider;
+          provider:(UMLayerMTP3 *)provider
+         fromLocal:(BOOL)fromLocal;
+
 
 
 - (void) routeXUDT:(NSData *)data
@@ -253,7 +260,9 @@
                dpc:(UMMTP3PointCode *)dpc
        optionsData:(NSData *)xoptionsdata
            options:(NSDictionary *)options
-          provider:(UMLayerMTP3 *)provider;
+          provider:(UMLayerMTP3 *)provider
+         fromLocal:(BOOL)fromLocal;
+
 
 -(void) routeXUDTsegment:(UMSCCP_Segment *)segment
                  calling:(SccpAddress *)src
@@ -265,7 +274,9 @@
                      dpc:(UMMTP3PointCode *)dpc
              optionsData:(NSData *)xoptionsdata
                  options:(NSDictionary *)options
-                provider:(UMLayerMTP3 *)provider;
+                provider:(UMLayerMTP3 *)provider
+               fromLocal:(BOOL)fromLocal;
+
 
 - (void) routeXUDTS:(NSData *)data
            calling:(SccpAddress *)src
@@ -276,13 +287,15 @@
                dpc:(UMMTP3PointCode *)dpc
         optionsData:(NSData *)xoptionsdata
            options:(NSDictionary *)options
-          provider:(UMLayerMTP3 *)provider;
+          provider:(UMLayerMTP3 *)provider
+          fromLocal:(BOOL)fromLocal;
+
 
 - (void)findRoute:(SccpAddress *)dst
        causeValue:(int *)cause
         localUser:(id<UMSCCP_UserProtocol> *)user
-        pointCode:(UMMTP3PointCode **)pc;
-
+        pointCode:(UMMTP3PointCode **)pc
+        fromLocal:(BOOL)isLocal;
 
 - (NSUInteger)maxPayloadSizeForServiceType:(SCCP_ServiceType) serviceType
                         callingAddressSize:(NSUInteger)cas
