@@ -1227,10 +1227,6 @@
             _stpMode = NO;
         }
     }
-    if(cfg[@"next-pc"])
-    {
-        _next_pc = [[UMMTP3PointCode alloc]initWithString:[cfg[@"next-dpc"] stringValue] variant:UMMTP3Variant_Undefined];
-    }
 
     if(cfg[@"variant"])
     {
@@ -1248,6 +1244,12 @@
             _sccpVariant = SCCP_VARIANT_ITU;
         }
     }
+
+    if(cfg[@"next-pc"])
+    {
+        _next_pc = [[UMMTP3PointCode alloc]initWithString:[cfg[@"next-dpc"] stringValue] variant:_mtp3.variant];
+    }
+
 }
 
 - (NSDictionary *)config
