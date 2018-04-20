@@ -545,7 +545,7 @@
                 s = [NSString stringWithFormat:@"Can not forward UDT. PDU too big. SRC=%@ DST=%@ DATA=%@",src,dst,data];
                 break;
             case UMMTP3_error_no_route_to_destination:
-                s = [NSString stringWithFormat:@"Can not forward UDT. No route to destination. SRC=%@ DST=%@ DATA=%@",src,dst,data];
+                s = [NSString stringWithFormat:@"Can not forward UDT. No route to destination PC=%@. SRC=%@ DST=%@ DATA=%@",pc,src,dst,data];
                 break;
             case UMMTP3_error_invalid_variant:
                 s = [NSString stringWithFormat:@"Can not forward UDT. Invalid variant. SRC=%@ DST=%@ DATA=%@",src,dst,data];
