@@ -442,7 +442,7 @@
             else
             {
                 SccpDestination *destination = [selector chooseNextHopWithL3RoutingTable:self.mtp3RoutingTable
-                                                                                  digits:dst.address];
+                                                                             destination:&dst];
                 if(destination==NULL)
                 {
                     *cause = SCCP_ReturnCause_NoTranslationForThisSpecificAddress;
