@@ -73,6 +73,7 @@
     _mtp3RoutingTable = [[SccpL3RoutingTable alloc]init];
     _xudt_max_hop_count = 16;
     _xudts_max_hop_count = 16;
+    _gttSelectorRegistry = [[SccpGttRegistry alloc]init];
 }
 
 - (void)mtpTransfer:(NSData *)data
