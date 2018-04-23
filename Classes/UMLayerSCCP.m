@@ -519,12 +519,27 @@
     else
     {
         provider = _mtp3;
+
+        if(logLevel <=UMLOG_DEBUG)
+        {
+            NSString *s = [NSString stringWithFormat:@"calling findRoute (DST=%@,local=%d,pc=%@)",dst,fromLocal,pc];
+            [self.logFeed debugText:s];
+        }
+
         [self findRoute:dst
              causeValue:&causeValue
               localUser:&localUser
               pointCode:&pc
               fromLocal:fromLocal];
+
+        if(logLevel <=UMLOG_DEBUG)
+        {
+            NSString *s = [NSString stringWithFormat:@"findRoute (DST=%@,local=%d) returns causeValue=%d, localUser=%@, pc=%@",dst,fromLocal,causeValue,localUser,pc];
+            [self.logFeed debugText:s];
+        }
     }
+
+
 
     if(pc)
     {
