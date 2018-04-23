@@ -512,6 +512,12 @@
     UMMTP3PointCode *pc = NULL;
 
 
+    if(logLevel <=UMLOG_DEBUG)
+    {
+        NSString *s = [NSString stringWithFormat:@"calling findRoute (DST=%@,local=%d,pc=%@) dpc=%@",dst,fromLocal,pc,dpc];
+        [self.logFeed debugText:s];
+    }
+
     if((dpc) && (provider) && (fromLocal))
     {
         pc = dpc;
