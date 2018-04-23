@@ -622,7 +622,7 @@
     }
     else
     {
-        [self logMinorError:[NSString stringWithFormat:@"Can not route UDT. Cause %d SRC=%@ DST=%@ DATA=%@",causeValue,src,dst,data]];
+        [self logMinorError:[NSString stringWithFormat:@"[1] Can not route UDT. Cause %d SRC=%@ DST=%@ DATA=%@",causeValue,src,dst,data]];
         if(returnOnError)
         {
             [self sendUDTS:data
@@ -661,11 +661,24 @@
         id<UMSCCP_UserProtocol> localUser =NULL;
         UMMTP3PointCode *pc = NULL;
         provider = _mtp3;
+
+        if(logLevel <=UMLOG_DEBUG)
+        {
+            NSString *s = [NSString stringWithFormat:@"calling findRoute (DST=%@,local=%d,pc=%@)",dst,fromLocal,pc];
+            [self.logFeed debugText:s];
+        }
+
         [self findRoute:dst
              causeValue:&causeValue
               localUser:&localUser
               pointCode:&pc
               fromLocal:fromLocal];
+
+        if(logLevel <=UMLOG_DEBUG)
+        {
+            NSString *s = [NSString stringWithFormat:@"findRoute (DST=%@,local=%d) returns causeValue=%d, localUser=%@, pc=%@",dst,fromLocal,causeValue,localUser,pc];
+            [self.logFeed debugText:s];
+        }
     }
 
     if(pc)
@@ -710,7 +723,7 @@
     }
     else
     {
-        [self logMinorError:[NSString stringWithFormat:@"Can not route UDTS %@->%@ Reason=%d %@",src,dst,reasonCode,data]];
+        [self logMinorError:[NSString stringWithFormat:@"[2] Can not route UDTS %@->%@ Reason=%d %@",src,dst,reasonCode,data]];
     }
 }
 
@@ -985,7 +998,7 @@
     }
     else
     {
-        [self logMinorError:[NSString stringWithFormat:@"Can not route UDTS %@->%@ Reason=%d %@",src,dst,reasonCode,data]];
+        [self logMinorError:[NSString stringWithFormat:@"[3] Can not route UDTS %@->%@ Reason=%d %@",src,dst,reasonCode,data]];
     }
 }
 
