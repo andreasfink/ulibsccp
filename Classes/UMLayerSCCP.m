@@ -429,6 +429,11 @@
     {
         if(dst.ai.routingIndicatorBit == ROUTE_BY_GLOBAL_TITLE)
         {
+            if(logLevel <=UMLOG_DEBUG)
+            {
+                [self.logFeed debugText:@" Route by global title"];
+            }
+
             SccpGttRegistry *registry = self.gttSelectorRegistry;
             SccpGttSelector *selector = [registry selectorForInstance:self.layerName
                                                                    tt:dst.tt.tt
@@ -438,6 +443,10 @@
             if(selector == NULL)
             {
                 /* we send a UDTS back as we have no forward route */
+                if(logLevel <=UMLOG_DEBUG)
+                {
+                    [self.logFeed debugText:[NSString stringWithFormat:@" SCCP selector is null for tt=%d, gti=%d, np:%d nai:%d. Returning NoTranslationForThisSpecificAddress" ,dst.tt.tt,dst.ai.globalTitleIndicator,dst.npi.npi,dst.nai.nai]];
+                }
                 *cause = SCCP_ReturnCause_NoTranslationForThisSpecificAddress;
             }
             else
@@ -446,17 +455,33 @@
                                                                              destination:&dst];
                 if(destination==NULL)
                 {
+                    if(logLevel <=UMLOG_DEBUG)
+                    {
+                        [self.logFeed debugText:@" GTT SCCP selector returns no nextHop. Returning NoTranslationForThisSpecificAddress"];
+                    }
+
                     *cause = SCCP_ReturnCause_NoTranslationForThisSpecificAddress;
                 }
                 else
                 {
                     if(destination.ssn)
                     {
+                        if(logLevel <=UMLOG_DEBUG)
+                        {
+                            [self.logFeed debugText:[NSString stringWithFormat:@" GTT SCCP selector returns SSN=%@",destination.ssn]];
+                        }
+
                         /* routed by subsystem */
                         id<UMSCCP_UserProtocol> upperLayer = [self getUserForSubsystem:dst.ssn number:dst];
                         if(upperLayer == NULL)
                         {
                             [logFeed majorErrorText:[NSString stringWithFormat:@"no upper layer found for %@",dst.debugDescription]];
+
+                            if(logLevel <=UMLOG_DEBUG)
+                            {
+                                [self.logFeed debugText:[NSString stringWithFormat:@" SSN %@ is unequipped",destination.ssn]];
+                            }
+
                             *cause = SCCP_ReturnCause_Unequipped;
                         }
                         else
@@ -466,11 +491,19 @@
                     }
                     else if(destination.dpc)
                     {
+                        if(logLevel <=UMLOG_DEBUG)
+                        {
+                            [self.logFeed debugText:[NSString stringWithFormat:@" next hop DPC= %@", destination.dpc]];
+                        }
                         *pc =destination.dpc;
                     }
                     else if(destination.m3uaAs)
                     {
                         /* not yet implemented */
+                        if(logLevel <=UMLOG_DEBUG)
+                        {
+                            [self.logFeed debugText:[NSString stringWithFormat:@" next hopM3UAAS= %@", destination.m3uaAs]];
+                        }
                         *cause = SCCP_ReturnCause_ErrorInLocalProcessing;
                     }
                 }
@@ -479,6 +512,11 @@
         else /* ROUTE_BY_SUBSYSTEM */
         {
             /* routed by subsystem */
+            if(logLevel <=UMLOG_DEBUG)
+            {
+                [self.logFeed debugText:@" Route by subsystem"];
+            }
+
             id<UMSCCP_UserProtocol> upperLayer = [self getUserForSubsystem:dst.ssn number:dst];
             if(upperLayer == NULL)
             {
@@ -487,6 +525,10 @@
             }
             else
             {
+                if(logLevel <=UMLOG_DEBUG)
+                {
+                    [self.logFeed debugText:@" Route to upper layer"];
+                }
                 *user = upperLayer;
             }
         }
