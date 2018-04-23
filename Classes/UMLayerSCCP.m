@@ -464,6 +464,11 @@
                 }
                 else
                 {
+                    if(logLevel <=UMLOG_DEBUG)
+                    {
+                        [self.logFeed debugText:[NSString stringWithFormat:@" Route to SCCP destination %@",destination]];
+                    }
+
                     if(destination.ssn)
                     {
                         if(logLevel <=UMLOG_DEBUG)
