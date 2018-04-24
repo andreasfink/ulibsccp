@@ -604,7 +604,7 @@
                                 called:dst
                                  class:class_and_handling   /* MGMT is class 0 */
                          returnOnError:returnOnError
-                                   opc:opc
+                                   opc:_mtp3.opc
                                    dpc:pc
                                options:options
                               provider:provider];
@@ -743,7 +743,7 @@
                                 calling:src
                                  called:dst
                                  reason:reasonCode
-                                    opc:opc
+                                    opc:_mtp3.opc
                                     dpc:pc
                                 options:options
                                provider:provider];
@@ -834,7 +834,7 @@
                                   class:class_and_handling   /* MGMT is class 0 */
                                hopCount:hopCount
                           returnOnError:returnOnError
-                                    opc:opc
+                                    opc:_mtp3.opc
                                     dpc:pc
                             optionsData:xoptionsdata
                                 options:options
@@ -1018,7 +1018,7 @@
                                  called:dst
                             returnCause:reasonCode
                                hopCount:hopCount
-                                    opc:opc
+                                    opc:_mtp3.opc
                                     dpc:pc
                              optionsData:xoptionsdata
                                 options:options
