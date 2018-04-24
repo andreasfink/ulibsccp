@@ -23,7 +23,7 @@
 @interface UMLayerSCCP : UMLayer<UMLayerMTP3UserProtocol>
 {
     SccpVariant                 _sccpVariant;
-    SccpDestination             *_defaultNextHop;
+    SccpDestinationGroup        *_defaultNextHop;
 
     SccpGttRegistry             *_gttSelectorRegistry;
     UMSynchronizedDictionary    *_subsystemUsers;
@@ -45,7 +45,7 @@
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;
-@property(readwrite,strong) SccpDestination *defaultNextHop;
+@property(readwrite,strong) SccpDestinationGroup *defaultNextHop;
 @property(readwrite,strong) SccpGttRegistry *gttSelectorRegistry;
 @property(readwrite,strong) NSMutableDictionary *pendingSegments;
 @property(readwrite,strong) SccpL3RoutingTable *mtp3RoutingTable;
