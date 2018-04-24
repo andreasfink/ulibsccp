@@ -384,12 +384,14 @@
 }
 
 
-- (void)findRoute:(SccpAddress *)dst
+- (void)findRoute:(SccpAddress **)dst1
        causeValue:(int *)cause
         localUser:(id<UMSCCP_UserProtocol> *)user
         pointCode:(UMMTP3PointCode **)pc
         fromLocal:(BOOL)isLocal
 {
+    SccpAddress *dst = [*dst1 copy];
+    
     if(!_stpMode && _next_pc)
     {
         /* simple mode */
@@ -451,6 +453,7 @@
             }
             else
             {
+                /* this call takes care of the pre/post translation */
                 SccpDestination *destination = [selector chooseNextHopWithL3RoutingTable:self.mtp3RoutingTable
                                                                              destination:&dst];
                 if(destination==NULL)
@@ -538,6 +541,7 @@
             }
         }
     }
+    *dst1 = dst;
 }
 
 
@@ -578,8 +582,7 @@
             NSString *s = [NSString stringWithFormat:@"calling findRoute (DST=%@,local=%d,pc=%@)",dst,fromLocal,pc];
             [self.logFeed debugText:s];
         }
-
-        [self findRoute:dst
+        [self findRoute:&dst
              causeValue:&causeValue
               localUser:&localUser
               pointCode:&pc
@@ -721,7 +724,7 @@
             [self.logFeed debugText:s];
         }
 
-        [self findRoute:dst
+        [self findRoute:&dst
              causeValue:&causeValue
               localUser:&localUser
               pointCode:&pc
@@ -816,7 +819,7 @@
         id<UMSCCP_UserProtocol> localUser =NULL;
         UMMTP3PointCode *pc = NULL;
         provider = _mtp3;
-        [self findRoute:dst
+        [self findRoute:&dst
              causeValue:&causeValue
               localUser:&localUser
               pointCode:&pc
@@ -1000,11 +1003,12 @@
         id<UMSCCP_UserProtocol> localUser =NULL;
         UMMTP3PointCode *pc = NULL;
         provider = _mtp3;
-        [self findRoute:dst
+        [self findRoute:&dst
              causeValue:&causeValue
               localUser:&localUser
               pointCode:&pc
               fromLocal:fromLocal];
+
     }
 
     if(pc)

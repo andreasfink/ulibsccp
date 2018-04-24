@@ -291,7 +291,7 @@
           fromLocal:(BOOL)fromLocal;
 
 
-- (void)findRoute:(SccpAddress *)dst
+- (void)findRoute:(SccpAddress **)dst
        causeValue:(int *)cause
         localUser:(id<UMSCCP_UserProtocol> *)user
         pointCode:(UMMTP3PointCode **)pc
