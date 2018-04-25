@@ -713,11 +713,10 @@
     id<UMSCCP_UserProtocol> localUser =NULL;
     UMMTP3PointCode *pc = NULL;
 
-    if((dpc) && (provider))
+    if((dpc) && (provider) && (fromLocal)) /* only from layer above, we can do a force route. otherwise we would loop to self */
     {
         pc = dpc;
     }
-
     else
     {
         int causeValue = -1;
