@@ -392,38 +392,45 @@
 {
     SccpAddress *dst = [*dst1 copy];
     
-    if(!_stpMode && _next_pc)
+    if(!_stpMode)
     {
         /* simple mode */
-        if(isLocal)
+        if(!_next_pc)
         {
-            /* packet from upper layer going out to next_pc */
-            SccpL3RoutingTableEntry *rtentry = [_mtp3RoutingTable getEntryForPointCode:_next_pc];
-            if(rtentry.status==SccpL3RouteStatus_available)
-            {
-                *pc = _next_pc;
-            }
-            else if(rtentry.status==SccpL3RouteStatus_restricted)
-            {
-                *pc = _next_pc;
-            }
-            else
-            {
-                *cause = SCCP_ReturnCause_MTPFailure;
-            }
+            [logFeed majorErrorText:[NSString stringWithFormat:@"no next pointcode set in SSP mode. Dropping packet for %@",dst.debugDescription]];
         }
         else
         {
-            /* packet from lower layer going up to subsystem */
-            id<UMSCCP_UserProtocol> upperLayer = [self getUserForSubsystem:dst.ssn number:dst];
-            if(upperLayer == NULL)
+            if(isLocal)
             {
-                [logFeed majorErrorText:[NSString stringWithFormat:@"no upper layer found for %@",dst.debugDescription]];
-                *cause = SCCP_ReturnCause_Unequipped;
+                /* packet from upper layer going out to next_pc */
+                SccpL3RoutingTableEntry *rtentry = [_mtp3RoutingTable getEntryForPointCode:_next_pc];
+                if(rtentry.status==SccpL3RouteStatus_available)
+                {
+                    *pc = _next_pc;
+                }
+                else if(rtentry.status==SccpL3RouteStatus_restricted)
+                {
+                    *pc = _next_pc;
+                }
+                else
+                {
+                    *cause = SCCP_ReturnCause_MTPFailure;
+                }
             }
             else
             {
-                *user = upperLayer;
+                /* packet from lower layer going up to subsystem */
+                id<UMSCCP_UserProtocol> upperLayer = [self getUserForSubsystem:dst.ssn number:dst];
+                if(upperLayer == NULL)
+                {
+                    [logFeed majorErrorText:[NSString stringWithFormat:@"no upper layer found for %@",dst.debugDescription]];
+                    *cause = SCCP_ReturnCause_Unequipped;
+                }
+                else
+                {
+                    *user = upperLayer;
+                }
             }
         }
     }
