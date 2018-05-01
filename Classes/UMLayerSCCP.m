@@ -83,8 +83,19 @@
                  si:(int)si
                  ni:(int)ni
         linksetName:(NSString *)linksetName
-            options:(NSDictionary *)options
+            options:(NSDictionary *)xoptions
 {
+    NSMutableDictionary*options;
+    if(xoptions)
+    {
+        options = [xoptions mutableCopy];
+    }
+    else
+    {
+        options = [[NSMutableDictionary alloc]init];
+    }
+    options[@"mtp3-incoming-linkset"] = linksetName;
+
     UMSCCP_mtpTransfer *task = [[UMSCCP_mtpTransfer alloc]initForSccp:self mtp3:mtp3Layer opc:opc dpc:dpc si:si ni:ni data:data options:options];
     [self queueFromLower:task];
 }
@@ -247,12 +258,14 @@
 -(UMMTP3_Error) sendPDU:(NSData *)pdu
                     opc:(UMMTP3PointCode *)opc
                     dpc:(UMMTP3PointCode *)dpc
+                options:(NSDictionary *)options
 {
     return [_mtp3 sendPDU:pdu
-                          opc:opc
-                          dpc:dpc
-                           si:MTP3_SERVICE_INDICATOR_SCCP
-                           mp:0];
+                      opc:opc
+                      dpc:dpc
+                       si:MTP3_SERVICE_INDICATOR_SCCP
+                       mp:0
+                  options:options];
 }
 
 -(UMMTP3_Error) sendXUDT:(NSData *)data
@@ -317,7 +330,7 @@
         [a sccpTraceSentPdu:sccp_pdu options:o];
     }
 
-    UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc];
+    UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc options:options];
     return result;
 }
 
@@ -379,7 +392,7 @@
         [a sccpTraceSentPdu:sccp_pdu options:o];
     }
 
-    UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc];
+    UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc options:options];
     return result;
 }
 
@@ -1140,7 +1153,7 @@
         [a sccpTraceSentPdu:sccp_pdu options:o];
     }
 
-    UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc];
+    UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc options:options];
     
     switch(result)
     {
@@ -1237,7 +1250,7 @@
         [a sccpTraceSentPdu:sccp_pdu options:o];
     }
 
-    UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc];
+    UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc options:options];
 
     switch(result)
     {

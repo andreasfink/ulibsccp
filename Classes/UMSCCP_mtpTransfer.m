@@ -558,7 +558,7 @@
           returnOnError:m_return_on_error
                     opc:opc
                     dpc:dpc
-                options:@{}
+                options:options
                provider:sccpLayer.mtp3
               fromLocal:NO];
 }
