@@ -42,6 +42,18 @@
     int                         _xudts_max_hop_count;
     BOOL                        _stpMode;
     UMMTP3PointCode             *_next_pc;
+    UMThroughputCounter         *_throughput_routeUDT;
+    long long                   _total_time_routeUDT;
+    long long                   _total_count_routeUDT;
+    UMThroughputCounter         *_throughput_routeUDTS;
+    long long                   _total_time_routeUDTS;
+    long long                   _total_count_routeUDTS;
+    UMThroughputCounter         *_throughput_routeXUDT;
+    long long                   _total_time_routeXUDT;
+    long long                   _total_count_routeXUDT;
+    UMThroughputCounter         *_throughput_routeXUDTS;
+    long long                   _total_time_routeXUDTS;
+    long long                   _total_count_routeXUDTS;
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;
@@ -54,6 +66,7 @@
 @property(readwrite,assign) BOOL stpMode;
 @property(readwrite,strong) UMMTP3PointCode *next_pc;
 
+- (NSDictionary *)statisticalInfo;
 - (UMLayerMTP3 *)mtp3;
 - (UMMTP3Variant) variant;
 

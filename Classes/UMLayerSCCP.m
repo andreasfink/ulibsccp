@@ -74,6 +74,44 @@
     _xudt_max_hop_count = 16;
     _xudts_max_hop_count = 16;
     _gttSelectorRegistry = [[SccpGttRegistry alloc]init];
+    _throughput_routeUDT = [[UMThroughputCounter alloc]init];
+    _throughput_routeUDTS = [[UMThroughputCounter alloc]init];
+    _throughput_routeXUDT = [[UMThroughputCounter alloc]init];
+    _throughput_routeXUDTS = [[UMThroughputCounter alloc]init];
+}
+
+- (NSDictionary *)statisticalInfo
+{
+    NSMutableDictionary *dict = [[NSMutableDictionary alloc]init];
+    dict[@"udt-throughput"] = [_throughput_routeUDT getSpeedTripleJson];
+    dict[@"udts-throughput"] = [_throughput_routeUDTS getSpeedTripleJson];
+    dict[@"xudt-throughput"] = [_throughput_routeXUDT getSpeedTripleJson];
+    dict[@"xudts-throughput"] = [_throughput_routeXUDTS getSpeedTripleJson];
+    dict[@"total-count-udt"] = @(_total_count_routeUDT);
+    dict[@"total-time-udt"] = @(((double)_total_time_routeUDT/1000.0));
+    dict[@"total-count-udts"] = @(_total_count_routeUDTS);
+    dict[@"total-time-udts"] = @(((double)_total_time_routeUDTS/1000.0));
+    dict[@"total-count-xudt"] = @(_total_count_routeXUDT);
+    dict[@"total-time-xudt"] = @(((double)_total_time_routeXUDT/1000.0));
+    dict[@"total-count-xudts"] = @(_total_count_routeXUDTS);
+    dict[@"total-time-xsudt"] = @(((double)_total_time_routeXUDTS/1000.0));
+    if(_total_count_routeUDT>0)
+    {
+        dict[@"average-time-udt"] = @((double)_total_time_routeUDT/(double)_total_count_routeUDT/1000.0);
+    }
+    if(_total_count_routeUDTS>0)
+    {
+        dict[@"average-time-udts"] = @((double)_total_time_routeUDTS/(double)_total_count_routeUDTS/1000.0);
+    }
+    if(_total_count_routeXUDT>0)
+    {
+        dict[@"average-time-xudt"] = @((double)_total_time_routeXUDT/(double)_total_count_routeXUDT/1000.0);
+    }
+    if(_total_count_routeXUDTS>0)
+    {
+        dict[@"average-time-xudts"] = @((double)_total_time_routeXUDTS/(double)_total_count_routeXUDTS/1000.0);
+    }
+    return dict;
 }
 
 - (void)mtpTransfer:(NSData *)data
@@ -582,7 +620,7 @@
     id<UMSCCP_UserProtocol> localUser =NULL;
     UMMTP3PointCode *pc = NULL;
 
-
+    long long startTime = [UMUtil milisecondClock];
     if(logLevel <=UMLOG_DEBUG)
     {
         NSString *s = [NSString stringWithFormat:@"calling findRoute (DST=%@,local=%d,pc=%@) dpc=%@",dst,fromLocal,pc,dpc];
@@ -711,6 +749,9 @@
                   provider:_mtp3];
         }
     }
+    long long timeConsumed = [UMUtil milisecondClock] - startTime;
+    _total_time_routeUDT += timeConsumed;
+    _total_count_routeUDT++;
 }
 
 - (void) routeUDTS:(NSData *)data
@@ -723,6 +764,8 @@
           provider:(UMLayerMTP3 *)provider
          fromLocal:(BOOL)fromLocal
 {
+    long long startTime = [UMUtil milisecondClock];
+
     id<UMSCCP_UserProtocol> localUser =NULL;
     UMMTP3PointCode *pc = NULL;
 
@@ -800,6 +843,10 @@
     {
         [self logMinorError:[NSString stringWithFormat:@"[2] Can not route UDTS %@->%@ Reason=%d %@",src,dst,reasonCode,data]];
     }
+
+    long long timeConsumed = [UMUtil milisecondClock] - startTime;
+    _total_time_routeUDTS += timeConsumed;
+    _total_count_routeUDTS++;
 }
 
 - (void) routeXUDT:(NSData *)data
@@ -815,6 +862,8 @@
           provider:(UMLayerMTP3 *)provider
          fromLocal:(BOOL)fromLocal
 {
+    long long startTime = [UMUtil milisecondClock];
+
     /* predefined routing */
 
     int causeValue = -1;
@@ -947,6 +996,9 @@
                   provider:_mtp3];
         }
     }
+    long long timeConsumed = [UMUtil milisecondClock] - startTime;
+    _total_time_routeUDTS += timeConsumed;
+    _total_count_routeUDTS++;
 }
 
 
@@ -1001,6 +1053,8 @@
            provider:(UMLayerMTP3 *)provider
           fromLocal:(BOOL)fromLocal;
 {
+    long long startTime = [UMUtil milisecondClock];
+
     id<UMSCCP_UserProtocol> localUser =NULL;
     UMMTP3PointCode *pc = NULL;
 
@@ -1076,6 +1130,10 @@
     {
         [self logMinorError:[NSString stringWithFormat:@"[3] Can not route UDTS %@->%@ Reason=%d %@",src,dst,reasonCode,data]];
     }
+    long long timeConsumed = [UMUtil milisecondClock] - startTime;
+    _total_time_routeXUDTS += timeConsumed;
+    _total_count_routeXUDTS++;
+
 }
 
 - (UMMTP3_Error) sendUDT:(NSData *)data
