@@ -80,33 +80,37 @@
     _throughput_routeXUDTS = [[UMThroughputCounter alloc]init];
 }
 
-- (NSDictionary *)statisticalInfo
+- (UMSynchronizedSortedDictionary *)statisticalInfo
 {
-    NSMutableDictionary *dict = [[NSMutableDictionary alloc]init];
+    UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
     dict[@"udt-throughput"] = [_throughput_routeUDT getSpeedTripleJson];
-    dict[@"udts-throughput"] = [_throughput_routeUDTS getSpeedTripleJson];
-    dict[@"xudt-throughput"] = [_throughput_routeXUDT getSpeedTripleJson];
-    dict[@"xudts-throughput"] = [_throughput_routeXUDTS getSpeedTripleJson];
     dict[@"total-count-udt"] = @(_total_count_routeUDT);
     dict[@"total-time-udt"] = @(((double)_total_time_routeUDT/1000.0));
-    dict[@"total-count-udts"] = @(_total_count_routeUDTS);
-    dict[@"total-time-udts"] = @(((double)_total_time_routeUDTS/1000.0));
-    dict[@"total-count-xudt"] = @(_total_count_routeXUDT);
-    dict[@"total-time-xudt"] = @(((double)_total_time_routeXUDT/1000.0));
-    dict[@"total-count-xudts"] = @(_total_count_routeXUDTS);
-    dict[@"total-time-xsudt"] = @(((double)_total_time_routeXUDTS/1000.0));
     if(_total_count_routeUDT>0)
     {
         dict[@"average-time-udt"] = @((double)_total_time_routeUDT/(double)_total_count_routeUDT/1000.0);
     }
+
+    dict[@"udts-throughput"] = [_throughput_routeUDTS getSpeedTripleJson];
+    dict[@"total-count-udts"] = @(_total_count_routeUDTS);
+    dict[@"total-time-udts"] = @(((double)_total_time_routeUDTS/1000.0));
     if(_total_count_routeUDTS>0)
     {
         dict[@"average-time-udts"] = @((double)_total_time_routeUDTS/(double)_total_count_routeUDTS/1000.0);
     }
+
+    dict[@"xudt-throughput"] = [_throughput_routeXUDT getSpeedTripleJson];
+    dict[@"total-count-xudt"] = @(_total_count_routeXUDT);
+    dict[@"total-time-xudt"] = @(((double)_total_time_routeXUDT/1000.0));
     if(_total_count_routeXUDT>0)
     {
         dict[@"average-time-xudt"] = @((double)_total_time_routeXUDT/(double)_total_count_routeXUDT/1000.0);
     }
+
+    dict[@"xudts-throughput"] = [_throughput_routeXUDTS getSpeedTripleJson];
+    dict[@"total-count-xudts"] = @(_total_count_routeXUDTS);
+    dict[@"total-time-xudts"] = @(((double)_total_time_routeXUDTS/1000.0));
+
     if(_total_count_routeXUDTS>0)
     {
         dict[@"average-time-xudts"] = @((double)_total_time_routeXUDTS/(double)_total_count_routeXUDTS/1000.0);

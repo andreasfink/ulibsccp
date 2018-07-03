@@ -66,7 +66,7 @@
 @property(readwrite,assign) BOOL stpMode;
 @property(readwrite,strong) UMMTP3PointCode *next_pc;
 
-- (NSDictionary *)statisticalInfo;
+- (UMSynchronizedSortedDictionary *)statisticalInfo;
 - (UMLayerMTP3 *)mtp3;
 - (UMMTP3Variant) variant;
 
