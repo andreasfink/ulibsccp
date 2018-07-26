@@ -448,7 +448,7 @@
 {
     SccpAddress *dst = [*dst1 copy];
     
-    if(!_stpMode)
+    if(_stpMode==NO)
     {
         /* simple mode */
         if(!_next_pc)
@@ -480,7 +480,7 @@
                 id<UMSCCP_UserProtocol> upperLayer = [self getUserForSubsystem:dst.ssn number:dst];
                 if(upperLayer == NULL)
                 {
-                    [logFeed majorErrorText:[NSString stringWithFormat:@"no upper layer found for %@",dst.debugDescription]];
+                    [logFeed majorErrorText:[NSString stringWithFormat:@"no upper layer found for %@ ssn=%d number=%@",dst.debugDescription,(int)dst.ssn,dst.stringValueE164]];
                     *cause = SCCP_ReturnCause_Unequipped;
                 }
                 else
