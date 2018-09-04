@@ -533,8 +533,8 @@
             /*UMMTP3_Error err = */[sccpLayer sendUDT:rpdu
                                               calling:response_calling_sccp
                                                called:response_called_sccp
-                                                class:0
-                                        returnOnError:NO
+                                                class:m_protocol_class
+                                             handling:m_handling
                                                   opc:opc
                                                   dpc:dpc
                                               options:@{}
@@ -554,8 +554,8 @@
     [sccpLayer routeUDT:sccp_pdu
                 calling:src
                  called:dst
-                 class:m_return_on_error
-          returnOnError:m_return_on_error
+                  class:m_protocol_class
+               handling:m_handling
                     opc:opc
                     dpc:dpc
                 options:options
@@ -609,6 +609,8 @@
                           calling:src
                            called:dst
                  qualityOfService:0
+                            class:m_protocol_class
+                         handling:m_handling
                           options:options];
     }
     else
@@ -645,6 +647,8 @@
                               calling:src
                                called:dst
                      qualityOfService:0
+                                class:m_protocol_class
+                             handling:m_handling
                               options:options];
         }
         

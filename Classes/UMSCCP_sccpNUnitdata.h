@@ -23,13 +23,15 @@
     SccpAddress             *src;
     SccpAddress             *dst;
     NSDictionary            *options;
-    int                     qos;
+    int                     _qos;
     /* internal */
     SccpDestination         *nextHop;
     NSMutableData           *sccp_pdu;
     UMASN1Object            *tcap_asn1;
     int                     maxHopCount;
     BOOL                    returnOnError;
+    SCCP_ServiceClass       _protocolClass;
+    int                     _handling;
 }
 
 @property(readwrite,strong) id<UMSCCP_UserProtocol> sccpUser;
@@ -42,6 +44,7 @@
 @property(readwrite,strong) SccpDestination *nextHop;
 @property(readwrite,strong) UMASN1Object *tcap_asn1;
 @property(readwrite,assign) int maxHopCount;
+@property(readwrite,assign) SCCP_ServiceClass   protocolClass;
 
 
 
@@ -55,10 +58,28 @@
 
 - (UMSCCP_sccpNUnitdata *)initForSccp:(UMLayerSCCP *)sccp
                                  user:(id<UMSCCP_UserProtocol>)xuser
+                             userData:(NSData *)xdata
+                              calling:(SccpAddress *)xsrc
+                               called:(SccpAddress *)xdst
+                     qualityOfService:(int)xqos
+                        protocolClass:(SCCP_ServiceClass)pclass
+                              options:(NSDictionary *)xoptions;
+
+- (UMSCCP_sccpNUnitdata *)initForSccp:(UMLayerSCCP *)sccp
+                                 user:(id<UMSCCP_UserProtocol>)xuser
                      userDataSegments:(NSArray *)xdataSegments
                               calling:(SccpAddress *)xsrc
                                called:(SccpAddress *)xdst
                      qualityOfService:(int)qos
+                              options:(NSDictionary *)options;
+
+- (UMSCCP_sccpNUnitdata *)initForSccp:(UMLayerSCCP *)sccp
+                                 user:(id<UMSCCP_UserProtocol>)xuser
+                     userDataSegments:(NSArray *)xdataSegments
+                              calling:(SccpAddress *)xsrc
+                               called:(SccpAddress *)xdst
+                     qualityOfService:(int)qos
+                        protocolClass:(SCCP_ServiceClass)pclass
                               options:(NSDictionary *)options;
 
 @end

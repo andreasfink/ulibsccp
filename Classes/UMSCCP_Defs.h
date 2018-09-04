@@ -39,6 +39,7 @@ typedef	enum SCCP_State
 } SCCP_State;
 
 
+#define UMSCCP_HANDLING_RETURN_ON_ERROR 0x08
 
 typedef enum SCCP_ReturnCause
 {

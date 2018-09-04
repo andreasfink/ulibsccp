@@ -109,6 +109,8 @@
              calling:(SccpAddress *)src
               called:(SccpAddress *)dst
     qualityOfService:(int)qos
+               class:(SCCP_ServiceClass)pclass
+            handling:(int)handling
              options:(NSDictionary *)options;
 
 - (void)sccpNNotice:(NSData *)data
@@ -185,8 +187,8 @@
 -(UMMTP3_Error) sendUDT:(NSData *)pdu
                 calling:(SccpAddress *)src
                  called:(SccpAddress *)dst
-                  class:(int)cls
-          returnOnError:(BOOL)reterr
+                  class:(SCCP_ServiceClass)pclass
+               handling:(int)handling
                     opc:(UMMTP3PointCode *)opc
                     dpc:(UMMTP3PointCode *)dpc
                 options:(NSDictionary *)options
@@ -205,9 +207,9 @@
 -(UMMTP3_Error) sendXUDT:(NSData *)pdu
                  calling:(SccpAddress *)src
                   called:(SccpAddress *)dst
-                   class:(int)cls
-              hopCount:(int)hopCount
-           returnOnError:(BOOL)reterr
+                   class:(SCCP_ServiceClass)pclass
+                handling:(int)handling
+                hopCount:(int)hopCount
                      opc:(UMMTP3PointCode *)opc
                      dpc:(UMMTP3PointCode *)dpc
              optionsData:(NSData *)xoptionsdata
@@ -218,9 +220,9 @@
 -(UMMTP3_Error) sendXUDTsegment:(UMSCCP_Segment *)pdu
                         calling:(SccpAddress *)src
                          called:(SccpAddress *)dst
-                          class:(int)cls
-                     hopCount:(int)hopCount
-                  returnOnError:(BOOL)reterr
+                          class:(SCCP_ServiceClass)pclass
+                       handling:(int)handling
+                       hopCount:(int)hopCount
                             opc:(UMMTP3PointCode *)opc
                             dpc:(UMMTP3PointCode *)dpc
                     optionsData:(NSData *)xoptionsdata
@@ -231,7 +233,7 @@
                   calling:(SccpAddress *)src
                    called:(SccpAddress *)dst
               returnCause:(int)returnCause
-               hopCount:(int)hopCount
+                 hopCount:(int)hopCount
                       opc:(UMMTP3PointCode *)opc
                       dpc:(UMMTP3PointCode *)dpc
               optionsData:(NSData *)xoptionsdata
@@ -242,8 +244,8 @@
 -(void) routeUDT:(NSData *)pdu
          calling:(SccpAddress *)src
           called:(SccpAddress *)dst
-           class:(int)cls
-   returnOnError:(BOOL)reterr
+           class:(SCCP_ServiceClass)pclass
+        handling:(int)handling
              opc:(UMMTP3PointCode *)opc
              dpc:(UMMTP3PointCode *)dpc
          options:(NSDictionary *)options
@@ -266,9 +268,9 @@
 - (void) routeXUDT:(NSData *)data
            calling:(SccpAddress *)src
             called:(SccpAddress *)dst
-             class:(int)class_and_handling
+             class:(SCCP_ServiceClass)pclass
+          handling:(int)handling
           hopCount:(int)hopCount
-     returnOnError:(BOOL)returnOnError
                opc:(UMMTP3PointCode *)opc
                dpc:(UMMTP3PointCode *)dpc
        optionsData:(NSData *)xoptionsdata
@@ -280,9 +282,9 @@
 -(void) routeXUDTsegment:(UMSCCP_Segment *)segment
                  calling:(SccpAddress *)src
                   called:(SccpAddress *)dst
-                   class:(int)class_and_handling
+                   class:(SCCP_ServiceClass)pclass
+                handling:(int)handling
                 hopCount:(int)hopCount
-           returnOnError:(BOOL)reterr
                      opc:(UMMTP3PointCode *)opc
                      dpc:(UMMTP3PointCode *)dpc
              optionsData:(NSData *)xoptionsdata

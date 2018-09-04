@@ -13,6 +13,8 @@
 #import <ulibmtp3/ulibmtp3.h>
 #import <ulibgt/ulibgt.h>
 
+#import "UMSCCP_Defs.h"
+
 @class UMLayerSCCP;
 
 @interface UMSCCP_mtpTransfer : UMLayerTask
@@ -31,8 +33,8 @@
     SccpAddress     *dst;
     NSData          *sccp_pdu;
     NSData          *sccp_optional;
-    int             m_protocol_class;
-    BOOL            m_return_on_error;
+    SCCP_ServiceClass  m_protocol_class;
+    int             m_handling;
     int             m_hopcounter;
     NSMutableDictionary *optional_dict;
     int             importance;

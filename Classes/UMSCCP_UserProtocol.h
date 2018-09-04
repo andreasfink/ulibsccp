@@ -13,6 +13,8 @@
 
 #import "UMSCCP_UserProtocol.h"
 #import "UMSCCPConnection.h"
+#import "UMSCCP_Defs.h"
+
 @class UMLayerSCCP;
 
 @protocol UMSCCP_UserProtocol <NSObject,UMLayerUserProtocol>
@@ -28,6 +30,8 @@
               calling:(SccpAddress *)src
                called:(SccpAddress *)dst
      qualityOfService:(int)qos
+                class:(SCCP_ServiceClass)pclass
+             handling:(int)handling
               options:(NSDictionary *)options;
 
 - (void)sccpNNotice:(NSData *)data

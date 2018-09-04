@@ -260,12 +260,13 @@
     [self setUser:usr forSubsystem:ssn number:addr];
 }
 
+
 -(UMMTP3_Error) sendXUDTsegment:(UMSCCP_Segment *)segment
                         calling:(SccpAddress *)src
                          called:(SccpAddress *)dst
-                          class:(int)class_and_handling
+                          class:(SCCP_ServiceClass)pclass
+                       handling:(int)handling
                        hopCount:(int)hopCount
-                  returnOnError:(BOOL)reterr
                             opc:(UMMTP3PointCode *)opc
                             dpc:(UMMTP3PointCode *)dpc
                     optionsData:(NSData *)xoptionsdata
@@ -288,9 +289,9 @@
     return [self sendXUDT:segment.data
                   calling:src
                    called:dst
-                    class:class_and_handling
+                    class:pclass
+                 handling:handling
                  hopCount:hopCount
-            returnOnError:reterr
                       opc:opc
                       dpc:dpc
               optionsData:optionsData
@@ -314,9 +315,9 @@
 -(UMMTP3_Error) sendXUDT:(NSData *)data
                  calling:(SccpAddress *)src
                   called:(SccpAddress *)dst
-                   class:(int)class_and_handling
+                   class:(SCCP_ServiceClass)pclass
+                handling:(int)handling
                 hopCount:(int)maxHopCount
-           returnOnError:(BOOL)reterr
                      opc:(UMMTP3PointCode *)opc
                      dpc:(UMMTP3PointCode *)dpc
              optionsData:(NSData *)xoptionsdata
@@ -326,14 +327,10 @@
     NSData *srcEncoded = [src encode:_sccpVariant];
     NSData *dstEncoded = [dst encode:_sccpVariant];
     
-    if(reterr)
-    {
-        class_and_handling = class_and_handling | 0x80;
-    }
     NSMutableData *sccp_pdu = [[NSMutableData alloc]init];
     uint8_t header[7];
     header[0] = SCCP_XUDT;
-    header[1] = class_and_handling;
+    header[1] = (pclass & 0x0F) | ((handling & 0x0F) << 4);
     header[2] = maxHopCount;
     header[3] = 4;
     header[4] = 4 + dstEncoded.length;
@@ -611,8 +608,8 @@
 - (void) routeUDT:(NSData *)data
           calling:(SccpAddress *)src
            called:(SccpAddress *)dst
-            class:(int)class_and_handling
-    returnOnError:(BOOL)returnOnError
+            class:(SCCP_ServiceClass)pclass
+         handling:(int)handling
               opc:(UMMTP3PointCode *)opc
               dpc:(UMMTP3PointCode *)dpc
           options:(NSDictionary *)options
@@ -665,8 +662,8 @@
         UMMTP3_Error e = [self sendUDT:data
                                calling:src
                                 called:dst
-                                 class:class_and_handling   /* MGMT is class 0 */
-                         returnOnError:returnOnError
+                                 class:pclass
+                              handling:handling
                                    opc:_mtp3.opc
                                    dpc:pc
                                options:options
@@ -690,7 +687,7 @@
         {
             [self logMinorError:s];
         }
-        if(returnOnError)
+        if(handling & UMSCCP_HANDLING_RETURN_ON_ERROR)
         {
             switch(e)
             {
@@ -737,12 +734,14 @@
                          calling:src
                           called:dst
                 qualityOfService:0
+                           class:pclass
+                        handling:handling
                          options:options];
     }
     else
     {
         [self logMinorError:[NSString stringWithFormat:@"[1] Can not route UDT. Cause %d SRC=%@ DST=%@ DATA=%@",causeValue,src,dst,data]];
-        if(returnOnError)
+        if(handling & UMSCCP_HANDLING_RETURN_ON_ERROR)
         {
             [self sendUDTS:data
                    calling:src
@@ -857,9 +856,9 @@
 - (void) routeXUDT:(NSData *)data
            calling:(SccpAddress *)src
             called:(SccpAddress *)dst
-             class:(int)class_and_handling
+             class:(SCCP_ServiceClass)pclass
+          handling:(int)handling
           hopCount:(int)hopCount
-     returnOnError:(BOOL)returnOnError
                opc:(UMMTP3PointCode *)opc
                dpc:(UMMTP3PointCode *)dpc
        optionsData:(NSData *)xoptionsdata
@@ -904,9 +903,9 @@
         UMMTP3_Error e = [self sendXUDT:data
                                 calling:src
                                  called:dst
-                                  class:class_and_handling   /* MGMT is class 0 */
+                                  class:pclass   /* MGMT is class 0 */
+                               handling:handling
                                hopCount:hopCount
-                          returnOnError:returnOnError
                                     opc:_mtp3.opc
                                     dpc:pc
                             optionsData:xoptionsdata
@@ -931,7 +930,7 @@
         {
             [self logMinorError:s];
         }
-        if(returnOnError)
+        if(handling & UMSCCP_HANDLING_RETURN_ON_ERROR)
         {
             switch(e)
             {
@@ -984,12 +983,14 @@
                          calling:src
                           called:dst
                 qualityOfService:0
+                           class:pclass
+                        handling:handling
                          options:options];
     }
     else
     {
         [self logMinorError:[NSString stringWithFormat:@"Can not route XUDT. Cause=%d SRC=%@ DST=%@ DATA=%@",causeValue,src,dst,data]];
-        if(returnOnError)
+        if(handling & UMSCCP_HANDLING_RETURN_ON_ERROR)
         {
             [self sendUDTS:data
                    calling:src
@@ -1010,9 +1011,9 @@
 -(void) routeXUDTsegment:(UMSCCP_Segment *)segment
                  calling:(SccpAddress *)src
                   called:(SccpAddress *)dst
-                   class:(int)class_and_handling
+                   class:(SCCP_ServiceClass)pclass
+                handling:(int)handling
                 hopCount:(int)hopCount
-           returnOnError:(BOOL)reterr
                      opc:(UMMTP3PointCode *)opc
                      dpc:(UMMTP3PointCode *)dpc
              optionsData:(NSData *)xoptionsdata
@@ -1035,9 +1036,9 @@
     [self routeXUDT:segment.data
             calling:src
              called:dst
-              class:class_and_handling
+              class:pclass
+           handling:handling
            hopCount:hopCount
-      returnOnError:reterr
                 opc:opc
                 dpc:dpc
         optionsData:optionsData
@@ -1142,26 +1143,22 @@
 }
 
 - (UMMTP3_Error) sendUDT:(NSData *)data
-                calling:(SccpAddress *)src
-                 called:(SccpAddress *)dst
-                  class:(int)class_and_handling   /* MGMT is class 0 */
-          returnOnError:(BOOL)reterr
-                    opc:(UMMTP3PointCode *)opc
-                    dpc:(UMMTP3PointCode *)dpc
-                options:(NSDictionary *)options
-               provider:(UMLayerMTP3 *)provider
+                 calling:(SccpAddress *)src
+                  called:(SccpAddress *)dst
+                   class:(SCCP_ServiceClass)pclass   /* MGMT is class 0 */
+                handling:(int)handling
+                     opc:(UMMTP3PointCode *)opc
+                     dpc:(UMMTP3PointCode *)dpc
+                 options:(NSDictionary *)options
+                provider:(UMLayerMTP3 *)provider
 {
     NSData *srcEncoded = [src encode:_sccpVariant];
     NSData *dstEncoded = [dst encode:_sccpVariant];
     
-    if(reterr)
-    {
-        class_and_handling = class_and_handling | 0x80;
-    }
     NSMutableData *sccp_pdu = [[NSMutableData alloc]init];
     uint8_t header[5];
     header[0] = SCCP_UDT;
-    header[1] = class_and_handling;
+    header[1] = (pclass & 0x0F) | (( handling & 0xF)<<4);
     header[2] = 3;
     header[3] = 3 + dstEncoded.length;
     header[4] = 3 + dstEncoded.length + srcEncoded.length;
@@ -1515,6 +1512,8 @@
              calling:(SccpAddress *)src
               called:(SccpAddress *)dst
     qualityOfService:(int)qos
+               class:(SCCP_ServiceClass)pclass
+            handling:(int)handling
              options:(NSDictionary *)options
 {
     UMSCCP_sccpNUnitdata *task;

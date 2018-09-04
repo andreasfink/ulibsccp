@@ -25,9 +25,9 @@ static int segmentReferenceId;
 @synthesize dst;
 @synthesize options;
 @synthesize nextHop;
-@synthesize qos;
 @synthesize tcap_asn1;
 @synthesize maxHopCount;
+
 
 - (UMSCCP_sccpNUnitdata *)initForSccp:(UMLayerSCCP *)sccp
                                  user:(id<UMSCCP_UserProtocol>)xuser
@@ -35,7 +35,26 @@ static int segmentReferenceId;
                               calling:(SccpAddress *)xsrc
                                called:(SccpAddress *)xdst
                      qualityOfService:(int)xqos
-                              options:(NSDictionary *)xoptions;
+                              options:(NSDictionary *)xoptions
+{
+    return [self initForSccp:sccp
+                        user:xuser
+                    userData:xdata
+                     calling:xsrc
+                      called:xdst
+            qualityOfService:xqos
+               protocolClass:SCCP_CLASS_BASIC
+                     options:xoptions];
+}
+
+- (UMSCCP_sccpNUnitdata *)initForSccp:(UMLayerSCCP *)sccp
+                                 user:(id<UMSCCP_UserProtocol>)xuser
+                             userData:(NSData *)xdata
+                              calling:(SccpAddress *)xsrc
+                               called:(SccpAddress *)xdst
+                     qualityOfService:(int)xqos
+                        protocolClass:(SCCP_ServiceClass)pclass
+                              options:(NSDictionary *)xoptions
 {
     self = [super initWithName:@"UMSCCP_sccpNUnitdata"
                       receiver:sccp
@@ -49,8 +68,10 @@ static int segmentReferenceId;
         src = xsrc;
         dst = xdst;
         options = xoptions;
-        qos = xqos;
+        _qos = xqos;
         maxHopCount = 255;
+        _protocolClass = pclass;
+
     }
     return self;
 }
@@ -61,6 +82,26 @@ static int segmentReferenceId;
                               calling:(SccpAddress *)xsrc
                                called:(SccpAddress *)xdst
                      qualityOfService:(int)xqos
+                              options:(NSDictionary *)xoptions
+{
+    return [self initForSccp:sccp
+                        user:xuser
+            userDataSegments:xdataSegments
+                     calling:xsrc
+                      called:xdst
+            qualityOfService:xqos
+               protocolClass:SCCP_CLASS_BASIC
+                     options:xoptions];
+}
+
+
+- (UMSCCP_sccpNUnitdata *)initForSccp:(UMLayerSCCP *)sccp
+                                 user:(id<UMSCCP_UserProtocol>)xuser
+                     userDataSegments:(NSArray *)xdataSegments
+                              calling:(SccpAddress *)xsrc
+                               called:(SccpAddress *)xdst
+                     qualityOfService:(int)xqos
+                        protocolClass:(SCCP_ServiceClass)pclass
                               options:(NSDictionary *)xoptions;
 {
     self = [super initWithName:@"UMSCCP_sccpNUnitdata"
@@ -75,7 +116,8 @@ static int segmentReferenceId;
         src = xsrc;
         dst = xdst;
         options = xoptions;
-        qos = xqos;
+        _qos = xqos;
+        _protocolClass = pclass;
         if(options)
         {
             NSString *s = options[@"hop-counter"];
@@ -326,9 +368,9 @@ static int segmentReferenceId;
                     [sccpLayer routeXUDT:data
                                  calling:src
                                   called:dst
-                                   class:1
+                                   class:_protocolClass
+                                handling:_handling
                                 hopCount:maxHopCount
-                           returnOnError:returnOnError
                                      opc:xopc
                                      dpc:xdpc
                              optionsData:optional_data
@@ -341,8 +383,8 @@ static int segmentReferenceId;
                     [sccpLayer routeUDT:data
                                 calling:src
                                  called:dst
-                                  class:1
-                          returnOnError:returnOnError
+                                  class:_protocolClass
+                               handling:_handling
                                     opc:xopc
                                     dpc:xdpc
                                 options:options
@@ -362,9 +404,9 @@ static int segmentReferenceId;
                 [sccpLayer routeXUDTsegment:s
                                     calling:src
                                      called:dst
-                                      class:1
+                                      class:_protocolClass
+                                   handling:_handling
                                    hopCount:maxHopCount
-                              returnOnError:returnOnError
                                         opc:xopc
                                         dpc:xdpc
                                 optionsData:optional_data
