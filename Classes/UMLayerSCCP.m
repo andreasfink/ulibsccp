@@ -1523,6 +1523,8 @@
                                             calling:src
                                              called:dst
                                    qualityOfService:qos
+                                              class:pclass
+                                           handling:handling
                                             options:options];
     [self queueFromUpper:task];
 }

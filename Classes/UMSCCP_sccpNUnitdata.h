@@ -54,23 +54,8 @@
                               calling:(SccpAddress *)xsrc
                                called:(SccpAddress *)xdst
                      qualityOfService:(int)qos
-                              options:(NSDictionary *)options;
-
-- (UMSCCP_sccpNUnitdata *)initForSccp:(UMLayerSCCP *)sccp
-                                 user:(id<UMSCCP_UserProtocol>)xuser
-                             userData:(NSData *)xdata
-                              calling:(SccpAddress *)xsrc
-                               called:(SccpAddress *)xdst
-                     qualityOfService:(int)xqos
-                        protocolClass:(SCCP_ServiceClass)pclass
-                              options:(NSDictionary *)xoptions;
-
-- (UMSCCP_sccpNUnitdata *)initForSccp:(UMLayerSCCP *)sccp
-                                 user:(id<UMSCCP_UserProtocol>)xuser
-                     userDataSegments:(NSArray *)xdataSegments
-                              calling:(SccpAddress *)xsrc
-                               called:(SccpAddress *)xdst
-                     qualityOfService:(int)qos
+                                class:(SCCP_ServiceClass)pclass
+                             handling:(int)handling
                               options:(NSDictionary *)options;
 
 - (UMSCCP_sccpNUnitdata *)initForSccp:(UMLayerSCCP *)sccp
@@ -79,7 +64,8 @@
                               calling:(SccpAddress *)xsrc
                                called:(SccpAddress *)xdst
                      qualityOfService:(int)qos
-                        protocolClass:(SCCP_ServiceClass)pclass
+                                class:(SCCP_ServiceClass)pclass
+                             handling:(int)handling
                               options:(NSDictionary *)options;
 
 @end

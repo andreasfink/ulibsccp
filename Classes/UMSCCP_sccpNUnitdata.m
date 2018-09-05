@@ -29,23 +29,6 @@ static int segmentReferenceId;
 @synthesize maxHopCount;
 
 
-- (UMSCCP_sccpNUnitdata *)initForSccp:(UMLayerSCCP *)sccp
-                                 user:(id<UMSCCP_UserProtocol>)xuser
-                             userData:(NSData *)xdata
-                              calling:(SccpAddress *)xsrc
-                               called:(SccpAddress *)xdst
-                     qualityOfService:(int)xqos
-                              options:(NSDictionary *)xoptions
-{
-    return [self initForSccp:sccp
-                        user:xuser
-                    userData:xdata
-                     calling:xsrc
-                      called:xdst
-            qualityOfService:xqos
-               protocolClass:SCCP_CLASS_BASIC
-                     options:xoptions];
-}
 
 - (UMSCCP_sccpNUnitdata *)initForSccp:(UMLayerSCCP *)sccp
                                  user:(id<UMSCCP_UserProtocol>)xuser
@@ -53,7 +36,8 @@ static int segmentReferenceId;
                               calling:(SccpAddress *)xsrc
                                called:(SccpAddress *)xdst
                      qualityOfService:(int)xqos
-                        protocolClass:(SCCP_ServiceClass)pclass
+                                class:(SCCP_ServiceClass)pclass
+                             handling:(int)handling
                               options:(NSDictionary *)xoptions
 {
     self = [super initWithName:@"UMSCCP_sccpNUnitdata"
@@ -71,28 +55,11 @@ static int segmentReferenceId;
         _qos = xqos;
         maxHopCount = 255;
         _protocolClass = pclass;
-
+        _handling = handling;
     }
     return self;
 }
 
-- (UMSCCP_sccpNUnitdata *)initForSccp:(UMLayerSCCP *)sccp
-                                 user:(id<UMSCCP_UserProtocol>)xuser
-                     userDataSegments:(NSArray *)xdataSegments
-                              calling:(SccpAddress *)xsrc
-                               called:(SccpAddress *)xdst
-                     qualityOfService:(int)xqos
-                              options:(NSDictionary *)xoptions
-{
-    return [self initForSccp:sccp
-                        user:xuser
-            userDataSegments:xdataSegments
-                     calling:xsrc
-                      called:xdst
-            qualityOfService:xqos
-               protocolClass:SCCP_CLASS_BASIC
-                     options:xoptions];
-}
 
 
 - (UMSCCP_sccpNUnitdata *)initForSccp:(UMLayerSCCP *)sccp
@@ -101,7 +68,8 @@ static int segmentReferenceId;
                               calling:(SccpAddress *)xsrc
                                called:(SccpAddress *)xdst
                      qualityOfService:(int)xqos
-                        protocolClass:(SCCP_ServiceClass)pclass
+                                class:(SCCP_ServiceClass)pclass
+                             handling:(int)handling
                               options:(NSDictionary *)xoptions;
 {
     self = [super initWithName:@"UMSCCP_sccpNUnitdata"
@@ -118,6 +86,7 @@ static int segmentReferenceId;
         options = xoptions;
         _qos = xqos;
         _protocolClass = pclass;
+        _handling = handling;
         if(options)
         {
             NSString *s = options[@"hop-counter"];
