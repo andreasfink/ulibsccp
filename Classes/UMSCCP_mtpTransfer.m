@@ -305,29 +305,14 @@
         {
             @throw([NSException exceptionWithName:@"SCCP_MISSING_CALLED_PARTY_ADDRESS" reason:NULL userInfo:@{@"mtp3": [rawMtp3 hexString] }] );
         }
-        NSMutableDictionary *o = [[NSMutableDictionary alloc]init];
-        o[@"type"]=type;
-        if(opc)
-        {
-            o[@"opc"]=opc.stringValue;
-        }
-        if(dpc)
-        {
-            o[@"dpc"]=dpc.stringValue;
-        }
-        if(mtp3Layer)
-        {
-            o[@"mtp3"]=mtp3Layer.layerName;
-        }
-        else
-        {
-            o[@"mtp3"]=@"(not-set)";
-        }
-        if(optional_dict)
-        {
-            o[@"sccp-optional"] = optional_dict;
-            options[@"sccp-optional"] = optional_dict;
-        }
+
+        NSDictionary *o = @{
+                            @"type" : type,
+                            @"action" : @"rx",
+                            @"opc"  : opc.stringValue,
+                            @"dpc"  : dpc.stringValue,
+                            @"mtp3" : mtp3Layer.layerName
+                            };
         [sccpLayer traceReceivedPdu:data options:o];
         if(!decodeOnly)
         {

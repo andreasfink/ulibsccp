@@ -302,6 +302,10 @@
                     dpc:(UMMTP3PointCode *)dpc
                 options:(NSDictionary *)options
 {
+    if(_mtp3==NULL)
+    {
+        return UMMTP3_error_no_route_to_destination;
+    }
     return [_mtp3 sendPDU:pdu
                       opc:opc
                       dpc:dpc
@@ -352,23 +356,47 @@
     {
         [sccp_pdu appendData:xoptionsdata];
     }
-    id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-tx-destination"];
-    [u sccpTraceSentPdu:sccp_pdu options:options];
-
-
-    NSInteger n = [_traceSendDestinations count];
-    for (NSInteger i=0;i<n;i++)
-    {
-        id a = [_traceSendDestinations objectAtIndex:i];
-        NSMutableDictionary *o = [[NSMutableDictionary alloc]init];
-        o[@"type"]=@"XUDT-Data";
-        o[@"opc"]=opc.stringValue;
-        o[@"dpc"]=dpc.stringValue;
-        o[@"mtp3"]=_mtp3.layerName;
-        [a sccpTraceSentPdu:sccp_pdu options:o];
-    }
 
     UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc options:options];
+
+    NSString *s;
+    switch(result)
+    {
+        case UMMTP3_no_error:
+            s = @"success";
+            break;
+        case UMMTP3_error_pdu_too_big:
+            s = @"pdu-too-big";
+            break;
+        case UMMTP3_error_no_route_to_destination:
+            s = @"no-route-to-destination";
+            break;
+        case UMMTP3_error_invalid_variant:
+            s = @"invalid-variant";
+            break;
+        default:
+            s = [NSString stringWithFormat:@"Unknown %d",result];
+            break;
+    }
+    NSDictionary *o = @{
+                        @"type" : @"XUDT",
+                        @"action" : @"drop",
+                        @"error"  : s,
+                        @"opc"  : ( opc ? opc.stringValue : @"(not-set)" ),
+                        @"dpc"  : ( dpc ? dpc.stringValue : @"(not-set)" ),
+                        @"mtp3" : ( _mtp3 ? _mtp3.layerName : @"(not-set)")};
+    if(result == UMMTP3_no_error)
+    {
+        id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-tx-destination"];
+        [ u sccpTraceSentPdu:sccp_pdu options:o];
+        [ self traceSentPdu:sccp_pdu options:o];
+    }
+    else
+    {
+        id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-dropped-destination"];
+        [ u sccpTraceDroppedPdu:sccp_pdu options:o];
+        [ self traceDroppedPdu:sccp_pdu options:o];
+    }
     return result;
 }
 
@@ -415,22 +443,48 @@
     {
         [sccp_pdu appendData:xoptionsdata];
     }
-    id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-tx-destination"];
-    [u sccpTraceSentPdu:sccp_pdu options:options];
-
-    NSInteger n = [_traceSendDestinations count];
-    for (NSInteger i=0;i<n;i++)
-    {
-        id a = [_traceSendDestinations objectAtIndex:i];
-        NSMutableDictionary *o = [[NSMutableDictionary alloc]init];
-        o[@"type"]=@"XUDTS";
-        o[@"opc"]=opc.stringValue;
-        o[@"dpc"]=dpc.stringValue;
-        o[@"mtp3"]=_mtp3.layerName;
-        [a sccpTraceSentPdu:sccp_pdu options:o];
-    }
 
     UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc options:options];
+    NSString *s;
+    NSString *action = @"drop";
+    switch(result)
+    {
+        case UMMTP3_no_error:
+            s = @"success";
+            action = @"tx";
+            break;
+        case UMMTP3_error_pdu_too_big:
+            s = @"pdu-too-big";
+            break;
+        case UMMTP3_error_no_route_to_destination:
+            s = @"no-route-to-destination";
+            break;
+        case UMMTP3_error_invalid_variant:
+            s = @"invalid-variant";
+            break;
+        default:
+            s = [NSString stringWithFormat:@"Unknown %d",result];
+            break;
+    }
+    NSDictionary *o = @{
+                        @"type" : @"XUDTS",
+                        @"action" : action,
+                        @"error"  : s,
+                        @"opc"  : ( opc ? opc.stringValue : @"(not-set)" ),
+                        @"dpc"  : ( dpc ? dpc.stringValue : @"(not-set)" ),
+                        @"mtp3" : ( _mtp3 ? _mtp3.layerName : @"(not-set)")};
+    if(result == UMMTP3_no_error)
+    {
+        id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-tx-destination"];
+        [ u sccpTraceSentPdu:sccp_pdu options:o];
+        [ self traceSentPdu:sccp_pdu options:o];
+    }
+    else
+    {
+        id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-dropped-destination"];
+        [ u sccpTraceDroppedPdu:sccp_pdu options:o];
+        [ self traceDroppedPdu:sccp_pdu options:o];
+    }
     return result;
 }
 
@@ -1150,51 +1204,47 @@
     [sccp_pdu appendByte:data.length];
     [sccp_pdu appendData:data];
     
-    id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-tx-destination"];
-    [u sccpTraceSentPdu:sccp_pdu options:options];
-
-    NSInteger n = [_traceSendDestinations count];
-    for (NSInteger i=0;i<n;i++)
-    {
-        id a = [_traceSendDestinations objectAtIndex:i];
-        NSMutableDictionary *o = [[NSMutableDictionary alloc]init];
-        o[@"type"]=@"UDT";
-        if(opc)
-        {
-            o[@"opc"]=opc.stringValue;
-        }
-        else
-        {
-            o[@"opc"]=@"(not-set)";
-        }
-        if(dpc)
-        {
-            o[@"dpc"]=dpc.stringValue;
-        }
-        else
-        {
-            o[@"dpc"]=@"(not-set)";
-        }
-        if(provider)
-        {
-            if(_mtp3)
-            {
-                o[@"mtp3"]=_mtp3.layerName;
-            }
-            else
-            {
-                o[@"mtp3"]=@"(not-set)";
-            }
-        }
-        else
-        {
-            o[@"provider"]=@"(not-set)";
-        }
-        [a sccpTraceSentPdu:sccp_pdu options:o];
-    }
-
     UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc options:options];
-    
+    NSString *s;
+    NSString *action = @"drop";
+    switch(result)
+    {
+        case UMMTP3_no_error:
+            s = @"success";
+            action = @"tx";
+            break;
+        case UMMTP3_error_pdu_too_big:
+            s = @"pdu-too-big";
+            break;
+        case UMMTP3_error_no_route_to_destination:
+            s = @"no-route-to-destination";
+            break;
+        case UMMTP3_error_invalid_variant:
+            s = @"invalid-variant";
+            break;
+        default:
+            s = [NSString stringWithFormat:@"Unknown %d",result];
+            break;
+    }
+    NSDictionary *o = @{
+                        @"type" : @"UDT",
+                        @"action" : action,
+                        @"error"  : s,
+                        @"opc"  : ( opc ? opc.stringValue : @"(not-set)" ),
+                        @"dpc"  : ( dpc ? dpc.stringValue : @"(not-set)" ),
+                        @"mtp3" : ( _mtp3 ? _mtp3.layerName : @"(not-set)")};
+    if(result == UMMTP3_no_error)
+    {
+        id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-tx-destination"];
+        [ u sccpTraceSentPdu:sccp_pdu options:o];
+        [ self traceSentPdu:sccp_pdu options:o];
+    }
+    else
+    {
+        id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-dropped-destination"];
+        [ u sccpTraceDroppedPdu:sccp_pdu options:o];
+        [ self traceDroppedPdu:sccp_pdu options:o];
+    }
     switch(result)
     {
         case UMMTP3_error_pdu_too_big:
@@ -1247,51 +1297,47 @@
     [sccp_pdu appendByte:data.length];
     [sccp_pdu appendData:data];
 
-    id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-tx-destination"];
-    [u sccpTraceSentPdu:sccp_pdu options:options];
-
-    NSInteger n = [_traceSendDestinations count];
-    for (NSInteger i=0;i<n;i++)
-    {
-        id a = [_traceSendDestinations objectAtIndex:i];
-        NSMutableDictionary *o = [[NSMutableDictionary alloc]init];
-        o[@"type"]=@"UDT";
-        if(opc)
-        {
-            o[@"opc"]=opc.stringValue;
-        }
-        else
-        {
-            o[@"opc"]=@"(not-set)";
-        }
-        if(dpc)
-        {
-            o[@"dpc"]=dpc.stringValue;
-        }
-        else
-        {
-            o[@"dpc"]=@"(not-set)";
-        }
-        if(provider)
-        {
-            if(_mtp3)
-            {
-                o[@"mtp3"]=_mtp3.layerName;
-            }
-            else
-            {
-                o[@"mtp3"]=@"(not-set)";
-            }
-        }
-        else
-        {
-            o[@"provider"]=@"(not-set)";
-        }
-        [a sccpTraceSentPdu:sccp_pdu options:o];
-    }
-
     UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc options:options];
-
+    NSString *s;
+    NSString *action = @"drop";
+    switch(result)
+    {
+        case UMMTP3_no_error:
+            s = @"success";
+            action = @"tx";
+            break;
+        case UMMTP3_error_pdu_too_big:
+            s = @"pdu-too-big";
+            break;
+        case UMMTP3_error_no_route_to_destination:
+            s = @"no-route-to-destination";
+            break;
+        case UMMTP3_error_invalid_variant:
+            s = @"invalid-variant";
+            break;
+        default:
+            s = [NSString stringWithFormat:@"Unknown %d",result];
+            break;
+    }
+    NSDictionary *o = @{
+                        @"type" : @"UDTS",
+                        @"action" : action,
+                        @"error"  : s,
+                        @"opc"  : ( opc ? opc.stringValue : @"(not-set)" ),
+                        @"dpc"  : ( dpc ? dpc.stringValue : @"(not-set)" ),
+                        @"mtp3" : ( _mtp3 ? _mtp3.layerName : @"(not-set)")};
+    if(result == UMMTP3_no_error)
+    {
+        id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-tx-destination"];
+        [ u sccpTraceSentPdu:sccp_pdu options:o];
+        [ self traceSentPdu:sccp_pdu options:o];
+    }
+    else
+    {
+        id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-dropped-destination"];
+        [ u sccpTraceDroppedPdu:sccp_pdu options:o];
+        [ self traceDroppedPdu:sccp_pdu options:o];
+    }
     switch(result)
     {
         case UMMTP3_error_pdu_too_big:

@@ -39,7 +39,7 @@
     int                         _xudt_max_hop_count;
     int                         _xudts_max_hop_count;
     BOOL                        _stpMode;
-    UMMTP3PointCode             *_next_pc;
+    UMMTP3PointCode             *_next_pc;  /* if STP mode is NO, all traffic is sent to next_pc instead of using a routing table */
     UMThroughputCounter         *_throughput_routeUDT;
     long long                   _total_time_routeUDT;
     long long                   _total_count_routeUDT;

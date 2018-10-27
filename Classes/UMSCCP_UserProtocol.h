@@ -50,8 +50,10 @@
 - (void)sccpTraceSentPdu:(NSData *)data
                  options:(NSDictionary *)options;
 
-
 - (void)sccpTraceReceivedPdu:(NSData *)data
                      options:(NSDictionary *)options;
+
+- (void)sccpTraceDroppedPdu:(NSData *)data
+                    options:(NSDictionary *)options;
 
 @end
