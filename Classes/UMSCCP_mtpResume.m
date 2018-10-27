@@ -11,7 +11,7 @@
 
 #import "UMSCCP_mtpResume.h"
 #import "UMLayerSCCP.h"
-
+ 
 @implementation UMSCCP_mtpResume
 
 - (UMSCCP_mtpResume *)initForSccp:(UMLayerSCCP *)layer
@@ -24,20 +24,19 @@
     self = [super initWithName:@"UMSCCP_mtpResume" receiver:layer sender:mtp3 requiresSynchronisation:NO];
     if(self)
     {
-        affectedPointCode = affPC;
-        si = xsi;
-        ni = xni;
-        options = xoptions;
+        _affectedPointCode = affPC;
+        _si = xsi;
+        _ni = xni;
+        _options = xoptions;
+        _sccp = layer;
     }
     return self;
 }
 
 - (void)main
 {
-    /*
-    UMSCCP_MTP3Route *r = [layer.routingTable routeForPointCode:affPC];
-    [r resume];
-     */
+    [_sccp.mtp3RoutingTable setStatus:SccpL3RouteStatus_available
+                         forPointCode:_affectedPointCode];
 }
 
 @end

@@ -16,11 +16,11 @@
 
 @interface UMSCCP_mtpStatus : UMLayerTask
 {
-    UMMTP3PointCode *affectedPointCode;
-    int si;
-    int ni;
-    NSDictionary *options;
-    int status;
+    UMMTP3PointCode *_affectedPointCode;
+    int _si;
+    int _ni;
+    NSDictionary *_options;
+    int _status;
     UMLayerSCCP *_sccp;
 }
 

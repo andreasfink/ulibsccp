@@ -20,7 +20,6 @@
 #import "UMSCCP_Defs.h"
 #import "UMSCCP_Segment.h"
 #import "UMLayerSCCPApplicationContextProtocol.h"
-#import "UMSCCP_MTP3RoutingTable.h"
 #import <ulibgt/ulibgt.h>
 
 @implementation UMLayerSCCP
@@ -69,7 +68,6 @@
     _traceSendDestinations =[[UMSynchronizedArray alloc]init];
     _traceReceiveDestinations =[[UMSynchronizedArray alloc]init];
     _traceDroppedDestinations =[[UMSynchronizedArray alloc]init];
-    _routingTable = [[UMSCCP_MTP3RoutingTable alloc]init];
     _mtp3RoutingTable = [[SccpL3RoutingTable alloc]init];
     _xudt_max_hop_count = 16;
     _xudts_max_hop_count = 16;

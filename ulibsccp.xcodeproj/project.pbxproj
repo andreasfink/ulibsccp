@@ -21,13 +21,7 @@
 		A64DC0B11DA1FDA800EE4016 /* ulib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D8E1A2943B9006C66A2 /* ulib.framework */; };
 		A64DC0B21DA1FDAE00EE4016 /* ulibgt.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A615D9061B4D587900854472 /* ulibgt.framework */; };
 		A66DD09F1B4FC4300090FC94 /* sctp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A615D9141B4D5FB000854472 /* sctp.framework */; };
-		A67B03F52039150A00A30480 /* UMSCCP_MTP3Route.h in Headers */ = {isa = PBXBuildFile; fileRef = A67B03F32039150A00A30480 /* UMSCCP_MTP3Route.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		A67B03F62039150A00A30480 /* UMSCCP_MTP3Route.m in Sources */ = {isa = PBXBuildFile; fileRef = A67B03F42039150A00A30480 /* UMSCCP_MTP3Route.m */; };
-		A67B03FD203919DF00A30480 /* UMSCCP_MTP3RoutingTable.h in Headers */ = {isa = PBXBuildFile; fileRef = A67B03FB203919DF00A30480 /* UMSCCP_MTP3RoutingTable.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		A67B03FE203919DF00A30480 /* UMSCCP_MTP3RoutingTable.m in Sources */ = {isa = PBXBuildFile; fileRef = A67B03FC203919DF00A30480 /* UMSCCP_MTP3RoutingTable.m */; };
 		A6827E1A1E380FC900F3048B /* UMLayerSCCPApplicationContextProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = A6827E181E380FC900F3048B /* UMLayerSCCPApplicationContextProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		A68494D61CB31FA900211137 /* UMSCCP_dpcAvailability.h in Headers */ = {isa = PBXBuildFile; fileRef = A68494D41CB31FA900211137 /* UMSCCP_dpcAvailability.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		A68494D71CB31FA900211137 /* UMSCCP_dpcAvailability.m in Sources */ = {isa = PBXBuildFile; fileRef = A68494D51CB31FA900211137 /* UMSCCP_dpcAvailability.m */; };
 		A68494DA1CB320AB00211137 /* UMSCCP_mtpTransfer.h in Headers */ = {isa = PBXBuildFile; fileRef = A68494D81CB320AB00211137 /* UMSCCP_mtpTransfer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A68494DB1CB320AB00211137 /* UMSCCP_mtpTransfer.m in Sources */ = {isa = PBXBuildFile; fileRef = A68494D91CB320AB00211137 /* UMSCCP_mtpTransfer.m */; };
 		A68494DE1CB320B600211137 /* UMSCCP_mtpPause.h in Headers */ = {isa = PBXBuildFile; fileRef = A68494DC1CB320B600211137 /* UMSCCP_mtpPause.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -82,13 +76,7 @@
 		A615D9061B4D587900854472 /* ulibgt.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibgt.framework; path = /Library/Frameworks/ulibgt.framework; sourceTree = "<absolute>"; };
 		A615D9141B4D5FB000854472 /* sctp.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = sctp.framework; path = /Library/Frameworks/sctp.framework; sourceTree = "<absolute>"; };
 		A645FFD01DA990EF0060380D /* ulibasn1.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibasn1.framework; path = /Library/Frameworks/ulibasn1.framework; sourceTree = "<absolute>"; };
-		A67B03F32039150A00A30480 /* UMSCCP_MTP3Route.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_MTP3Route.h; sourceTree = "<group>"; };
-		A67B03F42039150A00A30480 /* UMSCCP_MTP3Route.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_MTP3Route.m; sourceTree = "<group>"; };
-		A67B03FB203919DF00A30480 /* UMSCCP_MTP3RoutingTable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_MTP3RoutingTable.h; sourceTree = "<group>"; };
-		A67B03FC203919DF00A30480 /* UMSCCP_MTP3RoutingTable.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_MTP3RoutingTable.m; sourceTree = "<group>"; };
 		A6827E181E380FC900F3048B /* UMLayerSCCPApplicationContextProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMLayerSCCPApplicationContextProtocol.h; sourceTree = "<group>"; };
-		A68494D41CB31FA900211137 /* UMSCCP_dpcAvailability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_dpcAvailability.h; sourceTree = "<group>"; };
-		A68494D51CB31FA900211137 /* UMSCCP_dpcAvailability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_dpcAvailability.m; sourceTree = "<group>"; };
 		A68494D81CB320AB00211137 /* UMSCCP_mtpTransfer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_mtpTransfer.h; sourceTree = "<group>"; };
 		A68494D91CB320AB00211137 /* UMSCCP_mtpTransfer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_mtpTransfer.m; sourceTree = "<group>"; };
 		A68494DC1CB320B600211137 /* UMSCCP_mtpPause.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_mtpPause.h; sourceTree = "<group>"; };
@@ -207,10 +195,6 @@
 				A6ADC5E31CAE8C7600211137 /* UMSCCP_Defs.h */,
 				A6ED5C6B1B435A8A00854472 /* UMLayerSCCP.h */,
 				A6ED5C6C1B435A8A00854472 /* UMLayerSCCP.m */,
-				A67B03F32039150A00A30480 /* UMSCCP_MTP3Route.h */,
-				A67B03F42039150A00A30480 /* UMSCCP_MTP3Route.m */,
-				A67B03FB203919DF00A30480 /* UMSCCP_MTP3RoutingTable.h */,
-				A67B03FC203919DF00A30480 /* UMSCCP_MTP3RoutingTable.m */,
 				A61571EC1CD4891200211137 /* UMSCCP_Segment.h */,
 				A61571ED1CD4891200211137 /* UMSCCP_Segment.m */,
 				A68494D81CB320AB00211137 /* UMSCCP_mtpTransfer.h */,
@@ -221,8 +205,6 @@
 				A68494E11CB320BF00211137 /* UMSCCP_mtpResume.m */,
 				A68494E41CB320C800211137 /* UMSCCP_mtpStatus.h */,
 				A68494E51CB320C800211137 /* UMSCCP_mtpStatus.m */,
-				A68494D41CB31FA900211137 /* UMSCCP_dpcAvailability.h */,
-				A68494D51CB31FA900211137 /* UMSCCP_dpcAvailability.m */,
 				A6ADC5C51CADB25500211137 /* UMSCCP_sccpNUnitdata.h */,
 				A6ADC5C61CADB25500211137 /* UMSCCP_sccpNUnitdata.m */,
 				A6F442B01CB2595000C2B472 /* UMSCCPConnection.h */,
@@ -290,11 +272,8 @@
 				A6ADC5C71CADB25500211137 /* UMSCCP_sccpNUnitdata.h in Headers */,
 				A68494DA1CB320AB00211137 /* UMSCCP_mtpTransfer.h in Headers */,
 				A6ADC5E51CAE8C7600211137 /* UMSCCP_Defs.h in Headers */,
-				A67B03F52039150A00A30480 /* UMSCCP_MTP3Route.h in Headers */,
 				A61571EE1CD4891200211137 /* UMSCCP_Segment.h in Headers */,
 				A61571F61CD4AADF00211137 /* UMSCCP_ReceivedSegments.h in Headers */,
-				A68494D61CB31FA900211137 /* UMSCCP_dpcAvailability.h in Headers */,
-				A67B03FD203919DF00A30480 /* UMSCCP_MTP3RoutingTable.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -398,10 +377,7 @@
 			files = (
 				A6F442B31CB2595000C2B472 /* UMSCCPConnection.m in Sources */,
 				A61571EF1CD4891200211137 /* UMSCCP_Segment.m in Sources */,
-				A67B03FE203919DF00A30480 /* UMSCCP_MTP3RoutingTable.m in Sources */,
 				A68494E31CB320BF00211137 /* UMSCCP_mtpResume.m in Sources */,
-				A67B03F62039150A00A30480 /* UMSCCP_MTP3Route.m in Sources */,
-				A68494D71CB31FA900211137 /* UMSCCP_dpcAvailability.m in Sources */,
 				A68494E71CB320C800211137 /* UMSCCP_mtpStatus.m in Sources */,
 				A6ADC5C81CADB25500211137 /* UMSCCP_sccpNUnitdata.m in Sources */,
 				A68494DF1CB320B600211137 /* UMSCCP_mtpPause.m in Sources */,
