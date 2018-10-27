@@ -43,21 +43,21 @@ typedef	enum SCCP_State
 
 typedef enum SCCP_ReturnCause
 {
-    SCCP_ReturnCause_NoTranslationForAnAddressOfSuchNature   = 0,
+    SCCP_ReturnCause_NoTranslationForAnAddressOfSuchNature  = 0,
     SCCP_ReturnCause_NoTranslationForThisSpecificAddress    = 1,
-    SCCP_ReturnCause_SubsystemCongestion    = 2,
-    SCCP_ReturnCause_SubsystemFailure    = 3,
-    SCCP_ReturnCause_Unequipped = 4,
-    SCCP_ReturnCause_MTPFailure = 5,
-    SCCP_ReturnCause_NetworkCongestion = 6,
-    SCCP_ReturnCause_Unqualified = 7,
-    SCCP_ReturnCause_ErrorInMessageTransport = 8,
-    SCCP_ReturnCause_ErrorInLocalProcessing = 9,
-    SCCP_ReturnCause_DestinationCannotPerformReassembly = 10,
-    SCCP_ReturnCause_SCCPFailure = 11,
-    SCCP_ReturnCause_HopCounterViolation = 12,
-    SCCP_ReturnCause_SegmentationNotSupported = 13,
-    SCCP_ReturnCause_SegmentationFailure = 14,
+    SCCP_ReturnCause_SubsystemCongestion                    = 2,
+    SCCP_ReturnCause_SubsystemFailure                       = 3,
+    SCCP_ReturnCause_Unequipped                             = 4,
+    SCCP_ReturnCause_MTPFailure                             = 5,
+    SCCP_ReturnCause_NetworkCongestion                      = 6,
+    SCCP_ReturnCause_Unqualified                            = 7,
+    SCCP_ReturnCause_ErrorInMessageTransport                = 8,
+    SCCP_ReturnCause_ErrorInLocalProcessing                 = 9,
+    SCCP_ReturnCause_DestinationCannotPerformReassembly     = 10,
+    SCCP_ReturnCause_SCCPFailure                            = 11,
+    SCCP_ReturnCause_HopCounterViolation                    = 12,
+    SCCP_ReturnCause_SegmentationNotSupported               = 13,
+    SCCP_ReturnCause_SegmentationFailure                    = 14,
 } SCCP_ReturnCause;
 #define	SCCP_CLASS_BASIC	0
 
