@@ -18,18 +18,6 @@ static int segmentReferenceId;
 
 @implementation UMSCCP_sccpNUnitdata
 
-@synthesize sccpUser;
-@synthesize sccpLayer;
-@synthesize data;
-@synthesize src;
-@synthesize dst;
-@synthesize options;
-@synthesize nextHop;
-@synthesize tcap_asn1;
-@synthesize maxHopCount;
-
-
-
 - (UMSCCP_sccpNUnitdata *)initForSccp:(UMLayerSCCP *)sccp
                                  user:(id<UMSCCP_UserProtocol>)xuser
                              userData:(NSData *)xdata
@@ -46,14 +34,14 @@ static int segmentReferenceId;
        requiresSynchronisation:NO];
     if(self)
     {
-        sccpLayer = sccp;
-        sccpUser = xuser;
-        data = xdata;
-        src = xsrc;
-        dst = xdst;
-        options = xoptions;
+        _sccpLayer = sccp;
+        _sccpUser = xuser;
+        _data = xdata;
+        _src = xsrc;
+        _dst = xdst;
+        _options = xoptions;
         _qos = xqos;
-        maxHopCount = 255;
+        _maxHopCount = 255;
         _protocolClass = pclass;
         _handling = handling;
     }
@@ -78,26 +66,26 @@ static int segmentReferenceId;
        requiresSynchronisation:NO];
     if(self)
     {
-        sccpLayer = sccp;
-        sccpUser = xuser;
-        dataSegments = [xdataSegments mutableCopy];
-        src = xsrc;
-        dst = xdst;
-        options = xoptions;
+        _sccpLayer = sccp;
+        _sccpUser = xuser;
+        _dataSegments = [xdataSegments mutableCopy];
+        _src = xsrc;
+        _dst = xdst;
+        _options = xoptions;
         _qos = xqos;
         _protocolClass = pclass;
         _handling = handling;
-        if(options)
+        if(_options)
         {
-            NSString *s = options[@"hop-counter"];
+            NSString *s = _options[@"hop-counter"];
             if(s)
             {
-                maxHopCount = [s intValue] -1;
+                _maxHopCount = [s intValue] -1;
             }
         }
         else
         {
-            maxHopCount = 15;
+            _maxHopCount = 15;
         }
     }
     return self;
@@ -110,36 +98,36 @@ static int segmentReferenceId;
     {
         /* int cls =0;*/
 
-        UMMTP3PointCode         *xopc =sccpLayer.mtp3.opc;
-        UMMTP3PointCode         *xdpc = nextHop.dpc;
+        UMMTP3PointCode         *xopc = _sccpLayer.mtp3.opc;
+        UMMTP3PointCode         *xdpc = _nextHop.dpc;
 
-        NSString *xopc_string = options[@"opc"];
-        NSString *xdpc_string = options[@"dpc"];
+        NSString *xopc_string = _options[@"opc"];
+        NSString *xdpc_string = _options[@"dpc"];
 
         if((xdpc_string.length > 0) && (![xdpc_string isEqualToString:@"default"]))
         {
             xdpc = [[UMMTP3PointCode alloc] initWithString:xdpc_string
-                                                   variant:sccpLayer.mtp3.variant];
+                                                   variant:_sccpLayer.mtp3.variant];
         }
 
         if((xopc_string.length > 0) && (![xopc_string isEqualToString:@"default"]))
         {
             xopc = [[UMMTP3PointCode alloc] initWithString:xopc_string
-                                                   variant:sccpLayer.mtp3.variant];
+                                                   variant:_sccpLayer.mtp3.variant];
         }
 
         UMMTP3_Error e = UMMTP3_no_error;
 
-        NSData *srcEncoded = [src encode:sccpLayer.sccpVariant];
-        NSData *dstEncoded = [dst encode:sccpLayer.sccpVariant];
+        NSData *srcEncoded = [_src encode:_sccpLayer.sccpVariant];
+        NSData *dstEncoded = [_dst encode:_sccpLayer.sccpVariant];
         NSUInteger cas = srcEncoded.length;
         NSUInteger cds = dstEncoded.length;
         NSUInteger maxPdu = 0;
 
-        BOOL useXUDT        = [options[@"sccp-xudt"] boolValue];
-        BOOL useSegments    = [options[@"sccp-segment"] boolValue];
+        BOOL useXUDT        = [_options[@"sccp-xudt"] boolValue];
+        BOOL useSegments    = [_options[@"sccp-segment"] boolValue];
 
-        NSDictionary *sccp_options = options[@"sccp-optional"];
+        NSDictionary *sccp_options = _options[@"sccp-optional"];
         NSMutableData *optional_data;
         if(sccp_options)
         {
@@ -238,48 +226,48 @@ static int segmentReferenceId;
             }
         }
 
-        if(data.length > 0)
+        if(_data.length > 0)
         {
             /* we have single data as input, no segments yet */
             if(useXUDT == NO)
             {
-                maxPdu = [sccpLayer maxPayloadSizeForServiceType:SCCP_UDT
-                                              callingAddressSize:cas
-                                               calledAddressSize:cds
-                                                   usingSegments:useSegments
-                                                        provider:sccpLayer.mtp3];
+                maxPdu = [_sccpLayer maxPayloadSizeForServiceType:SCCP_UDT
+                                               callingAddressSize:cas
+                                                calledAddressSize:cds
+                                                    usingSegments:useSegments
+                                                         provider:_sccpLayer.mtp3];
 
-                if(data.length > maxPdu)
+                if(_data.length > maxPdu)
                 {
                     /* no choice, we must segment */
                     useSegments=YES;
                     useXUDT = YES;
-                    maxPdu = [sccpLayer maxPayloadSizeForServiceType:SCCP_XUDT
-                                                  callingAddressSize:cas
-                                                   calledAddressSize:cds
-                                                       usingSegments:YES
-                                                            provider:sccpLayer.mtp3];
+                    maxPdu = [_sccpLayer maxPayloadSizeForServiceType:SCCP_XUDT
+                                                   callingAddressSize:cas
+                                                    calledAddressSize:cds
+                                                        usingSegments:YES
+                                                             provider:_sccpLayer.mtp3];
 
                 }
             }
             else
             {
-                maxPdu = [sccpLayer maxPayloadSizeForServiceType:SCCP_XUDT
-                                              callingAddressSize:cas
-                                               calledAddressSize:cds
-                                                   usingSegments:useSegments
-                                                        provider:sccpLayer.mtp3];
+                maxPdu = [_sccpLayer maxPayloadSizeForServiceType:SCCP_XUDT
+                                               callingAddressSize:cas
+                                                calledAddressSize:cds
+                                                    usingSegments:useSegments
+                                                         provider:_sccpLayer.mtp3];
 
-                if(data.length > maxPdu)
+                if(_data.length > maxPdu)
                 {
                     /* no choice, we must segment */
                     useSegments = YES;
                     useXUDT = YES;
-                    maxPdu = [sccpLayer maxPayloadSizeForServiceType:SCCP_XUDT
-                                                  callingAddressSize:cas
-                                                   calledAddressSize:cds
-                                                       usingSegments:useSegments
-                                                            provider:sccpLayer.mtp3];
+                    maxPdu = [_sccpLayer maxPayloadSizeForServiceType:SCCP_XUDT
+                                                   callingAddressSize:cas
+                                                    calledAddressSize:cds
+                                                        usingSegments:useSegments
+                                                             provider:_sccpLayer.mtp3];
 
                 }
             }
@@ -293,14 +281,14 @@ static int segmentReferenceId;
                     ref = segmentReferenceId;
                 }
 
-                dataSegments = [[NSMutableArray alloc]init];
+                _dataSegments = [[NSMutableArray alloc]init];
                 UMSCCP_Segment *segment = [[UMSCCP_Segment alloc]init];
                 segment.first = YES;
                 segment.class1 = YES;
                 segmentReferenceId = ref;
 
-                const uint8_t *bytes = data.bytes;
-                NSUInteger n = data.length;
+                const uint8_t *bytes = _data.bytes;
+                NSUInteger n = _data.length;
                 NSUInteger p = 0;
                 while(p < n)
                 {
@@ -314,7 +302,7 @@ static int segmentReferenceId;
                         m = (n-p);
                     }
                     segment.data = [NSData dataWithBytes:&bytes[p] length:m];
-                    [dataSegments addObject:segment];
+                    [_dataSegments addObject:segment];
 
                     segment = [[UMSCCP_Segment alloc]init];
                     segment.first = NO;
@@ -322,66 +310,65 @@ static int segmentReferenceId;
                     segmentReferenceId = ref;
                     p = p + m;
                 }
-                NSUInteger count = dataSegments.count;
+                NSUInteger count = _dataSegments.count;
                 for(int i=0;i<count;i++)
                 {
-                    UMSCCP_Segment *s = [dataSegments objectAtIndex:(NSUInteger)i];
+                    UMSCCP_Segment *s = [_dataSegments objectAtIndex:(NSUInteger)i];
                     s.remainingSegment = (int)count - i -1;
                 }
-                data = NULL;
+                _data = NULL;
             }
             else /* we have pure data only */
             {
                 if(useXUDT)
                 {
-                    [sccpLayer routeXUDT:data
-                                 calling:src
-                                  called:dst
-                                   class:_protocolClass
-                                handling:_handling
-                                hopCount:maxHopCount
-                                     opc:xopc
-                                     dpc:xdpc
-                             optionsData:optional_data
-                                 options:options
-                                provider:sccpLayer.mtp3
-                               fromLocal:YES];
+                    [_sccpLayer routeXUDT:_data
+                                  calling:_src
+                                   called:_dst
+                                    class:_protocolClass
+                                 handling:_handling
+                                 hopCount:_maxHopCount
+                                      opc:xopc
+                                      dpc:xdpc
+                              optionsData:optional_data
+                                  options:_options
+                                 provider:_sccpLayer.mtp3
+                                fromLocal:YES];
                 }
                 else
                 {
-                    [sccpLayer routeUDT:data
-                                calling:src
-                                 called:dst
-                                  class:_protocolClass
-                               handling:_handling
-                                    opc:xopc
-                                    dpc:xdpc
-                                options:options
-                               provider:sccpLayer.mtp3
-                              fromLocal:YES];
-
+                    [_sccpLayer routeUDT:_data
+                                 calling:_src
+                                  called:_dst
+                                   class:_protocolClass
+                                handling:_handling
+                                     opc:xopc
+                                     dpc:xdpc
+                                 options:_options
+                                provider:_sccpLayer.mtp3
+                               fromLocal:YES];
                 }
             }
         }
-        if(dataSegments)
+        if(_dataSegments)
         {
-            NSUInteger count = dataSegments.count;
+            NSUInteger count = _dataSegments.count;
             for(int i=0;i<count;i++)
             {
-                UMSCCP_Segment *s = [dataSegments objectAtIndex:(NSUInteger)i];
+                UMSCCP_Segment *s = [_dataSegments objectAtIndex:(NSUInteger)i];
                 s.remainingSegment = (int)count - i -1;
-                [sccpLayer routeXUDTsegment:s
-                                    calling:src
-                                     called:dst
-                                      class:_protocolClass
-                                   handling:_handling
-                                   hopCount:maxHopCount
-                                        opc:xopc
-                                        dpc:xdpc
-                                optionsData:optional_data
-                                    options:options
-                                   provider:sccpLayer.mtp3
-                                  fromLocal:YES];
+                [_sccpLayer routeXUDTsegment:s
+                                     calling:_src
+                                      called:_dst
+                                       class:_protocolClass
+                                    handling:_handling
+                                    hopCount:_maxHopCount
+                                         opc:xopc
+                                         dpc:xdpc
+                                 optionsData:optional_data
+                                     options:_options
+                                    provider:_sccpLayer.mtp3
+                                   fromLocal:YES];
                 if(e != UMMTP3_no_error)
                 {
                     break;
@@ -391,17 +378,8 @@ static int segmentReferenceId;
     }
     @catch(NSException *ex)
     {
-        [sccpLayer.logFeed majorErrorText:[NSString stringWithFormat:@"Error: %@",ex]];
+        [_sccpLayer.logFeed majorErrorText:[NSString stringWithFormat:@"Error: %@",ex]];
     }
-}
-
-
-
--(void)sendToL3
-{
-//    UMMTP3PointCode *opc = nextHop.opc;
-//    UMMTP3PointCode *dpc = nextHop.dpc;
-
 }
 
 @end

@@ -16,20 +16,20 @@
 
 @interface UMSCCP_sccpNUnitdata : UMLayerTask
 {
-    id<UMSCCP_UserProtocol> sccpUser;
-    UMLayerSCCP             *sccpLayer;
-    NSData                  *data;
-    NSMutableArray          *dataSegments;
-    SccpAddress             *src;
-    SccpAddress             *dst;
-    NSDictionary            *options;
+    id<UMSCCP_UserProtocol> _sccpUser;
+    UMLayerSCCP             *_sccpLayer;
+    NSData                  *_data;
+    NSMutableArray          *_dataSegments;
+    SccpAddress             *_src;
+    SccpAddress             *_dst;
+    NSDictionary            *_options;
     int                     _qos;
     /* internal */
-    SccpDestination         *nextHop;
-    NSMutableData           *sccp_pdu;
-    UMASN1Object            *tcap_asn1;
-    int                     maxHopCount;
-    BOOL                    returnOnError;
+    SccpDestination         *_nextHop;
+    NSMutableData           *_sccp_pdu;
+    UMASN1Object            *_tcap_asn1;
+    int                     _maxHopCount;
+    BOOL                    _returnOnError;
     SCCP_ServiceClass       _protocolClass;
     int                     _handling;
 }
@@ -45,6 +45,7 @@
 @property(readwrite,strong) UMASN1Object *tcap_asn1;
 @property(readwrite,assign) int maxHopCount;
 @property(readwrite,assign) SCCP_ServiceClass   protocolClass;
+@property(readwrite,assign) int handling;
 
 
 

@@ -11,8 +11,6 @@
 
 #import "UMSCCP_mtpPause.h"
 #import "UMLayerSCCP.h"
-#import "UMSCCP_MTP3RoutingTable.h"
-#import "UMSCCP_MTP3Route.h"
 
 @implementation UMSCCP_mtpPause
 
@@ -27,20 +25,18 @@
     self = [super initWithName:@"UMSCCP_mtpPause" receiver:layer sender:mtp3 requiresSynchronisation:NO];
     if(self)
     {
-        affectedPointCode = affPC;
-        si = xsi;
-        ni = xni;
-        options = xoptions;
+        _affectedPointCode = affPC;
+        _si = xsi;
+        _ni = xni;
+        _options = xoptions;
+        _sccp = layer;
     }
     return self;
 }
 
 - (void)main
 {
-    /* FIXME
-    UMSCCP_MTP3Route *r = [layer.routingTable routeForPointCode:affPC];
-    [r pause];
-
-     */
+    [_sccp.mtp3RoutingTable setStatus:SccpL3RouteStatus_unavailable
+                         forPointCode:_affectedPointCode];
 }
 @end

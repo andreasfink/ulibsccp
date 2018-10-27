@@ -11,7 +11,7 @@
 
 #import "UMSCCP_mtpStatus.h"
 #import "UMLayerSCCP.h"
-#import "UMSCCP_MTP3Route.h"
+
 @implementation UMSCCP_mtpStatus
 
 - (UMSCCP_mtpStatus *)initForSccp:(UMLayerSCCP *)layer
@@ -26,11 +26,11 @@
     self = [super initWithName:@"UMSCCP_mtpStatus" receiver:layer sender:mtp3 requiresSynchronisation:NO];
     if(self)
     {
-        affectedPointCode = affPC;
-        status = s;
-        si = xsi;
-        ni = xni;
-        options = xoptions;
+        _affectedPointCode = affPC;
+        _status = s;
+        _si = xsi;
+        _ni = xni;
+        _options = xoptions;
         _sccp = layer;
     }
     return self;
@@ -38,11 +38,8 @@
 
 - (void)main
 {
-    /* FIXME: update SCCP MTP3 routing table view
-    UMSCCP_MTP3Route *r = [sccp.routingTable routeForPointCode:affPC];
-    [r status:status];
-
-     */
+    [_sccp.mtp3RoutingTable setStatus:SccpL3RouteStatus_restricted
+                         forPointCode:_affectedPointCode];
 }
 
 @end

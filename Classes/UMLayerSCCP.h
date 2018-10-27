@@ -19,7 +19,6 @@
 #import "UMSCCP_Segment.h"
 #import "UMLayerSCCPApplicationContextProtocol.h"
 
-@class UMSCCP_MTP3RoutingTable;
 @interface UMLayerSCCP : UMLayer<UMLayerMTP3UserProtocol>
 {
     SccpVariant                 _sccpVariant;
@@ -37,7 +36,6 @@
     UMSynchronizedArray         *_traceDroppedDestinations;
 
     SccpL3RoutingTable          *_mtp3RoutingTable;
-    UMSCCP_MTP3RoutingTable     *_routingTable;
     int                         _xudt_max_hop_count;
     int                         _xudts_max_hop_count;
     BOOL                        _stpMode;

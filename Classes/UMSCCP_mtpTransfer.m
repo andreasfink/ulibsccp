@@ -50,7 +50,7 @@
 
 - (void)main
 {
-    /* we build a pseudo MTP3 raw packet for debugging logging */
+    /* we build a pseudo MTP3 raw packet for debugging /tracing and logging */
     UMMTP3Label *label = [[UMMTP3Label alloc]init];
     label.opc = opc;
     label.dpc = dpc;
@@ -59,9 +59,7 @@
     [rawMtp3 appendByte:sio];
     [label appendToMutableData:rawMtp3];
     [rawMtp3 appendData:data];
-
     options[@"mtp3-pdu"] = rawMtp3;
-
     options[@"sccp-pdu"] = [data hexString];
     BOOL decodeOnly = [options[@"decode-only"] boolValue];
     if(decodeOnly)
@@ -78,7 +76,6 @@
         const uint8_t *d = data.bytes;
         int i = 0;
         int m_type = d[i++];
-        
         int m_handling;
         int param_called_party_address;
         int param_calling_party_address;

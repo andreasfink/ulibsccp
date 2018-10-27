@@ -16,10 +16,11 @@
 
 @interface UMSCCP_mtpPause : UMLayerTask
 {
-    UMMTP3PointCode *affectedPointCode;
-    int si;
-    int ni;
-    NSDictionary *options;
+    UMMTP3PointCode *_affectedPointCode;
+    int _si;
+    int _ni;
+    NSDictionary *_options;
+    UMLayerSCCP *_sccp;
 }
 
 - (UMSCCP_mtpPause *)initForSccp:(UMLayerSCCP *)layer
