@@ -29,7 +29,7 @@
     NSString *key = [pc stringValue];
     [_lock lock];
     UMSCCP_MTP3Route *r = _routes[key];
-    if(r==0)
+    if(r==NULL)
     {
         r =  [[UMSCCP_MTP3Route alloc]init];
         r.dpc = pc;
