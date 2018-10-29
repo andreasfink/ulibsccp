@@ -13,6 +13,7 @@
 #import <ulibmtp3/ulibmtp3.h>
 #import <ulibgt/ulibgt.h>
 #import "UMLayerSCCP.h"
+#import "UMSCCP_StatisticSection.h"
 
 static int segmentReferenceId;
 
@@ -34,6 +35,7 @@ static int segmentReferenceId;
        requiresSynchronisation:NO];
     if(self)
     {
+        _created = [NSDate date];
         _sccpLayer = sccp;
         _sccpUser = xuser;
         _data = xdata;
@@ -44,11 +46,11 @@ static int segmentReferenceId;
         _maxHopCount = 255;
         _protocolClass = pclass;
         _handling = handling;
+        _statisticsSection = UMSCCP_StatisticSection_TX;
+        _statisticsSection2 = UMSCCP_StatisticSection_UDT_TX;
     }
     return self;
 }
-
-
 
 - (UMSCCP_sccpNUnitdata *)initForSccp:(UMLayerSCCP *)sccp
                                  user:(id<UMSCCP_UserProtocol>)xuser
@@ -66,6 +68,7 @@ static int segmentReferenceId;
        requiresSynchronisation:NO];
     if(self)
     {
+        _created = [NSDate date];
         _sccpLayer = sccp;
         _sccpUser = xuser;
         _dataSegments = [xdataSegments mutableCopy];
@@ -97,6 +100,7 @@ static int segmentReferenceId;
     @try
     {
         /* int cls =0;*/
+        _startOfProcessing = [NSDate date];
 
         UMMTP3PointCode         *xopc = _sccpLayer.mtp3.opc;
         UMMTP3PointCode         *xdpc = _nextHop.dpc;
@@ -334,6 +338,7 @@ static int segmentReferenceId;
                                   options:_options
                                  provider:_sccpLayer.mtp3
                                 fromLocal:YES];
+                    _statisticsSection2 = UMSCCP_StatisticSection_XUDT_TX;
                 }
                 else
                 {
@@ -347,6 +352,7 @@ static int segmentReferenceId;
                                  options:_options
                                 provider:_sccpLayer.mtp3
                                fromLocal:YES];
+                    _statisticsSection2 = UMSCCP_StatisticSection_UDT_TX;
                 }
             }
         }
@@ -369,6 +375,7 @@ static int segmentReferenceId;
                                      options:_options
                                     provider:_sccpLayer.mtp3
                                    fromLocal:YES];
+                _statisticsSection2 = UMSCCP_StatisticSection_XUDT_TX;
                 if(e != UMMTP3_no_error)
                 {
                     break;
@@ -380,6 +387,16 @@ static int segmentReferenceId;
     {
         [_sccpLayer.logFeed majorErrorText:[NSString stringWithFormat:@"Error: %@",ex]];
     }
+    _endOfProcessing = [NSDate date];
+    [_sccpLayer addProcessingStatistic:_statisticsSection
+                          waitingDelay:[_startOfProcessing timeIntervalSinceDate:_created]
+                       processingDelay:[_endOfProcessing timeIntervalSinceDate:_startOfProcessing]];
+    [_sccpLayer addProcessingStatistic:_statisticsSection2
+                          waitingDelay:[_startOfProcessing timeIntervalSinceDate:_created]
+                       processingDelay:[_endOfProcessing timeIntervalSinceDate:_startOfProcessing]];
+    [_sccpLayer increaseThroughputCounter:_statisticsSection];
+    [_sccpLayer increaseThroughputCounter:_statisticsSection2];
 }
+
 
 @end

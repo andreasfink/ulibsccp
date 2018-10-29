@@ -18,6 +18,9 @@
 #import "UMSCCP_Defs.h"
 #import "UMSCCP_Segment.h"
 #import "UMLayerSCCPApplicationContextProtocol.h"
+#import "UMSCCP_Statistics.h"
+
+#import "UMSCCP_StatisticSection.h"
 
 @interface UMLayerSCCP : UMLayer<UMLayerMTP3UserProtocol>
 {
@@ -40,18 +43,10 @@
     int                         _xudts_max_hop_count;
     BOOL                        _stpMode;
     UMMTP3PointCode             *_next_pc;  /* if STP mode is NO, all traffic is sent to next_pc instead of using a routing table */
-    UMThroughputCounter         *_throughput_routeUDT;
-    long long                   _total_time_routeUDT;
-    long long                   _total_count_routeUDT;
-    UMThroughputCounter         *_throughput_routeUDTS;
-    long long                   _total_time_routeUDTS;
-    long long                   _total_count_routeUDTS;
-    UMThroughputCounter         *_throughput_routeXUDT;
-    long long                   _total_time_routeXUDT;
-    long long                   _total_count_routeXUDT;
-    UMThroughputCounter         *_throughput_routeXUDTS;
-    long long                   _total_time_routeXUDTS;
-    long long                   _total_count_routeXUDTS;
+
+    UMSCCP_Statistics           *_processingStats[UMSCCP_StatisticSection_MAX];
+    UMThroughputCounter         *_throughputCounters[UMSCCP_StatisticSection_MAX];
+
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;
@@ -63,6 +58,8 @@
 @property(readwrite,assign) int xudts_max_hop_count;
 @property(readwrite,assign) BOOL stpMode;
 @property(readwrite,strong) UMMTP3PointCode *next_pc;
+
+- (void)increaseThroughputCounter:(UMSCCP_StatisticSection)section;
 
 - (UMSynchronizedSortedDictionary *)statisticalInfo;
 - (UMLayerMTP3 *)mtp3;
@@ -239,7 +236,7 @@
                  provider:(UMLayerMTP3 *)provider;
 
 
--(void) routeUDT:(NSData *)pdu
+-(BOOL) routeUDT:(NSData *)pdu /* returns true if processed locally, false if transited */
          calling:(SccpAddress *)src
           called:(SccpAddress *)dst
            class:(SCCP_ServiceClass)pclass
@@ -251,7 +248,7 @@
        fromLocal:(BOOL)fromLocal;
 
 
-- (void) routeUDTS:(NSData *)data
+- (BOOL) routeUDTS:(NSData *)data /* returns true if processed locally, false if transited */
            calling:(SccpAddress *)src
             called:(SccpAddress *)dst
             reason:(int)reasonCode
@@ -263,7 +260,7 @@
 
 
 
-- (void) routeXUDT:(NSData *)data
+- (BOOL) routeXUDT:(NSData *)data /* returns true if processed locally, false if transited */
            calling:(SccpAddress *)src
             called:(SccpAddress *)dst
              class:(SCCP_ServiceClass)pclass
@@ -277,7 +274,7 @@
          fromLocal:(BOOL)fromLocal;
 
 
--(void) routeXUDTsegment:(UMSCCP_Segment *)segment
+-(BOOL) routeXUDTsegment:(UMSCCP_Segment *)segment /* returns true if processed locally, false if transited */
                  calling:(SccpAddress *)src
                   called:(SccpAddress *)dst
                    class:(SCCP_ServiceClass)pclass
@@ -291,7 +288,7 @@
                fromLocal:(BOOL)fromLocal;
 
 
-- (void) routeXUDTS:(NSData *)data
+- (BOOL) routeXUDTS:(NSData *)data /* returns true if processed locally, false if transited */
            calling:(SccpAddress *)src
             called:(SccpAddress *)dst
             reason:(int)reasonCode
@@ -328,5 +325,9 @@
 - (NSDictionary *)apiStatus;
 
 - (void)stopDetachAndDestroy;
+- (void)addProcessingStatistic:(UMSCCP_StatisticSection)section
+                  waitingDelay:(NSTimeInterval)waitingDelay
+               processingDelay:(NSTimeInterval)processingDelay;
+
 
 @end

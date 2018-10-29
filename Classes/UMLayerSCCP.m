@@ -21,6 +21,8 @@
 #import "UMSCCP_Segment.h"
 #import "UMLayerSCCPApplicationContextProtocol.h"
 #import <ulibgt/ulibgt.h>
+#import "UMSCCP_Statistics.h"
+#import "UMSCCP_StatisticSection.h"
 
 @implementation UMLayerSCCP
 
@@ -72,49 +74,13 @@
     _xudt_max_hop_count = 16;
     _xudts_max_hop_count = 16;
     _gttSelectorRegistry = [[SccpGttRegistry alloc]init];
-    _throughput_routeUDT = [[UMThroughputCounter alloc]init];
-    _throughput_routeUDTS = [[UMThroughputCounter alloc]init];
-    _throughput_routeXUDT = [[UMThroughputCounter alloc]init];
-    _throughput_routeXUDTS = [[UMThroughputCounter alloc]init];
+    for(int i=0;i<UMSCCP_StatisticSection_MAX;i++)
+    {
+        _processingStats[i] = [[UMSCCP_Statistics alloc] init];
+        _throughputCounters[i] = [[UMThroughputCounter alloc] init];
+    }
 }
 
-- (UMSynchronizedSortedDictionary *)statisticalInfo
-{
-    UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
-    dict[@"udt-throughput"] = [_throughput_routeUDT getSpeedTripleJson];
-    dict[@"total-count-udt"] = @(_total_count_routeUDT);
-    dict[@"total-time-udt"] = @(((double)_total_time_routeUDT/1000.0));
-    if(_total_count_routeUDT>0)
-    {
-        dict[@"average-time-udt"] = @((double)_total_time_routeUDT/(double)_total_count_routeUDT/1000.0);
-    }
-
-    dict[@"udts-throughput"] = [_throughput_routeUDTS getSpeedTripleJson];
-    dict[@"total-count-udts"] = @(_total_count_routeUDTS);
-    dict[@"total-time-udts"] = @(((double)_total_time_routeUDTS/1000.0));
-    if(_total_count_routeUDTS>0)
-    {
-        dict[@"average-time-udts"] = @((double)_total_time_routeUDTS/(double)_total_count_routeUDTS/1000.0);
-    }
-
-    dict[@"xudt-throughput"] = [_throughput_routeXUDT getSpeedTripleJson];
-    dict[@"total-count-xudt"] = @(_total_count_routeXUDT);
-    dict[@"total-time-xudt"] = @(((double)_total_time_routeXUDT/1000.0));
-    if(_total_count_routeXUDT>0)
-    {
-        dict[@"average-time-xudt"] = @((double)_total_time_routeXUDT/(double)_total_count_routeXUDT/1000.0);
-    }
-
-    dict[@"xudts-throughput"] = [_throughput_routeXUDTS getSpeedTripleJson];
-    dict[@"total-count-xudts"] = @(_total_count_routeXUDTS);
-    dict[@"total-time-xudts"] = @(((double)_total_time_routeXUDTS/1000.0));
-
-    if(_total_count_routeXUDTS>0)
-    {
-        dict[@"average-time-xudts"] = @((double)_total_time_routeXUDTS/(double)_total_count_routeXUDTS/1000.0);
-    }
-    return dict;
-}
 
 /* if MTP3 has a packet for us it will send us a mtpTransfer message */
 - (void)mtpTransfer:(NSData *)data
@@ -657,7 +623,7 @@
 }
 
 
-- (void) routeUDT:(NSData *)data
+- (BOOL) routeUDT:(NSData *)data /* returns true if processed locally, false if transited */
           calling:(SccpAddress *)src
            called:(SccpAddress *)dst
             class:(SCCP_ServiceClass)pclass
@@ -668,12 +634,10 @@
          provider:(UMLayerMTP3 *)provider
         fromLocal:(BOOL)fromLocal
 {
-
+    BOOL returnValue = NO;
     int causeValue = -1;
     id<UMSCCP_UserProtocol> localUser =NULL;
     UMMTP3PointCode *pc = NULL;
-
-    long long startTime = [UMUtil milisecondClock];
     if(logLevel <=UMLOG_DEBUG)
     {
         NSString *s = [NSString stringWithFormat:@"calling findRoute (DST=%@,local=%d,pc=%@) dpc=%@",dst,fromLocal,pc,dpc];
@@ -787,6 +751,7 @@
                            class:pclass
                         handling:handling
                          options:options];
+        returnValue = YES;
     }
     else
     {
@@ -804,12 +769,10 @@
                   provider:_mtp3];
         }
     }
-    long long timeConsumed = [UMUtil milisecondClock] - startTime;
-    _total_time_routeUDT += timeConsumed;
-    _total_count_routeUDT++;
+    return returnValue;
 }
 
-- (void) routeUDTS:(NSData *)data
+- (BOOL) routeUDTS:(NSData *)data /* returns true if processed locally, false if transited */
            calling:(SccpAddress *)src
             called:(SccpAddress *)dst
             reason:(int)reasonCode
@@ -819,8 +782,7 @@
           provider:(UMLayerMTP3 *)provider
          fromLocal:(BOOL)fromLocal
 {
-    long long startTime = [UMUtil milisecondClock];
-
+    BOOL returnValue = NO;
     id<UMSCCP_UserProtocol> localUser =NULL;
     UMMTP3PointCode *pc = NULL;
 
@@ -893,18 +855,17 @@
                         called:dst
                         reason:reasonCode
                        options:options];
+        returnValue = YES;
     }
     else
     {
         [self logMinorError:[NSString stringWithFormat:@"[2] Can not route UDTS %@->%@ Reason=%d %@",src,dst,reasonCode,data]];
     }
 
-    long long timeConsumed = [UMUtil milisecondClock] - startTime;
-    _total_time_routeUDTS += timeConsumed;
-    _total_count_routeUDTS++;
+    return returnValue;
 }
 
-- (void) routeXUDT:(NSData *)data
+- (BOOL) routeXUDT:(NSData *)data /* returns true if processed locally, false if transited */
            calling:(SccpAddress *)src
             called:(SccpAddress *)dst
              class:(SCCP_ServiceClass)pclass
@@ -917,8 +878,7 @@
           provider:(UMLayerMTP3 *)provider
          fromLocal:(BOOL)fromLocal
 {
-    long long startTime = [UMUtil milisecondClock];
-
+    BOOL returnValue = NO;
 
     int causeValue = -1;
 
@@ -1013,6 +973,7 @@
                                class:pclass
                             handling:handling
                              options:options];
+            returnValue = YES;
         }
         else
         {
@@ -1036,13 +997,11 @@
                    provider:provider];
         }
     }
-    long long timeConsumed = [UMUtil milisecondClock] - startTime;
-    _total_time_routeUDTS += timeConsumed;
-    _total_count_routeUDTS++;
+    return returnValue;
 }
 
 
--(void) routeXUDTsegment:(UMSCCP_Segment *)segment
+-(BOOL) routeXUDTsegment:(UMSCCP_Segment *)segment /* returns true if processed locally, false if transited */
                  calling:(SccpAddress *)src
                   called:(SccpAddress *)dst
                    class:(SCCP_ServiceClass)pclass
@@ -1055,6 +1014,7 @@
                 provider:(UMLayerMTP3 *)provider
                fromLocal:(BOOL)fromLocal
 {
+    BOOL returnValue = NO;
     NSMutableData *optionsData = [[NSMutableData alloc]init];
     [optionsData appendByte:0x10]; /* optional parameter "segmentation" */
     [optionsData appendByte:0x04]; /* length of optional parameter */
@@ -1067,21 +1027,22 @@
     {
         [optionsData appendByte:0x00]; /* end of optional parameters */
     }
-    [self routeXUDT:segment.data
-            calling:src
-             called:dst
-              class:pclass
-           handling:handling
-           hopCount:hopCount
-                opc:opc
-                dpc:dpc
-        optionsData:optionsData
-            options:options
-           provider:provider
-          fromLocal:fromLocal];
+    returnValue = [self routeXUDT:segment.data
+                          calling:src
+                           called:dst
+                            class:pclass
+                         handling:handling
+                         hopCount:hopCount
+                              opc:opc
+                              dpc:dpc
+                      optionsData:optionsData
+                          options:options
+                         provider:provider
+                        fromLocal:fromLocal];
+    return returnValue;
 }
 
-- (void) routeXUDTS:(NSData *)data
+- (BOOL) routeXUDTS:(NSData *)data  /* returns true if processed locally, false if transited */
             calling:(SccpAddress *)src
              called:(SccpAddress *)dst
              reason:(int)reasonCode
@@ -1093,8 +1054,7 @@
            provider:(UMLayerMTP3 *)provider
           fromLocal:(BOOL)fromLocal;
 {
-    long long startTime = [UMUtil milisecondClock];
-
+    BOOL returnValue = NO;
     id<UMSCCP_UserProtocol> localUser =NULL;
     UMMTP3PointCode *pc = NULL;
 
@@ -1102,7 +1062,7 @@
     if(hopCount < 0)
     {
         [self logMinorError:[NSString stringWithFormat:@"Dropping XUDT to maxhopcount reached SRC=%@ DST=%@ DATA=%@",src,dst,data]];
-        return;
+        return returnValue;
     }
 
     if((dpc) && (provider))
@@ -1165,15 +1125,13 @@
                         called:dst
                         reason:reasonCode
                        options:options];
+        returnValue= YES;
     }
     else
     {
         [self logMinorError:[NSString stringWithFormat:@"[3] Can not route UDTS %@->%@ Reason=%d %@",src,dst,reasonCode,data]];
     }
-    long long timeConsumed = [UMUtil milisecondClock] - startTime;
-    _total_time_routeXUDTS += timeConsumed;
-    _total_count_routeXUDTS++;
-
+    return returnValue;
 }
 
 - (UMMTP3_Error) sendUDT:(NSData *)data
@@ -1991,4 +1949,104 @@
 {
     /* FIXME: do something here */
 }
+
+- (void)addProcessingStatistic:(UMSCCP_StatisticSection)section
+                   waitingDelay:(NSTimeInterval)waitingDelay
+                processingDelay:(NSTimeInterval)processingDelay
+{
+    UMAssert( (section < UMSCCP_StatisticSection_MAX),@"unknown section");
+    [_processingStats[section] addWaitingDelay:waitingDelay processingDelay:processingDelay];
+
+}
+
+- (void)increaseThroughputCounter:(UMSCCP_StatisticSection)section
+{
+    [_throughputCounters[section] increase];
+}
+
+- (UMSynchronizedSortedDictionary *)statisticalInfo
+{
+    UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
+    UMSynchronizedSortedDictionary *throughput = [[UMSynchronizedSortedDictionary alloc]init];
+    UMSynchronizedSortedDictionary *delays = [[UMSynchronizedSortedDictionary alloc]init];
+
+    for(UMSCCP_StatisticSection i=0;i<UMSCCP_StatisticSection_MAX;i++)
+    {
+        NSString *key;
+        switch(i)
+        {
+            case  UMSCCP_StatisticSection_RX:
+                key = @"rx";
+                break;
+            case UMSCCP_StatisticSection_TX:
+                key = @"tx";
+                break;
+            case UMSCCP_StatisticSection_TRANSIT:
+                key = @"transit";
+                break;
+
+            case UMSCCP_StatisticSection_UDT_RX:
+                key = @"rx-udt";
+                break;
+
+            case UMSCCP_StatisticSection_UDTS_RX:
+                key = @"rx-udts";
+                break;
+
+            case UMSCCP_StatisticSection_XUDT_RX:
+                key = @"rx-xudt";
+                break;
+
+            case UMSCCP_StatisticSection_XUDTS_RX:
+                key = @"rx-xudts";
+                break;
+
+            case UMSCCP_StatisticSection_UDT_TX:
+                key = @"tx-udt";
+                break;
+
+            case UMSCCP_StatisticSection_UDTS_TX:
+                key = @"tx-udts";
+                break;
+
+            case UMSCCP_StatisticSection_XUDT_TX:
+                key = @"tx-xudt";
+                break;
+
+            case UMSCCP_StatisticSection_XUDTS_TX:
+                key = @"tx-xudts";
+                break;
+
+            case UMSCCP_StatisticSection_UDT_TRANSIT:
+                key = @"tr-udt";
+                break;
+
+            case UMSCCP_StatisticSection_UDTS_TRANSIT:
+                key = @"tr-udts";
+                break;
+
+            case UMSCCP_StatisticSection_XUDT_TRANSIT:
+                key = @"tr-xudt";
+                break;
+
+            case UMSCCP_StatisticSection_XUDTS_TRANSIT:
+                key = @"tr-xudts";
+                break;
+        }
+
+        UMThroughputCounter *tc = _throughputCounters[i];
+        UMSCCP_Statistics   *stat = _processingStats[i];
+
+        throughput[key] = [tc getSpeedTripleJson];
+        delays[key] = [stat getStatDict];
+    }
+
+    dict[@"throughput"] = throughput;
+    dict[@"delays"] = delays;
+    return dict;
+}
+
+
+
 @end
+

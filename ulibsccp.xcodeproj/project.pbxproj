@@ -40,6 +40,11 @@
 		A6C78D991A2943E8006C66A2 /* ulibm2pa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D971A2943E8006C66A2 /* ulibm2pa.framework */; };
 		A6C78D9B1A2943F7006C66A2 /* ulibsctp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D9A1A2943F7006C66A2 /* ulibsctp.framework */; };
 		A6C78D9C1A2943F7006C66A2 /* ulibsctp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D9A1A2943F7006C66A2 /* ulibsctp.framework */; };
+		A6CF1ABD2185A41C00F09659 /* UMSCCP_StatisticData.h in Headers */ = {isa = PBXBuildFile; fileRef = A6CF1ABB2185A41C00F09659 /* UMSCCP_StatisticData.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A6CF1ABE2185A41C00F09659 /* UMSCCP_StatisticData.m in Sources */ = {isa = PBXBuildFile; fileRef = A6CF1ABC2185A41C00F09659 /* UMSCCP_StatisticData.m */; };
+		A6CF1AC12185AAA600F09659 /* UMSCCP_Statistics.h in Headers */ = {isa = PBXBuildFile; fileRef = A6CF1ABF2185AAA600F09659 /* UMSCCP_Statistics.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A6CF1AC22185AAA600F09659 /* UMSCCP_Statistics.m in Sources */ = {isa = PBXBuildFile; fileRef = A6CF1AC02185AAA600F09659 /* UMSCCP_Statistics.m */; };
+		A6CF1AC92185B96D00F09659 /* UMSCCP_StatisticSection.h in Headers */ = {isa = PBXBuildFile; fileRef = A6CF1AC72185B96D00F09659 /* UMSCCP_StatisticSection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A6DDA3F01CAD269000754B9E /* UMSCCP_UserProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = A6DDA3EE1CAD269000754B9E /* UMSCCP_UserProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A6ED5C6D1B435A8A00854472 /* UMLayerSCCP.h in Headers */ = {isa = PBXBuildFile; fileRef = A6ED5C6B1B435A8A00854472 /* UMLayerSCCP.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A6ED5C6E1B435A8A00854472 /* UMLayerSCCP.m in Sources */ = {isa = PBXBuildFile; fileRef = A6ED5C6C1B435A8A00854472 /* UMLayerSCCP.m */; };
@@ -98,6 +103,11 @@
 		A6C78D911A2943D0006C66A2 /* ulibmtp3.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibmtp3.framework; path = /Library/Frameworks/ulibmtp3.framework; sourceTree = "<absolute>"; };
 		A6C78D971A2943E8006C66A2 /* ulibm2pa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibm2pa.framework; path = /Library/Frameworks/ulibm2pa.framework; sourceTree = "<absolute>"; };
 		A6C78D9A1A2943F7006C66A2 /* ulibsctp.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibsctp.framework; path = /Library/Frameworks/ulibsctp.framework; sourceTree = "<absolute>"; };
+		A6CF1ABB2185A41C00F09659 /* UMSCCP_StatisticData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_StatisticData.h; sourceTree = "<group>"; };
+		A6CF1ABC2185A41C00F09659 /* UMSCCP_StatisticData.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_StatisticData.m; sourceTree = "<group>"; };
+		A6CF1ABF2185AAA600F09659 /* UMSCCP_Statistics.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_Statistics.h; sourceTree = "<group>"; };
+		A6CF1AC02185AAA600F09659 /* UMSCCP_Statistics.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_Statistics.m; sourceTree = "<group>"; };
+		A6CF1AC72185B96D00F09659 /* UMSCCP_StatisticSection.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_StatisticSection.h; sourceTree = "<group>"; };
 		A6DDA3EE1CAD269000754B9E /* UMSCCP_UserProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_UserProtocol.h; sourceTree = "<group>"; };
 		A6ED5C6B1B435A8A00854472 /* UMLayerSCCP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMLayerSCCP.h; sourceTree = "<group>"; };
 		A6ED5C6C1B435A8A00854472 /* UMLayerSCCP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMLayerSCCP.m; sourceTree = "<group>"; };
@@ -207,6 +217,11 @@
 				A68494E51CB320C800211137 /* UMSCCP_mtpStatus.m */,
 				A6ADC5C51CADB25500211137 /* UMSCCP_sccpNUnitdata.h */,
 				A6ADC5C61CADB25500211137 /* UMSCCP_sccpNUnitdata.m */,
+				A6CF1ABB2185A41C00F09659 /* UMSCCP_StatisticData.h */,
+				A6CF1ABC2185A41C00F09659 /* UMSCCP_StatisticData.m */,
+				A6CF1AC72185B96D00F09659 /* UMSCCP_StatisticSection.h */,
+				A6CF1ABF2185AAA600F09659 /* UMSCCP_Statistics.h */,
+				A6CF1AC02185AAA600F09659 /* UMSCCP_Statistics.m */,
 				A6F442B01CB2595000C2B472 /* UMSCCPConnection.h */,
 				A6F442B11CB2595000C2B472 /* UMSCCPConnection.m */,
 			);
@@ -265,7 +280,9 @@
 				A6ED5C931B435F3600854472 /* ulibsccp.h in Headers */,
 				A6827E1A1E380FC900F3048B /* UMLayerSCCPApplicationContextProtocol.h in Headers */,
 				A6ED5C6D1B435A8A00854472 /* UMLayerSCCP.h in Headers */,
+				A6CF1AC12185AAA600F09659 /* UMSCCP_Statistics.h in Headers */,
 				A68494E21CB320BF00211137 /* UMSCCP_mtpResume.h in Headers */,
+				A6CF1AC92185B96D00F09659 /* UMSCCP_StatisticSection.h in Headers */,
 				A6F442B21CB2595000C2B472 /* UMSCCPConnection.h in Headers */,
 				A6DDA3F01CAD269000754B9E /* UMSCCP_UserProtocol.h in Headers */,
 				A68494E61CB320C800211137 /* UMSCCP_mtpStatus.h in Headers */,
@@ -273,6 +290,7 @@
 				A68494DA1CB320AB00211137 /* UMSCCP_mtpTransfer.h in Headers */,
 				A6ADC5E51CAE8C7600211137 /* UMSCCP_Defs.h in Headers */,
 				A61571EE1CD4891200211137 /* UMSCCP_Segment.h in Headers */,
+				A6CF1ABD2185A41C00F09659 /* UMSCCP_StatisticData.h in Headers */,
 				A61571F61CD4AADF00211137 /* UMSCCP_ReceivedSegments.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -382,6 +400,8 @@
 				A6ADC5C81CADB25500211137 /* UMSCCP_sccpNUnitdata.m in Sources */,
 				A68494DF1CB320B600211137 /* UMSCCP_mtpPause.m in Sources */,
 				A61571F71CD4AADF00211137 /* UMSCCP_ReceivedSegments.m in Sources */,
+				A6CF1ABE2185A41C00F09659 /* UMSCCP_StatisticData.m in Sources */,
+				A6CF1AC22185AAA600F09659 /* UMSCCP_Statistics.m in Sources */,
 				A6ED5C6E1B435A8A00854472 /* UMLayerSCCP.m in Sources */,
 				A68494DB1CB320AB00211137 /* UMSCCP_mtpTransfer.m in Sources */,
 			);

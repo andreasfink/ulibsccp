@@ -14,6 +14,7 @@
 #import <ulibgt/ulibgt.h>
 
 #import "UMSCCP_Defs.h"
+#import "UMSCCP_StatisticSection.h"
 
 @class UMLayerSCCP;
 
@@ -45,6 +46,12 @@
     SccpAddress *_decodedCalled;
     NSData *_decodedPdu;
     int m_type;
+
+    NSDate                  *_created;
+    NSDate                  *_startOfProcessing;
+    NSDate                  *_endOfProcessing;
+    UMSCCP_StatisticSection _statsSection;
+    UMSCCP_StatisticSection _statsSection2;
 }
 
 @property(readwrite,strong,atomic)  UMSynchronizedSortedDictionary *decodedJson;
@@ -60,4 +67,6 @@
                                  ni:(int)ni
                                data:(NSData *)data
                             options:(NSDictionary *)options;
+
+
 @end

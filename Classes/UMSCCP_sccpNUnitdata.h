@@ -32,6 +32,16 @@
     BOOL                    _returnOnError;
     SCCP_ServiceClass       _protocolClass;
     int                     _handling;
+
+    NSDate                  *_created;
+    NSDate                  *_startOfProcessing;
+    NSDate                  *_endOfProcessing;
+
+    UMSynchronizedDictionary    *_processingStats;
+
+    UMSCCP_StatisticSection _statisticsSection;
+    UMSCCP_StatisticSection _statisticsSection2;
+
 }
 
 @property(readwrite,strong) id<UMSCCP_UserProtocol> sccpUser;

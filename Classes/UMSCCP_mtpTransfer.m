@@ -29,6 +29,8 @@
     self = [super initWithName:@"UMSCCP_mtpTransfer" receiver:layer sender:mtp3 requiresSynchronisation:NO];
     if(self)
     {
+        _created = [NSDate date];
+        _statsSection = UMSCCP_StatisticSection_TRANSIT;
         opc = xopc;
         dpc = xdpc;
         si = xsi;
@@ -50,6 +52,8 @@
 
 - (void)main
 {
+    _startOfProcessing = [NSDate date];
+
     /* we build a pseudo MTP3 raw packet for debugging /tracing and logging */
     UMMTP3Label *label = [[UMMTP3Label alloc]init];
     label.opc = opc;
@@ -322,24 +326,69 @@
                     options[@"sccp-udt"] = @(YES);
                     if(dst.ssn.ssn==SCCP_SSN_SCCP_MG)
                     {
-                        [self process_udt_sccp_mg];
+                        if([self process_udt_sccp_mg])
+                        {
+                            _statsSection = UMSCCP_StatisticSection_RX;
+                            _statsSection2 = UMSCCP_StatisticSection_UDT_RX;
+                        }
+                        else
+                        {
+                            _statsSection = UMSCCP_StatisticSection_TRANSIT;
+                            _statsSection2 = UMSCCP_StatisticSection_UDT_TRANSIT;
+                        }
                     }
                     else
                     {
-                        [self processUDT];
+                        if([self processUDT])
+                        {
+                            _statsSection = UMSCCP_StatisticSection_RX;
+                            _statsSection2 = UMSCCP_StatisticSection_UDT_RX;
+                        }
+                        else
+                        {
+                            _statsSection = UMSCCP_StatisticSection_TRANSIT;
+                            _statsSection2 = UMSCCP_StatisticSection_UDT_TRANSIT;
+                        }
                     }
                     break;
                 case SCCP_UDTS:
                     options[@"sccp-udts"] = @(YES);
-                    [self processUDTS];
+                    if([self processUDTS])
+                    {
+                        _statsSection = UMSCCP_StatisticSection_RX;
+                        _statsSection2 = UMSCCP_StatisticSection_UDTS_RX;
+                    }
+                    else
+                    {
+                        _statsSection = UMSCCP_StatisticSection_TRANSIT;
+                        _statsSection2 = UMSCCP_StatisticSection_UDTS_TRANSIT;
+                    }
                     break;
                 case SCCP_XUDT:
                     options[@"sccp-xudt"] = @(YES);
-                    [self processXUDT];
+                    if([self processXUDT])
+                    {
+                        _statsSection = UMSCCP_StatisticSection_RX;
+                        _statsSection2 = UMSCCP_StatisticSection_XUDT_RX;
+                    }
+                    else
+                    {
+                        _statsSection = UMSCCP_StatisticSection_TRANSIT;
+                        _statsSection2 = UMSCCP_StatisticSection_XUDT_TRANSIT;
+                    }
                     break;
                 case SCCP_XUDTS:
                     options[@"sccp-xudts"] = @(YES);
-                    [self processXUDTS];
+                    if([self processXUDTS])
+                    {
+                        _statsSection = UMSCCP_StatisticSection_RX;
+                        _statsSection2 = UMSCCP_StatisticSection_XUDTS_RX;
+                    }
+                    else
+                    {
+                        _statsSection = UMSCCP_StatisticSection_TRANSIT;
+                        _statsSection2 = UMSCCP_StatisticSection_XUDTS_TRANSIT;
+                    }
                     break;
             }
         }
@@ -361,6 +410,16 @@
             _decodedJson[@"decode-error"] = e.description;
         }
     }
+    _endOfProcessing = [NSDate date];
+    [sccpLayer addProcessingStatistic:_statsSection
+                          waitingDelay:[_startOfProcessing timeIntervalSinceDate:_created]
+                       processingDelay:[_endOfProcessing timeIntervalSinceDate:_startOfProcessing]];
+    [sccpLayer addProcessingStatistic:_statsSection2
+                         waitingDelay:[_startOfProcessing timeIntervalSinceDate:_created]
+                      processingDelay:[_endOfProcessing timeIntervalSinceDate:_startOfProcessing]];
+    [sccpLayer increaseThroughputCounter:_statsSection];
+    [sccpLayer increaseThroughputCounter:_statsSection2];
+
 }
 
 - (void)routeOnGlobalTitle
@@ -425,7 +484,7 @@
     }
 }
 
-- (void)process_udt_sccp_mg
+- (BOOL)process_udt_sccp_mg /* returns true if processed locally */
 {
     int scgm_format = -1;
     int affected_ssn = 0;
@@ -492,8 +551,10 @@
         case 0x03: /* SST subsystem-status-test */
             /* we return exactly same packet as SSA */
         {
+            SccpSubSystemNumber *ssn = [[SccpSubSystemNumber alloc]initWithInt:affected_ssn];
+            id<UMSCCP_UserProtocol> user = [sccpLayer getUserForSubsystem:ssn];
             unsigned char r[5];
-            r[0] = 0x01; /* FIXME: should we maybe check here if the subsystem is really alive ? */
+            r[0] = user ? 0x01 : 0x00;
             r[1] = affected_ssn;
             r[2] = dat[2];
             r[3] = dat[3];
@@ -501,8 +562,8 @@
             
             NSData *rpdu = [[NSData alloc]initWithBytes:r length:5];
             
-            SccpAddress *response_calling_sccp = [[SccpAddress alloc]init];
-            SccpAddress *response_called_sccp = [[SccpAddress alloc]init];
+            SccpAddress *response_calling_sccp  = [[SccpAddress alloc]init];
+            SccpAddress *response_called_sccp   = [[SccpAddress alloc]init];
             
             response_calling_sccp.pc = dpc;
             [response_calling_sccp setSsnFromInt:0x01];
@@ -529,54 +590,56 @@
         default:
             break;
     }
+    return YES;
 }
 
-- (void)processUDT
+- (BOOL)processUDT /* returns true if processed locally */
 {
-    [sccpLayer routeUDT:sccp_pdu
-                calling:src
-                 called:dst
-                  class:m_protocol_class
-               handling:m_handling
-                    opc:opc
-                    dpc:dpc
-                options:options
-               provider:sccpLayer.mtp3
-              fromLocal:NO];
+    return [sccpLayer routeUDT:sccp_pdu
+                       calling:src
+                        called:dst
+                         class:m_protocol_class
+                      handling:m_handling
+                           opc:opc
+                           dpc:dpc
+                       options:options
+                      provider:sccpLayer.mtp3
+                     fromLocal:NO];
 }
 
-- (void)processUDTS
-{
-    NSDate *ts = [NSDate new];
-    options[@"sccp-timestamp-udt"] = ts;
-
-    [sccpLayer routeUDTS:sccp_pdu
-                  calling:src
-                   called:dst
-                   reason:m_return_cause
-                      opc:opc
-                      dpc:dpc
-                  options:options
-                 provider:sccpLayer.mtp3
-               fromLocal:NO];
-}
-
-- (void)processXUDT
+- (BOOL)processUDTS
 {
     NSDate *ts = [NSDate new];
     options[@"sccp-timestamp-udt"] = ts;
 
-    [sccpLayer routeXUDTS:sccp_pdu
-                 calling:src
-                  called:dst
-                  reason:m_return_cause
-                 hopCount:m_hopcounter
-                     opc:opc
-                     dpc:dpc
-              optionsData:sccp_optional
-                 options:options
-                provider:sccpLayer.mtp3
-                fromLocal:NO];
+    return [sccpLayer routeUDTS:sccp_pdu
+                        calling:src
+                         called:dst
+                         reason:m_return_cause
+                            opc:opc
+                            dpc:dpc
+                        options:options
+                       provider:sccpLayer.mtp3
+                      fromLocal:NO];
+}
+
+- (BOOL)processXUDT /* returns true if processed locally */
+{
+    BOOL returnValue = NO;
+    NSDate *ts = [NSDate new];
+    options[@"sccp-timestamp-udt"] = ts;
+    returnValue = [sccpLayer routeXUDT:sccp_pdu
+                               calling:src
+                                called:dst
+                                 class:m_protocol_class
+                                handling:m_handling
+                              hopCount:m_hopcounter
+                                   opc:opc
+                                   dpc:dpc
+                           optionsData:sccp_optional
+                               options:options
+                              provider:sccpLayer.mtp3
+                             fromLocal:NO];
 
     id<UMSCCP_UserProtocol> upperLayer = [sccpLayer getUserForSubsystem:dst.ssn number:dst];
     options[@"sccp-timestamp-udt"] = ts;
@@ -635,24 +698,25 @@
         }
         
     }
+    return returnValue;
 }
 
-- (void)processXUDTS
+- (BOOL)processXUDTS
 {
     NSDate *ts = [NSDate new];
     options[@"sccp-timestamp-udt"] = ts;
 
-    [sccpLayer routeXUDTS:sccp_pdu
-                  calling:src
-                   called:dst
-                   reason:m_return_cause
-                 hopCount:m_hopcounter
-                      opc:opc
-                      dpc:dpc
-              optionsData:sccp_optional
-                  options:options
-                 provider:sccpLayer.mtp3
-                fromLocal:NO];
+    return [sccpLayer routeXUDTS:sccp_pdu
+                         calling:src
+                          called:dst
+                          reason:m_return_cause
+                        hopCount:m_hopcounter
+                             opc:opc
+                             dpc:dpc
+                     optionsData:sccp_optional
+                         options:options
+                        provider:sccpLayer.mtp3
+                       fromLocal:NO];
 }
 
 @end
