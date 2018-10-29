@@ -32,7 +32,7 @@ ${SLIB}: ${OFILES}
 	ar rcs ${SLIB} ${OFILES}
 	ranlib ${SLIB}
 
-install: ${LIB}
+install: ${LIB} ${SLIB}
 	-mkdir -p ${DESTDIR}/usr/local/lib/pkgconfig
 	rm -f "${DESTDIR}/usr/local/lib/${LIB}.${MAJORVER}.${MINORVER}.${REVISION}"
 	rm -f "${DESTDIR}/usr/local/lib/${LIB}.${MAJORVER}.${MINORVER}"
