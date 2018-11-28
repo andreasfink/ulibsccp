@@ -468,7 +468,7 @@
         /* simple mode */
         if(!_next_pc)
         {
-            [logFeed majorErrorText:[NSString stringWithFormat:@"no next pointcode set in SSP mode. Dropping packet for %@",dst.debugDescription]];
+            [self.logFeed majorErrorText:[NSString stringWithFormat:@"no next pointcode set in SSP mode. Dropping packet for %@",dst.debugDescription]];
         }
         else
         {
@@ -495,7 +495,7 @@
                 id<UMSCCP_UserProtocol> upperLayer = [self getUserForSubsystem:dst.ssn number:dst];
                 if(upperLayer == NULL)
                 {
-                    [logFeed majorErrorText:[NSString stringWithFormat:@"no upper layer found for %@ ssn=%d number=%@",dst.debugDescription,(int)dst.ssn,dst.stringValueE164]];
+                    [self.logFeed majorErrorText:[NSString stringWithFormat:@"no upper layer found for %@ ssn=%d number=%@",dst.debugDescription,(int)dst.ssn,dst.stringValueE164]];
                     *cause = SCCP_ReturnCause_Unequipped;
                 }
                 else
@@ -561,7 +561,7 @@
                         id<UMSCCP_UserProtocol> upperLayer = [self getUserForSubsystem:dst.ssn number:dst];
                         if(upperLayer == NULL)
                         {
-                            [logFeed majorErrorText:[NSString stringWithFormat:@"no upper layer found for %@",dst.debugDescription]];
+                            [self.logFeed majorErrorText:[NSString stringWithFormat:@"no upper layer found for %@",dst.debugDescription]];
 
                             if(logLevel <=UMLOG_DEBUG)
                             {
@@ -606,7 +606,7 @@
             id<UMSCCP_UserProtocol> upperLayer = [self getUserForSubsystem:dst.ssn number:dst];
             if(upperLayer == NULL)
             {
-                [logFeed majorErrorText:[NSString stringWithFormat:@"no upper layer found for %@",dst.debugDescription]];
+                [self.logFeed majorErrorText:[NSString stringWithFormat:@"no upper layer found for %@",dst.debugDescription]];
                 *cause = SCCP_ReturnCause_Unequipped;
             }
             else
@@ -1439,7 +1439,7 @@
                  options:(NSDictionary *)options
              synchronous:(BOOL)sync
 {
-    [logFeed majorErrorText:@"sccpNDataRequest: not implemented"];
+    [self.logFeed majorErrorText:@"sccpNDataRequest: not implemented"];
 }
 
 - (void)sccpNExpeditedData:(NSData *)data
@@ -1447,14 +1447,14 @@
                    options:(NSDictionary *)options
                synchronous:(BOOL)sync
 {
-    [logFeed majorErrorText:@"sccpNExpeditedData: not implemented"];
+    [self.logFeed majorErrorText:@"sccpNExpeditedData: not implemented"];
 }
 
 - (void)sccpNResetRequest:(UMSCCPConnection *)connection
                   options:(NSDictionary *)options
               synchronous:(BOOL)sync
 {
-    [logFeed majorErrorText:@"sccpNResetRequest: not implemented"];
+    [self.logFeed majorErrorText:@"sccpNResetRequest: not implemented"];
 }
 
 
@@ -1462,7 +1462,7 @@
                      options:(NSDictionary *)options
                  synchronous:(BOOL)sync
 {
-    [logFeed majorErrorText:@"sccpNResetIndication: not implemented"];
+    [self.logFeed majorErrorText:@"sccpNResetIndication: not implemented"];
 }
 
 
@@ -1470,7 +1470,7 @@
                        options:(NSDictionary *)options
                    synchronous:(BOOL)sync
 {
-    [logFeed majorErrorText:@"sccpNDisconnectRequest: not implemented"];
+    [self.logFeed majorErrorText:@"sccpNDisconnectRequest: not implemented"];
 }
 
 
@@ -1478,7 +1478,7 @@
                          options:(NSDictionary *)options
                      synchronous:(BOOL)sync
 {
-    [logFeed majorErrorText:@"sccpNDisconnectIndicaton: not implemented"];
+    [self.logFeed majorErrorText:@"sccpNDisconnectIndicaton: not implemented"];
 }
 
 

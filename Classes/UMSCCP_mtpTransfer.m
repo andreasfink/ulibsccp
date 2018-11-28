@@ -404,7 +404,7 @@
             [mtp3Layer.problematicPacketDumper logRawPacket:rawMtp3];
         }
 
-        [logFeed majorErrorText:[NSString stringWithFormat:@"Error: %@",e]];
+        [self.logFeed majorErrorText:[NSString stringWithFormat:@"Error: %@",e]];
         if(decodeOnly)
         {
             _decodedJson[@"decode-error"] = e.description;
