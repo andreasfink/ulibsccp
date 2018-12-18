@@ -466,7 +466,7 @@
     if(_stpMode==NO)
     {
         /* simple mode */
-        if(!_next_pc)
+        if((!_next_pc1) && (!_next_pc2))
         {
             [self.logFeed majorErrorText:[NSString stringWithFormat:@"no next pointcode set in SSP mode. Dropping packet for %@",dst.debugDescription]];
         }
@@ -474,15 +474,48 @@
         {
             if(isLocal)
             {
+                int pick_random = [UMUtil randomFrom:1 to:2];
+
                 /* packet from upper layer going out to next_pc */
-                SccpL3RoutingTableEntry *rtentry = [_mtp3RoutingTable getEntryForPointCode:_next_pc];
-                if(rtentry.status==SccpL3RouteStatus_available)
+                SccpL3RoutingTableEntry *rtentry1 = [_mtp3RoutingTable getEntryForPointCode:_next_pc1];
+                SccpL3RoutingTableEntry *rtentry2 = [_mtp3RoutingTable getEntryForPointCode:_next_pc2];
+                if((rtentry1.status==SccpL3RouteStatus_available) && (rtentry2.status==SccpL3RouteStatus_available))
                 {
-                    *pc = _next_pc;
+                    if(pick_random==1)
+                    {
+                        *pc = _next_pc1;
+                    }
+                    else
+                    {
+                        *pc = _next_pc2;
+                    }
                 }
-                else if(rtentry.status==SccpL3RouteStatus_restricted)
+                else if((rtentry1.status==SccpL3RouteStatus_available) && (rtentry2.status!=SccpL3RouteStatus_available))
                 {
-                    *pc = _next_pc;
+                    *pc = _next_pc1;
+                }
+                else if((rtentry1.status!=SccpL3RouteStatus_available) && (rtentry2.status==SccpL3RouteStatus_available))
+                {
+                    *pc = _next_pc2;
+                }
+                else if((rtentry1.status==SccpL3RouteStatus_restricted) && (rtentry2.status==SccpL3RouteStatus_restricted))
+                {
+                    if(pick_random==1)
+                    {
+                        *pc = _next_pc1;
+                    }
+                    else
+                    {
+                        *pc = _next_pc2;
+                    }
+                }
+                else if((rtentry1.status==SccpL3RouteStatus_restricted) && (rtentry2.status==SccpL3RouteStatus_unavailable))
+                {
+                    *pc = _next_pc1;
+                }
+                else if((rtentry1.status==SccpL3RouteStatus_unavailable) && (rtentry2.status==SccpL3RouteStatus_restricted))
+                {
+                    *pc = _next_pc2;
                 }
                 else
                 {
@@ -550,13 +583,13 @@
                         [self.logFeed debugText:[NSString stringWithFormat:@" Route to SCCP destination %@",destination]];
                     }
 
+
                     if(destination.ssn)
                     {
                         if(logLevel <=UMLOG_DEBUG)
                         {
                             [self.logFeed debugText:[NSString stringWithFormat:@" GTT SCCP selector returns SSN=%@",destination.ssn]];
                         }
-
                         /* routed by subsystem */
                         id<UMSCCP_UserProtocol> upperLayer = [self getUserForSubsystem:dst.ssn number:dst];
                         if(upperLayer == NULL)
@@ -567,7 +600,6 @@
                             {
                                 [self.logFeed debugText:[NSString stringWithFormat:@" SSN %@ is unequipped",destination.ssn]];
                             }
-
                             *cause = SCCP_ReturnCause_Unequipped;
                         }
                         else
@@ -618,6 +650,10 @@
                 *user = upperLayer;
             }
         }
+    }
+    if((_ntt) && (isLocal))
+    {
+        dst.tt = [_ntt copy];
     }
     *dst1 = dst;
 }
@@ -1394,14 +1430,26 @@
     }
 
     NSString *s = cfg[@"next-pc"];
-    if(s)
+    if(s.length > 0)
     {
-        if(s.length > 0)
-        {
-            _next_pc = [[UMMTP3PointCode alloc]initWithString:s variant:_mtp3.variant];
-        }
+        _next_pc1 = [[UMMTP3PointCode alloc]initWithString:s variant:_mtp3.variant];
+        _next_pc2 = [[UMMTP3PointCode alloc]initWithString:s variant:_mtp3.variant];
     }
-
+    s = cfg[@"next-pc1"];
+    if(s.length > 0)
+    {
+        _next_pc1 = [[UMMTP3PointCode alloc]initWithString:s variant:_mtp3.variant];
+    }
+    s = cfg[@"next-pc2"];
+    if(s.length > 0)
+    {
+        _next_pc2 = [[UMMTP3PointCode alloc]initWithString:s variant:_mtp3.variant];
+    }
+    NSNumber *n = cfg[@"ntt"];
+    if(n)
+    {
+        _ntt = [[SccpTranslationTableNumber alloc]initWithInt:[n intValue]];
+    }
 }
 
 - (NSDictionary *)config
@@ -1421,7 +1469,6 @@
     }
     return cfg;
 }
-
 
 /* connection oriented primitives */
 - (void)sccpNConnectRequest:(UMSCCPConnection **)connection
