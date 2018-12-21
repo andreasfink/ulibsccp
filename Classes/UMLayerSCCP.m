@@ -707,6 +707,11 @@
         }
     }
 
+    if((_ntt) && (fromLocal) && (dst.tt.tt==0))
+    {
+        dst.tt = [_ntt copy];
+    }
+
     if(pc)
     {
         UMMTP3_Error e = [self sendUDT:data
