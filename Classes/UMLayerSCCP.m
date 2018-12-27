@@ -713,7 +713,25 @@
         dst.tt = [_ntt copy];
     }
 
-    if(pc)
+
+
+    if((pc==NULL) && (localUser==NULL))
+    {
+        NSString *s = [NSString stringWithFormat:@"Can not forward UDT. No route to destination PC=%@. SRC=%@ DST=%@ DATA=%@",pc,src,dst,data];
+        [self logMinorError:s];
+        if(handling & UMSCCP_HANDLING_RETURN_ON_ERROR)
+        {
+            [self sendUDTS:data
+                   calling:src
+                    called:dst
+                    reason:causeValue
+                       opc:_mtp3.opc
+                       dpc:opc
+                   options:@{}
+                  provider:_mtp3];
+        }
+    }
+    else if(pc)
     {
         UMMTP3_Error e = [self sendUDT:data
                                calling:src
@@ -724,6 +742,7 @@
                                    dpc:pc
                                options:options
                               provider:provider];
+
         NSString *s= NULL;
         switch(e)
         {
@@ -950,7 +969,26 @@
                   pointCode:&pc
                   fromLocal:fromLocal];
         }
-        if(pc)
+
+        if(causeValue >=0)
+        {
+            NSString *s = [NSString stringWithFormat:@"Can not forward XUDT. No route to destination PC=%@. SRC=%@ DST=%@ DATA=%@",pc,src,dst,data];
+            [self logMinorError:s];
+            if(handling & UMSCCP_HANDLING_RETURN_ON_ERROR)
+            {
+                [self sendXUDTS:data
+                        calling:src
+                         called:dst
+                    returnCause:causeValue
+                       hopCount:_xudts_max_hop_count
+                            opc:_mtp3.opc
+                            dpc:opc
+                    optionsData:xoptionsdata
+                        options:@{}
+                       provider:provider];
+            }
+        }
+        else if(pc)
         {
             UMMTP3_Error e = [self sendXUDT:data
                                     calling:src
