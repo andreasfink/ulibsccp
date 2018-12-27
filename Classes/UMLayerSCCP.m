@@ -583,7 +583,26 @@
                         [self.logFeed debugText:[NSString stringWithFormat:@" Route to SCCP destination %@",destination]];
                     }
 
-
+                    if(destination.dpc)
+                    {
+                        if(self.logLevel <=UMLOG_DEBUG)
+                        {
+                            [self.logFeed debugText:[NSString stringWithFormat:@" next hop DPC= %@", destination.dpc]];
+                        }
+                        *pc =destination.dpc;
+                    }
+                    else if(destination.m3uaAs)
+                    {
+                        if(self.logLevel <=UMLOG_DEBUG)
+                        {
+                            [self.logFeed debugText:[NSString stringWithFormat:@" next hopM3UAAS= %@", destination.m3uaAs]];
+                        }
+                        *pc = [_mtp3 adjacentPointCodeOfLinkSet:destination.m3uaAs];
+                        if(self.logLevel <=UMLOG_DEBUG)
+                        {
+                            [self.logFeed debugText:[NSString stringWithFormat:@" new next hop DPC= %@", *pc]];
+                        }
+                    }
                     if(destination.ssn)
                     {
                         if(self.logLevel <=UMLOG_DEBUG)
@@ -606,23 +625,6 @@
                         {
                             *user = upperLayer;
                         }
-                    }
-                    else if(destination.dpc)
-                    {
-                        if(self.logLevel <=UMLOG_DEBUG)
-                        {
-                            [self.logFeed debugText:[NSString stringWithFormat:@" next hop DPC= %@", destination.dpc]];
-                        }
-                        *pc =destination.dpc;
-                    }
-                    else if(destination.m3uaAs)
-                    {
-                        /* not yet implemented */
-                        if(self.logLevel <=UMLOG_DEBUG)
-                        {
-                            [self.logFeed debugText:[NSString stringWithFormat:@" next hopM3UAAS= %@", destination.m3uaAs]];
-                        }
-                        *cause = SCCP_ReturnCause_ErrorInLocalProcessing;
                     }
                 }
             }
@@ -674,21 +676,20 @@
     int causeValue = -1;
     id<UMSCCP_UserProtocol> localUser =NULL;
     UMMTP3PointCode *pc = NULL;
-    if(self.logLevel <=UMLOG_DEBUG)
-    {
-        NSString *s = [NSString stringWithFormat:@"calling findRoute (DST=%@,local=%d,pc=%@) dpc=%@",dst,fromLocal,pc,dpc];
-        [self.logFeed debugText:s];
-    }
 
     /* predefined routing */
     if((dpc) && (provider) && (fromLocal))
     {
+        if(self.logLevel <=UMLOG_DEBUG)
+        {
+            NSString *s = [NSString stringWithFormat:@"using predefiend route %@",pc];
+            [self.logFeed debugText:s];
+        }
         pc = dpc;
     }
     else
     {
         provider = _mtp3;
-
         if(self.logLevel <=UMLOG_DEBUG)
         {
             NSString *s = [NSString stringWithFormat:@"calling findRoute (DST=%@,local=%d,pc=%@)",dst,fromLocal,pc];
@@ -920,7 +921,6 @@
          fromLocal:(BOOL)fromLocal
 {
     BOOL returnValue = NO;
-
     int causeValue = -1;
 
     id<UMSCCP_UserProtocol> localUser =NULL;
@@ -1125,18 +1125,29 @@
 
     }
 
-    if(pc)
+    if(localUser)
+    {
+        /* FIXME: we should do reassembly here before delivering to upper layer */
+        [localUser sccpNNotice:data
+                  callingLayer:self
+                       calling:src
+                        called:dst
+                        reason:reasonCode
+                       options:options];
+        returnValue= YES;
+    }
+    else if(pc)
     {
         UMMTP3_Error e = [self sendXUDTS:data
-                                calling:src
-                                 called:dst
-                            returnCause:reasonCode
-                               hopCount:hopCount
-                                    opc:_mtp3.opc
-                                    dpc:pc
+                                 calling:src
+                                  called:dst
+                             returnCause:reasonCode
+                                hopCount:hopCount
+                                     opc:_mtp3.opc
+                                     dpc:pc
                              optionsData:xoptionsdata
-                                options:options
-                               provider:provider];
+                                 options:options
+                                provider:provider];
         NSString *s = NULL;
         switch(e)
         {
@@ -1156,17 +1167,6 @@
         {
             [self logMinorError:s];
         }
-    }
-    else if(localUser)
-    {
-        /* FIXME: we should do reassembly here before delivering to upper layer */
-        [localUser sccpNNotice:data
-                  callingLayer:self
-                       calling:src
-                        called:dst
-                        reason:reasonCode
-                       options:options];
-        returnValue= YES;
     }
     else
     {
