@@ -715,7 +715,7 @@
 
 
 
-    if((pc==NULL) && (localUser==NULL))
+    if(causeValue >= 0)
     {
         NSString *s = [NSString stringWithFormat:@"Can not forward UDT. No route to destination PC=%@. SRC=%@ DST=%@ DATA=%@",pc,src,dst,data];
         [self logMinorError:s];
@@ -922,7 +922,6 @@
     {
         [self logMinorError:[NSString stringWithFormat:@"[2] Can not route UDTS %@->%@ Reason=%d %@",src,dst,reasonCode,data]];
     }
-
     return returnValue;
 }
 
@@ -969,99 +968,11 @@
                   pointCode:&pc
                   fromLocal:fromLocal];
         }
-
-        if(causeValue >=0)
-        {
-            NSString *s = [NSString stringWithFormat:@"Can not forward XUDT. No route to destination PC=%@. SRC=%@ DST=%@ DATA=%@",pc,src,dst,data];
-            [self logMinorError:s];
-            if(handling & UMSCCP_HANDLING_RETURN_ON_ERROR)
-            {
-                [self sendXUDTS:data
-                        calling:src
-                         called:dst
-                    returnCause:causeValue
-                       hopCount:_xudts_max_hop_count
-                            opc:_mtp3.opc
-                            dpc:opc
-                    optionsData:xoptionsdata
-                        options:@{}
-                       provider:provider];
-            }
-        }
-        else if(pc)
-        {
-            UMMTP3_Error e = [self sendXUDT:data
-                                    calling:src
-                                     called:dst
-                                      class:pclass   /* MGMT is class 0 */
-                                   handling:handling
-                                   hopCount:hopCount
-                                        opc:_mtp3.opc
-                                        dpc:pc
-                                optionsData:xoptionsdata
-                                    options:options
-                                   provider:provider];
-            NSString *s = NULL;
-            switch(e)
-            {
-                case UMMTP3_no_error:
-                    break;
-                case UMMTP3_error_pdu_too_big:
-                    s = [NSString stringWithFormat:@"Can not forward XUDT. PDU too big. SRC=%@ DST=%@ DATA=%@",src,dst,data];
-                    causeValue = SCCP_ReturnCause_ErrorInMessageTransport;
-                    break;
-                case UMMTP3_error_no_route_to_destination:
-                    s = [NSString stringWithFormat:@"Can not forward XUDT. No route to destination. SRC=%@ DST=%@ DATA=%@",src,dst,data];
-                    causeValue = SCCP_ReturnCause_NoTranslationForThisSpecificAddress;
-                    
-                    break;
-                case UMMTP3_error_invalid_variant:
-                    s = [NSString stringWithFormat:@"Can not forward XUDT. Invalid variant. SRC=%@ DST=%@ DATA=%@",src,dst,data];
-                    causeValue = SCCP_ReturnCause_NoTranslationForAnAddressOfSuchNature;
-                    break;
-            }
-            if(s)
-            {
-                [self logMinorError:s];
-            }
-            if(handling & UMSCCP_HANDLING_RETURN_ON_ERROR)
-            {
-                switch(e)
-                {
-                    case UMMTP3_error_no_route_to_destination:
-                        causeValue = SCCP_ReturnCause_MTPFailure;
-                        break;
-                    case UMMTP3_error_pdu_too_big:
-                        causeValue = SCCP_ReturnCause_ErrorInMessageTransport;
-                        break;
-                    case UMMTP3_error_invalid_variant:
-                        causeValue = SCCP_ReturnCause_ErrorInLocalProcessing;
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-        else if(localUser)
-        {
-            [localUser sccpNUnitdata:data
-                        callingLayer:self
-                             calling:src
-                              called:dst
-                    qualityOfService:0
-                               class:pclass
-                            handling:handling
-                             options:options];
-            returnValue = YES;
-        }
-        else
-        {
-            causeValue = SCCP_ReturnCause_Unequipped;
-        }
     }
-    if(causeValue != -1)
+    if(causeValue >=0)
     {
-        [self logMinorError:[NSString stringWithFormat:@"Can not route XUDT. Cause=%d SRC=%@ DST=%@ DATA=%@",causeValue,src,dst,data]];
+        NSString *s = [NSString stringWithFormat:@"Can not forward XUDT. No route to destination PC=%@. SRC=%@ DST=%@ DATA=%@",pc,src,dst,data];
+        [self logMinorError:s];
         if(handling & UMSCCP_HANDLING_RETURN_ON_ERROR)
         {
             [self sendXUDTS:data
@@ -1075,6 +986,72 @@
                     options:@{}
                    provider:provider];
         }
+    }
+    else if(pc)
+    {
+        UMMTP3_Error e = [self sendXUDT:data
+                                calling:src
+                                 called:dst
+                                  class:pclass   /* MGMT is class 0 */
+                               handling:handling
+                               hopCount:hopCount
+                                    opc:_mtp3.opc
+                                    dpc:pc
+                            optionsData:xoptionsdata
+                                options:options
+                               provider:provider];
+        NSString *s = NULL;
+        switch(e)
+        {
+            case UMMTP3_no_error:
+                break;
+            case UMMTP3_error_pdu_too_big:
+                s = [NSString stringWithFormat:@"Can not forward XUDT. PDU too big. SRC=%@ DST=%@ DATA=%@",src,dst,data];
+                causeValue = SCCP_ReturnCause_ErrorInMessageTransport;
+                break;
+            case UMMTP3_error_no_route_to_destination:
+                s = [NSString stringWithFormat:@"Can not forward XUDT. No route to destination. SRC=%@ DST=%@ DATA=%@",src,dst,data];
+                causeValue = SCCP_ReturnCause_NoTranslationForThisSpecificAddress;
+
+                break;
+            case UMMTP3_error_invalid_variant:
+                s = [NSString stringWithFormat:@"Can not forward XUDT. Invalid variant. SRC=%@ DST=%@ DATA=%@",src,dst,data];
+                causeValue = SCCP_ReturnCause_NoTranslationForAnAddressOfSuchNature;
+                break;
+        }
+        if(s)
+        {
+            [self logMinorError:s];
+        }
+        if(handling & UMSCCP_HANDLING_RETURN_ON_ERROR)
+        {
+            switch(e)
+            {
+                case UMMTP3_error_no_route_to_destination:
+                    causeValue = SCCP_ReturnCause_MTPFailure;
+                    break;
+                case UMMTP3_error_pdu_too_big:
+                    causeValue = SCCP_ReturnCause_ErrorInMessageTransport;
+                    break;
+                case UMMTP3_error_invalid_variant:
+                    causeValue = SCCP_ReturnCause_ErrorInLocalProcessing;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+    else if(localUser)
+    {
+        [localUser sccpNUnitdata:data
+                    callingLayer:self
+                         calling:src
+                          called:dst
+                qualityOfService:0
+                           class:pclass
+                        handling:handling
+                         options:options];
+        returnValue = YES;
     }
     return returnValue;
 }
