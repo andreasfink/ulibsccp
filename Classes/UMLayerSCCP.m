@@ -553,6 +553,12 @@
                                                                   gti:dst.ai.globalTitleIndicator
                                                                    np:dst.npi.npi
                                                                   nai:dst.nai.nai];
+
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                [self.logFeed debugText:[NSString stringWithFormat:@" selector=%@",selector.name]];
+            }
+
             if(selector == NULL)
             {
                 /* we send a UDTS back as we have no forward route */
@@ -573,7 +579,6 @@
                     {
                         [self.logFeed debugText:@" GTT SCCP selector returns no nextHop. Returning NoTranslationForThisSpecificAddress"];
                     }
-
                     *cause = SCCP_ReturnCause_NoTranslationForThisSpecificAddress;
                 }
                 else
