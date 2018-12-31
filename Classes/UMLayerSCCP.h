@@ -60,6 +60,7 @@
 @property(readwrite,assign) BOOL stpMode;
 @property(readwrite,strong) UMMTP3PointCode *next_pc;
 
+
 - (void)increaseThroughputCounter:(UMSCCP_StatisticSection)section;
 
 - (UMSynchronizedSortedDictionary *)statisticalInfo;
