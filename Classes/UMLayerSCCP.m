@@ -74,6 +74,9 @@
     _xudt_max_hop_count = 16;
     _xudts_max_hop_count = 16;
     _gttSelectorRegistry = [[SccpGttRegistry alloc]init];
+    _gttSelectorRegistry.logLevel = self.logLevel;
+    _gttSelectorRegistry.logFeed = self.logFeed;
+
     for(int i=0;i<UMSCCP_StatisticSection_MAX;i++)
     {
         _processingStats[i] = [[UMSCCP_Statistics alloc] init];
@@ -81,6 +84,27 @@
     }
 }
 
+- (void)setLogLevel:(UMLogLevel)logLevel
+{
+    [super setLogLevel:logLevel];
+    [_gttSelectorRegistry updateLogLevel:logLevel];
+}
+
+- (UMLogLevel)logLevel
+{
+    return [super logLevel];
+}
+
+- (void)setLogFeed:(UMLogFeed *)feed
+{
+    [super setLogFeed:feed];
+    [_gttSelectorRegistry updateLogFeed:feed];
+}
+
+- (UMLogFeed *)logFeed
+{
+    return [super logFeed];
+}
 
 /* if MTP3 has a packet for us it will send us a mtpTransfer message */
 - (void)mtpTransfer:(NSData *)data
@@ -463,7 +487,7 @@
   incomingLinkset:(NSString *)incomingLinkset
 {
     SccpAddress *dst = [*dst1 copy];
-    
+
     if(_stpMode==NO)
     {
         /* simple mode */
@@ -1498,6 +1522,9 @@
     {
         _ntt = [[SccpTranslationTableNumber alloc]initWithInt:[n intValue]];
     }
+
+    [_gttSelectorRegistry updateLogLevel:self.logLevel];
+    [_gttSelectorRegistry updateLogFeed:self.logFeed];
 }
 
 - (NSDictionary *)config
@@ -1576,8 +1603,6 @@
     [self.logFeed majorErrorText:@"sccpNDisconnectIndicaton: not implemented"];
 }
 
-
-
 - (void)sccpNInform:(UMSCCPConnection *)connection
             options:(NSDictionary *)options
         synchronous:(BOOL)sync
@@ -1607,7 +1632,6 @@
                                             options:options];
     [self queueFromUpper:task];
 }
-
 
 - (void)sccpNNotice:(NSData *)data
        callingLayer:(id<UMSCCP_UserProtocol>)userLayer
