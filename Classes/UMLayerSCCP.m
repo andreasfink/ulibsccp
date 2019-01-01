@@ -460,6 +460,7 @@
         localUser:(id<UMSCCP_UserProtocol> *)user
         pointCode:(UMMTP3PointCode **)pc
         fromLocal:(BOOL)isLocal
+  incomingLinkset:(NSString *)incomingLinkset
 {
     SccpAddress *dst = [*dst1 copy];
     
@@ -572,7 +573,14 @@
             {
                 /* this call takes care of the pre/post translation */
                 SccpDestination *destination = [selector chooseNextHopWithL3RoutingTable:self.mtp3RoutingTable
-                                                                             destination:&dst];
+                                                                             destination:&dst
+                                                                         incomingLinkset:incomingLinkset];
+
+                if(self.logLevel <=UMLOG_DEBUG)
+                {
+                    [self.logFeed debugText:[NSString stringWithFormat:@" chooseNextHopWithL3RoutingTable return destination=%@",destination.name]];
+                }
+
                 if(destination==NULL)
                 {
                     if(self.logLevel <=UMLOG_DEBUG)
@@ -677,6 +685,8 @@
          provider:(UMLayerMTP3 *)provider
         fromLocal:(BOOL)fromLocal
 {
+    NSString *incomingLinkset = options[@"mtp3-incoming-linkset"];
+
     BOOL returnValue = NO;
     int causeValue = -1;
     id<UMSCCP_UserProtocol> localUser =NULL;
@@ -697,15 +707,15 @@
         provider = _mtp3;
         if(self.logLevel <=UMLOG_DEBUG)
         {
-            NSString *s = [NSString stringWithFormat:@"calling findRoute (DST=%@,local=%d,pc=%@)",dst,fromLocal,pc];
+            NSString *s = [NSString stringWithFormat:@"calling findRoute (DST=%@,local=%d,incomingLinkset=%@)",dst,fromLocal,incomingLinkset];
             [self.logFeed debugText:s];
         }
         [self findRoute:&dst
              causeValue:&causeValue
               localUser:&localUser
               pointCode:&pc
-              fromLocal:fromLocal];
-
+              fromLocal:fromLocal
+        incomingLinkset:incomingLinkset];
         if(self.logLevel <=UMLOG_DEBUG)
         {
             NSString *s = [NSString stringWithFormat:@"findRoute (DST=%@,local=%d) returns causeValue=%d, localUser=%@, pc=%@",dst,fromLocal,causeValue,localUser,pc];
@@ -848,6 +858,8 @@
           provider:(UMLayerMTP3 *)provider
          fromLocal:(BOOL)fromLocal
 {
+    NSString *incomingLinkset = options[@"mtp3-incoming-linkset"];
+
     BOOL returnValue = NO;
     id<UMSCCP_UserProtocol> localUser =NULL;
     UMMTP3PointCode *pc = NULL;
@@ -873,7 +885,8 @@
              causeValue:&causeValue
               localUser:&localUser
               pointCode:&pc
-              fromLocal:fromLocal];
+              fromLocal:fromLocal
+        incomingLinkset:incomingLinkset];
 
         if(self.logLevel <=UMLOG_DEBUG)
         {
@@ -943,6 +956,8 @@
           provider:(UMLayerMTP3 *)provider
          fromLocal:(BOOL)fromLocal
 {
+    NSString *incomingLinkset = options[@"mtp3-incoming-linkset"];
+
     BOOL returnValue = NO;
     int causeValue = -1;
 
@@ -971,7 +986,8 @@
                  causeValue:&causeValue
                   localUser:&localUser
                   pointCode:&pc
-                  fromLocal:fromLocal];
+                  fromLocal:fromLocal
+            incomingLinkset:incomingLinkset];
         }
     }
     if(causeValue >=0)
@@ -1115,6 +1131,7 @@
            provider:(UMLayerMTP3 *)provider
           fromLocal:(BOOL)fromLocal;
 {
+    NSString *incomingLinkset = options[@"mtp3-incoming-linkset"];
     BOOL returnValue = NO;
     id<UMSCCP_UserProtocol> localUser =NULL;
     UMMTP3PointCode *pc = NULL;
@@ -1141,7 +1158,8 @@
              causeValue:&causeValue
               localUser:&localUser
               pointCode:&pc
-              fromLocal:fromLocal];
+              fromLocal:fromLocal
+        incomingLinkset:incomingLinkset];
 
     }
 

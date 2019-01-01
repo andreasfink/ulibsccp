@@ -307,7 +307,8 @@
        causeValue:(int *)cause
         localUser:(id<UMSCCP_UserProtocol> *)user
         pointCode:(UMMTP3PointCode **)pc
-        fromLocal:(BOOL)isLocal;
+        fromLocal:(BOOL)isLocal
+  incomingLinkset:(NSString *)incomingLinkset;
 
 - (NSUInteger)maxPayloadSizeForServiceType:(SCCP_ServiceType) serviceType
                         callingAddressSize:(NSUInteger)cas
