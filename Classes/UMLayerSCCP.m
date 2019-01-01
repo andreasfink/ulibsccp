@@ -610,10 +610,15 @@
                         {
                             [self.logFeed debugText:[NSString stringWithFormat:@" next hopM3UAAS= %@", destination.m3uaAs]];
                         }
-                        *pc = [_mtp3 adjacentPointCodeOfLinkSet:destination.m3uaAs];
-                        if(self.logLevel <=UMLOG_DEBUG)
+                        UMMTP3LinkSet *linkset = [_mtp3 getLinkSetByName:destination.m3uaAs];
+                        if([linkset isKindOfClass:[UMM3UAApplicationServer class]])
                         {
-                            [self.logFeed debugText:[NSString stringWithFormat:@" new next hop DPC= %@", *pc]];
+                            UMM3UAApplicationServer *as = (UMM3UAApplicationServer *)linkset;
+                            *pc = as.adjacentPointCode;
+                            if(self.logLevel <=UMLOG_DEBUG)
+                            {
+                                [self.logFeed debugText:[NSString stringWithFormat:@" new next hop DPC= %@", *pc]];
+                            }
                         }
                     }
                     if(destination.ssn)
