@@ -713,6 +713,9 @@
     id<UMSCCP_UserProtocol> localUser = NULL;
     UMMTP3PointCode *pc = NULL;
 
+    dict[@"original-number"] = msisdn;
+    dict[@"original-tt"]     = @(tt);
+
     SccpAddress *dst = [[SccpAddress alloc]initWithHumanReadableString:msisdn variant:_mtp3.variant];
     dst.tt.tt = tt;
 
@@ -728,7 +731,6 @@
     if(causeValue >= 0)
     {
         dict[@"cause-value"] = @(causeValue);
-        dict[@"cause-string"] = @(causeValue);
 
     }
     else if(pc)
@@ -808,8 +810,8 @@
                 break;
         }
     }
-    dict[@"new-destination-number"] = dst.stringValueE164;
-    dict[@"new-destination-tt"] = @(dst.tt.tt);
+    dict[@"new-number"] = dst.stringValueE164;
+    dict[@"new-tt"] = @(dst.tt.tt);
     return dict;
 }
 
