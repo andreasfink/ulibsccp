@@ -702,6 +702,116 @@
     *dst1 = dst;
 }
 
+- (UMSynchronizedSortedDictionary *) routeTestForMSISDN:(NSString *)msisdn
+                                        translationType:(int)tt
+                                              fromLocal:(BOOL)fromLocal
+{
+    UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
+    NSString *incomingLinkset = @"test";
+
+    int causeValue = -1;
+    id<UMSCCP_UserProtocol> localUser = NULL;
+    UMMTP3PointCode *pc = NULL;
+
+    SccpAddress *dst = [[SccpAddress alloc]initWithHumanReadableString:msisdn variant:_mtp3.variant];
+    dst.tt.tt = tt;
+
+    [self findRoute:&dst
+         causeValue:&causeValue
+          localUser:&localUser
+          pointCode:&pc
+          fromLocal:fromLocal
+    incomingLinkset:incomingLinkset];
+
+
+
+    if(causeValue >= 0)
+    {
+        dict[@"cause-value"] = @(causeValue);
+        dict[@"cause-string"] = @(causeValue);
+
+    }
+    else if(pc)
+    {
+        dict[@"destination-point-code"] = pc;
+    }
+    else if(localUser)
+    {
+        dict[@"local-user"] = @"yes";
+    }
+    else
+    {
+        dict[@"cause-value"] = @(SCCP_ReturnCause_Unequipped);
+    }
+
+    if(dict[@"cause-value"])
+    {
+        switch([dict[@"cause-value"]intValue])
+        {
+            case SCCP_ReturnCause_NoTranslationForAnAddressOfSuchNature:
+                dict[@"cause-description"] = @"No translation for an address of such nature";
+                break;
+            case SCCP_ReturnCause_NoTranslationForThisSpecificAddress:
+                dict[@"cause-description"] = @"No translation for this specific address";
+                break;
+            case SCCP_ReturnCause_SubsystemCongestion:
+                dict[@"cause-description"] = @"Subsystem congestion";
+                break;
+            case SCCP_ReturnCause_SubsystemFailure:
+                dict[@"cause-description"] = @"Subsystem Failure";
+                break;
+
+            case SCCP_ReturnCause_Unequipped:
+                dict[@"cause-description"] = @"Unequipped";
+                break;
+
+            case SCCP_ReturnCause_MTPFailure:
+                dict[@"cause-description"] = @"MTP failure";
+                break;
+
+            case SCCP_ReturnCause_NetworkCongestion:
+                dict[@"cause-description"] = @"Network congestion";
+                break;
+
+            case SCCP_ReturnCause_Unqualified:
+                dict[@"cause-description"] = @"Unqualified";
+                break;
+
+            case SCCP_ReturnCause_ErrorInMessageTransport:
+                dict[@"cause-description"] = @"Errpr in message transport";
+                break;
+
+            case SCCP_ReturnCause_ErrorInLocalProcessing:
+                dict[@"cause-description"] = @"Error in local processing";
+                break;
+
+            case SCCP_ReturnCause_DestinationCannotPerformReassembly:
+                dict[@"cause-description"] = @"Destination cannot perform reassembly";
+                break;
+
+            case SCCP_ReturnCause_SCCPFailure:
+                dict[@"cause-description"] = @"SCCP failure";
+                break;
+
+            case SCCP_ReturnCause_HopCounterViolation:
+                dict[@"cause-description"] = @"Hop counter violation";
+                break;
+
+            case SCCP_ReturnCause_SegmentationNotSupported:
+                dict[@"cause-description"] = @"Segmentation not supported";
+                break;
+
+            case SCCP_ReturnCause_SegmentationFailure:
+                dict[@"cause-description"] = @"Segmentation failure";
+                break;
+            default:
+                break;
+        }
+    }
+    dict[@"new-destination-number"] = dst.stringValueE164;
+    dict[@"new-destination-tt"] = @(dst.tt.tt);
+    return dict;
+}
 
 - (BOOL) routeUDT:(NSData *)data /* returns true if processed locally, false if transited */
           calling:(SccpAddress *)src

@@ -238,6 +238,10 @@
                  provider:(UMLayerMTP3 *)provider;
 
 
+- (UMSynchronizedSortedDictionary *) routeTestForMSISDN:(NSString *)msisdn
+                                        translationType:(int)tt
+                                              fromLocal:(BOOL)fromLocal;
+
 -(BOOL) routeUDT:(NSData *)pdu /* returns true if processed locally, false if transited */
          calling:(SccpAddress *)src
           called:(SccpAddress *)dst
