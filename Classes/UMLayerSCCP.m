@@ -1012,7 +1012,6 @@
     else
     {
         int causeValue = -1;
-        id<UMSCCP_UserProtocol> localUser =NULL;
         UMMTP3PointCode *pc = NULL;
         provider = _mtp3;
 
@@ -1035,8 +1034,17 @@
             [self.logFeed debugText:s];
         }
     }
-
-    if(pc)
+    if(localUser)
+    {
+        [localUser sccpNNotice:data
+                  callingLayer:self
+                       calling:src
+                        called:dst
+                        reason:reasonCode
+                       options:options];
+        returnValue = YES;
+    }
+    else if(pc)
     {
         UMMTP3_Error e = [self sendUDTS:data
                                 calling:src
@@ -1066,16 +1074,6 @@
         {
             [self logMinorError:s];
         }
-    }
-    else if(localUser)
-    {
-        [localUser sccpNNotice:data
-                  callingLayer:self
-                       calling:src
-                        called:dst
-                        reason:reasonCode
-                       options:options];
-        returnValue = YES;
     }
     else
     {

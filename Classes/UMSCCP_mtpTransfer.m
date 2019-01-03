@@ -318,6 +318,10 @@
                             @"mtp3" : mtp3Layer.layerName
                             };
         [sccpLayer traceReceivedPdu:data options:o];
+
+        options[@"sccp-calling-address"] = src;
+        options[@"sccp-called-address"] = dst;
+
         if(!decodeOnly)
         {
             switch(m_type)
