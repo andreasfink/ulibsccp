@@ -878,8 +878,8 @@
         if(handling & UMSCCP_HANDLING_RETURN_ON_ERROR)
         {
             [self sendUDTS:data
-                   calling:src
-                    called:dst
+                   calling:dst
+                    called:src
                     reason:causeValue
                        opc:_mtp3.opc
                        dpc:opc
