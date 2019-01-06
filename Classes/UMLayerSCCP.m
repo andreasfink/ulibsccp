@@ -318,7 +318,7 @@
 {
     NSData *srcEncoded = [src encode:_sccpVariant];
     NSData *dstEncoded = [dst encode:_sccpVariant];
-    
+
     NSMutableData *sccp_pdu = [[NSMutableData alloc]init];
     uint8_t header[7];
     header[0] = SCCP_XUDT;
@@ -869,22 +869,20 @@
         dst.tt = [_ntt copy];
     }
 
-
-
     if(causeValue >= 0)
     {
         NSString *s = [NSString stringWithFormat:@"Can not forward UDT. No route to destination PC=%@. SRC=%@ DST=%@ DATA=%@",pc,src,dst,data];
         [self logMinorError:s];
         if(handling & UMSCCP_HANDLING_RETURN_ON_ERROR)
         {
-            [self sendUDTS:data
-                   calling:dst
-                    called:src
-                    reason:causeValue
-                       opc:_mtp3.opc
-                       dpc:opc
-                   options:@{}
-                  provider:_mtp3];
+            [self generateUDTS:data
+                       calling:dst
+                        called:src
+                        reason:causeValue
+                           opc:_mtp3.opc
+                           dpc:opc
+                       options:@{}
+                      provider:_mtp3];
         }
     }
     else if(pc)
@@ -898,7 +896,6 @@
                                    dpc:pc
                                options:options
                               provider:provider];
-
         NSString *s= NULL;
         switch(e)
         {
@@ -923,9 +920,9 @@
             switch(e)
             {
                 case UMMTP3_error_no_route_to_destination:
-                    [self sendUDTS:data
-                           calling:src
-                            called:dst
+                    [self generateUDTS:data
+                           calling:dst
+                            called:src
                             reason:SCCP_ReturnCause_MTPFailure
                                opc:_mtp3.opc
                                dpc:opc
@@ -933,9 +930,9 @@
                           provider:_mtp3];
                     break;
                 case UMMTP3_error_pdu_too_big:
-                    [self sendUDTS:data
-                           calling:src
-                            called:dst
+                    [self generateUDTS:data
+                           calling:dst
+                            called:src
                             reason:SCCP_ReturnCause_ErrorInMessageTransport
                                opc:_mtp3.opc
                                dpc:opc
@@ -944,9 +941,9 @@
 
                     break;
                 case UMMTP3_error_invalid_variant:
-                    [self sendUDTS:data
-                           calling:src
-                            called:dst
+                    [self generateUDTS:data
+                           calling:dst
+                            called:src
                             reason:SCCP_ReturnCause_ErrorInLocalProcessing
                                opc:_mtp3.opc
                                dpc:opc
@@ -977,8 +974,8 @@
         if(handling & UMSCCP_HANDLING_RETURN_ON_ERROR)
         {
             [self sendUDTS:data
-                   calling:src
-                    called:dst
+                   calling:dst
+                    called:src
                     reason:causeValue
                        opc:_mtp3.opc
                        dpc:opc
@@ -1364,7 +1361,7 @@
 {
     NSData *srcEncoded = [src encode:_sccpVariant];
     NSData *dstEncoded = [dst encode:_sccpVariant];
-    
+
     NSMutableData *sccp_pdu = [[NSMutableData alloc]init];
     uint8_t header[5];
     header[0] = SCCP_UDT;
@@ -1379,7 +1376,7 @@
     [sccp_pdu appendData:srcEncoded];
     [sccp_pdu appendByte:data.length];
     [sccp_pdu appendData:data];
-    
+
     UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc options:options];
     NSString *s;
     NSString *action = @"drop";
@@ -1446,14 +1443,14 @@
 }
 
 
-- (UMMTP3_Error) sendUDTS:(NSData *)data
-                  calling:(SccpAddress *)src
-                   called:(SccpAddress *)dst
-                   reason:(int)reasonCode
-                      opc:(UMMTP3PointCode *)opc
-                      dpc:(UMMTP3PointCode *)dpc
-                  options:(NSDictionary *)options
-                 provider:(UMLayerMTP3 *)provider
+- (UMMTP3_Error) forwardUDTS:(NSData *)data
+                     calling:(SccpAddress *)src
+                      called:(SccpAddress *)dst
+                      reason:(int)reasonCode
+                         opc:(UMMTP3PointCode *)opc
+                         dpc:(UMMTP3PointCode *)dpc
+                     options:(NSDictionary *)options
+                    provider:(UMLayerMTP3 *)provider
 {
     NSData *srcEncoded = [src encode:_sccpVariant];
     NSData *dstEncoded = [dst encode:_sccpVariant];
@@ -1534,6 +1531,101 @@
         default:
             [self.logFeed majorErrorText:[NSString stringWithFormat:@"sendPDU %@: %@->%@ returns unknown error %d",_mtp3.layerName,opc,dpc,result]];
 
+    }
+    return result;
+}
+
+- (UMMTP3_Error) generateUDTS:(NSData *)data
+                  calling:(SccpAddress *)src
+                   called:(SccpAddress *)dst
+                   reason:(int)reasonCode
+                      opc:(UMMTP3PointCode *)opc
+                      dpc:(UMMTP3PointCode *)dpc
+                  options:(NSDictionary *)options
+                 provider:(UMLayerMTP3 *)provider
+{
+    SccpAddress *src2 = [src copy];
+    src2.ai.pointCodeIndicator = YES;
+    src2.pc = opc;
+
+    NSData *srcEncoded = [src2 encode:_sccpVariant];
+    NSData *dstEncoded = [dst encode:_sccpVariant];
+
+    NSMutableData *sccp_pdu = [[NSMutableData alloc]init];
+    uint8_t header[5];
+    header[0] = SCCP_UDTS;
+    header[1] = reasonCode;
+    header[2] = 3;
+    header[3] = 3 + dstEncoded.length;
+    header[4] = 3 + dstEncoded.length + srcEncoded.length;
+    [sccp_pdu appendBytes:header length:5];
+    [sccp_pdu appendByte:dstEncoded.length];
+    [sccp_pdu appendData:dstEncoded];
+    [sccp_pdu appendByte:srcEncoded.length];
+    [sccp_pdu appendData:srcEncoded];
+    [sccp_pdu appendByte:data.length];
+    [sccp_pdu appendData:data];
+
+    UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc options:options];
+    NSString *s;
+    NSString *action = @"drop";
+    switch(result)
+    {
+        case UMMTP3_no_error:
+            s = @"success";
+            action = @"tx";
+            break;
+        case UMMTP3_error_pdu_too_big:
+            s = @"pdu-too-big";
+            break;
+        case UMMTP3_error_no_route_to_destination:
+            s = @"no-route-to-destination";
+            break;
+        case UMMTP3_error_invalid_variant:
+            s = @"invalid-variant";
+            break;
+        default:
+            s = [NSString stringWithFormat:@"Unknown %d",result];
+            break;
+    }
+    NSDictionary *o = @{
+                        @"type" : @"UDTS",
+                        @"action" : action,
+                        @"error"  : s,
+                        @"opc"  : ( opc ? opc.stringValue : @"(not-set)" ),
+                        @"dpc"  : ( dpc ? dpc.stringValue : @"(not-set)" ),
+                        @"mtp3" : ( _mtp3 ? _mtp3.layerName : @"(not-set)")};
+    if(result == UMMTP3_no_error)
+    {
+        id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-tx-destination"];
+        [ u sccpTraceSentPdu:sccp_pdu options:o];
+        [ self traceSentPdu:sccp_pdu options:o];
+    }
+    else
+    {
+        id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-dropped-destination"];
+        [ u sccpTraceDroppedPdu:sccp_pdu options:o];
+        [ self traceDroppedPdu:sccp_pdu options:o];
+    }
+    switch(result)
+    {
+        case UMMTP3_error_pdu_too_big:
+            [self.logFeed majorErrorText:@"PDU too big"];
+            break;
+        case UMMTP3_error_no_route_to_destination:
+            [self.logFeed majorErrorText:@"No route to destination"];
+            break;
+        case UMMTP3_error_invalid_variant:
+            [self.logFeed majorErrorText:@"Invalid variant"];
+            break;
+        case UMMTP3_no_error:
+            if(self.logLevel <= UMLOG_DEBUG)
+            {
+                [self.logFeed debugText:[NSString stringWithFormat:@"sendPDU to %@: %@->%@ success",_mtp3.layerName, opc,dpc]];
+            }
+            break;
+        default:
+            [self.logFeed majorErrorText:[NSString stringWithFormat:@"sendPDU %@: %@->%@ returns unknown error %d",_mtp3.layerName,opc,dpc,result]];
     }
     return result;
 }
@@ -1641,9 +1733,9 @@
 {
     NSMutableDictionary *cfg = [[NSMutableDictionary alloc]init];
     [self addLayerConfig:cfg];
-    
+
     cfg[@"attach-to"] = _mtp3_name;
-    
+
     if(_sccpVariant==SCCP_VARIANT_ITU)
     {
         cfg[@"variant"] = @"itu";
@@ -1798,14 +1890,14 @@
                      called:(SccpAddress *)dst
                     options:(NSDictionary *)xoptions
 {
-    
+
 }
 
 - (void)sccpNDataRequest:(NSData *)data
               connection:(UMSCCPConnection *)xconnection
                  options:(NSDictionary *)xoptions
 {
-    
+
 }
 
 
@@ -1813,47 +1905,47 @@
                 connection:(UMSCCPConnection *)xconnection
                    options:(NSDictionary *)xoptions
 {
-    
+
 }
 
 
 - (void)sccpNResetRequest:(UMSCCPConnection *)xconnection
                   options:(NSDictionary *)xoptions
 {
-    
+
 }
 
 
 - (void)sccpNResetIndication:(UMSCCPConnection *)connection
                      options:(NSDictionary *)xoptions
 {
-    
+
 }
 
 
 - (void)sccpNDisconnectRequest:(UMSCCPConnection *)xconnection
                        options:(NSDictionary *)xoptions
 {
-    
+
 }
 
 
 - (void)sccpNDisconnectIndicaton:(UMSCCPConnection *)cxonnection
                          options:(NSDictionary *)xoptions
 {
-    
+
 }
 
 
 - (void)sccpNInform:(UMSCCPConnection *)connection
             options:(NSDictionary *)options
 {
-    
+
 }
 
 - (void)startUp
 {
-    
+
 }
 
 + (NSString *)reasonString:(SCCP_ReturnCause)reason
@@ -1925,7 +2017,7 @@
     int m_hopcounter = -1;
     NSData *sccp_pdu = NULL;
     NSData *segment = NULL;
-    
+
     UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
     @try
     {
@@ -1937,13 +2029,13 @@
         const uint8_t *d = data.bytes;
         int i = 0;
         int m_type = d[i++];
-        
+
         int m_handling;
         int param_called_party_address;
         int param_calling_party_address;
         int param_data;
         int param_segment;
-        
+
         switch(m_type)
         {
             case SCCP_UDT:
@@ -1957,7 +2049,7 @@
                 i++;
                 param_segment = -1;
                 break;
-                
+
             case SCCP_UDTS:
                 m_return_cause = d[i++] & 0x0F;
                 param_called_party_address = d[i] + i;
@@ -1968,7 +2060,7 @@
                 i++;
                 param_segment   = -1;
                 break;
-                
+
             case SCCP_XUDT:
                 m_protocol_class = d[i] & 0x0F;
                 m_handling = (d[i++]>>4) & 0x0F;
@@ -1980,7 +2072,7 @@
                 i++;
                 param_segment = -1;
                 break;
-                
+
             case SCCP_XUDTS:
                 m_return_cause = d[i++] & 0x0F;
                 m_hopcounter = d[i++] & 0x0F;
@@ -1993,7 +2085,7 @@
                 param_segment   = d[i] + i;
                 i++;
                 break;
-                
+
             default:
                 @throw([NSException exceptionWithName:@"SCCP_UNKNOWN_PACKET_TYPE" reason:NULL userInfo:NULL] );
         }
@@ -2001,7 +2093,7 @@
         {
             @throw([NSException exceptionWithName:@"SCCP_PTR1_POINTS_BEYOND_END" reason:NULL userInfo:NULL] );
         }
-        
+
         if(param_calling_party_address > len)
         {
             @throw([NSException exceptionWithName:@"SCCP_PTR2_POINTS_BEYOND_END" reason:NULL userInfo:NULL] );
@@ -2014,10 +2106,10 @@
         {
             @throw([NSException exceptionWithName:@"SCCP_PTR4_POINTS_BEYOND_END" reason:NULL userInfo:NULL] );
         }
-        
+
         NSData *dstData = NULL;
         NSData *srcData = NULL;
-        
+
         if(param_called_party_address>0)
         {
             i = (int)d[param_called_party_address];
@@ -2029,7 +2121,7 @@
             i = (int)d[param_calling_party_address];
             srcData = [NSData dataWithBytes:&d[param_calling_party_address+1] length:i];
             src = [[SccpAddress alloc]initWithItuData:srcData];
-            
+
         }
         if(param_data > 0)
         {
@@ -2041,7 +2133,7 @@
             i = (int)d[param_segment];
             segment = [NSData dataWithBytes:&d[param_segment+1] length:i];
         }
-        
+
         if(src == NULL)
         {
             @throw([NSException exceptionWithName:@"SCCP_MISSING_CALLING_PARTY_ADDRESS" reason:NULL userInfo:NULL] );
@@ -2050,7 +2142,7 @@
         {
             @throw([NSException exceptionWithName:@"SCCP_MISSING_CALLED_PARTY_ADDRESS" reason:NULL userInfo:NULL] );
         }
-        
+
         switch(m_type)
         {
             case SCCP_UDT:
@@ -2074,7 +2166,7 @@
     if(dst)
     {
         dict[@"called-address"] = [dst objectValue];
-   
+
     }
     if(src)
     {
@@ -2274,7 +2366,6 @@
     dict[@"delays"] = delays;
     return dict;
 }
-
 
 
 @end

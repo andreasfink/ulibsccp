@@ -191,15 +191,26 @@
                 options:(NSDictionary *)options
                provider:(UMLayerMTP3 *)provider;
 
-- (UMMTP3_Error) sendUDTS:(NSData *)data
-                  calling:(SccpAddress *)src
-                   called:(SccpAddress *)dst
-                   reason:(int)reasonCode
-                      opc:(UMMTP3PointCode *)opc
-                      dpc:(UMMTP3PointCode *)dpc
-                  options:(NSDictionary *)options
-                 provider:(UMLayerMTP3 *)provider;
+    /* this is for transiting UDTS */
+- (UMMTP3_Error) forwardUDTS:(NSData *)data
+                     calling:(SccpAddress *)src
+                      called:(SccpAddress *)dst
+                      reason:(int)reasonCode
+                         opc:(UMMTP3PointCode *)opc
+                         dpc:(UMMTP3PointCode *)dpc
+                     options:(NSDictionary *)options
+                    provider:(UMLayerMTP3 *)provider;
 
+    /* this is for UDTS generated locally */
+
+- (UMMTP3_Error) generateUDTS:(NSData *)data
+                      calling:(SccpAddress *)src
+                       called:(SccpAddress *)dst
+                       reason:(int)reasonCode
+                          opc:(UMMTP3PointCode *)opc
+                          dpc:(UMMTP3PointCode *)dpc
+                      options:(NSDictionary *)options
+                     provider:(UMLayerMTP3 *)provider;
 
 -(UMMTP3_Error) sendXUDT:(NSData *)pdu
                  calling:(SccpAddress *)src
@@ -335,6 +346,8 @@
 - (void)addProcessingStatistic:(UMSCCP_StatisticSection)section
                   waitingDelay:(NSTimeInterval)waitingDelay
                processingDelay:(NSTimeInterval)processingDelay;
+
+
 
 
 @end
