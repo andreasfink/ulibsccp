@@ -620,6 +620,10 @@
                         [self.logFeed debugText:[NSString stringWithFormat:@" Route to SCCP destination %@",destination]];
                     }
 
+                    if(destination.ntt)
+                    {
+                        dst.tt.tt = destination.ntt.intValue;
+                    }
                     if(destination.dpc)
                     {
                         if(self.logLevel <=UMLOG_DEBUG)
@@ -718,7 +722,6 @@
 
     SccpAddress *dst = [[SccpAddress alloc]initWithHumanReadableString:msisdn variant:_mtp3.variant];
     dst.tt.tt = tt;
-
     [self findRoute:&dst
          causeValue:&causeValue
           localUser:&localUser
@@ -973,14 +976,14 @@
         [self logMinorError:[NSString stringWithFormat:@"[1] Can not route UDT. Cause %d SRC=%@ DST=%@ DATA=%@",causeValue,src,dst,data]];
         if(handling & UMSCCP_HANDLING_RETURN_ON_ERROR)
         {
-            [self sendUDTS:data
-                   calling:dst
-                    called:src
-                    reason:causeValue
-                       opc:_mtp3.opc
-                       dpc:opc
-                   options:@{}
-                  provider:_mtp3];
+            [self generateUDTS:data
+                       calling:dst
+                        called:src
+                        reason:causeValue
+                           opc:_mtp3.opc
+                           dpc:opc
+                       options:@{}
+                      provider:_mtp3];
         }
     }
     return returnValue;
@@ -1043,14 +1046,14 @@
     }
     else if(pc)
     {
-        UMMTP3_Error e = [self sendUDTS:data
-                                calling:src
-                                 called:dst
-                                 reason:reasonCode
-                                    opc:_mtp3.opc
-                                    dpc:pc
-                                options:options
-                               provider:provider];
+        UMMTP3_Error e = [self forwardUDTS:data
+                                   calling:src
+                                    called:dst
+                                    reason:reasonCode
+                                       opc:_mtp3.opc
+                                       dpc:pc
+                                   options:options
+                                  provider:provider];
 
         NSString *s = NULL;
         switch(e)
