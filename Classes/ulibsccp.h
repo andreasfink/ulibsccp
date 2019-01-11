@@ -19,4 +19,5 @@
 #import "UMSCCP_sccpNUnitdata.h"
 #import "UMSCCP_Defs.h"
 #import "UMSCCP_mtpTransfer.h"
+#import "UMSCCP_Filter.h"
 #import "UMLayerSCCPApplicationContextProtocol.h"

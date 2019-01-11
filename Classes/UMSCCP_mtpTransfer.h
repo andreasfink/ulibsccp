@@ -17,6 +17,7 @@
 #import "UMSCCP_StatisticSection.h"
 
 @class UMLayerSCCP;
+@class UMSCCP_Packet;
 
 @interface UMSCCP_mtpTransfer : UMLayerTask
 {
@@ -52,6 +53,8 @@
     NSDate                  *_endOfProcessing;
     UMSCCP_StatisticSection _statsSection;
     UMSCCP_StatisticSection _statsSection2;
+
+	UMSCCP_Packet		*_packet;
 }
 
 @property(readwrite,strong,atomic)  UMSynchronizedSortedDictionary *decodedJson;

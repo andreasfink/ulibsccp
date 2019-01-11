@@ -13,6 +13,7 @@
 #import "UMLayerSCCP.h"
 #import "UMSCCP_Defs.h"
 #import "UMSCCP_ReceivedSegments.h"
+#import "UMSCCP_Packet.h"
 
 @implementation UMSCCP_mtpTransfer
 
@@ -29,7 +30,15 @@
     self = [super initWithName:@"UMSCCP_mtpTransfer" receiver:layer sender:mtp3 requiresSynchronisation:NO];
     if(self)
     {
-        _created = [NSDate date];
+		_packet = [[UMSCCP_Packet alloc]init];
+		_packet.sccp = layer;
+		_packet.incomingOpc = xopc;
+		_packet.incomingDpc = xdpc;
+		_packet.incomingData = data;
+		_packet.incomingOptions = xoptions;
+		_packet.incomingMtp3Layer = mtp3;
+
+		_created = [NSDate date];
         _statsSection = UMSCCP_StatisticSection_TRANSIT;
         opc = xopc;
         dpc = xdpc;

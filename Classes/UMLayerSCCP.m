@@ -831,6 +831,8 @@
 {
     NSString *incomingLinkset = options[@"mtp3-incoming-linkset"];
 
+	//[_inboundFilter filterInbound:_packet];
+
     BOOL returnValue = NO;
     int causeValue = -1;
     id<UMSCCP_UserProtocol> localUser =NULL;
