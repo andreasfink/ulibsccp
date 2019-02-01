@@ -22,7 +22,7 @@
 		A64DC0B21DA1FDAE00EE4016 /* ulibgt.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A615D9061B4D587900854472 /* ulibgt.framework */; };
 		A658E20121E882E600825E4A /* UMSCCP_Filter.h in Headers */ = {isa = PBXBuildFile; fileRef = A658E1FF21E882E600825E4A /* UMSCCP_Filter.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A658E20221E882E600825E4A /* UMSCCP_Filter.m in Sources */ = {isa = PBXBuildFile; fileRef = A658E20021E882E600825E4A /* UMSCCP_Filter.m */; };
-		A658E20521E8863700825E4A /* UMSCCP_Packet.h in Headers */ = {isa = PBXBuildFile; fileRef = A658E20321E8863700825E4A /* UMSCCP_Packet.h */; };
+		A658E20521E8863700825E4A /* UMSCCP_Packet.h in Headers */ = {isa = PBXBuildFile; fileRef = A658E20321E8863700825E4A /* UMSCCP_Packet.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A658E20621E8863700825E4A /* UMSCCP_Packet.m in Sources */ = {isa = PBXBuildFile; fileRef = A658E20421E8863700825E4A /* UMSCCP_Packet.m */; };
 		A66DD09F1B4FC4300090FC94 /* sctp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A615D9141B4D5FB000854472 /* sctp.framework */; };
 		A6827E1A1E380FC900F3048B /* UMLayerSCCPApplicationContextProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = A6827E181E380FC900F3048B /* UMLayerSCCPApplicationContextProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
