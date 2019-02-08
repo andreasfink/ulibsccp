@@ -874,6 +874,10 @@
         dst.tt = [_ntt copy];
     }
 
+    if(opc==NULL)
+    {
+        opc = _mtp3.opc;
+    }
     if(causeValue >= 0)
     {
         NSString *s = [NSString stringWithFormat:@"Can not forward UDT. No route to destination PC=%@. SRC=%@ DST=%@ DATA=%@",pc,src,dst,data];
@@ -884,7 +888,7 @@
                        calling:dst
                         called:src
                         reason:causeValue
-                           opc:_mtp3.opc
+                           opc:_mtp3.opc /* errors are always sent from this instance */
                            dpc:opc
                        options:@{}
                       provider:_mtp3];
@@ -892,12 +896,13 @@
     }
     else if(pc)
     {
+
         UMMTP3_Error e = [self sendUDT:data
                                calling:src
                                 called:dst
                                  class:pclass
                               handling:handling
-                                   opc:_mtp3.opc
+                                   opc:opc
                                    dpc:pc
                                options:options
                               provider:provider];
@@ -1097,6 +1102,10 @@
           provider:(UMLayerMTP3 *)provider
          fromLocal:(BOOL)fromLocal
 {
+    if(opc==NULL)
+    {
+        opc = _mtp3.opc;
+    }
     NSString *incomingLinkset = options[@"mtp3-incoming-linkset"];
 
     BOOL returnValue = NO;
@@ -1157,7 +1166,7 @@
                                   class:pclass   /* MGMT is class 0 */
                                handling:handling
                                hopCount:hopCount
-                                    opc:_mtp3.opc
+                                    opc:opc
                                     dpc:pc
                             optionsData:xoptionsdata
                                 options:options
