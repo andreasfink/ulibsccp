@@ -2508,13 +2508,52 @@
             _sccp_destinations_dict[name] = currentAppGrp;
         }
     }
+    else if( (words.count > 2) && ([words[0] isEqualToString:@"multiplicity"]))
+    {
+        if([words[1] isEqualToString:@"cgpa"]) /* Share based on calling party and weighting factor */
+        {
+            currentAppGrp.distributionMethod = SccpDestinationGroupDistributionMethod_cgpa;
+        }
+        else if([words[1] isEqualToString:@"cost"]) /* Use destination with least cost if available */
+        {
+            currentAppGrp.distributionMethod = SccpDestinationGroupDistributionMethod_cost;
+        }
+        else if([words[1] isEqualToString:@"share"]) /* Share equally between all destinations */
+        {
+            currentAppGrp.distributionMethod = SccpDestinationGroupDistributionMethod_share;
+        }
+        else if([words[1] isEqualToString:@"wrr"]) /* Share based on weighted round robin method*/
+        {
+            currentAppGrp.distributionMethod = SccpDestinationGroupDistributionMethod_wrr;
+        }
+    }
 
-    else if( (words.count > 10) && ([words[0] isEqualToString:@"pc"]))
+    else if( (words.count > 1) && ([words[0] isEqualToString:@"sccp-class1-loadbalance"]))
+    {
+        currentAppGrp.class1LoadBalance = YES;
+    }
+    else if( (words.count > 1) && ([words[0] isEqualToString:@"distribute-sccp-sequenced-negate"]))
+    {
+        currentAppGrp.distributeSccpSequencedNegate = YES;
+    }
+    else if( (words.count > 2) && ([words[0] isEqualToString:@"instance"]))
+    {
+        currentAppGrp.dpcInstance = words[1];
+    }
+    else if( (words.count > 2) && (([words[0] isEqualToString:@"pc"]) || ([words[0] isEqualToString:@"asname"])))
     {
         NSInteger k = words.count;
         NSInteger i = 2;
-
-        NSString *pcString       = words[1];
+        NSString *pcString;
+        NSString *asname;
+        if([words[0] isEqualToString:@"pc"])
+        {
+            pcString       = words[1];
+        }
+        else
+        {
+            asname       = words[1];
+        }
         NSNumber *cost = words[2];
         NSString *ssnString  = NULL;
         BOOL useGt = NO;
@@ -2527,7 +2566,7 @@
          pc 1-1-1 ssn <ssn = 0,2...255> <cost> gt
          pc 1-1-1 { ssn <ssn = 0,2...255> } <cost> gt ntt <0...255>
          pc 1-1-1 { ssn <ssn = 0,2...255> } <cost> pcssn {sccp-allow-pak-conv}
-        */
+         */
         while(i<k)
         {
             NSString *w = words[i];
@@ -2578,7 +2617,14 @@
         else if(usePcssn)
         {
             SccpDestination *e = [[SccpDestination alloc]init];
-            e.dpc = [[UMMTP3PointCode alloc]initWithString:pcString variant:_mtp3.variant];
+            if(pcString)
+            {
+                e.dpc = [[UMMTP3PointCode alloc]initWithString:pcString variant:_mtp3.variant];
+            }
+            if(asname)
+            {
+                e.m3uaAs = asname;
+            }
             e.cost = cost;
             if(ssnString)
             {
