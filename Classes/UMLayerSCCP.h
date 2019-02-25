@@ -23,6 +23,14 @@
 
 #import "UMSCCP_StatisticSection.h"
 
+typedef enum SccpGtFileSection
+{
+    SccpGtFileSection_root,
+    SccpGtFileSection_selector,
+    SccpGtFileSection_application_group,
+    SccpGtFileSection_address_conversion,
+} SccpGtFileSection;
+
 @interface UMLayerSCCP : UMLayer<UMLayerMTP3UserProtocol>
 {
     SccpVariant                 _sccpVariant;
@@ -50,6 +58,9 @@
     UMThroughputCounter         *_throughputCounters[UMSCCP_StatisticSection_MAX];
 	UMSCCP_Filter				*_inboundFilter;
 	UMSCCP_Filter				*_outboundFilter;
+
+    UMSynchronizedDictionary    *_sccp_number_translations_dict; /* this one is normally shared with the one from the AppDelegate */
+    UMSynchronizedDictionary    *_sccp_destinations_dict;
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;
@@ -61,6 +72,9 @@
 @property(readwrite,assign) int xudts_max_hop_count;
 @property(readwrite,assign) BOOL stpMode;
 @property(readwrite,strong) UMMTP3PointCode *next_pc;
+
+@property(readwrite,strong,atomic) UMSynchronizedDictionary    *sccp_number_translations_dict;
+@property(readwrite,strong,atomic) UMSynchronizedDictionary    *sccp_destinations_dict;
 
 
 - (void)increaseThroughputCounter:(UMSCCP_StatisticSection)section;
