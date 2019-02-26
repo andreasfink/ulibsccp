@@ -46,7 +46,6 @@
     return self;
 }
 
-
 - (UMLayerSCCP *)initWithTaskQueueMulti:(UMTaskQueueMulti *)tq
 {
     return [self initWithTaskQueueMulti:tq name:@""];
