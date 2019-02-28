@@ -81,7 +81,8 @@
         _decodedJson = [[UMSynchronizedSortedDictionary alloc]init];
     }
 
-    _packet.serviceClass = SCCP_CLASS_UNDEFINED;
+    _packet.incomingServiceClass = SCCP_CLASS_UNDEFINED;
+    _packet.outgoingServiceClass = SCCP_CLASS_UNDEFINED;
     @try
     {
         NSUInteger len = data.length;
@@ -100,15 +101,18 @@
         int param_hop_counter = 0;
         NSString *type;
 
-        _packet.handling = m_handling;
-        _packet.serviceType = m_type;
+        _packet.incomingHandling = m_handling;
+        _packet.outgoingHandling = m_handling;
+        _packet.incomingServiceType = m_type;
+        _packet.outgoingServiceType = m_type;
         switch(m_type)
         {
             case SCCP_UDT:
                 type = @"UDT";
                 _decodedJson[@"sccp-pdu-type"]=type;
                 m_protocol_class = d[i] & 0x0F;
-                _packet.serviceClass = m_protocol_class;
+                _packet.incomingServiceClass = m_protocol_class;
+                _packet.outgoingServiceClass = m_protocol_class;
                 _decodedJson[@"sccp-protocol-class"]=@(m_protocol_class);
                 m_handling = (d[i++]>>4) & 0x0F;
                 _decodedJson[@"sccp-protocol-handling"]=@(m_handling);
@@ -139,7 +143,8 @@
                 type=@"XUDT";
                 _decodedJson[@"sccp-pdu-type"]=type;
                 m_protocol_class = d[i] & 0x0F;
-                _packet.serviceClass = m_protocol_class;
+                _packet.incomingServiceClass = m_protocol_class;
+                _packet.outgoingServiceClass = m_protocol_class;
                 _decodedJson[@"sccp-protocol-class"]=@(m_protocol_class);
                 m_handling = (d[i++]>>4) & 0x0F;
                 _decodedJson[@"sccp-protocol-handling"]=@(m_handling);
@@ -206,7 +211,8 @@
             dstData = [NSData dataWithBytes:&d[param_called_party_address+1] length:i];
             dst = [[SccpAddress alloc]initWithItuData:dstData];
             _decodedJson[@"sccp-called-party-address"]=[dst dictionaryValue];
-            _packet.calledAddress = dst;
+            _packet.incomingCalledPartyAddress = dst;
+            _packet.outgoingCalledPartyAddress = dst;
 
         }
         if(param_calling_party_address>0)
@@ -215,7 +221,8 @@
             srcData = [NSData dataWithBytes:&d[param_calling_party_address+1] length:i];
             src = [[SccpAddress alloc]initWithItuData:srcData];
             _decodedJson[@"sccp-calling-party-address"]=[src dictionaryValue];
-            _packet.callingAddress = src;
+            _packet.incomingCalledPartyAddress = src;
+            _packet.outgoingCalledPartyAddress = src;
         }
         if(param_data > 0)
         {
@@ -229,6 +236,8 @@
                 _decodedPdu = sccp_pdu;
                 _decodedJson[@"sccp-payload"]=decodedUserPdu;
             }
+            _packet.incomingData = sccp_pdu;
+            _packet.outgoingData = sccp_pdu;
         }
         if(param_optional > 0)
         {
@@ -335,11 +344,12 @@
                             @"mtp3" : mtp3Layer.layerName
                             };
         [sccpLayer traceReceivedPdu:data options:o];
+        [sccpLayer traceReceivedPacket:_packet options:o];
 
         options[@"sccp-calling-address"] = src;
         options[@"sccp-called-address"] = dst;
-        _packet.callingAddress = src;
-        _packet.calledAddress = dst;
+        _packet.incomingCallingPartyAddress = src;
+        _packet.incomingCalledPartyAddress = dst;
         if(!decodeOnly)
         {
             switch(m_type)
@@ -361,7 +371,8 @@
                     }
                     else
                     {
-                        if([self processUDT])
+                        [sccpLayer routePacket:_packet];
+                        if(_packet.outgoingToLocal)
                         {
                             _statsSection = UMSCCP_StatisticSection_RX;
                             _statsSection2 = UMSCCP_StatisticSection_UDT_RX;
@@ -375,7 +386,9 @@
                     break;
                 case SCCP_UDTS:
                     options[@"sccp-udts"] = @(YES);
-                    if([self processUDTS])
+                    [sccpLayer routePacket:_packet];
+                    if(_packet.outgoingToLocal)
+
                     {
                         _statsSection = UMSCCP_StatisticSection_RX;
                         _statsSection2 = UMSCCP_StatisticSection_UDTS_RX;
@@ -388,7 +401,8 @@
                     break;
                 case SCCP_XUDT:
                     options[@"sccp-xudt"] = @(YES);
-                    if([self processXUDT])
+                    [sccpLayer routePacket:_packet];
+                    if(_packet.outgoingToLocal)
                     {
                         _statsSection = UMSCCP_StatisticSection_RX;
                         _statsSection2 = UMSCCP_StatisticSection_XUDT_RX;
@@ -401,7 +415,8 @@
                     break;
                 case SCCP_XUDTS:
                     options[@"sccp-xudts"] = @(YES);
-                    if([self processXUDTS])
+                    [sccpLayer routePacket:_packet];
+                    if(_packet.outgoingToLocal)
                     {
                         _statsSection = UMSCCP_StatisticSection_RX;
                         _statsSection2 = UMSCCP_StatisticSection_XUDTS_RX;
@@ -442,68 +457,6 @@
     [sccpLayer increaseThroughputCounter:_statsSection];
     [sccpLayer increaseThroughputCounter:_statsSection2];
 
-}
-
-- (void)routeOnGlobalTitle
-{
-    /* route on global number */
-    switch(m_type)
-    {
-        case SCCP_UDT:
-            options[@"sccp-udt"] = @(YES);
-            if(dst.ssn.ssn==SCCP_SSN_SCCP_MG)
-            {
-                [self process_udt_sccp_mg];
-            }
-            else
-            {
-                [self processUDT];
-            }
-            break;
-        case SCCP_UDTS:
-            options[@"sccp-udts"] = @(YES);
-            [self processUDTS];
-            break;
-        case SCCP_XUDT:
-            options[@"sccp-xudt"] = @(YES);
-            [self processXUDT];
-            break;
-        case SCCP_XUDTS:
-            options[@"sccp-xudts"] = @(YES);
-            [self processXUDTS];
-            break;
-    }
-}
-
-- (void)routeOnSubsystem
-{
-    /* route on subsystem number */
-    switch(m_type)
-    {
-        case SCCP_UDT:
-            options[@"sccp-udt"] = @(YES);
-            if(dst.ssn.ssn==SCCP_SSN_SCCP_MG)
-            {
-                [self process_udt_sccp_mg];
-            }
-            else
-            {
-                [self processUDT];
-            }
-            break;
-        case SCCP_UDTS:
-            options[@"sccp-udts"] = @(YES);
-            [self processUDTS];
-            break;
-        case SCCP_XUDT:
-            options[@"sccp-xudt"] = @(YES);
-            [self processXUDT];
-            break;
-        case SCCP_XUDTS:
-            options[@"sccp-xudts"] = @(YES);
-            [self processXUDTS];
-            break;
-    }
 }
 
 - (BOOL)process_udt_sccp_mg /* returns true if processed locally */
@@ -615,6 +568,7 @@
     return YES;
 }
 
+#if 0
 - (BOOL)processUDT /* returns true if processed locally */
 {
     return [sccpLayer routeUDT:sccp_pdu
@@ -740,5 +694,6 @@
                         provider:sccpLayer.mtp3
                        fromLocal:NO];
 }
+#endif
 
 @end

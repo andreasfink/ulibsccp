@@ -16,6 +16,7 @@
 #import "UMSCCP_Defs.h"
 
 @class UMLayerSCCP;
+@class UMSCCP_Packet;
 
 @protocol UMSCCP_UserProtocol <NSObject,UMLayerUserProtocol>
 
@@ -55,5 +56,15 @@
 
 - (void)sccpTraceDroppedPdu:(NSData *)data
                     options:(NSDictionary *)options;
+
+
+- (void)sccpTraceSentSccpPacket:(UMSCCP_Packet *)packet
+                    options:(NSDictionary *)options;
+
+- (void)sccpTraceReceivedSccpPacket:(UMSCCP_Packet *)packet
+                        options:(NSDictionary *)options;
+
+- (void)sccpTraceDroppedSccpPacket:(UMSCCP_Packet *)packet
+                       options:(NSDictionary *)options;
 
 @end

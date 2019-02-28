@@ -14,6 +14,7 @@
 #import <ulibgt/ulibgt.h>
 #import "UMLayerSCCP.h"
 #import "UMSCCP_StatisticSection.h"
+#import "UMSCCP_Packet.h"
 
 static int segmentReferenceId;
 
@@ -324,8 +325,29 @@ static int segmentReferenceId;
             }
             else /* we have pure data only */
             {
+                UMSCCP_Packet *packet = [[UMSCCP_Packet alloc]init];
+                packet.incomingMtp3Layer = _sccpLayer.mtp3;
+                packet.incomingCallingPartyAddress = _src;
+                packet.incomingCalledPartyAddress = _dst;
+                packet.incomingServiceClass = _protocolClass;
+                packet.incomingHandling = _handling;
+                packet.incomingData = _data;
+                packet.incomingOptions = _options;
+                packet.incomingMaxHopCount = _maxHopCount;
+                packet.incomingOptionsData = optional_data;
+
                 if(useXUDT)
                 {
+                    packet.incomingServiceType = SCCP_YUDT;
+                }
+                else
+                {
+                    packet.incomingServiceType = SCCP_UDT;
+                }
+                [_sccpLayer routePacket:packet
+                            fromLinkset:NULL
+                          fromLocalUser:YES];
+
                     [_sccpLayer routeXUDT:_data
                                   calling:_src
                                    called:_dst
@@ -342,6 +364,8 @@ static int segmentReferenceId;
                 }
                 else
                 {
+                    packet.incomingServiceType = SCCP_UDT;
+
                     [_sccpLayer routeUDT:_data
                                  calling:_src
                                   called:_dst

@@ -20,8 +20,8 @@
 #import "UMLayerSCCPApplicationContextProtocol.h"
 #import "UMSCCP_Statistics.h"
 #import "UMSCCP_Filter.h"
-
 #import "UMSCCP_StatisticSection.h"
+#import "UMSCCP_Packet.h"
 
 typedef enum SccpGtFileSection
 {
@@ -266,6 +266,10 @@ typedef enum SccpGtFileSection
                                         translationType:(int)tt
                                               fromLocal:(BOOL)fromLocal;
 
+
+- (BOOL)routePacket:(UMSCCP_Packet *)packet;
+
+#if 0
 -(BOOL) routeUDT:(NSData *)pdu /* returns true if processed locally, false if transited */
          calling:(SccpAddress *)src
           called:(SccpAddress *)dst
@@ -329,6 +333,7 @@ typedef enum SccpGtFileSection
            options:(NSDictionary *)options
           provider:(UMLayerMTP3 *)provider
           fromLocal:(BOOL)fromLocal;
+#endif
 
 
 - (void)findRoute:(SccpAddress **)dst
@@ -351,8 +356,11 @@ typedef enum SccpGtFileSection
 + (NSString *)reasonString:(SCCP_ReturnCause)reason;
 - (id)decodePdu:(NSData *)data;
 - (void)traceSentPdu:(NSData *)pdu options:(NSDictionary *)dict;
+- (void)traceSentPacket:(UMSCCP_Packet *)packet options:(NSDictionary *)dict;
 - (void)traceReceivedPdu:(NSData *)pdu options:(NSDictionary *)dict;
+- (void)traceReceivedPacket:(UMSCCP_Packet *)packet options:(NSDictionary *)o;
 - (void)traceDroppedPdu:(NSData *)pdu options:(NSDictionary *)dict;
+- (void)traceDroppedPacket:(UMSCCP_Packet *)packet options:(NSDictionary *)dict;
 - (NSDictionary *)apiStatus;
 
 - (void)stopDetachAndDestroy;
