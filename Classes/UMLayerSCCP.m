@@ -75,9 +75,6 @@
     _gttSelectorRegistry = [[SccpGttRegistry alloc]init];
     _gttSelectorRegistry.logLevel = self.logLevel;
     _gttSelectorRegistry.logFeed = self.logFeed;
-    _sccp_number_translations_dict = [[UMSynchronizedDictionary alloc]init];
-    _sccp_destinations_dict = [[UMSynchronizedDictionary alloc]init];
-
     for(int i=0;i<UMSCCP_StatisticSection_MAX;i++)
     {
         _processingStats[i] = [[UMSCCP_Statistics alloc] init];
@@ -818,6 +815,7 @@
     dict[@"new-tt"] = @(dst.tt.tt);
     return dict;
 }
+
 
 - (BOOL) routeUDT:(NSData *)data /* returns true if processed locally, false if transited */
           calling:(SccpAddress *)src
@@ -1749,6 +1747,7 @@
         {
             [self readFromGtFile:f];
         }
+        NSLog(@"gtt files read");
     }
 }
 
@@ -2390,7 +2389,7 @@
     return dict;
 }
 
-- (SccpGttSelector *)parseSelectorWords:(NSArray *)words currentSelector:(SccpGttSelector *)currentSel
+- (SccpGttSelector *)parseSelectorWords:(NSArray *)words currentSelector:(SccpGttSelector *)currentSel registry:(SccpGttRegistry *)registry
 {
 
     /* example */
@@ -2413,17 +2412,17 @@
     if(( (words.count > 3) &&
         ([words[0] isEqualToString:@"cs7"]) &&
         ([words[1] isEqualToString:@"gtt"]) &&
-        ([words[2] isEqualToString:@"application-group"])))
+        ([words[2] isEqualToString:@"selector"])))
     {
         NSString *selectorName = words[3];
-        currentSel = [_gttSelectorRegistry getSelectorByName:selectorName];
+        currentSel = [registry getSelectorByName:selectorName];
 
         if(words.count > 7)
         {
             BOOL isNew = NO;
             if(currentSel == NULL)
             {
-                currentSel = [[SccpGttSelector alloc]init];
+                currentSel = [[SccpGttSelector alloc]initWithInstanceName:_layerName];
                 currentSel.name = selectorName;
                 isNew = YES;
             }
@@ -2454,15 +2453,23 @@
             }
             if(isNew)
             {
-                [_gttSelectorRegistry addEntry:currentSel];
+                [registry addEntry:currentSel];
             }
             else
             {
-                [_gttSelectorRegistry updateEntry:currentSel];
+                [registry updateEntry:currentSel];
             }
         }
         return currentSel;
 
+    }
+    else if( (words.count > 1) && ([words[0] isEqualToString:@"pre-gtt-address-conversion"]))
+    {
+        currentSel.preTranslationName = words[1];
+    }
+    else if( (words.count > 1) && ([words[0] isEqualToString:@"post-gtt-address-conversion"]))
+    {
+        currentSel.postTranslationName = words[1];
     }
     else if( (words.count > 3) && ([words[0] isEqualToString:@"gta"]))
     {
@@ -2481,17 +2488,20 @@
         }
         else if([destType isEqualToString:@"asname"])
         {
-            NSLog(@"gta XXX asname ... is not supported yet");
+            NSString *s =@"gta XXX asname ... is not supported yet";
+            @throw([NSException exceptionWithName:@"PARSING_ERROR" reason:s userInfo:NULL]);
+
         }
         else if([destType isEqualToString:@"pcssn"])
         {
-            NSLog(@"gta XXX pcssn ... is not supported yet");
+            NSString *s = @"gta XXX pcssn ... is not supported yet";
+            @throw([NSException exceptionWithName:@"PARSING_ERROR" reason:s userInfo:NULL]);
         }
     }
     return currentSel;
 }
 
-- (SccpDestinationGroup *)parseDestinationGroupWords:(NSArray *)words currentDestinationGroup:(SccpDestinationGroup *)currentAppGrp
+- (SccpDestinationGroup *)parseDestinationGroupWords:(NSArray *)words currentDestinationGroup:(SccpDestinationGroup *)currentAppGrp registry:(SccpGttRegistry *)registry
 {
     if(( (words.count > 3) &&
         ([words[0] isEqualToString:@"cs7"]) &&
@@ -2499,12 +2509,12 @@
         ([words[2] isEqualToString:@"application-group"])))
     {
         NSString *name = words[3];
-        currentAppGrp = _sccp_destinations_dict[name];
+        currentAppGrp = registry.sccp_destinations_dict[name];
         if(currentAppGrp == NULL)
         {
             currentAppGrp = [[SccpDestinationGroup alloc]init];
             currentAppGrp.name = name;
-            _sccp_destinations_dict[name] = currentAppGrp;
+            registry.sccp_destinations_dict[name] = currentAppGrp;
         }
     }
     else if( (words.count > 2) && ([words[0] isEqualToString:@"multiplicity"]))
@@ -2596,6 +2606,11 @@
             {
                 cost = @(iv);
             }
+            else
+            {
+                NSLog(@"Can't understand %@",words);
+            }
+            i++;
         }
 
         if(useGt)
@@ -2640,7 +2655,7 @@
     return currentAppGrp;
 }
 
-- (SccpNumberTranslation *)parseAddressConversionWords:(NSArray *)words currentAddressConversion:(SccpNumberTranslation *)currentAddrConv
+- (SccpNumberTranslation *)parseAddressConversionWords:(NSArray *)words currentAddressConversion:(SccpNumberTranslation *)currentAddrConv registry:(SccpGttRegistry *)registry
 {
     if(( (words.count > 3) &&
         ([words[0] isEqualToString:@"cs7"]) &&
@@ -2648,12 +2663,12 @@
         ([words[2] isEqualToString:@"address-conversion"])))
     {
         NSString *name = words[3];
-        currentAddrConv = _sccp_number_translations_dict[name];
+        currentAddrConv = registry.sccp_number_translations_dict[name];
         if(currentAddrConv == NULL)
         {
             currentAddrConv = [[SccpNumberTranslation alloc]init];
             currentAddrConv.name = name;
-            _sccp_number_translations_dict[name] = currentAddrConv;
+            registry.sccp_number_translations_dict[name] = currentAddrConv;
         }
     }
 
@@ -2697,6 +2712,12 @@
                 nai = @( [s integerValue]);
                 i = i+1;
             }
+            else
+            {
+                NSString *s = [NSString stringWithFormat:@"Can't parse words: %@",words];
+                @throw([NSException exceptionWithName:@"PARSING_ERROR" reason:s userInfo:NULL]);
+            }
+            i++;
         }
 
         if(inAddress)
@@ -2715,132 +2736,208 @@
 
 - (void)readFromGtFile:(NSString *)fn
 {
-    BOOL errIgnore = NO;
-    NSError *err = NULL;
+    @try
+    {
+        BOOL errIgnore = NO;
+        NSError *err = NULL;
 
-    NSString *fullPath  = [fn stringByStandardizingPath];
-    NSString *filename  = [fullPath lastPathComponent];
-    NSString *newPath   = [fullPath stringByDeletingLastPathComponent];
-    NSString *oldPath   = [[NSFileManager defaultManager] currentDirectoryPath];
-    SccpGtFileSection currentSection = SccpGtFileSection_root;
+        NSString *fullPath  = [fn stringByStandardizingPath];
+        NSString *filename  = [fullPath lastPathComponent];
+        NSString *newPath   = [fullPath stringByDeletingLastPathComponent];
+        NSString *oldPath   = [[NSFileManager defaultManager] currentDirectoryPath];
 
-    SccpGttSelector *currentSel = NULL;
-    SccpDestinationGroup *currentDestGrp = NULL;
-    SccpNumberTranslation *currentAddrConv = NULL;
+        SccpGttRegistry *registry = [[SccpGttRegistry alloc]init];
+        SccpGtFileSection currentSection = SccpGtFileSection_root;
+
+        SccpGttSelector *currentSel = NULL;
+        SccpDestinationGroup *currentDestGrp = NULL;
+        SccpNumberTranslation *currentAddrConv = NULL;
 
 #ifdef LINUX
-    chdir([newPath UTF8String]);
+        chdir([newPath UTF8String]);
 #else
-    [[NSFileManager defaultManager] changeCurrentDirectoryPath:newPath];
+        [[NSFileManager defaultManager] changeCurrentDirectoryPath:newPath];
 #endif
-    NSString *configFile = [NSString stringWithContentsOfFile:filename
-                                                     encoding:NSUTF8StringEncoding
-                                                        error:&err];
-#ifdef LINUX
-    chdir([oldPath UTF8String]);
-#else
-    [[NSFileManager defaultManager] changeCurrentDirectoryPath:oldPath];
-#endif
+        NSString *configFile = [NSString stringWithContentsOfFile:filename
+                                                         encoding:NSUTF8StringEncoding
+                                                            error:&err];
 
-    if(err)
-    {
-        NSString *s = [NSString stringWithFormat:@"Can not read file %@. Error %@",fn,err];
-        if(errIgnore == YES)
+        if(err)
         {
-            NSLog(@"%@",s);
+            NSString *s = [NSString stringWithFormat:@"Can not read file %@. Error %@",fn,err];
+            if(errIgnore == YES)
+            {
+                NSLog(@"%@",s);
+            }
+            else
+            {
+                @throw([NSException exceptionWithName:@"config"
+                                               reason:s
+                                             userInfo:@{@"backtrace": UMBacktrace(NULL,0) }]);
+            }
         }
-        else
-        {
-            @throw([NSException exceptionWithName:@"config"
-                                           reason:s
-                                         userInfo:@{@"backtrace": UMBacktrace(NULL,0) }]);
-        }
-    }
 
-    NSArray *lines = [configFile componentsSeparatedByString:@"\n"];
-    //NSMutableArray *config = [[NSMutableArray alloc]init];
-
-    long linenumber = 0;
-    for (NSString *line1 in lines)
-    {
         NSCharacterSet *ws = [UMObject whitespaceAndNewlineCharacterSet];
-
-        NSString *line = [line1 stringByTrimmingCharactersInSet:ws];
-        linenumber++;
-
-        NSArray *words = [line componentsSeparatedByCharactersInSet:ws];
-        if(words.count == 0) /* empty line */
+        NSInteger includeStatementsCount = 0;
+        NSArray *lines = [configFile componentsSeparatedByString:@"\n"];
+        //NSMutableArray *config = [[NSMutableArray alloc]init];
+        do
         {
-            continue;
-        }
-
-        if([words[0] isEqualToString:@"!"]) /* a comment line */
-        {
-            continue;
-        }
-        if([words[0] isEqualToString:@"exit"])
-        {
-            currentSection = SccpGtFileSection_root;
-            currentSel = NULL;
-            currentDestGrp = NULL;
-            currentAddrConv = NULL;
-        }
-        else if((currentSection == SccpGtFileSection_selector) ||
-                ( (words.count > 3) &&
-                  ([words[0] isEqualToString:@"cs7"]) &&
-                  ([words[1] isEqualToString:@"gtt"]) &&
-                  ([words[2] isEqualToString:@"selector"])))
-        {
-            currentSel = [self parseSelectorWords:words currentSelector:currentSel];
-            if(currentSel)
+            includeStatementsCount = 0;
+            NSMutableArray *lines2 = [[NSMutableArray alloc]init];
+            for (NSString *line1 in lines)
             {
-                currentSection = SccpGtFileSection_selector;
+                NSString *line = [line1 stringByTrimmingCharactersInSet:ws];
+                NSArray *words = [line componentsSeparatedByCharactersInSet:ws];
+                /* remove empty words */
+                NSMutableArray *words2 = [[NSMutableArray alloc]init];
+                for(NSString *word in words)
+                {
+                    if(word.length > 0)
+                    {
+                        [words2 addObject:word];
+                    }
+                }
+
+                if((words.count==2) && ([words[0]isEqualToString:@"include"]))
+                {
+                    includeStatementsCount++;
+                    NSString *includeFileName = words[1];
+                    NSString *includedFile = [NSString stringWithContentsOfFile:includeFileName
+                                                                       encoding:NSUTF8StringEncoding
+                                                                          error:&err];
+                    if(err)
+                    {
+                        NSString *s = [NSString stringWithFormat:@"Can not read file %@. Error %@",fn,err];
+                        if(errIgnore == YES)
+                        {
+                            NSLog(@"%@",s);
+                        }
+                        else
+                        {
+                            @throw([NSException exceptionWithName:@"config"
+                                                           reason:s
+                                                         userInfo:@{@"backtrace": UMBacktrace(NULL,0) }]);
+                        }
+                    }
+                    NSArray *includedLines = [includedFile componentsSeparatedByString:@"\n"];
+                    for(NSString *includedLine in includedLines)
+                    {
+                        [lines2 addObject:includedLine];
+                    }
+                }
+                else
+                {
+                    [lines2 addObject:line];
+                }
+
+            }
+            lines = lines2;
+        } while(includeStatementsCount > 0);
+
+#ifdef LINUX
+        chdir([oldPath UTF8String]);
+#else
+        [[NSFileManager defaultManager] changeCurrentDirectoryPath:oldPath];
+#endif
+
+        long linenumber = 0;
+        for (NSString *line1 in lines)
+        {
+            NSString *line = [line1 stringByTrimmingCharactersInSet:ws];
+            linenumber++;
+
+            NSArray *words = [line componentsSeparatedByCharactersInSet:ws];
+            /* remove empty words */
+            NSMutableArray *words2 = [[NSMutableArray alloc]init];
+            for(NSString *word in words)
+            {
+                if(word.length > 0)
+                {
+                    [words2 addObject:word];
+                }
+            }
+            words = words2;
+
+            if(words.count == 0) /* empty line */
+            {
+                continue;
+            }
+
+            if([words[0] isEqualToString:@"!"]) /* a comment line */
+            {
+                continue;
+            }
+            if([words[0] isEqualToString:@"exit"])
+            {
+                currentSection = SccpGtFileSection_root;
+                currentSel = NULL;
+                currentDestGrp = NULL;
+                currentAddrConv = NULL;
+            }
+            else if((currentSection == SccpGtFileSection_selector) ||
+                    ( (words.count > 3) &&
+                     ([words[0] isEqualToString:@"cs7"]) &&
+                     ([words[1] isEqualToString:@"gtt"]) &&
+                     ([words[2] isEqualToString:@"selector"])))
+            {
+                currentSel = [self parseSelectorWords:words currentSelector:currentSel registry:registry];
+                if(currentSel)
+                {
+                    currentSection = SccpGtFileSection_selector;
+                }
+                else
+                {
+                    currentSection = SccpGtFileSection_root;
+                }
+            }
+            else if((currentSection == SccpGtFileSection_application_group) ||
+                    ( (words.count > 3) &&
+                     ([words[0] isEqualToString:@"cs7"]) &&
+                     ([words[1] isEqualToString:@"gtt"]) &&
+                     ([words[2] isEqualToString:@"application-group"])))
+            {
+                currentDestGrp = [self parseDestinationGroupWords:words currentDestinationGroup:currentDestGrp registry:registry];
+                if(currentDestGrp)
+                {
+                    currentSection = SccpGtFileSection_application_group;
+                }
+                else
+                {
+                    currentSection = SccpGtFileSection_root;
+                }
+            }
+            else if((currentSection == SccpGtFileSection_address_conversion) ||
+                    ( (words.count > 3) &&
+                     ([words[0] isEqualToString:@"cs7"]) &&
+                     ([words[1] isEqualToString:@"gtt"]) &&
+                     ([words[2] isEqualToString:@"address-conversion"])))
+            {
+
+                currentAddrConv = [self parseAddressConversionWords:words currentAddressConversion:currentAddrConv registry:registry];
+                if(currentAddrConv)
+                {
+                    currentSection = SccpGtFileSection_address_conversion;
+                }
+                else
+                {
+                    currentSection = SccpGtFileSection_root;
+                }
             }
             else
             {
-                currentSection = SccpGtFileSection_root;
+                NSString *s = [NSString stringWithFormat:@"Can not parse line %ld from file %@: %@",linenumber,filename,line];
+                @throw([NSException exceptionWithName:@"PARSING_ERROR" reason:s userInfo:NULL]);
             }
         }
-        else if((currentSection == SccpGtFileSection_application_group) ||
-                ( (words.count > 3) &&
-                 ([words[0] isEqualToString:@"cs7"]) &&
-                 ([words[1] isEqualToString:@"gtt"]) &&
-                 ([words[2] isEqualToString:@"application-group"])))
-        {
-            currentDestGrp = [self parseDestinationGroupWords:words currentDestinationGroup:currentDestGrp];
-            if(currentDestGrp)
-            {
-                currentSection = SccpGtFileSection_application_group;
-            }
-            else
-            {
-                currentSection = SccpGtFileSection_root;
-            }
-        }
-        else if((currentSection == SccpGtFileSection_address_conversion) ||
-                ( (words.count > 3) &&
-                 ([words[0] isEqualToString:@"cs7"]) &&
-                 ([words[1] isEqualToString:@"gtt"]) &&
-                 ([words[2] isEqualToString:@"address-conversion"])))
-        {
-
-            currentAddrConv = [self parseAddressConversionWords:words currentAddressConversion:currentAddrConv];
-            if(currentAddrConv)
-            {
-                currentSection = SccpGtFileSection_address_conversion;
-            }
-            else
-            {
-                currentSection = SccpGtFileSection_root;
-            }
-        }
-        else
-        {
-            NSString *s = [NSString stringWithFormat:@"Can not parse line %ld from file %@: %@",linenumber,filename,line];
-            [self logMajorError:s];
-        }
+        [registry finishUpdate];
+        _gttSelectorRegistry = registry;
+    }
+    @catch(NSException *e)
+    {
+        NSString *s = [NSString stringWithFormat:@"Exception while reading file: %@\n%@",fn,e];
+        [self logMajorError:s];
     }
 }
-
 @end
 

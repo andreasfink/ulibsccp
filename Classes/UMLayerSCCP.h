@@ -58,9 +58,6 @@ typedef enum SccpGtFileSection
     UMThroughputCounter         *_throughputCounters[UMSCCP_StatisticSection_MAX];
 	UMSCCP_Filter				*_inboundFilter;
 	UMSCCP_Filter				*_outboundFilter;
-
-    UMSynchronizedDictionary    *_sccp_number_translations_dict; /* this one is normally shared with the one from the AppDelegate */
-    UMSynchronizedDictionary    *_sccp_destinations_dict;
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;

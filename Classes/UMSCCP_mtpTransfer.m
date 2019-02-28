@@ -37,6 +37,7 @@
 		_packet.incomingData = data;
 		_packet.incomingOptions = xoptions;
 		_packet.incomingMtp3Layer = mtp3;
+        _packet.incomingLinkset = options[@"mtp3-incoming-linkset"];
 
 		_created = [NSDate date];
         _statsSection = UMSCCP_StatisticSection_TRANSIT;
@@ -79,6 +80,8 @@
     {
         _decodedJson = [[UMSynchronizedSortedDictionary alloc]init];
     }
+
+    _packet.serviceClass = SCCP_CLASS_UNDEFINED;
     @try
     {
         NSUInteger len = data.length;
@@ -97,12 +100,15 @@
         int param_hop_counter = 0;
         NSString *type;
 
+        _packet.handling = m_handling;
+        _packet.serviceType = m_type;
         switch(m_type)
         {
             case SCCP_UDT:
                 type = @"UDT";
                 _decodedJson[@"sccp-pdu-type"]=type;
                 m_protocol_class = d[i] & 0x0F;
+                _packet.serviceClass = m_protocol_class;
                 _decodedJson[@"sccp-protocol-class"]=@(m_protocol_class);
                 m_handling = (d[i++]>>4) & 0x0F;
                 _decodedJson[@"sccp-protocol-handling"]=@(m_handling);
@@ -133,6 +139,7 @@
                 type=@"XUDT";
                 _decodedJson[@"sccp-pdu-type"]=type;
                 m_protocol_class = d[i] & 0x0F;
+                _packet.serviceClass = m_protocol_class;
                 _decodedJson[@"sccp-protocol-class"]=@(m_protocol_class);
                 m_handling = (d[i++]>>4) & 0x0F;
                 _decodedJson[@"sccp-protocol-handling"]=@(m_handling);
@@ -199,7 +206,8 @@
             dstData = [NSData dataWithBytes:&d[param_called_party_address+1] length:i];
             dst = [[SccpAddress alloc]initWithItuData:dstData];
             _decodedJson[@"sccp-called-party-address"]=[dst dictionaryValue];
-            _decodedCalled = dst;
+            _packet.calledAddress = dst;
+
         }
         if(param_calling_party_address>0)
         {
@@ -207,7 +215,7 @@
             srcData = [NSData dataWithBytes:&d[param_calling_party_address+1] length:i];
             src = [[SccpAddress alloc]initWithItuData:srcData];
             _decodedJson[@"sccp-calling-party-address"]=[src dictionaryValue];
-            _decodedCalling = src;
+            _packet.callingAddress = src;
         }
         if(param_data > 0)
         {
@@ -330,7 +338,8 @@
 
         options[@"sccp-calling-address"] = src;
         options[@"sccp-called-address"] = dst;
-
+        _packet.callingAddress = src;
+        _packet.calledAddress = dst;
         if(!decodeOnly)
         {
             switch(m_type)

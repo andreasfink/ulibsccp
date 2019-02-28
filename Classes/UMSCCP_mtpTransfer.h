@@ -43,8 +43,6 @@
     int             end_of_optional_parameters;
     int             m_return_cause;
     UMSynchronizedSortedDictionary *_decodedJson;
-    SccpAddress *_decodedCalling;
-    SccpAddress *_decodedCalled;
     NSData *_decodedPdu;
     int m_type;
 

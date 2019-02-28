@@ -11,6 +11,7 @@
 
 typedef enum SCCP_ServiceClass
 {
+    SCCP_CLASS_UNDEFINED        =  -1,
     SCCP_CLASS_BASIC = 				0,
     SCCP_CLASS_INSEQ_CL = 			1,
     SCCP_CLASS_BASIC_CO = 			2,
