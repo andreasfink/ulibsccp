@@ -2517,7 +2517,7 @@
             registry.sccp_destinations_dict[name] = currentAppGrp;
         }
     }
-    else if( (words.count > 2) && ([words[0] isEqualToString:@"multiplicity"]))
+    else if( (words.count > 1) && ([words[0] isEqualToString:@"multiplicity"]))
     {
         if([words[1] isEqualToString:@"cgpa"]) /* Share based on calling party and weighting factor */
         {
@@ -2537,15 +2537,15 @@
         }
     }
 
-    else if( (words.count > 1) && ([words[0] isEqualToString:@"sccp-class1-loadbalance"]))
+    else if( (words.count > 0) && ([words[0] isEqualToString:@"sccp-class1-loadbalance"]))
     {
         currentAppGrp.class1LoadBalance = YES;
     }
-    else if( (words.count > 1) && ([words[0] isEqualToString:@"distribute-sccp-sequenced-negate"]))
+    else if( (words.count > 0) && ([words[0] isEqualToString:@"distribute-sccp-sequenced-negate"]))
     {
         currentAppGrp.distributeSccpSequencedNegate = YES;
     }
-    else if( (words.count > 2) && ([words[0] isEqualToString:@"instance"]))
+    else if( (words.count > 1) && ([words[0] isEqualToString:@"instance"]))
     {
         currentAppGrp.dpcInstance = words[1];
     }
@@ -2563,8 +2563,9 @@
         {
             asname       = words[1];
         }
-        NSNumber *cost = words[2];
+        NSNumber *cost = NULL;
         NSString *ssnString  = NULL;
+        NSString *weightString = NULL;
         BOOL useGt = NO;
         BOOL usePcssn = NO;
         NSString *nttString = NULL;
@@ -2574,7 +2575,7 @@
 
          pc 1-1-1 ssn <ssn = 0,2...255> <cost> gt
          pc 1-1-1 { ssn <ssn = 0,2...255> } <cost> gt ntt <0...255>
-         pc 1-1-1 { ssn <ssn = 0,2...255> } <cost> pcssn {sccp-allow-pak-conv}
+         pc 1-1-1 { ssn <ssn = 0,2...255> } <cost> pcssn {sccp-allow-pak-conv} weight {number}
          */
         while(i<k)
         {
@@ -2598,6 +2599,11 @@
                 nttString  = words[i+1];
                 i = i+1;
             }
+            else if( ([w isEqualToString:@"weight"]) && ((i+1) <k) )
+            {
+                weightString = words[i+1];
+                i = i+1;
+            }
             else if([w isEqualToString:@"sccp-allow-pak-conv"])
             {
                 allowXUDTconversion = YES;
@@ -2613,44 +2619,40 @@
             i++;
         }
 
-        if(useGt)
-        {
-            SccpDestination *e = [[SccpDestination alloc]init];
-            e.dpc = [[UMMTP3PointCode alloc]initWithString:pcString variant:_mtp3.variant];
-            e.cost = cost;
-            if(ssnString)
-            {
-                e.ssn = @([ssnString integerValue]);
-            }
-            if(nttString)
-            {
-                e.ntt = @([nttString integerValue]);
-            }
-            [currentAppGrp addEntry:e];
-        }
-        else if(usePcssn)
-        {
-            SccpDestination *e = [[SccpDestination alloc]init];
-            if(pcString)
-            {
-                e.dpc = [[UMMTP3PointCode alloc]initWithString:pcString variant:_mtp3.variant];
-            }
-            if(asname)
-            {
-                e.m3uaAs = asname;
-            }
-            e.cost = cost;
-            if(ssnString)
-            {
-                e.ssn = @([ssnString integerValue]);
-            }
-            if(nttString)
-            {
-                e.ntt = @([nttString integerValue]);
-            }
-            [currentAppGrp addEntry:e];
+        SccpDestination *e = [[SccpDestination alloc]init];
 
+        e.dpc = [[UMMTP3PointCode alloc]initWithString:pcString variant:_mtp3.variant];
+        if(cost)
+        {
+            e.cost = cost;
         }
+        else
+        {
+            e.cost = @(5);
+        }
+        if(ssnString)
+        {
+            e.ssn = @([ssnString integerValue]);
+        }
+        if(nttString)
+        {
+            e.ntt = @([nttString integerValue]);
+        }
+        if(weightString)
+        {
+            e.weight = @([weightString doubleValue]);
+        }
+        else
+        {
+            e.weight = @(100.0);
+        }
+        if(asname)
+        {
+            e.m3uaAs = asname;
+        }
+        e.useGt = useGt;
+        e.usePcssn = usePcssn;
+        [currentAppGrp addEntry:e];
     }
     return currentAppGrp;
 }
