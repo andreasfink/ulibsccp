@@ -121,8 +121,6 @@ static int segmentReferenceId;
                                                    variant:_sccpLayer.mtp3.variant];
         }
 
-        UMMTP3_Error e = UMMTP3_no_error;
-
         NSData *srcEncoded = [_src encode:_sccpLayer.sccpVariant];
         NSData *dstEncoded = [_dst encode:_sccpLayer.sccpVariant];
         NSUInteger cas = srcEncoded.length;
@@ -322,6 +320,25 @@ static int segmentReferenceId;
                     s.remainingSegment = (int)count - i -1;
                 }
                 _data = NULL;
+                for(int i=0;i<count;i++)
+                {
+                    UMSCCP_Segment *s = [_dataSegments objectAtIndex:(NSUInteger)i];
+                    s.remainingSegment = (int)count - i -1;
+
+                    UMSCCP_Packet *packet = [[UMSCCP_Packet alloc]init];
+                    packet.incomingMtp3Layer = _sccpLayer.mtp3;
+                    packet.incomingCallingPartyAddress = _src;
+                    packet.incomingCalledPartyAddress = _dst;
+                    packet.incomingServiceClass = _protocolClass;
+                    packet.incomingHandling = _handling;
+                    packet.incomingData = _data;
+                    packet.incomingOptions = _options;
+                    packet.incomingMaxHopCount = _maxHopCount;
+                    packet.incomingOptionalData = optional_data;
+                    packet.incomingServiceType = SCCP_XUDT;
+                    _statisticsSection2 = UMSCCP_StatisticSection_XUDT_TX;
+                    [_sccpLayer routePacket:packet];
+                }
             }
             else /* we have pure data only */
             {
@@ -334,76 +351,18 @@ static int segmentReferenceId;
                 packet.incomingData = _data;
                 packet.incomingOptions = _options;
                 packet.incomingMaxHopCount = _maxHopCount;
-                packet.incomingOptionsData = optional_data;
-
+                packet.incomingOptionalData = optional_data;
                 if(useXUDT)
                 {
-                    packet.incomingServiceType = SCCP_YUDT;
-                }
-                else
-                {
-                    packet.incomingServiceType = SCCP_UDT;
-                }
-                [_sccpLayer routePacket:packet
-                            fromLinkset:NULL
-                          fromLocalUser:YES];
-
-                    [_sccpLayer routeXUDT:_data
-                                  calling:_src
-                                   called:_dst
-                                    class:_protocolClass
-                                 handling:_handling
-                                 hopCount:_maxHopCount
-                                      opc:xopc
-                                      dpc:xdpc
-                              optionsData:optional_data
-                                  options:_options
-                                 provider:_sccpLayer.mtp3
-                                fromLocal:YES];
+                    packet.incomingServiceType = SCCP_XUDT;
                     _statisticsSection2 = UMSCCP_StatisticSection_XUDT_TX;
                 }
                 else
                 {
                     packet.incomingServiceType = SCCP_UDT;
-
-                    [_sccpLayer routeUDT:_data
-                                 calling:_src
-                                  called:_dst
-                                   class:_protocolClass
-                                handling:_handling
-                                     opc:xopc
-                                     dpc:xdpc
-                                 options:_options
-                                provider:_sccpLayer.mtp3
-                               fromLocal:YES];
                     _statisticsSection2 = UMSCCP_StatisticSection_UDT_TX;
                 }
-            }
-        }
-        if(_dataSegments)
-        {
-            NSUInteger count = _dataSegments.count;
-            for(int i=0;i<count;i++)
-            {
-                UMSCCP_Segment *s = [_dataSegments objectAtIndex:(NSUInteger)i];
-                s.remainingSegment = (int)count - i -1;
-                [_sccpLayer routeXUDTsegment:s
-                                     calling:_src
-                                      called:_dst
-                                       class:_protocolClass
-                                    handling:_handling
-                                    hopCount:_maxHopCount
-                                         opc:xopc
-                                         dpc:xdpc
-                                 optionsData:optional_data
-                                     options:_options
-                                    provider:_sccpLayer.mtp3
-                                   fromLocal:YES];
-                _statisticsSection2 = UMSCCP_StatisticSection_XUDT_TX;
-                if(e != UMMTP3_no_error)
-                {
-                    break;
-                }
+                [_sccpLayer routePacket:packet];
             }
         }
     }

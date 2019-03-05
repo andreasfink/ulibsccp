@@ -77,7 +77,7 @@
     _outgoingCallingPartyAddress = _incomingCallingPartyAddress;
     _outgoingCalledPartyAddress = _incomingCalledPartyAddress;
     _outgoingData = _incomingData;
-    _outgoingMaxHopCount    = _incomingMaxHopCount;
+    _outgoingMaxHopCount    = _incomingMaxHopCount - 1;
     _outgoingOptionalData   = _incomingOptionalData;
     _outgoingFromLocal      = _incomingFromLocal;
     _outgoingToLocal        = _incomingToLocal;

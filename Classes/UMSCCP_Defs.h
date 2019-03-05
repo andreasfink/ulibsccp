@@ -44,6 +44,7 @@ typedef	enum SCCP_State
 
 typedef enum SCCP_ReturnCause
 {
+    SCCP_ReturnCause_not_set                                = -1,
     SCCP_ReturnCause_NoTranslationForAnAddressOfSuchNature  = 0,
     SCCP_ReturnCause_NoTranslationForThisSpecificAddress    = 1,
     SCCP_ReturnCause_SubsystemCongestion                    = 2,

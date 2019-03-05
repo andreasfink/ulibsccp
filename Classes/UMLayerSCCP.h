@@ -335,13 +335,14 @@ typedef enum SccpGtFileSection
           fromLocal:(BOOL)fromLocal;
 #endif
 
-
+#if 0
 - (void)findRoute:(SccpAddress **)dst
        causeValue:(int *)cause
         localUser:(id<UMSCCP_UserProtocol> *)user
         pointCode:(UMMTP3PointCode **)pc
         fromLocal:(BOOL)isLocal
   incomingLinkset:(NSString *)incomingLinkset;
+#endif
 
 - (NSUInteger)maxPayloadSizeForServiceType:(SCCP_ServiceType) serviceType
                         callingAddressSize:(NSUInteger)cas
