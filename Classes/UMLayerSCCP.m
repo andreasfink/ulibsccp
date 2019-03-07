@@ -903,7 +903,7 @@
         }
         else if(pc)
         {
-
+            packet.outgoingDpc = pc;
             UMMTP3_Error e = [self sendUDT:packet.outgoingData
                                    calling:packet.outgoingCallingPartyAddress
                                     called:packet.outgoingCalledPartyAddress
