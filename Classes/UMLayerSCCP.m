@@ -883,7 +883,7 @@
                                    fromLocalUser:packet.incomingFromLocal];
     if(self.logLevel <=UMLOG_DEBUG)
     {
-        NSString *s = [NSString stringWithFormat:@"findRoutes:%@ returns:\n\tdestinationGroup=%@\n\tcause=%d\n\tnewCalledAddress=%@\n\tfromLocalUser=%@fromLocal\n",dst,grp,causeValue,called_out,localUser,packet.incomingFromLocal ? @"YES" : @"NO"];
+        NSString *s = [NSString stringWithFormat:@"findRoutes:%@ returns:\n\tdestinationGroup=%@\n\tcause=%d\n\tnewCalledAddress=%@\n\tfromLocalUser=%@\n\tfromLocal=%@\n",dst,grp,causeValue,called_out,localUser,packet.incomingFromLocal ? @"YES" : @"NO"];
         [self logDebug:s];
     }
 
