@@ -481,13 +481,13 @@
                                cause:(SCCP_ReturnCause *)cause
                     newCalledAddress:(SccpAddress **)called_out
                            localUser:(id<UMSCCP_UserProtocol> *)localUser
-                      incomingPacket:(BOOL)incomingPacket
+                       fromLocalUser:(BOOL)fromLocalUser
 {
     SccpDestinationGroup *destination = NULL;
     SccpAddress *called1 = [called copy];
     if(_stpMode==NO)
     {
-        if(incomingPacket)
+        if(!fromLocalUser)
         {
             /* routed by subsystem */
             if(self.logLevel <=UMLOG_DEBUG)
@@ -731,7 +731,7 @@
                                            cause:&cause
                                 newCalledAddress:&called_out
                                        localUser:&localUser
-                                  incomingPacket:!fromLocal];
+                                   fromLocalUser:fromLocal];
     if(grp)
     {
         [self chooseRouteFromGroup:grp
@@ -862,7 +862,7 @@
             [s appendFormat:@"MsgType %@   LS: %@\n",packet.incomingPacketType,packet.incomingLinkset];
         }
         [s appendFormat:@"OPC: %@\tCgPA: %@src\n",packet.incomingOpc,packet.incomingCallingPartyAddress];
-        [s appendFormat:@"DPC: %@\tCgPA: %@src\n",packet.incomingDpc,packet.incomingCalledPartyAddress];
+        [s appendFormat:@"DPC: %@\tCdPA: %@src\n",packet.incomingDpc,packet.incomingCalledPartyAddress];
         [self.logFeed debugText:s];
     }
 
@@ -880,10 +880,10 @@
                                            cause:&causeValue
                                 newCalledAddress:&called_out
                                        localUser:&localUser
-                                  incomingPacket:packet.incomingFromLocal];
+                                   fromLocalUser:packet.incomingFromLocal];
     if(self.logLevel <=UMLOG_DEBUG)
     {
-        NSString *s = [NSString stringWithFormat:@"findRoutes:%@ returns:\n\tdestinationGroup=%@\n\tcause=%d\n\tnewCalledAddress=%@\n\tlocalUser=%@\n",dst,grp,causeValue,called_out,localUser];
+        NSString *s = [NSString stringWithFormat:@"findRoutes:%@ returns:\n\tdestinationGroup=%@\n\tcause=%d\n\tnewCalledAddress=%@\n\tfromLocalUser=%@fromLocal\n",dst,grp,causeValue,called_out,localUser,packet.incomingFromLocal ? @"YES" : @"NO"];
         [self logDebug:s];
     }
 
@@ -1055,8 +1055,8 @@ fromLocal:(BOOL)fromLocal
         {
             NSMutableString *s = [[NSMutableString alloc]init];
             [s appendFormat:@"MsgType udt   LS: %@\n",incomingLinkset];
-            [s appendFormat:@"OPC: %@\tCgPA: %@src\n",opc,src];
-            [s appendFormat:@"DPC: %@\tCgPA: %@src\n",dpc,dst];
+            [s appendFormat:@"OPC: %@\tCgPA: %@\n",opc,src];
+            [s appendFormat:@"DPC: %@\tCdPA: %@\n",dpc,dst];
             [self.logFeed debugText:s];
         }
 
