@@ -2012,8 +2012,18 @@ provider:(UMLayerMTP3 *)provider
             {
                 [self readFromGtFile:f];
             }
+            NSLog(@"gt files read");
+        }
+        if(cfg[@"gtt-file"])
+        {
+            NSArray<NSString *> *a =cfg[@"gtt-file"];
+            for(NSString *f in a)
+            {
+                [self readFromGtFile:f];
+            }
             NSLog(@"gtt files read");
         }
+
     }
 
 
@@ -2851,7 +2861,6 @@ processingDelay:(NSTimeInterval)processingDelay
             NSNumber *cost = NULL;
             NSString *ssnString  = NULL;
             NSString *weightString = NULL;
-            BOOL useGt = NO;
             BOOL usePcssn = NO;
             NSString *nttString = NULL;
             BOOL allowXUDTconversion = NO;
@@ -2873,7 +2882,7 @@ processingDelay:(NSTimeInterval)processingDelay
                 }
                 else if([w isEqualToString:@"gt"])
                 {
-                    useGt = YES;
+                    usePcssn = NO;
                 }
                 else if([w isEqualToString:@"pcssn"])
                 {
@@ -2936,6 +2945,10 @@ processingDelay:(NSTimeInterval)processingDelay
                 e.m3uaAs = asname;
             }
             e.usePcssn = usePcssn;
+            if(allowXUDTconversion)
+            {
+                e.allowConversion = @(YES);
+            }
             [currentAppGrp addEntry:e];
         }
         return currentAppGrp;
