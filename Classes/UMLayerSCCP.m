@@ -852,13 +852,19 @@
                                            cause:&causeValue
                                 newCalledAddress:&called_out
                                        localUser:&localUser];
+
+    if(self.logLevel <=UMLOG_DEBUG)
+    {
+        NSString *s = [NSString stringWithFormat:@"findRoutes:%@ returns:\n\tdestinationGroup=%@\n\tcause=%d\n\tnewCalledAddress=%@\n\tlocalUser=%@\n",dst,grp,causeValue,called_out,localUser];
+        [self logDebug:s];
+    }
+
     if(called_out!=NULL)
     {
         packet.outgoingCalledPartyAddress = called_out;
     }
     else
     {
-
         if(causeValue != SCCP_ReturnCause_not_set)
         {
             NSString *s = [NSString stringWithFormat:@"findRoute (DST=%@,local=%d) returns causeValue=%d, localUser=%@, pc=%@",packet.incomingCalledPartyAddress,packet.incomingFromLocal,causeValue,localUser,pc];
