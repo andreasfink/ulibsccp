@@ -584,7 +584,12 @@
                         [self.logFeed debugText:[NSString stringWithFormat:@"pre-translation: ->%@",called1]];
                     }
                 }
-                destination = [gttSelector findNextHopForDestination:called1];
+                SccpGttRoutingTableEntry *rte = [gttSelector findNextHopForDestination:called1];
+                if(rte.routeTo == NULL)
+                {
+                    rte.routeTo = [registry getDestinationByName:rte.routeToName];
+                }
+                destination = rte.routeTo;
                 if(destination == NULL)
                 {
                     *cause = SCCP_ReturnCause_NoTranslationForThisSpecificAddress;
