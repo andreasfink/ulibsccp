@@ -481,12 +481,39 @@
                                cause:(SCCP_ReturnCause *)cause
                     newCalledAddress:(SccpAddress **)called_out
                            localUser:(id<UMSCCP_UserProtocol> *)localUser
+                      incomingPacket:(BOOL)incomingPacket
 {
     SccpDestinationGroup *destination = NULL;
     SccpAddress *called1 = [called copy];
     if(_stpMode==NO)
     {
-        if((_next_pc1) || (_next_pc2))
+        if(incomingPacket)
+        {
+            /* routed by subsystem */
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                [self.logFeed debugText:@" Route to internal subsystem"];
+            }
+
+            id<UMSCCP_UserProtocol> upperLayer = [self getUserForSubsystem:called1.ssn number:called1];
+            if(upperLayer == NULL)
+            {
+                [self.logFeed majorErrorText:[NSString stringWithFormat:@"no upper layer found for %@",called1.debugDescription]];
+                *cause = SCCP_ReturnCause_Unequipped;
+            }
+            else
+            {
+                if(self.logLevel <=UMLOG_DEBUG)
+                {
+                    [self.logFeed debugText:@" Route to upper layer"];
+                }
+                if(localUser)
+                {
+                    *localUser = upperLayer;
+                }
+            }
+        }
+        else if((_next_pc1) || (_next_pc2))
         {
             destination = [[SccpDestinationGroup alloc]init];
             if(_next_pc1)
@@ -703,7 +730,8 @@
     SccpDestinationGroup *grp = [self findRoutes:dst
                                            cause:&cause
                                 newCalledAddress:&called_out
-                                       localUser:&localUser];
+                                       localUser:&localUser
+                                  incomingPacket:!fromLocal];
     if(grp)
     {
         [self chooseRouteFromGroup:grp
@@ -847,12 +875,12 @@
 
     SccpAddress *dst = packet.incomingCalledPartyAddress;
     SCCP_ReturnCause causeValue = SCCP_ReturnCause_not_set;
-    SccpAddress *called_out = NULL;;
+    SccpAddress *called_out = NULL;
     SccpDestinationGroup *grp = [self findRoutes:dst
                                            cause:&causeValue
                                 newCalledAddress:&called_out
-                                       localUser:&localUser];
-
+                                       localUser:&localUser
+                                  incomingPacket:packet.incomingFromLocal];
     if(self.logLevel <=UMLOG_DEBUG)
     {
         NSString *s = [NSString stringWithFormat:@"findRoutes:%@ returns:\n\tdestinationGroup=%@\n\tcause=%d\n\tnewCalledAddress=%@\n\tlocalUser=%@\n",dst,grp,causeValue,called_out,localUser];
