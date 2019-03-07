@@ -336,6 +336,7 @@ static int segmentReferenceId;
                     packet.incomingMaxHopCount = _maxHopCount;
                     packet.incomingOptionalData = optional_data;
                     packet.incomingServiceType = SCCP_XUDT;
+                    packet.incomingFromLocal = YES;
                     _statisticsSection2 = UMSCCP_StatisticSection_XUDT_TX;
                     [_sccpLayer routePacket:packet];
                 }
@@ -352,6 +353,7 @@ static int segmentReferenceId;
                 packet.incomingOptions = _options;
                 packet.incomingMaxHopCount = _maxHopCount;
                 packet.incomingOptionalData = optional_data;
+                packet.incomingFromLocal = YES;
                 if(useXUDT)
                 {
                     packet.incomingServiceType = SCCP_XUDT;
