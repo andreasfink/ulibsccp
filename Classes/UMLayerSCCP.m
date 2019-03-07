@@ -852,7 +852,6 @@
                                            cause:&causeValue
                                 newCalledAddress:&called_out
                                        localUser:&localUser];
-
     if(called_out!=NULL)
     {
         packet.outgoingCalledPartyAddress = called_out;
