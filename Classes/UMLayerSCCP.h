@@ -269,80 +269,6 @@ typedef enum SccpGtFileSection
 
 - (BOOL)routePacket:(UMSCCP_Packet *)packet;
 
-#if 0
--(BOOL) routeUDT:(NSData *)pdu /* returns true if processed locally, false if transited */
-         calling:(SccpAddress *)src
-          called:(SccpAddress *)dst
-           class:(SCCP_ServiceClass)pclass
-        handling:(int)handling
-             opc:(UMMTP3PointCode *)opc
-             dpc:(UMMTP3PointCode *)dpc
-         options:(NSDictionary *)options
-        provider:(UMLayerMTP3 *)provider
-       fromLocal:(BOOL)fromLocal;
-
-
-- (BOOL) routeUDTS:(NSData *)data /* returns true if processed locally, false if transited */
-           calling:(SccpAddress *)src
-            called:(SccpAddress *)dst
-            reason:(int)reasonCode
-               opc:(UMMTP3PointCode *)opc
-               dpc:(UMMTP3PointCode *)dpc
-           options:(NSDictionary *)options
-          provider:(UMLayerMTP3 *)provider
-         fromLocal:(BOOL)fromLocal;
-
-
-
-- (BOOL) routeXUDT:(NSData *)data /* returns true if processed locally, false if transited */
-           calling:(SccpAddress *)src
-            called:(SccpAddress *)dst
-             class:(SCCP_ServiceClass)pclass
-          handling:(int)handling
-          hopCount:(int)hopCount
-               opc:(UMMTP3PointCode *)opc
-               dpc:(UMMTP3PointCode *)dpc
-       optionsData:(NSData *)xoptionsdata
-           options:(NSDictionary *)options
-          provider:(UMLayerMTP3 *)provider
-         fromLocal:(BOOL)fromLocal;
-
-
--(BOOL) routeXUDTsegment:(UMSCCP_Segment *)segment /* returns true if processed locally, false if transited */
-                 calling:(SccpAddress *)src
-                  called:(SccpAddress *)dst
-                   class:(SCCP_ServiceClass)pclass
-                handling:(int)handling
-                hopCount:(int)hopCount
-                     opc:(UMMTP3PointCode *)opc
-                     dpc:(UMMTP3PointCode *)dpc
-             optionsData:(NSData *)xoptionsdata
-                 options:(NSDictionary *)options
-                provider:(UMLayerMTP3 *)provider
-               fromLocal:(BOOL)fromLocal;
-
-
-- (BOOL) routeXUDTS:(NSData *)data /* returns true if processed locally, false if transited */
-           calling:(SccpAddress *)src
-            called:(SccpAddress *)dst
-            reason:(int)reasonCode
-          hopCount:(int)maxHopCount
-               opc:(UMMTP3PointCode *)opc
-               dpc:(UMMTP3PointCode *)dpc
-        optionsData:(NSData *)xoptionsdata
-           options:(NSDictionary *)options
-          provider:(UMLayerMTP3 *)provider
-          fromLocal:(BOOL)fromLocal;
-#endif
-
-#if 0
-- (void)findRoute:(SccpAddress **)dst
-       causeValue:(int *)cause
-        localUser:(id<UMSCCP_UserProtocol> *)user
-        pointCode:(UMMTP3PointCode **)pc
-        fromLocal:(BOOL)isLocal
-  incomingLinkset:(NSString *)incomingLinkset;
-#endif
 
 - (NSUInteger)maxPayloadSizeForServiceType:(SCCP_ServiceType) serviceType
                         callingAddressSize:(NSUInteger)cas
@@ -363,13 +289,11 @@ typedef enum SccpGtFileSection
 - (void)traceDroppedPdu:(NSData *)pdu options:(NSDictionary *)dict;
 - (void)traceDroppedPacket:(UMSCCP_Packet *)packet options:(NSDictionary *)dict;
 - (NSDictionary *)apiStatus;
+- (UMSynchronizedSortedDictionary *)routeStatus;
 
 - (void)stopDetachAndDestroy;
 - (void)addProcessingStatistic:(UMSCCP_StatisticSection)section
                   waitingDelay:(NSTimeInterval)waitingDelay
                processingDelay:(NSTimeInterval)processingDelay;
-
-
-
 
 @end
