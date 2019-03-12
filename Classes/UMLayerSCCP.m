@@ -393,8 +393,10 @@
 -(UMMTP3_Error) sendXUDTS:(NSData *)data
                   calling:(SccpAddress *)src
                    called:(SccpAddress *)dst
-              returnCause:(int)returnCause
+                    class:(SCCP_ServiceClass)serviceClass
+                 handling:(int)handling
                  hopCount:(int)hopCounter
+              returnCause:(int)returnCause
                       opc:(UMMTP3PointCode *)opc
                       dpc:(UMMTP3PointCode *)dpc
               optionsData:(NSData *)xoptionsdata
@@ -892,35 +894,70 @@
         [self logDebug:s];
     }
 
+
+
     if(called_out!=NULL)
     {
         packet.outgoingCalledPartyAddress = called_out;
     }
-    else
-    {
-        if(causeValue != SCCP_ReturnCause_not_set)
-        {
-            NSString *s = [NSString stringWithFormat:@"findRoute (DST=%@,local=%d) returns causeValue=%d, localUser=%@, pc=%@",packet.incomingCalledPartyAddress,packet.incomingFromLocal,causeValue,localUser,pc];
-            [self.logFeed debugText:s];
-        }
-        if(grp)
-        {
-            SccpDestination *dest = [grp chooseNextHopWithRoutingTable:_mtp3RoutingTable];
-            if(dest.ntt)
-            {
-                packet.outgoingCalledPartyAddress.tt.tt = [dest.ntt intValue];
-            }
-            if(dest.dpc)
-            {
-                pc = dest.dpc;
-            }
-            if(dest.m3uaAs)
-            {
 
+    if((causeValue != SCCP_ReturnCause_not_set) ||  (grp ==NULL))
+    {
+        if(grp==NULL)
+        {
+            causeValue = SCCP_ReturnCause_SCCPFailure;
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                NSString *s = @"grp=NULL and causeValue not set. Setting SCCP_ReturnCause_SCCPFailure";
+                [self.logFeed debugText:s];
             }
         }
-        if(causeValue >= 0)
+        NSString *s = [NSString stringWithFormat:@"Can not forward UDT. No route to destination PC=%@. SRC=%@ DST=%@ DATA=%@",
+                       packet.incomingOpc,
+                       packet.incomingCallingPartyAddress,
+                       packet.incomingCalledPartyAddress,
+                       packet.incomingData];
+        [self logMinorError:s];
+        if(packet.incomingHandling & UMSCCP_HANDLING_RETURN_ON_ERROR)
         {
+            [self generateUDTS:packet.incomingData
+                       calling:packet.incomingCalledPartyAddress
+                        called:packet.incomingCallingPartyAddress
+                   returnCause:causeValue
+                           opc:_mtp3.opc /* errors are always sent from this instance */
+                           dpc:packet.incomingOpc
+                       options:@{}
+                      provider:_mtp3];
+        }
+    }
+    else if(localUser)
+    {
+        [localUser sccpNUnitdata:packet.outgoingData
+                    callingLayer:self
+                         calling:packet.outgoingCallingPartyAddress
+                          called:packet.outgoingCalledPartyAddress
+                qualityOfService:0
+                           class:packet.outgoingServiceClass
+                        handling:packet.outgoingHandling
+                         options:packet.outgoingOptions];
+        returnValue = YES;
+    }
+    else if(grp)
+    {
+        SccpDestination *dest = [grp chooseNextHopWithRoutingTable:_mtp3RoutingTable];
+        if(dest.ntt)
+        {
+            packet.outgoingCalledPartyAddress.tt.tt = [dest.ntt intValue];
+        }
+        if(dest.dpc)
+        {
+            pc = dest.dpc;
+        }
+        packet.outgoingDpc = pc;
+
+        if(pc==NULL)
+        {
+            causeValue = SCCP_ReturnCause_SCCPFailure;
             NSString *s = [NSString stringWithFormat:@"Can not forward UDT. No route to destination PC=%@. SRC=%@ DST=%@ DATA=%@",
                            packet.incomingOpc,
                            packet.incomingCallingPartyAddress,
@@ -932,25 +969,79 @@
                 [self generateUDTS:packet.incomingData
                            calling:packet.incomingCalledPartyAddress
                             called:packet.incomingCallingPartyAddress
-                            reason:causeValue
+                       returnCause:causeValue
                                opc:_mtp3.opc /* errors are always sent from this instance */
                                dpc:packet.incomingOpc
                            options:@{}
                           provider:_mtp3];
             }
         }
-        else if(pc)
+        else
         {
-            packet.outgoingDpc = pc;
-            UMMTP3_Error e = [self sendUDT:packet.outgoingData
-                                   calling:packet.outgoingCallingPartyAddress
-                                    called:packet.outgoingCalledPartyAddress
-                                     class:packet.outgoingServiceClass
-                                  handling:packet.outgoingHandling
-                                       opc:packet.outgoingOpc
-                                       dpc:packet.outgoingDpc
-                                   options:packet.outgoingOptions
-                                  provider:provider];
+            UMMTP3_Error e;
+
+            switch(packet.outgoingServiceType)
+            {
+                case SCCP_UDT:
+                    e = [self sendUDT:packet.outgoingData
+                              calling:packet.outgoingCallingPartyAddress
+                               called:packet.outgoingCalledPartyAddress
+                                class:packet.outgoingServiceClass
+                             handling:packet.outgoingHandling
+                                  opc:packet.outgoingOpc
+                                  dpc:packet.outgoingDpc
+                              options:packet.outgoingOptions
+                             provider:provider];
+                    break;
+                case SCCP_UDTS:
+                    e = [self forwardUDTS:packet.outgoingData
+                                  calling:packet.outgoingCallingPartyAddress
+                                   called:packet.outgoingCalledPartyAddress
+                                    class:packet.outgoingServiceClass
+                                 handling:packet.outgoingHandling
+                              returnCause:packet.outgoingReturnCause
+                                      opc:packet.outgoingOpc
+                                      dpc:packet.outgoingDpc
+                                  options:packet.outgoingOptions
+                                 provider:provider];
+                    break;
+                case SCCP_XUDT:
+
+                    e = [self sendXUDT:packet.outgoingData
+                               calling:packet.outgoingCallingPartyAddress
+                                called:packet.outgoingCalledPartyAddress
+                                 class:packet.outgoingServiceClass
+                              handling:packet.outgoingHandling
+                              hopCount:packet.outgoingMaxHopCount
+                                   opc:packet.outgoingOpc
+                                   dpc:packet.outgoingDpc
+                           optionsData:packet.outgoingOptionalData
+                               options:packet.outgoingOptions
+                              provider:provider];
+                    break;
+                case SCCP_XUDTS:
+
+
+                    e = [self sendXUDTS:packet.outgoingData
+                                calling:packet.outgoingCallingPartyAddress
+                                 called:packet.outgoingCalledPartyAddress
+                                  class:packet.outgoingServiceClass
+                               handling:packet.outgoingHandling
+                               hopCount:packet.outgoingMaxHopCount
+                            returnCause:packet.outgoingReturnCause
+                                    opc:packet.outgoingOpc
+                                    dpc:packet.outgoingDpc
+                            optionsData:packet.outgoingOptionalData
+                                options:packet.outgoingOptions
+                               provider:provider];
+                    break;
+                case SCCP_LUDT:
+                    e = UMMTP3_error_invalid_variant;
+                    break;
+                case SCCP_LUDTS:
+                    e = UMMTP3_error_invalid_variant;
+                    break;
+            }
             NSString *s= NULL;
             switch(e)
             {
@@ -978,7 +1069,7 @@
                         [self generateUDTS:packet.incomingData
                                    calling:packet.incomingCalledPartyAddress
                                     called:packet.incomingCallingPartyAddress
-                                    reason:SCCP_ReturnCause_MTPFailure
+                               returnCause:SCCP_ReturnCause_MTPFailure
                                        opc:_mtp3.opc /* errors are always sent from this instance */
                                        dpc:packet.incomingOpc
                                    options:@{}
@@ -988,7 +1079,7 @@
                         [self generateUDTS:packet.incomingData
                                    calling:packet.incomingCalledPartyAddress
                                     called:packet.incomingCallingPartyAddress
-                                    reason:SCCP_ReturnCause_ErrorInMessageTransport
+                               returnCause:SCCP_ReturnCause_ErrorInMessageTransport
                                        opc:_mtp3.opc /* errors are always sent from this instance */
                                        dpc:packet.incomingOpc
                                    options:@{}
@@ -998,7 +1089,7 @@
                         [self generateUDTS:packet.incomingData
                                    calling:packet.incomingCalledPartyAddress
                                     called:packet.incomingCallingPartyAddress
-                                    reason:SCCP_ReturnCause_ErrorInLocalProcessing
+                               returnCause:SCCP_ReturnCause_ErrorInLocalProcessing
                                        opc:_mtp3.opc /* errors are always sent from this instance */
                                        dpc:packet.incomingOpc
                                    options:@{}
@@ -1009,35 +1100,24 @@
                 }
             }
         }
-        else if(localUser)
+    }
+    else
+    {
+        causeValue = SCCP_ReturnCause_Unequipped;
+        [self logMinorError:[NSString stringWithFormat:@"[1] Can not route %@. Cause %d SRC=%@ DST=%@ DATA=%@",packet.incomingPacketType,causeValue,packet.outgoingOpc,packet.outgoingDpc,packet.outgoingData]];
+        if(packet.incomingHandling & UMSCCP_HANDLING_RETURN_ON_ERROR)
         {
-            [localUser sccpNUnitdata:packet.outgoingData
-                        callingLayer:self
-                             calling:packet.outgoingCallingPartyAddress
-                              called:packet.outgoingCalledPartyAddress
-                    qualityOfService:0
-                               class:packet.outgoingServiceClass
-                            handling:packet.outgoingHandling
-                             options:packet.outgoingOptions];
-            returnValue = YES;
-        }
-        else
-        {
-            causeValue = SCCP_ReturnCause_Unequipped;
-            [self logMinorError:[NSString stringWithFormat:@"[1] Can not route %@. Cause %d SRC=%@ DST=%@ DATA=%@",packet.incomingPacketType,causeValue,packet.outgoingOpc,packet.outgoingDpc,packet.outgoingData]];
-            if(packet.incomingHandling & UMSCCP_HANDLING_RETURN_ON_ERROR)
-            {
-                [self generateUDTS:packet.incomingData
-                           calling:packet.incomingCalledPartyAddress
-                            called:packet.incomingCallingPartyAddress
-                            reason:causeValue
-                               opc:_mtp3.opc /* errors are always sent from this instance */
-                               dpc:packet.incomingOpc
-                           options:@{}
-                          provider:_mtp3];
-            }
+            [self generateUDTS:packet.incomingData
+                       calling:packet.incomingCalledPartyAddress
+                        called:packet.incomingCallingPartyAddress
+                        returnCause:causeValue
+                           opc:_mtp3.opc /* errors are always sent from this instance */
+                           dpc:packet.incomingOpc
+                       options:@{}
+                      provider:_mtp3];
         }
     }
+
     return returnValue;
 }
 
@@ -1121,7 +1201,7 @@
             [self generateUDTS:data
                        calling:dst
                         called:src
-                        reason:causeValue
+                        returnCause:causeValue
                            opc:_mtp3.opc /* errors are always sent from this instance */
                            dpc:opc
                        options:@{}
@@ -1167,7 +1247,7 @@
                     [self generateUDTS:data
                                calling:dst
                                 called:src
-                                reason:SCCP_ReturnCause_MTPFailure
+                                returnCause:SCCP_ReturnCause_MTPFailure
                                    opc:_mtp3.opc
                                    dpc:opc
                                options:@{}
@@ -1177,7 +1257,7 @@
                     [self generateUDTS:data
                                calling:dst
                                 called:src
-                                reason:SCCP_ReturnCause_ErrorInMessageTransport
+                                returnCause:SCCP_ReturnCause_ErrorInMessageTransport
                                    opc:_mtp3.opc
                                    dpc:opc
                                options:@{}
@@ -1188,7 +1268,7 @@
                     [self generateUDTS:data
                                calling:dst
                                 called:src
-                                reason:SCCP_ReturnCause_ErrorInLocalProcessing
+                                returnCause:SCCP_ReturnCause_ErrorInLocalProcessing
                                    opc:_mtp3.opc
                                    dpc:opc
                                options:@{}
@@ -1220,7 +1300,7 @@
             [self generateUDTS:data
                        calling:dst
                         called:src
-                        reason:causeValue
+                        returnCause:causeValue
                            opc:_mtp3.opc
                            dpc:opc
                        options:@{}
@@ -1404,6 +1484,8 @@
             [self sendXUDTS:data
                     calling:src
                      called:dst
+                      class:packet.outgoingServiceClass
+                   handling:packet.outgoingHandling
                 returnCause:causeValue
                    hopCount:_xudts_max_hop_count
                         opc:_mtp3.opc
@@ -1596,6 +1678,8 @@
         UMMTP3_Error e = [self sendXUDTS:data
                                  calling:src
                                   called:dst
+                                   class:packet.outgoingServiceClass
+                                handling:packet.outgoingHandling
                              returnCause:reasonCode
                                 hopCount:hopCount
                                      opc:_mtp3.opc
@@ -1729,7 +1813,9 @@
 - (UMMTP3_Error) forwardUDTS:(NSData *)data
                      calling:(SccpAddress *)src
                       called:(SccpAddress *)dst
-                      reason:(int)reasonCode
+                       class:(SCCP_ServiceClass)pclass
+                    handling:(int)handling
+                 returnCause:(SCCP_ReturnCause)returnCause
                          opc:(UMMTP3PointCode *)opc
                          dpc:(UMMTP3PointCode *)dpc
                      options:(NSDictionary *)options
@@ -1741,7 +1827,7 @@
     NSMutableData *sccp_pdu = [[NSMutableData alloc]init];
     uint8_t header[5];
     header[0] = SCCP_UDTS;
-    header[1] = reasonCode;
+    header[1] = returnCause;
     header[2] = 3;
     header[3] = 3 + dstEncoded.length;
     header[4] = 3 + dstEncoded.length + srcEncoded.length;
@@ -1818,10 +1904,11 @@
     return result;
 }
 
+
 - (UMMTP3_Error) generateUDTS:(NSData *)data
                       calling:(SccpAddress *)src
                        called:(SccpAddress *)dst
-                       reason:(int)reasonCode
+                       returnCause:(int)reasonCode
                           opc:(UMMTP3PointCode *)opc
                           dpc:(UMMTP3PointCode *)dpc
                       options:(NSDictionary *)options
@@ -3254,4 +3341,6 @@
 }
 
 @end
+
+
 
