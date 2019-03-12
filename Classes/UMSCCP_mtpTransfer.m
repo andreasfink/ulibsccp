@@ -103,8 +103,8 @@
 
         _packet.incomingServiceType = m_type;
         _packet.outgoingServiceType = m_type;
-        _packet.incomingHandling = SCCP_HANDLING_NO_RETURN_ON_ERROR;
-        _packet.outgoingHandling = SCCP_HANDLING_NO_RETURN_ON_ERROR;
+        _packet.incomingHandling = SCCP_HANDLING_NO_SPECIAL_OPTIONS;
+        _packet.outgoingHandling = SCCP_HANDLING_NO_SPECIAL_OPTIONS;
 
         switch(m_type)
         {

@@ -41,7 +41,7 @@ typedef	enum SCCP_State
 
 typedef enum SCCP_Handling
 {
-    SCCP_HANDLING_NO_RETURN_ON_ERROR = 0x00,
+    SCCP_HANDLING_NO_SPECIAL_OPTIONS= 0x00,
     SCCP_HANDLING_RETURN_ON_ERROR = 0x08,
 } SCCP_Handling;
 
