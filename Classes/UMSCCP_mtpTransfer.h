@@ -36,7 +36,7 @@
     NSData          *sccp_pdu;
     NSData          *sccp_optional;
     SCCP_ServiceClass  m_protocol_class;
-    int             m_handling;
+    SCCP_Handling      m_handling;
     int             m_hopcounter;
     NSMutableDictionary *optional_dict;
     int             importance;

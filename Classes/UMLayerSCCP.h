@@ -120,7 +120,7 @@ typedef enum SccpGtFileSection
               called:(SccpAddress *)dst
     qualityOfService:(int)qos
                class:(SCCP_ServiceClass)pclass
-            handling:(int)handling
+            handling:(SCCP_Handling)handling
              options:(NSDictionary *)options;
 
 - (void)sccpNNotice:(NSData *)data
@@ -198,30 +198,30 @@ typedef enum SccpGtFileSection
                 calling:(SccpAddress *)src
                  called:(SccpAddress *)dst
                   class:(SCCP_ServiceClass)pclass
-               handling:(int)handling
+               handling:(SCCP_Handling)handling
                     opc:(UMMTP3PointCode *)opc
                     dpc:(UMMTP3PointCode *)dpc
                 options:(NSDictionary *)options
                provider:(UMLayerMTP3 *)provider;
 
     /* this is for transiting UDTS */
-- (UMMTP3_Error) forwardUDTS:(NSData *)data
-                     calling:(SccpAddress *)src
-                      called:(SccpAddress *)dst
-                       class:(SCCP_ServiceClass)pclass
-                    handling:(int)handling
-                 returnCause:(SCCP_ReturnCause)returnCause
-                         opc:(UMMTP3PointCode *)opc
-                         dpc:(UMMTP3PointCode *)dpc
-                     options:(NSDictionary *)options
-                    provider:(UMLayerMTP3 *)provider;
+- (UMMTP3_Error) sendUDTS:(NSData *)data
+                  calling:(SccpAddress *)src
+                   called:(SccpAddress *)dst
+                    class:(SCCP_ServiceClass)pclass
+              returnCause:(SCCP_ReturnCause)returnCause
+                      opc:(UMMTP3PointCode *)opc
+                      dpc:(UMMTP3PointCode *)dpc
+                  options:(NSDictionary *)options
+                 provider:(UMLayerMTP3 *)provider;
+
 
     /* this is for UDTS generated locally */
-
 - (UMMTP3_Error) generateUDTS:(NSData *)data
                       calling:(SccpAddress *)src
                        called:(SccpAddress *)dst
-                  returnCause:(int)reasonCode
+                        class:(SCCP_ServiceClass)pclass
+                  returnCause:(SCCP_ReturnCause)reasonCode
                           opc:(UMMTP3PointCode *)opc
                           dpc:(UMMTP3PointCode *)dpc
                       options:(NSDictionary *)options
@@ -231,7 +231,7 @@ typedef enum SccpGtFileSection
                  calling:(SccpAddress *)src
                   called:(SccpAddress *)dst
                    class:(SCCP_ServiceClass)pclass
-                handling:(int)handling
+                handling:(SCCP_Handling)handling
                 hopCount:(int)hopCount
                      opc:(UMMTP3PointCode *)opc
                      dpc:(UMMTP3PointCode *)dpc
@@ -244,7 +244,7 @@ typedef enum SccpGtFileSection
                         calling:(SccpAddress *)src
                          called:(SccpAddress *)dst
                           class:(SCCP_ServiceClass)pclass
-                       handling:(int)handling
+                       handling:(SCCP_Handling)handling
                        hopCount:(int)hopCount
                             opc:(UMMTP3PointCode *)opc
                             dpc:(UMMTP3PointCode *)dpc
@@ -256,9 +256,8 @@ typedef enum SccpGtFileSection
                   calling:(SccpAddress *)src
                    called:(SccpAddress *)dst
                     class:(SCCP_ServiceClass)pclass
-                 handling:(int)handling
                  hopCount:(int)hopCount
-              returnCause:(int)returnCause
+              returnCause:(SCCP_ReturnCause)returnCause
                       opc:(UMMTP3PointCode *)opc
                       dpc:(UMMTP3PointCode *)dpc
               optionsData:(NSData *)xoptionsdata

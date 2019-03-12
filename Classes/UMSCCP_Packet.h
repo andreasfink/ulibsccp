@@ -35,8 +35,7 @@
     SCCP_ServiceClass        _incomingServiceClass;
     SCCP_ServiceType        _incomingServiceType;
     SCCP_ReturnCause        _incomingReturnCause;
-
-    int                     _incomingHandling;
+    SCCP_Handling           _incomingHandling;
     int                     _incomingMaxHopCount;
     BOOL                    _incomingFromLocal;
     BOOL                    _incomingToLocal;
@@ -54,7 +53,7 @@
     SCCP_ServiceClass       _outgoingServiceClass;
     SCCP_ServiceType        _outgoingServiceType;
     SCCP_ReturnCause        _outgoingReturnCause;
-    int                     _outgoingHandling;
+    SCCP_Handling           _outgoingHandling;
     SccpAddress             *_outgoingCallingPartyAddress;
     SccpAddress             *_outgoingCalledPartyAddress;
     NSData                  *_outgoingData;
@@ -85,12 +84,12 @@
 @property(readwrite,assign,atomic)  SCCP_ServiceType        incomingServiceType;
 @property(readwrite,assign,atomic)  SCCP_ReturnCause        incomingReturnCause;
 
-@property(readwrite,assign,atomic)  int                     incomingHandling;
+@property(readwrite,assign,atomic)  SCCP_Handling           incomingHandling;
 @property(readwrite,assign,atomic)  int                     incomingMaxHopCount;
 @property(readwrite,strong,atomic)  SccpAddress             *incomingCallingPartyAddress;
 @property(readwrite,strong,atomic)  SccpAddress             *incomingCalledPartyAddress;
-@property(readwrite,strong,atomic)    NSData                    *incomingData;
-@property(readwrite,strong,atomic)    NSData                    *incomingOptionalData;
+@property(readwrite,strong,atomic)  NSData                  *incomingData;
+@property(readwrite,strong,atomic)  NSData                  *incomingOptionalData;
 @property(readwrite,assign,atomic)  BOOL                    incomingFromLocal;
 @property(readwrite,assign,atomic)  BOOL                    incomingToLocal;
 
@@ -104,12 +103,12 @@
 @property(readwrite,assign,atomic)  SCCP_ServiceType        outgoingServiceType;
 @property(readwrite,assign,atomic)  SCCP_ReturnCause        outgoingReturnCause;
 
-@property(readwrite,assign,atomic)  int                     outgoingHandling;
+@property(readwrite,assign,atomic)  SCCP_Handling           outgoingHandling;
 @property(readwrite,assign,atomic)  int                     outgoingMaxHopCount;
 @property(readwrite,strong,atomic)  SccpAddress             *outgoingCallingPartyAddress;
 @property(readwrite,strong,atomic)  SccpAddress             *outgoingCalledPartyAddress;
-@property(readwrite,strong,atomic)    NSData                    *outgoingData;
-@property(readwrite,strong,atomic)    NSData                    *outgoingOptionalData;
+@property(readwrite,strong,atomic)  NSData                  *outgoingData;
+@property(readwrite,strong,atomic)  NSData                  *outgoingOptionalData;
 @property(readwrite,assign,atomic)  BOOL                    outgoingFromLocal;
 @property(readwrite,assign,atomic)  BOOL                    outgoingToLocal;
 

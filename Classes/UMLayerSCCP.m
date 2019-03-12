@@ -251,7 +251,7 @@
                         calling:(SccpAddress *)src
                          called:(SccpAddress *)dst
                           class:(SCCP_ServiceClass)pclass
-                       handling:(int)handling
+                       handling:(SCCP_Handling)handling
                        hopCount:(int)hopCount
                             opc:(UMMTP3PointCode *)opc
                             dpc:(UMMTP3PointCode *)dpc
@@ -306,7 +306,7 @@
                  calling:(SccpAddress *)src
                   called:(SccpAddress *)dst
                    class:(SCCP_ServiceClass)pclass
-                handling:(int)handling
+                handling:(SCCP_Handling)handling
                 hopCount:(int)maxHopCount
                      opc:(UMMTP3PointCode *)opc
                      dpc:(UMMTP3PointCode *)dpc
@@ -390,13 +390,13 @@
 
 
 
+
 -(UMMTP3_Error) sendXUDTS:(NSData *)data
                   calling:(SccpAddress *)src
                    called:(SccpAddress *)dst
                     class:(SCCP_ServiceClass)serviceClass
-                 handling:(int)handling
                  hopCount:(int)hopCounter
-              returnCause:(int)returnCause
+              returnCause:(SCCP_ReturnCause)returnCause
                       opc:(UMMTP3PointCode *)opc
                       dpc:(UMMTP3PointCode *)dpc
               optionsData:(NSData *)xoptionsdata
@@ -918,11 +918,12 @@
                        packet.incomingCalledPartyAddress,
                        packet.incomingData];
         [self logMinorError:s];
-        if(packet.incomingHandling & UMSCCP_HANDLING_RETURN_ON_ERROR)
+        if(packet.incomingHandling & SCCP_HANDLING_RETURN_ON_ERROR)
         {
             [self generateUDTS:packet.incomingData
                        calling:packet.incomingCalledPartyAddress
                         called:packet.incomingCallingPartyAddress
+                         class:packet.incomingServiceClass
                    returnCause:causeValue
                            opc:_mtp3.opc /* errors are always sent from this instance */
                            dpc:packet.incomingOpc
@@ -964,11 +965,12 @@
                            packet.incomingCalledPartyAddress,
                            packet.incomingData];
             [self logMinorError:s];
-            if(packet.incomingHandling & UMSCCP_HANDLING_RETURN_ON_ERROR)
+            if(packet.incomingHandling & SCCP_HANDLING_RETURN_ON_ERROR)
             {
                 [self generateUDTS:packet.incomingData
                            calling:packet.incomingCalledPartyAddress
                             called:packet.incomingCallingPartyAddress
+                             class:packet.incomingServiceClass
                        returnCause:causeValue
                                opc:_mtp3.opc /* errors are always sent from this instance */
                                dpc:packet.incomingOpc
@@ -994,19 +996,17 @@
                              provider:provider];
                     break;
                 case SCCP_UDTS:
-                    e = [self forwardUDTS:packet.outgoingData
-                                  calling:packet.outgoingCallingPartyAddress
-                                   called:packet.outgoingCalledPartyAddress
-                                    class:packet.outgoingServiceClass
-                                 handling:packet.outgoingHandling
-                              returnCause:packet.outgoingReturnCause
-                                      opc:packet.outgoingOpc
-                                      dpc:packet.outgoingDpc
-                                  options:packet.outgoingOptions
-                                 provider:provider];
+                    e = [self sendUDTS:packet.outgoingData
+                               calling:packet.outgoingCallingPartyAddress
+                                called:packet.outgoingCalledPartyAddress
+                                 class:packet.outgoingServiceClass
+                           returnCause:packet.outgoingReturnCause
+                                   opc:packet.outgoingOpc
+                                   dpc:packet.outgoingDpc
+                               options:packet.outgoingOptions
+                              provider:provider];
                     break;
                 case SCCP_XUDT:
-
                     e = [self sendXUDT:packet.outgoingData
                                calling:packet.outgoingCallingPartyAddress
                                 called:packet.outgoingCalledPartyAddress
@@ -1020,13 +1020,10 @@
                               provider:provider];
                     break;
                 case SCCP_XUDTS:
-
-
                     e = [self sendXUDTS:packet.outgoingData
                                 calling:packet.outgoingCallingPartyAddress
                                  called:packet.outgoingCalledPartyAddress
                                   class:packet.outgoingServiceClass
-                               handling:packet.outgoingHandling
                                hopCount:packet.outgoingMaxHopCount
                             returnCause:packet.outgoingReturnCause
                                     opc:packet.outgoingOpc
@@ -1061,7 +1058,7 @@
             {
                 [self logMinorError:s];
             }
-            if(packet.incomingHandling & UMSCCP_HANDLING_RETURN_ON_ERROR)
+            if(packet.incomingHandling & SCCP_HANDLING_RETURN_ON_ERROR)
             {
                 switch(e)
                 {
@@ -1069,6 +1066,7 @@
                         [self generateUDTS:packet.incomingData
                                    calling:packet.incomingCalledPartyAddress
                                     called:packet.incomingCallingPartyAddress
+                                     class:packet.incomingServiceClass
                                returnCause:SCCP_ReturnCause_MTPFailure
                                        opc:_mtp3.opc /* errors are always sent from this instance */
                                        dpc:packet.incomingOpc
@@ -1079,6 +1077,7 @@
                         [self generateUDTS:packet.incomingData
                                    calling:packet.incomingCalledPartyAddress
                                     called:packet.incomingCallingPartyAddress
+                                     class:packet.incomingServiceClass
                                returnCause:SCCP_ReturnCause_ErrorInMessageTransport
                                        opc:_mtp3.opc /* errors are always sent from this instance */
                                        dpc:packet.incomingOpc
@@ -1089,6 +1088,7 @@
                         [self generateUDTS:packet.incomingData
                                    calling:packet.incomingCalledPartyAddress
                                     called:packet.incomingCallingPartyAddress
+                                     class:packet.incomingServiceClass
                                returnCause:SCCP_ReturnCause_ErrorInLocalProcessing
                                        opc:_mtp3.opc /* errors are always sent from this instance */
                                        dpc:packet.incomingOpc
@@ -1105,11 +1105,12 @@
     {
         causeValue = SCCP_ReturnCause_Unequipped;
         [self logMinorError:[NSString stringWithFormat:@"[1] Can not route %@. Cause %d SRC=%@ DST=%@ DATA=%@",packet.incomingPacketType,causeValue,packet.outgoingOpc,packet.outgoingDpc,packet.outgoingData]];
-        if(packet.incomingHandling & UMSCCP_HANDLING_RETURN_ON_ERROR)
+        if(packet.incomingHandling & SCCP_HANDLING_RETURN_ON_ERROR)
         {
             [self generateUDTS:packet.incomingData
                        calling:packet.incomingCalledPartyAddress
                         called:packet.incomingCallingPartyAddress
+                         class:packet.incomingServiceClass
                         returnCause:causeValue
                            opc:_mtp3.opc /* errors are always sent from this instance */
                            dpc:packet.incomingOpc
@@ -1126,7 +1127,7 @@
           calling:(SccpAddress *)src
            called:(SccpAddress *)dst
             class:(SCCP_ServiceClass)pclass
-         handling:(int)handling
+         handling:(SCCP_Handling)handling
               opc:(UMMTP3PointCode *)opc
               dpc:(UMMTP3PointCode *)dpc
           options:(NSDictionary *)options
@@ -1196,7 +1197,7 @@
     {
         NSString *s = [NSString stringWithFormat:@"Can not forward UDT. No route to destination PC=%@. SRC=%@ DST=%@ DATA=%@",pc,src,dst,data];
         [self logMinorError:s];
-        if(handling & UMSCCP_HANDLING_RETURN_ON_ERROR)
+        if(handling & SCCP_HANDLING_RETURN_ON_ERROR)
         {
             [self generateUDTS:data
                        calling:dst
@@ -1239,7 +1240,7 @@
         {
             [self logMinorError:s];
         }
-        if(handling & UMSCCP_HANDLING_RETURN_ON_ERROR)
+        if(handling & SCCP_HANDLING_RETURN_ON_ERROR)
         {
             switch(e)
             {
@@ -1295,7 +1296,7 @@
     {
         causeValue = SCCP_ReturnCause_Unequipped;
         [self logMinorError:[NSString stringWithFormat:@"[1] Can not route UDT. Cause %d SRC=%@ DST=%@ DATA=%@",causeValue,src,dst,data]];
-        if(handling & UMSCCP_HANDLING_RETURN_ON_ERROR)
+        if(handling & SCCP_HANDLING_RETURN_ON_ERROR)
         {
             [self generateUDTS:data
                        calling:dst
@@ -1420,7 +1421,7 @@
            calling:(SccpAddress *)src
             called:(SccpAddress *)dst
              class:(SCCP_ServiceClass)pclass
-          handling:(int)handling
+          handling:(SCCP_Handling)handling
           hopCount:(int)hopCount
                opc:(UMMTP3PointCode *)opc
                dpc:(UMMTP3PointCode *)dpc
@@ -1479,7 +1480,7 @@
     {
         NSString *s = [NSString stringWithFormat:@"Can not forward XUDT. No route to destination PC=%@. SRC=%@ DST=%@ DATA=%@",pc,src,dst,data];
         [self logMinorError:s];
-        if(handling & UMSCCP_HANDLING_RETURN_ON_ERROR)
+        if(handling & SCCP_HANDLING_RETURN_ON_ERROR)
         {
             [self sendXUDTS:data
                     calling:src
@@ -1531,7 +1532,7 @@
         {
             [self logMinorError:s];
         }
-        if(handling & UMSCCP_HANDLING_RETURN_ON_ERROR)
+        if(handling & SCCP_HANDLING_RETURN_ON_ERROR)
         {
             switch(e)
             {
@@ -1570,7 +1571,7 @@
                  calling:(SccpAddress *)src
                   called:(SccpAddress *)dst
                    class:(SCCP_ServiceClass)pclass
-                handling:(int)handling
+                handling:(SCCP_Handling)handling
                 hopCount:(int)hopCount
                      opc:(UMMTP3PointCode *)opc
                      dpc:(UMMTP3PointCode *)dpc
@@ -1720,7 +1721,7 @@
                  calling:(SccpAddress *)src
                   called:(SccpAddress *)dst
                    class:(SCCP_ServiceClass)pclass   /* MGMT is class 0 */
-                handling:(int)handling
+                handling:(SCCP_Handling)handling
                      opc:(UMMTP3PointCode *)opc
                      dpc:(UMMTP3PointCode *)dpc
                  options:(NSDictionary *)options
@@ -1810,11 +1811,10 @@
 }
 
 
-- (UMMTP3_Error) forwardUDTS:(NSData *)data
+- (UMMTP3_Error) sendUDTS:(NSData *)data
                      calling:(SccpAddress *)src
                       called:(SccpAddress *)dst
                        class:(SCCP_ServiceClass)pclass
-                    handling:(int)handling
                  returnCause:(SCCP_ReturnCause)returnCause
                          opc:(UMMTP3PointCode *)opc
                          dpc:(UMMTP3PointCode *)dpc
@@ -1908,7 +1908,8 @@
 - (UMMTP3_Error) generateUDTS:(NSData *)data
                       calling:(SccpAddress *)src
                        called:(SccpAddress *)dst
-                       returnCause:(int)reasonCode
+                        class:(SCCP_ServiceClass)pclass
+                  returnCause:(SCCP_ReturnCause)reasonCode
                           opc:(UMMTP3PointCode *)opc
                           dpc:(UMMTP3PointCode *)dpc
                       options:(NSDictionary *)options
@@ -2209,7 +2210,7 @@
               called:(SccpAddress *)dst
     qualityOfService:(int)qos
                class:(SCCP_ServiceClass)pclass
-            handling:(int)handling
+            handling:(SCCP_Handling)handling
              options:(NSDictionary *)options
 {
     UMSCCP_sccpNUnitdata *task;

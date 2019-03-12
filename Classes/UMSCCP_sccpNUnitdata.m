@@ -27,7 +27,7 @@ static int segmentReferenceId;
                                called:(SccpAddress *)xdst
                      qualityOfService:(int)xqos
                                 class:(SCCP_ServiceClass)pclass
-                             handling:(int)handling
+                             handling:(SCCP_Handling)handling
                               options:(NSDictionary *)xoptions
 {
     self = [super initWithName:@"UMSCCP_sccpNUnitdata"
@@ -60,7 +60,7 @@ static int segmentReferenceId;
                                called:(SccpAddress *)xdst
                      qualityOfService:(int)xqos
                                 class:(SCCP_ServiceClass)pclass
-                             handling:(int)handling
+                             handling:(SCCP_Handling)handling
                               options:(NSDictionary *)xoptions;
 {
     self = [super initWithName:@"UMSCCP_sccpNUnitdata"
@@ -108,28 +108,23 @@ static int segmentReferenceId;
 
         NSString *xopc_string = _options[@"opc"];
         NSString *xdpc_string = _options[@"dpc"];
-
         if((xdpc_string.length > 0) && (![xdpc_string isEqualToString:@"default"]))
         {
             xdpc = [[UMMTP3PointCode alloc] initWithString:xdpc_string
                                                    variant:_sccpLayer.mtp3.variant];
         }
-
         if((xopc_string.length > 0) && (![xopc_string isEqualToString:@"default"]))
         {
             xopc = [[UMMTP3PointCode alloc] initWithString:xopc_string
                                                    variant:_sccpLayer.mtp3.variant];
         }
-
         NSData *srcEncoded = [_src encode:_sccpLayer.sccpVariant];
         NSData *dstEncoded = [_dst encode:_sccpLayer.sccpVariant];
         NSUInteger cas = srcEncoded.length;
         NSUInteger cds = dstEncoded.length;
         NSUInteger maxPdu = 0;
-
         BOOL useXUDT        = [_options[@"sccp-xudt"] boolValue];
         BOOL useSegments    = [_options[@"sccp-segment"] boolValue];
-
         NSDictionary *sccp_options = _options[@"sccp-optional"];
         NSMutableData *optional_data;
         if(sccp_options)
@@ -382,6 +377,5 @@ static int segmentReferenceId;
     [_sccpLayer increaseThroughputCounter:_statisticsSection];
     [_sccpLayer increaseThroughputCounter:_statisticsSection2];
 }
-
 
 @end

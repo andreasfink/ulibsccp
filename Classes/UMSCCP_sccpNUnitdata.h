@@ -66,7 +66,7 @@
                                called:(SccpAddress *)xdst
                      qualityOfService:(int)qos
                                 class:(SCCP_ServiceClass)pclass
-                             handling:(int)handling
+                             handling:(SCCP_Handling)handling
                               options:(NSDictionary *)options;
 
 - (UMSCCP_sccpNUnitdata *)initForSccp:(UMLayerSCCP *)sccp
@@ -76,7 +76,7 @@
                                called:(SccpAddress *)xdst
                      qualityOfService:(int)qos
                                 class:(SCCP_ServiceClass)pclass
-                             handling:(int)handling
+                             handling:(SCCP_Handling)handling
                               options:(NSDictionary *)options;
 
 @end

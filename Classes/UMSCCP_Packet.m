@@ -65,21 +65,23 @@
 
 - (void)copyIncomingToOutgoing
 {
-    _outgoingLocalUser      = _incomingLocalUser;
-    _outgoingMtp3Layer      = _incomingMtp3Layer;
-    _outgoingLinkset        = _incomingLinkset;
-    _outgoingOptions        = _incomingOptions;
-    _outgoingOpc            = _incomingOpc;
-    _outgoingDpc            = _incomingDpc;
-    _outgoingServiceClass   = _incomingServiceClass;
-    _outgoingServiceType    = _incomingServiceType;
-    _outgoingHandling       = _incomingHandling;
-    _outgoingCallingPartyAddress = _incomingCallingPartyAddress;
-    _outgoingCalledPartyAddress = _incomingCalledPartyAddress;
-    _outgoingData = _incomingData;
-    _outgoingMaxHopCount    = _incomingMaxHopCount - 1;
-    _outgoingOptionalData   = _incomingOptionalData;
-    _outgoingFromLocal      = _incomingFromLocal;
-    _outgoingToLocal        = _incomingToLocal;
+    _outgoingLocalUser              = _incomingLocalUser;
+    _outgoingMtp3Layer              = _incomingMtp3Layer;
+    _outgoingLinkset                = _incomingLinkset;
+    _outgoingOptions                = _incomingOptions;
+    _outgoingOpc                    = _incomingOpc;
+    _outgoingDpc                    = _incomingDpc;
+    _outgoingServiceClass           = _incomingServiceClass;
+    _outgoingServiceType            = _incomingServiceType;
+    _outgoingReturnCause            = _incomingReturnCause;
+    _outgoingHandling               = _incomingHandling;
+    _outgoingCallingPartyAddress    = _incomingCallingPartyAddress;
+    _outgoingCalledPartyAddress     = _incomingCalledPartyAddress;
+    _outgoingData                   = _incomingData;
+    _outgoingMaxHopCount            = _incomingMaxHopCount - 1;
+    _outgoingOptionalData           = _incomingOptionalData;
+    _outgoingFromLocal              = _incomingFromLocal;
+    _outgoingToLocal                = _incomingToLocal;
 }
+
 @end

@@ -39,8 +39,11 @@ typedef	enum SCCP_State
     SCCP_STATE_USER_REQUEST_RESET_PENDING		= 5,
 } SCCP_State;
 
-
-#define UMSCCP_HANDLING_RETURN_ON_ERROR 0x08
+typedef enum SCCP_Handling
+{
+    SCCP_HANDLING_NO_RETURN_ON_ERROR = 0x00,
+    SCCP_HANDLING_RETURN_ON_ERROR = 0x08,
+} SCCP_Handling;
 
 typedef enum SCCP_ReturnCause
 {
@@ -61,5 +64,5 @@ typedef enum SCCP_ReturnCause
     SCCP_ReturnCause_SegmentationNotSupported               = 13,
     SCCP_ReturnCause_SegmentationFailure                    = 14,
 } SCCP_ReturnCause;
-#define	SCCP_CLASS_BASIC	0
+
 
