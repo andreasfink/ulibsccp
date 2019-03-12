@@ -101,20 +101,27 @@
         int param_hop_counter = 0;
         NSString *type;
 
-        _packet.incomingHandling = m_handling;
-        _packet.outgoingHandling = m_handling;
         _packet.incomingServiceType = m_type;
         _packet.outgoingServiceType = m_type;
+        _packet.incomingHandling = SCCP_HANDLING_NO_RETURN_ON_ERROR;
+        _packet.outgoingHandling = SCCP_HANDLING_NO_RETURN_ON_ERROR;
+
         switch(m_type)
         {
             case SCCP_UDT:
                 type = @"UDT";
                 _decodedJson[@"sccp-pdu-type"]=type;
                 m_protocol_class = d[i] & 0x0F;
+                m_handling = (d[i++]>>4) & 0x0F;
+
                 _packet.incomingServiceClass = m_protocol_class;
                 _packet.outgoingServiceClass = m_protocol_class;
+                if(m_handling & 0x08)
+                {
+                    _packet.incomingHandling = SCCP_HANDLING_RETURN_ON_ERROR;
+                    _packet.outgoingHandling = SCCP_HANDLING_RETURN_ON_ERROR;
+                }
                 _decodedJson[@"sccp-protocol-class"]=@(m_protocol_class);
-                m_handling = (d[i++]>>4) & 0x0F;
                 _decodedJson[@"sccp-protocol-handling"]=@(m_handling);
                 param_called_party_address = d[i] + i;
                 i++;
@@ -147,6 +154,11 @@
                 _packet.outgoingServiceClass = m_protocol_class;
                 _decodedJson[@"sccp-protocol-class"]=@(m_protocol_class);
                 m_handling = (d[i++]>>4) & 0x0F;
+                if(m_handling & 0x08)
+                {
+                    _packet.incomingHandling = SCCP_HANDLING_RETURN_ON_ERROR;
+                    _packet.outgoingHandling = SCCP_HANDLING_RETURN_ON_ERROR;
+                }
                 _decodedJson[@"sccp-protocol-handling"]=@(m_handling);
                 param_hop_counter=d[i];
                 i++;

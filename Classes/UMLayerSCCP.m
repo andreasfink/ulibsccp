@@ -918,7 +918,7 @@
                        packet.incomingCalledPartyAddress,
                        packet.incomingData];
         [self logMinorError:s];
-        if(packet.incomingHandling & SCCP_HANDLING_RETURN_ON_ERROR)
+        if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
         {
             [self generateUDTS:packet.incomingData
                        calling:packet.incomingCalledPartyAddress
@@ -965,7 +965,7 @@
                            packet.incomingCalledPartyAddress,
                            packet.incomingData];
             [self logMinorError:s];
-            if(packet.incomingHandling & SCCP_HANDLING_RETURN_ON_ERROR)
+            if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
             {
                 [self generateUDTS:packet.incomingData
                            calling:packet.incomingCalledPartyAddress
@@ -1058,7 +1058,7 @@
             {
                 [self logMinorError:s];
             }
-            if(packet.incomingHandling & SCCP_HANDLING_RETURN_ON_ERROR)
+            if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
             {
                 switch(e)
                 {
@@ -1105,7 +1105,7 @@
     {
         causeValue = SCCP_ReturnCause_Unequipped;
         [self logMinorError:[NSString stringWithFormat:@"[1] Can not route %@. Cause %d SRC=%@ DST=%@ DATA=%@",packet.incomingPacketType,causeValue,packet.outgoingOpc,packet.outgoingDpc,packet.outgoingData]];
-        if(packet.incomingHandling & SCCP_HANDLING_RETURN_ON_ERROR)
+        if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
         {
             [self generateUDTS:packet.incomingData
                        calling:packet.incomingCalledPartyAddress
@@ -1197,7 +1197,7 @@
     {
         NSString *s = [NSString stringWithFormat:@"Can not forward UDT. No route to destination PC=%@. SRC=%@ DST=%@ DATA=%@",pc,src,dst,data];
         [self logMinorError:s];
-        if(handling & SCCP_HANDLING_RETURN_ON_ERROR)
+        if(handling == SCCP_HANDLING_RETURN_ON_ERROR)
         {
             [self generateUDTS:data
                        calling:dst
@@ -1733,7 +1733,11 @@
     NSMutableData *sccp_pdu = [[NSMutableData alloc]init];
     uint8_t header[5];
     header[0] = SCCP_UDT;
-    header[1] = (pclass & 0x0F) | (( handling & 0xF)<<4);
+    header[1] = (pclass & 0x0F) ;
+    if(handling == SCCP_HANDLING_RETURN_ON_ERROR)
+    {
+        header[1] |= 0x80;
+    }
     header[2] = 3;
     header[3] = 3 + dstEncoded.length;
     header[4] = 3 + dstEncoded.length + srcEncoded.length;
@@ -2408,6 +2412,10 @@
     int m_hopcounter = -1;
     NSData *sccp_pdu = NULL;
     NSData *segment = NULL;
+    int param_called_party_address;
+    int param_calling_party_address;
+    int param_data;
+    int param_segment;
 
     UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
     @try
@@ -2420,12 +2428,6 @@
         const uint8_t *d = data.bytes;
         int i = 0;
         int m_type = d[i++];
-
-        int m_handling;
-        int param_called_party_address;
-        int param_calling_party_address;
-        int param_data;
-        int param_segment;
 
         switch(m_type)
         {
