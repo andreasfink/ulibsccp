@@ -900,8 +900,20 @@
     {
         packet.outgoingCalledPartyAddress = called_out;
     }
-
-    if((causeValue != SCCP_ReturnCause_not_set) ||  (grp ==NULL))
+    if((localUser) && (causeValue == SCCP_ReturnCause_not_set))
+    {
+        packet.outgoingToLocal = YES;
+        [localUser sccpNUnitdata:packet.outgoingData
+                    callingLayer:self
+                         calling:packet.outgoingCallingPartyAddress
+                          called:packet.outgoingCalledPartyAddress
+                qualityOfService:0
+                           class:packet.outgoingServiceClass
+                        handling:packet.outgoingHandling
+                         options:packet.outgoingOptions];
+        returnValue = YES;
+    }
+    else if((causeValue != SCCP_ReturnCause_not_set) ||  (grp ==NULL))
     {
         if(grp==NULL)
         {
@@ -930,18 +942,6 @@
                        options:@{}
                       provider:_mtp3];
         }
-    }
-    else if(localUser)
-    {
-        [localUser sccpNUnitdata:packet.outgoingData
-                    callingLayer:self
-                         calling:packet.outgoingCallingPartyAddress
-                          called:packet.outgoingCalledPartyAddress
-                qualityOfService:0
-                           class:packet.outgoingServiceClass
-                        handling:packet.outgoingHandling
-                         options:packet.outgoingOptions];
-        returnValue = YES;
     }
     else if(grp)
     {
