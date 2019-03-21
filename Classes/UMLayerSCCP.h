@@ -51,8 +51,8 @@ typedef enum SccpGtFileSection
     int                         _xudt_max_hop_count;
     int                         _xudts_max_hop_count;
     BOOL                        _stpMode;
-    UMMTP3PointCode             *_next_pc1;  /* if STP mode is NO, all traffic is sent to next_pc instead of using a routing table */
-    UMMTP3PointCode             *_next_pc2;  /* if STP mode is NO, all traffic is sent to next_pc instead of using a routing table */
+    NSArray<UMMTP3PointCode *>  *_next_pcs;  /* if STP mode is NO, all traffic is sent to next_pcs instead of using a routing table */
+    SccpDestinationGroup        *_default_destination_group;
     SccpTranslationTableNumber  *_ntt;
     UMSCCP_Statistics           *_processingStats[UMSCCP_StatisticSection_MAX];
     UMThroughputCounter         *_throughputCounters[UMSCCP_StatisticSection_MAX];

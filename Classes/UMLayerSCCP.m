@@ -515,19 +515,17 @@
                 }
             }
         }
-        else if((_next_pc1) || (_next_pc2))
+        else if(_default_destination_group)
+        {
+            destination = _default_destination_group;
+        }
+        else if(_next_pcs.count > 0)
         {
             destination = [[SccpDestinationGroup alloc]init];
-            if(_next_pc1)
+            for(UMMTP3PointCode *pc in _next_pcs)
             {
                 SccpDestination *e = [[SccpDestination alloc]init];
-                e.dpc = _next_pc1;
-                [destination addEntry:e];
-            }
-            if(_next_pc2)
-            {
-                SccpDestination *e = [[SccpDestination alloc]init];
-                e.dpc = _next_pc2;
+                e.dpc = pc;
                 [destination addEntry:e];
             }
         }
@@ -2078,21 +2076,25 @@
         }
     }
 
-    NSString *s = cfg[@"next-pc"];
-    if(s.length > 0)
+    NSArray<NSString *> *sa = cfg[@"next-pc"];
+    if(sa.count>0)
     {
-        _next_pc1 = [[UMMTP3PointCode alloc]initWithString:s variant:_mtp3.variant];
-        _next_pc2 = [[UMMTP3PointCode alloc]initWithString:s variant:_mtp3.variant];
-    }
-    s = cfg[@"next-pc1"];
-    if(s.length > 0)
-    {
-        _next_pc1 = [[UMMTP3PointCode alloc]initWithString:s variant:_mtp3.variant];
-    }
-    s = cfg[@"next-pc2"];
-    if(s.length > 0)
-    {
-        _next_pc2 = [[UMMTP3PointCode alloc]initWithString:s variant:_mtp3.variant];
+        SccpDestinationGroup *destination = [[SccpDestinationGroup alloc]init];
+        NSMutableArray<UMMTP3PointCode *> *a = [[NSMutableArray alloc]init];
+        for(NSString *s in sa)
+        {
+            UMMTP3PointCode *pc = [[UMMTP3PointCode alloc]initWithString:s variant:_mtp3.variant];
+            if(pc)
+            {
+                [a addObject:pc];
+
+                SccpDestination *e = [[SccpDestination alloc]init];
+                e.dpc = pc;
+                [destination addEntry:e];
+            }
+        }
+        _next_pcs = a;
+        _default_destination_group = destination;
     }
     NSNumber *n = cfg[@"ntt"];
     if(n)
