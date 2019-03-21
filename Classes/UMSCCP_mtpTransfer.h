@@ -21,30 +21,29 @@
 
 @interface UMSCCP_mtpTransfer : UMLayerTask
 {
-    NSData *data;
-    int si;
-    int ni;
-    UMMTP3PointCode *opc;
-    UMMTP3PointCode *dpc;
-    NSMutableDictionary *options;
-    
-    UMLayerSCCP *sccpLayer;
-    UMLayerMTP3 *mtp3Layer;
+    NSData *_data;
+    int _si;
+    int _ni;
+    UMMTP3PointCode *_opc;
+    UMMTP3PointCode *_dpc;
+    NSMutableDictionary *_options;
+    UMLayerSCCP *_sccpLayer;
+    UMLayerMTP3 *_mtp3Layer;
 
-    SccpAddress     *src;
-    SccpAddress     *dst;
-    NSData          *sccp_pdu;
-    NSData          *sccp_optional;
-    SCCP_ServiceClass  m_protocol_class;
-    SCCP_Handling      m_handling;
-    int             m_hopcounter;
-    NSMutableDictionary *optional_dict;
-    int             importance;
-    int             end_of_optional_parameters;
-    int             m_return_cause;
+    SccpAddress     *_src;
+    SccpAddress     *_dst;
+    NSData          *_sccp_pdu;
+    NSData          *_sccp_optional;
+    SCCP_ServiceClass  _m_protocol_class;
+    SCCP_Handling      _m_handling;
+    int             _m_hopcounter;
+    NSMutableDictionary *_optional_dict;
+    int             _importance;
+    int             _end_of_optional_parameters;
+    int             _m_return_cause;
     UMSynchronizedSortedDictionary *_decodedJson;
     NSData *_decodedPdu;
-    int m_type;
+    int _m_type;
 
     NSDate                  *_created;
     NSDate                  *_startOfProcessing;

@@ -52,7 +52,7 @@ static int segmentReferenceId;
     }
     return self;
 }
-
+ 
 - (UMSCCP_sccpNUnitdata *)initForSccp:(UMLayerSCCP *)sccp
                                  user:(id<UMSCCP_UserProtocol>)xuser
                      userDataSegments:(NSArray *)xdataSegments
@@ -326,7 +326,7 @@ static int segmentReferenceId;
                     packet.incomingCalledPartyAddress = _dst;
                     packet.incomingServiceClass = _protocolClass;
                     packet.incomingHandling = _handling;
-                    packet.incomingData = _data;
+                    packet.incomingSccpData = _data;
                     packet.incomingOptions = _options;
                     packet.incomingMaxHopCount = _maxHopCount;
                     packet.incomingOptionalData = optional_data;
@@ -344,7 +344,7 @@ static int segmentReferenceId;
                 packet.incomingCalledPartyAddress = _dst;
                 packet.incomingServiceClass = _protocolClass;
                 packet.incomingHandling = _handling;
-                packet.incomingData = _data;
+                packet.incomingSccpData = _data;
                 packet.incomingOptions = _options;
                 packet.incomingMaxHopCount = _maxHopCount;
                 packet.incomingOptionalData = optional_data;

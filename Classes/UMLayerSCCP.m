@@ -589,7 +589,16 @@
                 {
                     rte.routeTo = [registry getDestinationByName:rte.routeToName];
                 }
+
+
+
                 destination = rte.routeTo;
+
+                if(self.logLevel <= UMLOG_DEBUG)
+                {
+                    [self.logFeed debugText:[NSString stringWithFormat:@" %@",destination.description]];
+                }
+
                 if(destination == NULL)
                 {
                     *cause = SCCP_ReturnCause_NoTranslationForThisSpecificAddress;
@@ -904,7 +913,7 @@
         packet.outgoingLocalUser = localUser;
         if((packet.incomingServiceType == SCCP_UDTS) || (packet.incomingServiceType == SCCP_XUDTS) || (packet.incomingServiceType == SCCP_LUDTS))
         {
-            [localUser sccpNNotice:packet.outgoingData
+            [localUser sccpNNotice:packet.outgoingSccpData
                       callingLayer:self
                            calling:packet.outgoingCallingPartyAddress
                             called:packet.outgoingCalledPartyAddress
@@ -913,7 +922,7 @@
         }
         else
         {
-            [localUser sccpNUnitdata:packet.outgoingData
+            [localUser sccpNUnitdata:packet.outgoingSccpData
                         callingLayer:self
                              calling:packet.outgoingCallingPartyAddress
                               called:packet.outgoingCalledPartyAddress
@@ -924,26 +933,27 @@
         }
         returnValue = YES;
     }
-    else if((causeValue != SCCP_ReturnCause_not_set) ||  (grp ==NULL))
+    if((grp==NULL) && (causeValue != SCCP_ReturnCause_not_set))
     {
-        if(grp==NULL)
+        if(self.logLevel <=UMLOG_DEBUG)
         {
-            causeValue = SCCP_ReturnCause_SCCPFailure;
-            if(self.logLevel <=UMLOG_DEBUG)
-            {
-                NSString *s = @"grp=NULL and causeValue not set. Setting SCCP_ReturnCause_SCCPFailure";
-                [self.logFeed debugText:s];
-            }
+            NSString *s = @"grp=NULL and causeValue not set. Setting SCCP_ReturnCause_SCCPFailure";
+            [self.logFeed debugText:s];
         }
+        causeValue = SCCP_ReturnCause_NoTranslationForThisSpecificAddress;
+    }
+
+    else if(causeValue != SCCP_ReturnCause_not_set)
+    {
         NSString *s = [NSString stringWithFormat:@"Can not forward UDT. No route to destination PC=%@. SRC=%@ DST=%@ DATA=%@",
                        packet.incomingOpc,
                        packet.incomingCallingPartyAddress,
                        packet.incomingCalledPartyAddress,
-                       packet.incomingData];
+                       packet.incomingSccpData];
         [self logMinorError:s];
         if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
         {
-            [self generateUDTS:packet.incomingData
+            [self generateUDTS:packet.incomingSccpData
                        calling:packet.incomingCalledPartyAddress
                         called:packet.incomingCallingPartyAddress
                          class:packet.incomingServiceClass
@@ -974,11 +984,11 @@
                            packet.incomingOpc,
                            packet.incomingCallingPartyAddress,
                            packet.incomingCalledPartyAddress,
-                           packet.incomingData];
+                           packet.incomingSccpData];
             [self logMinorError:s];
             if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
             {
-                [self generateUDTS:packet.incomingData
+                [self generateUDTS:packet.incomingSccpData
                            calling:packet.incomingCalledPartyAddress
                             called:packet.incomingCallingPartyAddress
                              class:packet.incomingServiceClass
@@ -996,7 +1006,7 @@
             switch(packet.outgoingServiceType)
             {
                 case SCCP_UDT:
-                    e = [self sendUDT:packet.outgoingData
+                    e = [self sendUDT:packet.outgoingSccpData
                               calling:packet.outgoingCallingPartyAddress
                                called:packet.outgoingCalledPartyAddress
                                 class:packet.outgoingServiceClass
@@ -1007,7 +1017,7 @@
                              provider:provider];
                     break;
                 case SCCP_UDTS:
-                    e = [self sendUDTS:packet.outgoingData
+                    e = [self sendUDTS:packet.outgoingSccpData
                                calling:packet.outgoingCallingPartyAddress
                                 called:packet.outgoingCalledPartyAddress
                                  class:packet.outgoingServiceClass
@@ -1018,7 +1028,7 @@
                               provider:provider];
                     break;
                 case SCCP_XUDT:
-                    e = [self sendXUDT:packet.outgoingData
+                    e = [self sendXUDT:packet.outgoingSccpData
                                calling:packet.outgoingCallingPartyAddress
                                 called:packet.outgoingCalledPartyAddress
                                  class:packet.outgoingServiceClass
@@ -1031,7 +1041,7 @@
                               provider:provider];
                     break;
                 case SCCP_XUDTS:
-                    e = [self sendXUDTS:packet.outgoingData
+                    e = [self sendXUDTS:packet.outgoingSccpData
                                 calling:packet.outgoingCallingPartyAddress
                                  called:packet.outgoingCalledPartyAddress
                                   class:packet.outgoingServiceClass
@@ -1056,13 +1066,13 @@
                 case UMMTP3_no_error:
                     break;
                 case UMMTP3_error_pdu_too_big:
-                    s = [NSString stringWithFormat:@"Can not forward %@. PDU too big. SRC=%@ DST=%@ DATA=%@",packet.outgoingPacketType,packet.outgoingOpc,packet.outgoingDpc,packet.outgoingData];
+                    s = [NSString stringWithFormat:@"Can not forward %@. PDU too big. SRC=%@ DST=%@ DATA=%@",packet.outgoingPacketType,packet.outgoingOpc,packet.outgoingDpc,packet.outgoingSccpData];
                     break;
                 case UMMTP3_error_no_route_to_destination:
-                    s = [NSString stringWithFormat:@"Can not forward %@. No route to destination PC=%@. SRC=%@ DST=%@ DATA=%@",packet.outgoingPacketType,pc,packet.outgoingOpc,packet.outgoingDpc,packet.outgoingData];
+                    s = [NSString stringWithFormat:@"Can not forward %@. No route to destination PC=%@. SRC=%@ DST=%@ DATA=%@",packet.outgoingPacketType,pc,packet.outgoingOpc,packet.outgoingDpc,packet.outgoingSccpData];
                     break;
                 case UMMTP3_error_invalid_variant:
-                    s = [NSString stringWithFormat:@"Can not forward %@. Invalid variant. SRC=%@ DST=%@ DATA=%@",packet.outgoingPacketType,packet.outgoingOpc,packet.outgoingDpc,packet.outgoingData];
+                    s = [NSString stringWithFormat:@"Can not forward %@. Invalid variant. SRC=%@ DST=%@ DATA=%@",packet.outgoingPacketType,packet.outgoingOpc,packet.outgoingDpc,packet.outgoingSccpData];
                     break;
             }
             if(s)
@@ -1074,7 +1084,7 @@
                 switch(e)
                 {
                     case UMMTP3_error_no_route_to_destination:
-                        [self generateUDTS:packet.incomingData
+                        [self generateUDTS:packet.incomingSccpData
                                    calling:packet.incomingCalledPartyAddress
                                     called:packet.incomingCallingPartyAddress
                                      class:packet.incomingServiceClass
@@ -1085,7 +1095,7 @@
                                   provider:_mtp3];
                         break;
                     case UMMTP3_error_pdu_too_big:
-                        [self generateUDTS:packet.incomingData
+                        [self generateUDTS:packet.incomingSccpData
                                    calling:packet.incomingCalledPartyAddress
                                     called:packet.incomingCallingPartyAddress
                                      class:packet.incomingServiceClass
@@ -1096,7 +1106,7 @@
                                   provider:_mtp3];
                         break;
                     case UMMTP3_error_invalid_variant:
-                        [self generateUDTS:packet.incomingData
+                        [self generateUDTS:packet.incomingSccpData
                                    calling:packet.incomingCalledPartyAddress
                                     called:packet.incomingCallingPartyAddress
                                      class:packet.incomingServiceClass
@@ -1115,10 +1125,10 @@
     else
     {
         causeValue = SCCP_ReturnCause_Unequipped;
-        [self logMinorError:[NSString stringWithFormat:@"[1] Can not route %@. Cause %d SRC=%@ DST=%@ DATA=%@",packet.incomingPacketType,causeValue,packet.outgoingOpc,packet.outgoingDpc,packet.outgoingData]];
+        [self logMinorError:[NSString stringWithFormat:@"[1] Can not route %@. Cause %d SRC=%@ DST=%@ DATA=%@",packet.incomingPacketType,causeValue,packet.outgoingOpc,packet.outgoingDpc,packet.outgoingSccpData]];
         if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
         {
-            [self generateUDTS:packet.incomingData
+            [self generateUDTS:packet.incomingSccpData
                        calling:packet.incomingCalledPartyAddress
                         called:packet.incomingCallingPartyAddress
                          class:packet.incomingServiceClass
@@ -1941,7 +1951,7 @@
     packet.incomingOptions = options;
     packet.incomingServiceClass = pclass;
     packet.incomingMtp3Layer = provider;
-    packet.incomingData = data;
+    packet.incomingSccpData = data;
     if([self routePacket:packet]==YES) /* success */
     {
         return UMMTP3_no_error;
