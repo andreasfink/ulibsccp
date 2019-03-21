@@ -587,11 +587,8 @@
                 SccpGttRoutingTableEntry *rte = [gttSelector findNextHopForDestination:called1];
                 if(rte.routeTo == NULL)
                 {
-                    rte.routeTo = [registry getDestinationByName:rte.routeToName];
+                    rte.routeTo = [registry getDestinationGroupByName:rte.routeToName];
                 }
-
-
-
                 destination = rte.routeTo;
 
                 if(self.logLevel <= UMLOG_DEBUG)
