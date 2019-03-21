@@ -59,7 +59,7 @@ typedef enum SCCP_ReturnCause
     SCCP_ReturnCause_ErrorInMessageTransport                = 8,
     SCCP_ReturnCause_ErrorInLocalProcessing                 = 9,
     SCCP_ReturnCause_DestinationCannotPerformReassembly     = 10,
-    SCCP_ReturnCause_SCCPFailure                            = 11,
+    SCCP_ReturnCause_SCCPFailure                            = 11, /*0x0b */
     SCCP_ReturnCause_HopCounterViolation                    = 12,
     SCCP_ReturnCause_SegmentationNotSupported               = 13,
     SCCP_ReturnCause_SegmentationFailure                    = 14,

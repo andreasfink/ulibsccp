@@ -901,14 +901,27 @@
     if((localUser) && (causeValue == SCCP_ReturnCause_not_set))
     {
         packet.outgoingToLocal = YES;
-        [localUser sccpNUnitdata:packet.outgoingData
-                    callingLayer:self
-                         calling:packet.outgoingCallingPartyAddress
-                          called:packet.outgoingCalledPartyAddress
-                qualityOfService:0
-                           class:packet.outgoingServiceClass
-                        handling:packet.outgoingHandling
-                         options:packet.outgoingOptions];
+        packet.outgoingLocalUser = localUser;
+        if((packet.incomingServiceType == SCCP_UDTS) || (packet.incomingServiceType == SCCP_XUDTS) || (packet.incomingServiceType == SCCP_LUDTS))
+        {
+            [localUser sccpNNotice:packet.outgoingData
+                      callingLayer:self
+                           calling:packet.outgoingCallingPartyAddress
+                            called:packet.outgoingCalledPartyAddress
+                            reason:packet.outgoingReturnCause
+                           options:packet.outgoingOptions];
+        }
+        else
+        {
+            [localUser sccpNUnitdata:packet.outgoingData
+                        callingLayer:self
+                             calling:packet.outgoingCallingPartyAddress
+                              called:packet.outgoingCalledPartyAddress
+                    qualityOfService:0
+                               class:packet.outgoingServiceClass
+                            handling:packet.outgoingHandling
+                             options:packet.outgoingOptions];
+        }
         returnValue = YES;
     }
     else if((causeValue != SCCP_ReturnCause_not_set) ||  (grp ==NULL))
@@ -1116,7 +1129,7 @@
                       provider:_mtp3];
         }
     }
-
+    packet.routed = [[NSDate alloc]init];
     return returnValue;
 }
 
@@ -1917,6 +1930,25 @@
                       options:(NSDictionary *)options
                      provider:(UMLayerMTP3 *)provider
 {
+
+    UMSCCP_Packet *packet = [[UMSCCP_Packet alloc]init];
+    packet.incomingOpc = opc;
+    packet.incomingDpc = dpc;
+    packet.incomingCallingPartyAddress = src;
+    packet.incomingCalledPartyAddress = dst;
+    packet.incomingServiceType = SCCP_UDTS;
+    packet.incomingReturnCause = reasonCode;
+    packet.incomingOptions = options;
+    packet.incomingServiceClass = pclass;
+    packet.incomingMtp3Layer = provider;
+    packet.incomingData = data;
+    if([self routePacket:packet]==YES) /* success */
+    {
+        return UMMTP3_no_error;
+    }
+    return UMMTP3_error_no_route_to_destination;
+    
+#if 0
     SccpAddress *src2 = [src copy];
     src2.ai.pointCodeIndicator = YES;
     src2.pc = opc;
@@ -1938,6 +1970,15 @@
     [sccp_pdu appendData:srcEncoded];
     [sccp_pdu appendByte:data.length];
     [sccp_pdu appendData:data];
+    if(dpc == opc) /* local generated */
+    {
+        [localUser sccpNNotice:(NSData *)data
+                  callingLayer:self
+                       calling:src
+                        called:dst
+                        reason:reasonCode
+                       options:options];
+    }
 
     UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc options:options];
     NSString *s;
@@ -2001,6 +2042,8 @@
             [self.logFeed majorErrorText:[NSString stringWithFormat:@"sendPDU %@: %@->%@ returns unknown error %d",_mtp3.layerName,opc,dpc,result]];
     }
     return result;
+#endif
+
 }
 
 - (NSUInteger)maxPayloadSizeForServiceType:(SCCP_ServiceType) serviceType

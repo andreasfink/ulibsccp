@@ -136,6 +136,7 @@
                 type=@"UDTS";
                 _decodedJson[@"sccp-pdu-type"]=type;
                 m_return_cause = d[i++] & 0x0F;
+                _packet.incomingReturnCause = m_return_cause;
                 _decodedJson[@"sccp-return-cause"]=@(m_return_cause);
                 param_called_party_address = d[i] + i;
                 i++;
@@ -161,6 +162,7 @@
                 }
                 _decodedJson[@"sccp-protocol-handling"]=@(m_handling);
                 param_hop_counter=d[i];
+                _packet.incomingMaxHopCount = param_hop_counter;
                 i++;
                 param_called_party_address = d[i] + i;
                 i++;
@@ -176,9 +178,11 @@
                 type=@"XUDTS";
                 _decodedJson[@"sccp-pdu-type"]=type;
                 m_return_cause = d[i++] & 0x0F;
+                _packet.incomingReturnCause = m_return_cause;
                 _decodedJson[@"sccp-protocol-return-cause"]=@(m_return_cause);
                 m_hopcounter = d[i++] & 0x0F;
                 _decodedJson[@"sccp-hop-counter"]=@(m_hopcounter);
+                _packet.incomingMaxHopCount = m_return_cause;
                 param_called_party_address = d[i] + i;
                 i++;
                 param_calling_party_address = d[i] + i;
