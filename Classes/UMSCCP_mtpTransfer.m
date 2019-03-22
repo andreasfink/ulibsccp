@@ -35,7 +35,19 @@
 		_packet.incomingOpc = xopc;
 		_packet.incomingDpc = xdpc;
         _data = xdata;
-		_packet.incomingOptions = xoptions;
+        NSMutableDictionary *xoptions2;
+
+        if(xoptions)
+        {
+            xoptions2 = [xoptions mutableCopy];
+        }
+        else
+        {
+            xoptions2 = [[NSMutableDictionary alloc]init];
+        }
+        xoptions2[@"mtp3-opc"] = xopc;
+        xoptions2[@"mtp3-dpc"] = xdpc;
+
 		_packet.incomingMtp3Layer = mtp3;
         _packet.incomingLinkset = xoptions[@"mtp3-incoming-linkset"];
 		_created = [NSDate date];
@@ -44,16 +56,9 @@
         _dpc = xdpc;
         _si = xsi;
         _ni = xni;
-        if(xoptions)
-        {
-            _options = [xoptions mutableCopy];
-        }
-        else
-        {
-            _options = [[NSMutableDictionary alloc]init];
-        }
         _sccpLayer = layer;
         _mtp3Layer = mtp3;
+
     }
     return self;
 }
@@ -72,6 +77,10 @@
     [label appendToMutableData:rawMtp3];
     [rawMtp3 appendData:_data];
     _packet.incomingMtp3Data = rawMtp3;
+    if(_options==NULL)
+    {
+        _options = [[NSMutableDictionary alloc]init];
+    }
     _options[@"mtp3-pdu"] = rawMtp3;
     _options[@"sccp-pdu"] = [_data hexString];
     _packet.incomingSccpData = _data;
@@ -82,7 +91,6 @@
     }
 
     _packet.incomingServiceClass = SCCP_CLASS_UNDEFINED;
-    _packet.outgoingServiceClass = SCCP_CLASS_UNDEFINED;
     @try
     {
         NSUInteger len = _data.length;
@@ -228,7 +236,6 @@
             _dst = [[SccpAddress alloc]initWithItuData:dstData];
             _decodedJson[@"sccp-called-party-address"]=[_dst dictionaryValue];
             _packet.incomingCalledPartyAddress = _dst;
-            _packet.outgoingCalledPartyAddress = _dst;
 
         }
         if(param_calling_party_address>0)
@@ -236,9 +243,9 @@
             i = (int)d[param_calling_party_address];
             srcData = [NSData dataWithBytes:&d[param_calling_party_address+1] length:i];
             _src = [[SccpAddress alloc]initWithItuData:srcData];
+            _src.address=@"123";
             _decodedJson[@"sccp-calling-party-address"]=[_src dictionaryValue];
             _packet.incomingCalledPartyAddress = _src;
-            _packet.outgoingCalledPartyAddress = _src;
         }
         if(param_data > 0)
         {
@@ -253,7 +260,6 @@
                 _decodedJson[@"sccp-payload"]=decodedUserPdu;
             }
             _packet.incomingSccpData = _sccp_pdu;
-            _packet.outgoingSccpData = _sccp_pdu;
         }
         if(param_optional > 0)
         {
@@ -372,6 +378,7 @@
             {
                 case SCCP_UDT:
                     _options[@"sccp-udt"] = @(YES);
+                    _packet.incomingOptions = _options;
                     if(_dst.ssn.ssn==SCCP_SSN_SCCP_MG)
                     {
                         if([self process_udt_sccp_mg])
@@ -402,6 +409,7 @@
                     break;
                 case SCCP_UDTS:
                     _options[@"sccp-udts"] = @(YES);
+                    _packet.incomingOptions = _options;
                     [_sccpLayer routePacket:_packet];
                     if(_packet.outgoingToLocal)
 
@@ -417,6 +425,7 @@
                     break;
                 case SCCP_XUDT:
                     _options[@"sccp-xudt"] = @(YES);
+                    _packet.incomingOptions = _options;
                     [_sccpLayer routePacket:_packet];
                     if(_packet.outgoingToLocal)
                     {
@@ -431,6 +440,7 @@
                     break;
                 case SCCP_XUDTS:
                     _options[@"sccp-xudts"] = @(YES);
+                    _packet.incomingOptions = _options;
                     [_sccpLayer routePacket:_packet];
                     if(_packet.outgoingToLocal)
                     {
@@ -463,6 +473,7 @@
             _decodedJson[@"decode-error"] = e.description;
         }
     }
+
     _endOfProcessing = [NSDate date];
     [_sccpLayer addProcessingStatistic:_statsSection
                           waitingDelay:[_startOfProcessing timeIntervalSinceDate:_created]
