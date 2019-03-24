@@ -899,7 +899,6 @@
     }
 
 
-
     if(called_out!=NULL)
     {
         packet.outgoingCalledPartyAddress = called_out;
@@ -968,6 +967,11 @@
         {
             packet.outgoingCalledPartyAddress.tt.tt = [dest.ntt intValue];
         }
+        if(_ntt)
+        {
+            packet.outgoingCalledPartyAddress.tt = _ntt;
+        }
+
         if(dest.dpc)
         {
             pc = dest.dpc;
@@ -2126,6 +2130,12 @@
         }
     }
 
+    NSNumber *n = cfg[@"ntt"];
+    if(n)
+    {
+        _ntt = [[SccpTranslationTableNumber alloc]initWithInt:[n intValue]];
+    }
+
     NSArray<NSString *> *sa = cfg[@"next-pc"];
     if(sa.count>0)
     {
@@ -2140,16 +2150,12 @@
 
                 SccpDestination *e = [[SccpDestination alloc]init];
                 e.dpc = pc;
+                e.ntt = @(_ntt.tt);
                 [destination addEntry:e];
             }
         }
         _next_pcs = a;
         _default_destination_group = destination;
-    }
-    NSNumber *n = cfg[@"ntt"];
-    if(n)
-    {
-        _ntt = [[SccpTranslationTableNumber alloc]initWithInt:[n intValue]];
     }
 
     [_gttSelectorRegistry updateLogLevel:self.logLevel];
