@@ -34,28 +34,31 @@
 		_packet.sccp = layer;
 		_packet.incomingOpc = xopc;
 		_packet.incomingDpc = xdpc;
-		_packet.incomingData = data;
-		_packet.incomingOptions = xoptions;
-		_packet.incomingMtp3Layer = mtp3;
-        _packet.incomingLinkset = options[@"mtp3-incoming-linkset"];
+        _data = xdata;
+        NSMutableDictionary *xoptions2;
 
-		_created = [NSDate date];
-        _statsSection = UMSCCP_StatisticSection_TRANSIT;
-        opc = xopc;
-        dpc = xdpc;
-        si = xsi;
-        ni = xni;
-        data = xdata;
         if(xoptions)
         {
-            options = [xoptions mutableCopy];
+            xoptions2 = [xoptions mutableCopy];
         }
         else
         {
-            options = [[NSMutableDictionary alloc]init];
+            xoptions2 = [[NSMutableDictionary alloc]init];
         }
-        sccpLayer = layer;
-        mtp3Layer = mtp3;
+        xoptions2[@"mtp3-opc"] = xopc;
+        xoptions2[@"mtp3-dpc"] = xdpc;
+
+		_packet.incomingMtp3Layer = mtp3;
+        _packet.incomingLinkset = xoptions[@"mtp3-incoming-linkset"];
+		_created = [NSDate date];
+        _statsSection = UMSCCP_StatisticSection_TRANSIT;
+        _opc = xopc;
+        _dpc = xdpc;
+        _si = xsi;
+        _ni = xni;
+        _sccpLayer = layer;
+        _mtp3Layer = mtp3;
+
     }
     return self;
 }
@@ -66,31 +69,36 @@
 
     /* we build a pseudo MTP3 raw packet for debugging /tracing and logging */
     UMMTP3Label *label = [[UMMTP3Label alloc]init];
-    label.opc = opc;
-    label.dpc = dpc;
+    label.opc = _opc;
+    label.dpc = _dpc;
     NSMutableData *rawMtp3 = [[NSMutableData alloc]init];
-    int sio = ((ni & 0x03) << 6) | (si & 0x0F);
+    int sio = ((_ni & 0x03) << 6) | (_si & 0x0F);
     [rawMtp3 appendByte:sio];
     [label appendToMutableData:rawMtp3];
-    [rawMtp3 appendData:data];
-    options[@"mtp3-pdu"] = rawMtp3;
-    options[@"sccp-pdu"] = [data hexString];
-    BOOL decodeOnly = [options[@"decode-only"] boolValue];
+    [rawMtp3 appendData:_data];
+    _packet.incomingMtp3Data = rawMtp3;
+    if(_options==NULL)
+    {
+        _options = [[NSMutableDictionary alloc]init];
+    }
+    _options[@"mtp3-pdu"] = rawMtp3;
+    _options[@"sccp-pdu"] = [_data hexString];
+    _packet.incomingSccpData = _data;
+    BOOL decodeOnly = [_options[@"decode-only"] boolValue];
     if(decodeOnly)
     {
         _decodedJson = [[UMSynchronizedSortedDictionary alloc]init];
     }
 
     _packet.incomingServiceClass = SCCP_CLASS_UNDEFINED;
-    _packet.outgoingServiceClass = SCCP_CLASS_UNDEFINED;
     @try
     {
-        NSUInteger len = data.length;
+        NSUInteger len = _data.length;
         if(len < 6)
         {
             @throw([NSException exceptionWithName:@"SCCP_TOO_SMALL_PACKET_RECEIVED" reason:NULL userInfo:NULL] );
         }
-        const uint8_t *d = data.bytes;
+        const uint8_t *d = _data.bytes;
         int i = 0;
         int m_type = d[i++];
         int m_handling;
@@ -111,18 +119,18 @@
             case SCCP_UDT:
                 type = @"UDT";
                 _decodedJson[@"sccp-pdu-type"]=type;
-                m_protocol_class = d[i] & 0x0F;
-                m_handling = (d[i++]>>4) & 0x0F;
+                _m_protocol_class = d[i] & 0x0F;
+                _m_handling = (d[i++]>>4) & 0x0F;
 
-                _packet.incomingServiceClass = m_protocol_class;
-                _packet.outgoingServiceClass = m_protocol_class;
+                _packet.incomingServiceClass = _m_protocol_class;
+                _packet.outgoingServiceClass = _m_protocol_class;
                 if(m_handling & 0x08)
                 {
                     _packet.incomingHandling = SCCP_HANDLING_RETURN_ON_ERROR;
                     _packet.outgoingHandling = SCCP_HANDLING_RETURN_ON_ERROR;
                 }
-                _decodedJson[@"sccp-protocol-class"]=@(m_protocol_class);
-                _decodedJson[@"sccp-protocol-handling"]=@(m_handling);
+                _decodedJson[@"sccp-protocol-class"]=@(_m_protocol_class);
+                _decodedJson[@"sccp-protocol-handling"]=@(_m_handling);
                 param_called_party_address = d[i] + i;
                 i++;
                 param_calling_party_address = d[i] + i;
@@ -135,9 +143,9 @@
             case SCCP_UDTS:
                 type=@"UDTS";
                 _decodedJson[@"sccp-pdu-type"]=type;
-                m_return_cause = d[i++] & 0x0F;
-                _packet.incomingReturnCause = m_return_cause;
-                _decodedJson[@"sccp-return-cause"]=@(m_return_cause);
+                _m_return_cause = d[i++] & 0x0F;
+                _packet.incomingReturnCause = _m_return_cause;
+                _decodedJson[@"sccp-return-cause"]=@(_m_return_cause);
                 param_called_party_address = d[i] + i;
                 i++;
                 param_calling_party_address = d[i] + i;
@@ -150,10 +158,10 @@
             case SCCP_XUDT:
                 type=@"XUDT";
                 _decodedJson[@"sccp-pdu-type"]=type;
-                m_protocol_class = d[i] & 0x0F;
-                _packet.incomingServiceClass = m_protocol_class;
-                _packet.outgoingServiceClass = m_protocol_class;
-                _decodedJson[@"sccp-protocol-class"]=@(m_protocol_class);
+                _m_protocol_class = d[i] & 0x0F;
+                _packet.incomingServiceClass = _m_protocol_class;
+                _packet.outgoingServiceClass = _m_protocol_class;
+                _decodedJson[@"sccp-protocol-class"]=@(_m_protocol_class);
                 m_handling = (d[i++]>>4) & 0x0F;
                 if(m_handling & 0x08)
                 {
@@ -177,12 +185,12 @@
             case SCCP_XUDTS:
                 type=@"XUDTS";
                 _decodedJson[@"sccp-pdu-type"]=type;
-                m_return_cause = d[i++] & 0x0F;
-                _packet.incomingReturnCause = m_return_cause;
-                _decodedJson[@"sccp-protocol-return-cause"]=@(m_return_cause);
-                m_hopcounter = d[i++] & 0x0F;
-                _decodedJson[@"sccp-hop-counter"]=@(m_hopcounter);
-                _packet.incomingMaxHopCount = m_return_cause;
+                _m_return_cause = d[i++] & 0x0F;
+                _packet.incomingReturnCause = _m_return_cause;
+                _decodedJson[@"sccp-protocol-return-cause"]=@(_m_return_cause);
+                _m_hopcounter = d[i++] & 0x0F;
+                _decodedJson[@"sccp-hop-counter"]=@(_m_hopcounter);
+                _packet.incomingMaxHopCount = _m_return_cause;
                 param_called_party_address = d[i] + i;
                 i++;
                 param_calling_party_address = d[i] + i;
@@ -225,42 +233,39 @@
         {
             i = (int)d[param_called_party_address];
             dstData = [NSData dataWithBytes:&d[param_called_party_address+1] length:i];
-            dst = [[SccpAddress alloc]initWithItuData:dstData];
-            _decodedJson[@"sccp-called-party-address"]=[dst dictionaryValue];
-            _packet.incomingCalledPartyAddress = dst;
-            _packet.outgoingCalledPartyAddress = dst;
+            _dst = [[SccpAddress alloc]initWithItuData:dstData];
+            _decodedJson[@"sccp-called-party-address"]=[_dst dictionaryValue];
+            _packet.incomingCalledPartyAddress = _dst;
 
         }
         if(param_calling_party_address>0)
         {
             i = (int)d[param_calling_party_address];
             srcData = [NSData dataWithBytes:&d[param_calling_party_address+1] length:i];
-            src = [[SccpAddress alloc]initWithItuData:srcData];
-            _decodedJson[@"sccp-calling-party-address"]=[src dictionaryValue];
-            _packet.incomingCalledPartyAddress = src;
-            _packet.outgoingCalledPartyAddress = src;
+            _src = [[SccpAddress alloc]initWithItuData:srcData];
+            _decodedJson[@"sccp-calling-party-address"]=[_src dictionaryValue];
+            _packet.incomingCalledPartyAddress = _src;
         }
         if(param_data > 0)
         {
             i = (int)d[param_data];
-            sccp_pdu = [NSData dataWithBytes:&d[param_data+1] length:i];
-            _decodedJson[@"sccp-payload-bytes"]=[sccp_pdu hexString];
+            _sccp_pdu = [NSData dataWithBytes:&d[param_data+1] length:i];
+            _decodedJson[@"sccp-payload-bytes"]=[_sccp_pdu hexString];
             if(decodeOnly)
             {
-                id<UMSCCP_UserProtocol> user = [sccpLayer getUserForSubsystem:dst.ssn number:dst];
-                id decodedUserPdu = [user decodePdu:sccp_pdu];
-                _decodedPdu = sccp_pdu;
+                id<UMSCCP_UserProtocol> user = [_sccpLayer getUserForSubsystem:_dst.ssn number:_dst];
+                id decodedUserPdu = [user decodePdu:_sccp_pdu];
+                _decodedPdu = _sccp_pdu;
                 _decodedJson[@"sccp-payload"]=decodedUserPdu;
             }
-            _packet.incomingData = sccp_pdu;
-            _packet.outgoingData = sccp_pdu;
+            _packet.incomingSccpData = _sccp_pdu;
         }
         if(param_optional > 0)
         {
-            sccp_optional = [NSData dataWithBytes:&d[param_optional] length:len-param_optional];
-            _decodedJson[@"sccp-optional-raw"] = sccp_optional.hexString;
-            const uint8_t *bytes = sccp_optional.bytes;
-            NSUInteger m = sccp_optional.length;
+            _sccp_optional = [NSData dataWithBytes:&d[param_optional] length:len-param_optional];
+            _decodedJson[@"sccp-optional-raw"] = _sccp_optional.hexString;
+            const uint8_t *bytes = _sccp_optional.bytes;
+            NSUInteger m = _sccp_optional.length;
             NSUInteger j=0;
             while(j<m)
             {
@@ -270,7 +275,7 @@
                     int len = bytes[j++];
                     if((j+len)<m)
                     {
-                        optional_dict = [[NSMutableDictionary alloc]init];
+                        _optional_dict = [[NSMutableDictionary alloc]init];
                         NSData *param = [NSData dataWithBytes:&bytes[j] length:len];
                         j = j+len;
                         if(paramType==0x00)
@@ -280,74 +285,74 @@
                         switch(paramType)
                         {
                             case 0x01:
-                                optional_dict[@"destination-local-reference"] = param;
+                                _optional_dict[@"destination-local-reference"] = param;
                                 break;
                             case 0x02:
-                                optional_dict[@"source-local-reference"] = param;
+                                _optional_dict[@"source-local-reference"] = param;
                                 break;
                             case 0x03:
-                                optional_dict[@"called-party-address"] = param;
+                                _optional_dict[@"called-party-address"] = param;
                                 break;
                             case 0x04:
-                                optional_dict[@"calling-party-address"] = param;
+                                _optional_dict[@"calling-party-address"] = param;
                                 break;
                             case 0x05:
-                                optional_dict[@"protocol-class"] = param;
+                                _optional_dict[@"protocol-class"] = param;
                                 break;
                             case 0x06:
-                                optional_dict[@"segmenting-reassembling"] = param;
+                                _optional_dict[@"segmenting-reassembling"] = param;
                                 break;
                             case 0x07:
-                                optional_dict[@"receive-sequence-number"] = param;
+                                _optional_dict[@"receive-sequence-number"] = param;
                                 break;
                             case 0x08:
-                                optional_dict[@"sequencing-segmenting"] = param;
+                                _optional_dict[@"sequencing-segmenting"] = param;
                                 break;
                             case 0x09:
-                                optional_dict[@"credit"] = param;
+                                _optional_dict[@"credit"] = param;
                                 break;
                             case 0x0a:
-                                optional_dict[@"release-cause"] = param;
+                                _optional_dict[@"release-cause"] = param;
                                 break;
                             case 0x0b:
-                                optional_dict[@"return-cause"] = param;
+                                _optional_dict[@"return-cause"] = param;
                                 break;
                             case 0x0c:
-                                optional_dict[@"reset-cause"] = param;
+                                _optional_dict[@"reset-cause"] = param;
                                 break;
                             case 0x0d:
-                                optional_dict[@"error-cause"] = param;
+                                _optional_dict[@"error-cause"] = param;
                                 break;
                             case 0x0e:
-                                optional_dict[@"refusal-cause"] = param;
+                                _optional_dict[@"refusal-cause"] = param;
                                 break;
                             case 0x0f:
-                                optional_dict[@"data"] = param;
+                                _optional_dict[@"data"] = param;
                                 break;
                             case 0x10:
-                                optional_dict[@"segmentation"] = param;
+                                _optional_dict[@"segmentation"] = param;
                                 break;
                             case 0x11:
-                                optional_dict[@"hop-counter"] = param;
+                                _optional_dict[@"hop-counter"] = param;
                                 break;
                             case 0x12:
-                                optional_dict[@"importance"] = param;
+                                _optional_dict[@"importance"] = param;
                                 break;
                             case 0x13:
-                                optional_dict[@"long-data"] = param;
+                                _optional_dict[@"long-data"] = param;
                                 break;
                         }
                     }
                 }
             }
-            _decodedJson[@"sccp-optional"] = optional_dict;
+            _decodedJson[@"sccp-optional"] = _optional_dict;
         }
         
-        if(src == NULL)
+        if(_src == NULL)
         {
             @throw([NSException exceptionWithName:@"SCCP_MISSING_CALLING_PARTY_ADDRESS" reason:NULL userInfo:@{@"mtp3": [rawMtp3 hexString] }] );
         }
-        if(dst==NULL)
+        if(_dst==NULL)
         {
             @throw([NSException exceptionWithName:@"SCCP_MISSING_CALLED_PARTY_ADDRESS" reason:NULL userInfo:@{@"mtp3": [rawMtp3 hexString] }] );
         }
@@ -355,24 +360,25 @@
         NSDictionary *o = @{
                             @"type" : type,
                             @"action" : @"rx",
-                            @"opc"  : opc.stringValue,
-                            @"dpc"  : dpc.stringValue,
-                            @"mtp3" : mtp3Layer.layerName
+                            @"opc"  : _opc.stringValue,
+                            @"dpc"  : _dpc.stringValue,
+                            @"mtp3" : _mtp3Layer.layerName
                             };
-        [sccpLayer traceReceivedPdu:data options:o];
-        [sccpLayer traceReceivedPacket:_packet options:o];
+        [_sccpLayer traceReceivedPdu:_data options:o];
+        [_sccpLayer traceReceivedPacket:_packet options:o];
 
-        options[@"sccp-calling-address"] = src;
-        options[@"sccp-called-address"] = dst;
-        _packet.incomingCallingPartyAddress = src;
-        _packet.incomingCalledPartyAddress = dst;
+        _options[@"sccp-calling-address"] = _src;
+        _options[@"sccp-called-address"] = _dst;
+        _packet.incomingCallingPartyAddress = _src;
+        _packet.incomingCalledPartyAddress = _dst;
         if(!decodeOnly)
         {
             switch(m_type)
             {
                 case SCCP_UDT:
-                    options[@"sccp-udt"] = @(YES);
-                    if(dst.ssn.ssn==SCCP_SSN_SCCP_MG)
+                    _options[@"sccp-udt"] = @(YES);
+                    _packet.incomingOptions = _options;
+                    if(_dst.ssn.ssn==SCCP_SSN_SCCP_MG)
                     {
                         if([self process_udt_sccp_mg])
                         {
@@ -387,7 +393,7 @@
                     }
                     else
                     {
-                        [sccpLayer routePacket:_packet];
+                        [_sccpLayer routePacket:_packet];
                         if(_packet.outgoingToLocal)
                         {
                             _statsSection = UMSCCP_StatisticSection_RX;
@@ -401,8 +407,9 @@
                     }
                     break;
                 case SCCP_UDTS:
-                    options[@"sccp-udts"] = @(YES);
-                    [sccpLayer routePacket:_packet];
+                    _options[@"sccp-udts"] = @(YES);
+                    _packet.incomingOptions = _options;
+                    [_sccpLayer routePacket:_packet];
                     if(_packet.outgoingToLocal)
 
                     {
@@ -416,8 +423,9 @@
                     }
                     break;
                 case SCCP_XUDT:
-                    options[@"sccp-xudt"] = @(YES);
-                    [sccpLayer routePacket:_packet];
+                    _options[@"sccp-xudt"] = @(YES);
+                    _packet.incomingOptions = _options;
+                    [_sccpLayer routePacket:_packet];
                     if(_packet.outgoingToLocal)
                     {
                         _statsSection = UMSCCP_StatisticSection_RX;
@@ -430,8 +438,9 @@
                     }
                     break;
                 case SCCP_XUDTS:
-                    options[@"sccp-xudts"] = @(YES);
-                    [sccpLayer routePacket:_packet];
+                    _options[@"sccp-xudts"] = @(YES);
+                    _packet.incomingOptions = _options;
+                    [_sccpLayer routePacket:_packet];
                     if(_packet.outgoingToLocal)
                     {
                         _statsSection = UMSCCP_StatisticSection_RX;
@@ -452,9 +461,9 @@
     }
     @catch(NSException *e)
     {
-        if(mtp3Layer.problematicPacketDumper)
+        if(_mtp3Layer.problematicPacketDumper)
         {
-            [mtp3Layer.problematicPacketDumper logRawPacket:rawMtp3];
+            [_mtp3Layer.problematicPacketDumper logRawPacket:rawMtp3];
         }
 
         [self.logFeed majorErrorText:[NSString stringWithFormat:@"Error: %@",e]];
@@ -463,15 +472,16 @@
             _decodedJson[@"decode-error"] = e.description;
         }
     }
+
     _endOfProcessing = [NSDate date];
-    [sccpLayer addProcessingStatistic:_statsSection
+    [_sccpLayer addProcessingStatistic:_statsSection
                           waitingDelay:[_startOfProcessing timeIntervalSinceDate:_created]
                        processingDelay:[_endOfProcessing timeIntervalSinceDate:_startOfProcessing]];
-    [sccpLayer addProcessingStatistic:_statsSection2
+    [_sccpLayer addProcessingStatistic:_statsSection2
                          waitingDelay:[_startOfProcessing timeIntervalSinceDate:_created]
                       processingDelay:[_endOfProcessing timeIntervalSinceDate:_startOfProcessing]];
-    [sccpLayer increaseThroughputCounter:_statsSection];
-    [sccpLayer increaseThroughputCounter:_statsSection2];
+    [_sccpLayer increaseThroughputCounter:_statsSection];
+    [_sccpLayer increaseThroughputCounter:_statsSection2];
 
 }
 
@@ -483,8 +493,8 @@
     int ss_multiplicity_indicator = 0;
     int sccp_congestion_level = 0;
     
-    const uint8_t *dat = sccp_pdu.bytes;
-    NSUInteger len = sccp_pdu.length;
+    const uint8_t *dat = _sccp_pdu.bytes;
+    NSUInteger len = _sccp_pdu.length;
     
     /* Management Message */
     if(len<1)
@@ -543,7 +553,7 @@
             /* we return exactly same packet as SSA */
         {
             SccpSubSystemNumber *ssn = [[SccpSubSystemNumber alloc]initWithInt:affected_ssn];
-            id<UMSCCP_UserProtocol> user = [sccpLayer getUserForSubsystem:ssn];
+            id<UMSCCP_UserProtocol> user = [_sccpLayer getUserForSubsystem:ssn];
             unsigned char r[5];
             r[0] = user ? 0x01 : 0x00;
             r[1] = affected_ssn;
@@ -556,23 +566,23 @@
             SccpAddress *response_calling_sccp  = [[SccpAddress alloc]init];
             SccpAddress *response_called_sccp   = [[SccpAddress alloc]init];
             
-            response_calling_sccp.pc = dpc;
+            response_calling_sccp.pc = _dpc;
             [response_calling_sccp setSsnFromInt:0x01];
             [response_calling_sccp setAiFromInt:0x43]; /* route on SSN (0x40), SSn present (0x02), PC present (0x01); */
             
-            response_called_sccp.pc = opc;
+            response_called_sccp.pc = _opc;
             [response_called_sccp setSsnFromInt:0x01]; /* SCCP MGMT */
             [response_called_sccp setAiFromInt:0x43]; /* route on SSN (0x40), SSn present (0x02), PC present (0x01); */
 
-            /*UMMTP3_Error err = */[sccpLayer sendUDT:rpdu
+            /*UMMTP3_Error err = */[_sccpLayer sendUDT:rpdu
                                               calling:response_calling_sccp
                                                called:response_called_sccp
-                                                class:m_protocol_class
-                                             handling:m_handling
-                                                  opc:opc
-                                                  dpc:dpc
+                                                class:_m_protocol_class
+                                             handling:_m_handling
+                                                  opc:_opc
+                                                  dpc:_dpc
                                               options:@{}
-                                             provider:sccpLayer.mtp3];
+                                             provider:_sccpLayer.mtp3];
             break;
         }
         case 0x04: /* SOR subsystem-out-of-service-request */
