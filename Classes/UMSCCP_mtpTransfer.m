@@ -35,19 +35,17 @@
 		_packet.incomingOpc = xopc;
 		_packet.incomingDpc = xdpc;
         _data = xdata;
-        NSMutableDictionary *xoptions2;
 
         if(xoptions)
         {
-            xoptions2 = [xoptions mutableCopy];
+            _options = [xoptions mutableCopy];
         }
         else
         {
-            xoptions2 = [[NSMutableDictionary alloc]init];
+            _options = [[NSMutableDictionary alloc]init];
         }
-        xoptions2[@"mtp3-opc"] = xopc;
-        xoptions2[@"mtp3-dpc"] = xdpc;
-
+        _options[@"mtp3-opc"] = xopc;
+        _options[@"mtp3-dpc"] = xdpc;
 		_packet.incomingMtp3Layer = mtp3;
         _packet.incomingLinkset = xoptions[@"mtp3-incoming-linkset"];
 		_created = [NSDate date];
@@ -58,7 +56,6 @@
         _ni = xni;
         _sccpLayer = layer;
         _mtp3Layer = mtp3;
-
     }
     return self;
 }
@@ -362,7 +359,7 @@
                             @"action" : @"rx",
                             @"opc"  : _opc.stringValue,
                             @"dpc"  : _dpc.stringValue,
-                            @"mtp3" : _mtp3Layer.layerName
+                            @"mtp3" : (_mtp3Layer ? _mtp3Layer.layerName : @"")
                             };
         [_sccpLayer traceReceivedPdu:_data options:o];
         [_sccpLayer traceReceivedPacket:_packet options:o];
