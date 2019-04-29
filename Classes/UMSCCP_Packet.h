@@ -65,6 +65,16 @@
     BOOL                    _outgoingToLocal;
     SCCP_ReturnCause        _outgoingReturnCause;
 
+    /* this can be used by filters: */
+    UMASN1Object            *_incomingTcapAsn1;
+    int                     _incomingTcapType;
+    UMASN1Object            *_incomingGsmMapAsn1;
+    int                     _incomingGsmMapOperation;
+    int                     _incomingCategory;
+    NSString                *_incomingLocalTransactionId;
+    NSString                *_incomingRemoteTransactionId;
+    BOOL                    _canNotDecode;
+
 }
 
 
@@ -114,6 +124,16 @@
 @property(readwrite,assign,atomic)  BOOL                    outgoingFromLocal;
 @property(readwrite,assign,atomic)  BOOL                    outgoingToLocal;
 @property(readwrite,assign,atomic)  SCCP_ReturnCause        outgoingReturnCause;
+
+
+@property(readwrite,strong,atomic)  UMASN1Object            *incomingTcapAsn1; /* this can be set by filters */
+@property(readwrite,strong,atomic)  UMASN1Object            *incomingGsmMapAsn1;/* this can be set by filters */
+@property(readwrite,assign,atomic)  int                     incomingTcapType;
+@property(readwrite,assign,atomic)  int                     incomingGsmMapOperation;
+@property(readwrite,assign,atomic)  int                     incomingCategory;
+@property(readwrite,strong,atomic)  NSString                *incomingLocalTransactionId;
+@property(readwrite,strong,atomic)  NSString                *incomingRemoteTransactionId;
+@property(readwrite,assign,atomic) BOOL                     canNotDecode;
 
 - (NSString *) incomingPacketType;
 - (NSString *) outgoingPacketType;

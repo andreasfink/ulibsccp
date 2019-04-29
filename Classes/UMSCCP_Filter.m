@@ -9,9 +9,45 @@
 #import "UMSCCP_Filter.h"
 
 @implementation UMSCCP_Filter
-{
 
+
+
+- (UMSCCP_Filter *)initWithConfigFile:(NSString *)configFileName
+{
+    self = [super init];
+    if(self)
+    {
+        _filterConfigFile = configFileName;
+        [self processConfigFile];
+    }
+    return self;
 }
+
+- (void)activate
+{
+    _isActive = YES;
+}
+
+- (void)deactivate
+{
+    _isActive = NO;
+}
+
+- (void)processConfigFile
+{
+}
+
+
+- (NSString *)filterName
+{
+    return @"undefined";
+}
+
+- (NSString *)filterDescription
+{
+    return @"undefined";
+}
+
 
 - (UMSCCP_FilterResult) filterInbound:(UMSCCP_Packet *)packet;
 {
@@ -33,3 +69,33 @@
 }
 
 @end
+
+
+int         plugin_init(void)
+{
+    return 0;
+}
+
+int         plugin_exit(void)
+{
+    return 0;
+}
+
+NSString *  plugin_name(void)
+{
+    return @"sccp-filter";
+}
+
+UMPlugin *  plugin_create(void)
+{
+    UMPlugin *plugin = [[UMSCCP_Filter alloc]init];
+    return plugin;
+}
+
+NSDictionary *plugin_info(void)
+{
+    return @{ @"name" : @"sccp-filter" };
+}
+
+
+
