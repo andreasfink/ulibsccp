@@ -8,6 +8,15 @@
 
 #import "UMSCCP_Filter.h"
 
+
+int         plugin_init(void);
+int         plugin_exit(void);
+NSString *  plugin_name(void);
+UMPlugin *  plugin_create(void);
+NSDictionary *plugin_info(void);
+
+
+
 @implementation UMSCCP_Filter
 
 
