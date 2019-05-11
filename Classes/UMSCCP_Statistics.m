@@ -15,7 +15,7 @@
     self = [super init];
     if(self)
     {
-        _lock = [[UMMutex alloc]init];
+        _lock = [[UMMutex alloc]initWithName:@"UMSCCP_Statistics"];
 
         for(NSUInteger i=0;i< UMSCCP_STATISTICS_TIMESPAN_5SEC_COUNT;i++)
         {
