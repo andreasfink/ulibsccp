@@ -12,6 +12,10 @@
 #import "UMSCCP_Defs.h"
 #import "UMSCCP_UserProtocol.h"
 
+@class UMTCAP_itu_asn1_begin;
+@class UMTCAP_itu_asn1_continue;
+@class UMTCAP_itu_asn1_end;
+@class UMTCAP_itu_asn1_abort;
 
 @interface UMSCCP_Packet : UMObject
 {
@@ -67,6 +71,12 @@
 
     /* this can be used by filters: */
     UMASN1Object            *_incomingTcapAsn1;
+
+	UMTCAP_itu_asn1_begin		*_incomingTcapBegin;
+	UMTCAP_itu_asn1_continue	*_incomingTcapContinue;
+	UMTCAP_itu_asn1_end			*_incomingTcapEnd;
+	UMTCAP_itu_asn1_abort		*_incomingTcapAbort;
+
     int                     _incomingTcapType;
     UMASN1Object            *_incomingGsmMapAsn1;
     int                     _incomingGsmMapOperation;
@@ -126,7 +136,11 @@
 @property(readwrite,assign,atomic)  SCCP_ReturnCause        outgoingReturnCause;
 
 
-@property(readwrite,strong,atomic)  UMASN1Object            *incomingTcapAsn1; /* this can be set by filters */
+@property(readwrite,strong,atomic)  UMASN1Object           		*incomingTcapAsn1; /* this can be set by filters */
+@property(readwrite,strong,atomic)  UMTCAP_itu_asn1_begin		*incomingTcapBegin;
+@property(readwrite,strong,atomic)  UMTCAP_itu_asn1_continue	*incomingTcapContinue;
+@property(readwrite,strong,atomic)  UMTCAP_itu_asn1_end			*incomingTcapEnd;
+@property(readwrite,strong,atomic)  UMTCAP_itu_asn1_abort		*incomingTcapAbort;
 @property(readwrite,strong,atomic)  UMASN1Object            *incomingGsmMapAsn1;/* this can be set by filters */
 @property(readwrite,assign,atomic)  int                     incomingTcapType;
 @property(readwrite,assign,atomic)  int                     incomingGsmMapOperation;

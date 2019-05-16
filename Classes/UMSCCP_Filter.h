@@ -22,6 +22,7 @@
 #define    UMSCCP_FILTER_RESULT_ADD_TO_TRACEFILE_CAN_NOT_DECODE   0x100    /* set if the filter has problems decoding   */
 
 typedef int UMSCCP_FilterResult; /* bitmask */
+@class UMSCCP_Packet;
 
 @interface UMSCCP_Filter : UMPlugin
 {

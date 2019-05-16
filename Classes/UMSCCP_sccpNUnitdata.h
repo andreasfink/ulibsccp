@@ -14,6 +14,8 @@
 #import "UMSCCP_UserProtocol.h"
 #import "UMLayerSCCP.h"
 
+#import "UMSCCP_StatisticSection.h"
+
 @interface UMSCCP_sccpNUnitdata : UMLayerTask
 {
     id<UMSCCP_UserProtocol> _sccpUser;
@@ -39,8 +41,9 @@
 
     UMSynchronizedDictionary    *_processingStats;
 
-    UMSCCP_StatisticSection _statisticsSection;
-    UMSCCP_StatisticSection _statisticsSection2;
+	UMSCCP_StatisticSection	_statisticsSection;
+	UMSCCP_StatisticSection	_statisticsSection2;
+
 
 }
 

@@ -13,6 +13,7 @@
 #import <ulibm2pa/ulibm2pa.h>
 #import <ulibmtp3/ulibmtp3.h>
 #import <ulibgt/ulibgt.h>
+
 #import "UMSCCP_UserProtocol.h"
 #import "UMSCCPConnection.h"
 #import "UMSCCP_Defs.h"
@@ -30,6 +31,8 @@ typedef enum SccpGtFileSection
     SccpGtFileSection_application_group,
     SccpGtFileSection_address_conversion,
 } SccpGtFileSection;
+
+@class UMSCCP_Filter;
 
 @interface UMLayerSCCP : UMLayer<UMLayerMTP3UserProtocol>
 {

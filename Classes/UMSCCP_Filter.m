@@ -19,8 +19,6 @@ NSDictionary *plugin_info(void);
 
 @implementation UMSCCP_Filter
 
-
-
 - (UMSCCP_Filter *)initWithConfigFile:(NSString *)configFileName
 {
     self = [super init];
