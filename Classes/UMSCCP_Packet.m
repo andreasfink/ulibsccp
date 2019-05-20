@@ -16,6 +16,7 @@
 	if(self)
 	{
 		_created = [NSDate date];
+        _tags = [[UMSynchronizedDictionary alloc]init];
 	}
 	return self;
 }
@@ -87,5 +88,28 @@
 }
 
 
+- (void)addTag:(NSString *)tag
+{
+    _tags[tag]=tag;
+}
+
+- (void)clearTag:(NSString *)tag
+{
+    [_tags removeObjectForKey:tag];
+}
+
+- (BOOL) hasTag:(NSString *)tag
+{
+    if(_tags[tag])
+    {
+        return YES;
+    }
+    return NO;
+}
+
+- (void)clearAllTags
+{
+    _tags = [[UMSynchronizedDictionary alloc] init];
+}
 
 @end
