@@ -11,7 +11,7 @@
 		A604D14E19B999BD0090FC94 /* ulibsccp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A604D13119B999BC0090FC94 /* ulibsccp.framework */; };
 		A604D15419B999BD0090FC94 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A604D15219B999BD0090FC94 /* InfoPlist.strings */; };
 		A604D15619B999BD0090FC94 /* ulibsccpTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A604D15519B999BD0090FC94 /* ulibsccpTests.m */; };
-		A6092FCF228D763A0025D782 /* UMSCCP_Filter.h in Headers */ = {isa = PBXBuildFile; fileRef = A658E1FF21E882E600825E4A /* UMSCCP_Filter.h */; };
+		A6092FCF228D763A0025D782 /* UMSCCP_Filter.h in Headers */ = {isa = PBXBuildFile; fileRef = A658E1FF21E882E600825E4A /* UMSCCP_Filter.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A61571EE1CD4891200211137 /* UMSCCP_Segment.h in Headers */ = {isa = PBXBuildFile; fileRef = A61571EC1CD4891200211137 /* UMSCCP_Segment.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A61571EF1CD4891200211137 /* UMSCCP_Segment.m in Sources */ = {isa = PBXBuildFile; fileRef = A61571ED1CD4891200211137 /* UMSCCP_Segment.m */; };
 		A61571F61CD4AADF00211137 /* UMSCCP_ReceivedSegments.h in Headers */ = {isa = PBXBuildFile; fileRef = A61571F41CD4AADF00211137 /* UMSCCP_ReceivedSegments.h */; };
