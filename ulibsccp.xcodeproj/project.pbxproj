@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A604D14A19B999BD0090FC94 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A604D14919B999BD0090FC94 /* XCTest.framework */; };
 		A604D14E19B999BD0090FC94 /* ulibsccp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A604D13119B999BC0090FC94 /* ulibsccp.framework */; };
 		A604D15419B999BD0090FC94 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A604D15219B999BD0090FC94 /* InfoPlist.strings */; };
 		A604D15619B999BD0090FC94 /* ulibsccpTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A604D15519B999BD0090FC94 /* ulibsccpTests.m */; };
@@ -16,15 +15,9 @@
 		A61571EF1CD4891200211137 /* UMSCCP_Segment.m in Sources */ = {isa = PBXBuildFile; fileRef = A61571ED1CD4891200211137 /* UMSCCP_Segment.m */; };
 		A61571F61CD4AADF00211137 /* UMSCCP_ReceivedSegments.h in Headers */ = {isa = PBXBuildFile; fileRef = A61571F41CD4AADF00211137 /* UMSCCP_ReceivedSegments.h */; };
 		A61571F71CD4AADF00211137 /* UMSCCP_ReceivedSegments.m in Sources */ = {isa = PBXBuildFile; fileRef = A61571F51CD4AADF00211137 /* UMSCCP_ReceivedSegments.m */; };
-		A615D9071B4D587900854472 /* ulibgt.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A615D9061B4D587900854472 /* ulibgt.framework */; };
-		A615D9151B4D5FB000854472 /* sctp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A615D9141B4D5FB000854472 /* sctp.framework */; };
-		A645FFD11DA990EF0060380D /* ulibasn1.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A645FFD01DA990EF0060380D /* ulibasn1.framework */; };
-		A64DC0B11DA1FDA800EE4016 /* ulib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D8E1A2943B9006C66A2 /* ulib.framework */; };
-		A64DC0B21DA1FDAE00EE4016 /* ulibgt.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A615D9061B4D587900854472 /* ulibgt.framework */; };
 		A658E20221E882E600825E4A /* UMSCCP_Filter.m in Sources */ = {isa = PBXBuildFile; fileRef = A658E20021E882E600825E4A /* UMSCCP_Filter.m */; };
 		A658E20521E8863700825E4A /* UMSCCP_Packet.h in Headers */ = {isa = PBXBuildFile; fileRef = A658E20321E8863700825E4A /* UMSCCP_Packet.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A658E20621E8863700825E4A /* UMSCCP_Packet.m in Sources */ = {isa = PBXBuildFile; fileRef = A658E20421E8863700825E4A /* UMSCCP_Packet.m */; };
-		A66DD09F1B4FC4300090FC94 /* sctp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A615D9141B4D5FB000854472 /* sctp.framework */; };
 		A6827E1A1E380FC900F3048B /* UMLayerSCCPApplicationContextProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = A6827E181E380FC900F3048B /* UMLayerSCCPApplicationContextProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A68494DA1CB320AB00211137 /* UMSCCP_mtpTransfer.h in Headers */ = {isa = PBXBuildFile; fileRef = A68494D81CB320AB00211137 /* UMSCCP_mtpTransfer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A68494DB1CB320AB00211137 /* UMSCCP_mtpTransfer.m in Sources */ = {isa = PBXBuildFile; fileRef = A68494D91CB320AB00211137 /* UMSCCP_mtpTransfer.m */; };
@@ -37,19 +30,15 @@
 		A6ADC5C71CADB25500211137 /* UMSCCP_sccpNUnitdata.h in Headers */ = {isa = PBXBuildFile; fileRef = A6ADC5C51CADB25500211137 /* UMSCCP_sccpNUnitdata.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A6ADC5C81CADB25500211137 /* UMSCCP_sccpNUnitdata.m in Sources */ = {isa = PBXBuildFile; fileRef = A6ADC5C61CADB25500211137 /* UMSCCP_sccpNUnitdata.m */; };
 		A6ADC5E51CAE8C7600211137 /* UMSCCP_Defs.h in Headers */ = {isa = PBXBuildFile; fileRef = A6ADC5E31CAE8C7600211137 /* UMSCCP_Defs.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		A6C78D8F1A2943B9006C66A2 /* ulib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D8E1A2943B9006C66A2 /* ulib.framework */; };
-		A6C78D921A2943D0006C66A2 /* ulibmtp3.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D911A2943D0006C66A2 /* ulibmtp3.framework */; };
-		A6C78D931A2943D0006C66A2 /* ulibmtp3.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D911A2943D0006C66A2 /* ulibmtp3.framework */; };
-		A6C78D981A2943E8006C66A2 /* ulibm2pa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D971A2943E8006C66A2 /* ulibm2pa.framework */; };
-		A6C78D991A2943E8006C66A2 /* ulibm2pa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D971A2943E8006C66A2 /* ulibm2pa.framework */; };
-		A6C78D9B1A2943F7006C66A2 /* ulibsctp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D9A1A2943F7006C66A2 /* ulibsctp.framework */; };
-		A6C78D9C1A2943F7006C66A2 /* ulibsctp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6C78D9A1A2943F7006C66A2 /* ulibsctp.framework */; };
+		A6CEB97422BABC4800B2BD9D /* ulibmtp3.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6CEB97222BABC4700B2BD9D /* ulibmtp3.framework */; };
+		A6CEB97522BABC4800B2BD9D /* ulibgt.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6CEB97322BABC4800B2BD9D /* ulibgt.framework */; };
 		A6CF1ABD2185A41C00F09659 /* UMSCCP_StatisticData.h in Headers */ = {isa = PBXBuildFile; fileRef = A6CF1ABB2185A41C00F09659 /* UMSCCP_StatisticData.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A6CF1ABE2185A41C00F09659 /* UMSCCP_StatisticData.m in Sources */ = {isa = PBXBuildFile; fileRef = A6CF1ABC2185A41C00F09659 /* UMSCCP_StatisticData.m */; };
 		A6CF1AC12185AAA600F09659 /* UMSCCP_Statistics.h in Headers */ = {isa = PBXBuildFile; fileRef = A6CF1ABF2185AAA600F09659 /* UMSCCP_Statistics.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A6CF1AC22185AAA600F09659 /* UMSCCP_Statistics.m in Sources */ = {isa = PBXBuildFile; fileRef = A6CF1AC02185AAA600F09659 /* UMSCCP_Statistics.m */; };
 		A6CF1AC92185B96D00F09659 /* UMSCCP_StatisticSection.h in Headers */ = {isa = PBXBuildFile; fileRef = A6CF1AC72185B96D00F09659 /* UMSCCP_StatisticSection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A6DDA3F01CAD269000754B9E /* UMSCCP_UserProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = A6DDA3EE1CAD269000754B9E /* UMSCCP_UserProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A6E3D78F22BABDEA00D5B1B6 /* ulib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6CEB97022BABC1500B2BD9D /* ulib.framework */; };
 		A6ED5C6D1B435A8A00854472 /* UMLayerSCCP.h in Headers */ = {isa = PBXBuildFile; fileRef = A6ED5C6B1B435A8A00854472 /* UMLayerSCCP.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A6ED5C6E1B435A8A00854472 /* UMLayerSCCP.m in Sources */ = {isa = PBXBuildFile; fileRef = A6ED5C6C1B435A8A00854472 /* UMLayerSCCP.m */; };
 		A6ED5C931B435F3600854472 /* ulibsccp.h in Headers */ = {isa = PBXBuildFile; fileRef = A604D14119B999BC0090FC94 /* ulibsccp.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -74,7 +63,6 @@
 		A604D14019B999BC0090FC94 /* ulibsccp-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ulibsccp-Prefix.pch"; sourceTree = "<group>"; };
 		A604D14119B999BC0090FC94 /* ulibsccp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ulibsccp.h; sourceTree = "<group>"; };
 		A604D14819B999BD0090FC94 /* ulibsccpTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ulibsccpTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		A604D14919B999BD0090FC94 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		A604D15119B999BD0090FC94 /* ulibsccpTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "ulibsccpTests-Info.plist"; sourceTree = "<group>"; };
 		A604D15319B999BD0090FC94 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		A604D15519B999BD0090FC94 /* ulibsccpTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ulibsccpTests.m; sourceTree = "<group>"; };
@@ -82,9 +70,6 @@
 		A61571ED1CD4891200211137 /* UMSCCP_Segment.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_Segment.m; sourceTree = "<group>"; };
 		A61571F41CD4AADF00211137 /* UMSCCP_ReceivedSegments.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_ReceivedSegments.h; sourceTree = "<group>"; };
 		A61571F51CD4AADF00211137 /* UMSCCP_ReceivedSegments.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_ReceivedSegments.m; sourceTree = "<group>"; };
-		A615D9061B4D587900854472 /* ulibgt.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibgt.framework; path = /Library/Frameworks/ulibgt.framework; sourceTree = "<absolute>"; };
-		A615D9141B4D5FB000854472 /* sctp.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = sctp.framework; path = /Library/Frameworks/sctp.framework; sourceTree = "<absolute>"; };
-		A645FFD01DA990EF0060380D /* ulibasn1.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibasn1.framework; path = /Library/Frameworks/ulibasn1.framework; sourceTree = "<absolute>"; };
 		A658E1FF21E882E600825E4A /* UMSCCP_Filter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_Filter.h; sourceTree = "<group>"; };
 		A658E20021E882E600825E4A /* UMSCCP_Filter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_Filter.m; sourceTree = "<group>"; };
 		A658E20321E8863700825E4A /* UMSCCP_Packet.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_Packet.h; sourceTree = "<group>"; };
@@ -107,10 +92,9 @@
 		A6C6052F207698DE002DEBDD /* q-711 SCCP Functional Description.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "q-711 SCCP Functional Description.pdf"; sourceTree = "<group>"; };
 		A6C60530207698DE002DEBDD /* q-713 SCCP Formats Codes.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "q-713 SCCP Formats Codes.pdf"; sourceTree = "<group>"; };
 		A6C60531207698DE002DEBDD /* q-716 SCCP Performance.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "q-716 SCCP Performance.pdf"; sourceTree = "<group>"; };
-		A6C78D8E1A2943B9006C66A2 /* ulib.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulib.framework; path = /Library/Frameworks/ulib.framework; sourceTree = "<absolute>"; };
-		A6C78D911A2943D0006C66A2 /* ulibmtp3.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibmtp3.framework; path = /Library/Frameworks/ulibmtp3.framework; sourceTree = "<absolute>"; };
-		A6C78D971A2943E8006C66A2 /* ulibm2pa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibm2pa.framework; path = /Library/Frameworks/ulibm2pa.framework; sourceTree = "<absolute>"; };
-		A6C78D9A1A2943F7006C66A2 /* ulibsctp.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibsctp.framework; path = /Library/Frameworks/ulibsctp.framework; sourceTree = "<absolute>"; };
+		A6CEB97022BABC1500B2BD9D /* ulib.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulib.framework; path = "/Library/Application Support/FinkTelecomServices/frameworks/ulib.framework"; sourceTree = "<absolute>"; };
+		A6CEB97222BABC4700B2BD9D /* ulibmtp3.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibmtp3.framework; path = "/Library/Application Support/FinkTelecomServices/frameworks/ulibmtp3.framework"; sourceTree = "<absolute>"; };
+		A6CEB97322BABC4800B2BD9D /* ulibgt.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibgt.framework; path = "/Library/Application Support/FinkTelecomServices/frameworks/ulibgt.framework"; sourceTree = "<absolute>"; };
 		A6CF1ABB2185A41C00F09659 /* UMSCCP_StatisticData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_StatisticData.h; sourceTree = "<group>"; };
 		A6CF1ABC2185A41C00F09659 /* UMSCCP_StatisticData.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_StatisticData.m; sourceTree = "<group>"; };
 		A6CF1ABF2185AAA600F09659 /* UMSCCP_Statistics.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_Statistics.h; sourceTree = "<group>"; };
@@ -133,13 +117,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A6C78D9B1A2943F7006C66A2 /* ulibsctp.framework in Frameworks */,
-				A615D9151B4D5FB000854472 /* sctp.framework in Frameworks */,
-				A6C78D921A2943D0006C66A2 /* ulibmtp3.framework in Frameworks */,
-				A615D9071B4D587900854472 /* ulibgt.framework in Frameworks */,
-				A645FFD11DA990EF0060380D /* ulibasn1.framework in Frameworks */,
-				A6C78D8F1A2943B9006C66A2 /* ulib.framework in Frameworks */,
-				A6C78D981A2943E8006C66A2 /* ulibm2pa.framework in Frameworks */,
+				A6CEB97422BABC4800B2BD9D /* ulibmtp3.framework in Frameworks */,
+				A6E3D78F22BABDEA00D5B1B6 /* ulib.framework in Frameworks */,
+				A6CEB97522BABC4800B2BD9D /* ulibgt.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -147,14 +127,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A6C78D931A2943D0006C66A2 /* ulibmtp3.framework in Frameworks */,
-				A66DD09F1B4FC4300090FC94 /* sctp.framework in Frameworks */,
 				A604D14E19B999BD0090FC94 /* ulibsccp.framework in Frameworks */,
-				A6C78D9C1A2943F7006C66A2 /* ulibsctp.framework in Frameworks */,
-				A604D14A19B999BD0090FC94 /* XCTest.framework in Frameworks */,
-				A64DC0B21DA1FDAE00EE4016 /* ulibgt.framework in Frameworks */,
-				A64DC0B11DA1FDA800EE4016 /* ulib.framework in Frameworks */,
-				A6C78D991A2943E8006C66A2 /* ulibm2pa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -190,14 +163,9 @@
 		A604D13319B999BC0090FC94 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				A6C78D8E1A2943B9006C66A2 /* ulib.framework */,
-				A645FFD01DA990EF0060380D /* ulibasn1.framework */,
-				A615D9141B4D5FB000854472 /* sctp.framework */,
-				A6C78D9A1A2943F7006C66A2 /* ulibsctp.framework */,
-				A6C78D971A2943E8006C66A2 /* ulibm2pa.framework */,
-				A6C78D911A2943D0006C66A2 /* ulibmtp3.framework */,
-				A615D9061B4D587900854472 /* ulibgt.framework */,
-				A604D14919B999BD0090FC94 /* XCTest.framework */,
+				A6CEB97022BABC1500B2BD9D /* ulib.framework */,
+				A6CEB97222BABC4700B2BD9D /* ulibmtp3.framework */,
+				A6CEB97322BABC4800B2BD9D /* ulibgt.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -496,6 +464,7 @@
 				DSTROOT = /;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = "\"/Library/Application Support/FinkTelecomServices/frameworks\"";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
@@ -512,7 +481,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				INSTALL_PATH = /Library/Frameworks;
+				INSTALL_PATH = "/Library/Application Support/FinkTelecomServices/frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
@@ -555,6 +524,7 @@
 				DSTROOT = /;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				FRAMEWORK_SEARCH_PATHS = "\"/Library/Application Support/FinkTelecomServices/frameworks\"";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -564,7 +534,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				INSTALL_PATH = /Library/Frameworks;
+				INSTALL_PATH = "/Library/Application Support/FinkTelecomServices/frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				SDKROOT = macosx;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -581,6 +551,11 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+					"$(LOCAL_LIBRARY_DIR)/Application\\ Support/FinkTelecomServices/frameworks",
+					"$(LOCAL_LIBRARY_DIR)/Application\\ Support/FinkTelecomServices/frameworks",
+					"$(LOCAL_LIBRARY_DIR)/Application\\ Support/FinkTelecomServices/frameworks",
+					"$(LOCAL_LIBRARY_DIR)/Application\\ Support/FinkTelecomServices/frameworks",
+					"$(LOCAL_LIBRARY_DIR)/Application\\ Support/FinkTelecomServices/frameworks",
 				);
 				FRAMEWORK_VERSION = A;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
@@ -602,6 +577,11 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+					"$(LOCAL_LIBRARY_DIR)/Application\\ Support/FinkTelecomServices/frameworks",
+					"$(LOCAL_LIBRARY_DIR)/Application\\ Support/FinkTelecomServices/frameworks",
+					"$(LOCAL_LIBRARY_DIR)/Application\\ Support/FinkTelecomServices/frameworks",
+					"$(LOCAL_LIBRARY_DIR)/Application\\ Support/FinkTelecomServices/frameworks",
+					"$(LOCAL_LIBRARY_DIR)/Application\\ Support/FinkTelecomServices/frameworks",
 				);
 				FRAMEWORK_VERSION = A;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
