@@ -31,59 +31,59 @@
     NSDate                    *_queuedForDelivery;
     SCCP_State                _state;
 
-    id<UMSCCP_UserProtocol>    _incomingLocalUser;
-    UMLayerMTP3                *_incomingMtp3Layer;
-    NSString                *_incomingLinkset;
-    NSDictionary             *_incomingOptions;
-    UMMTP3PointCode            *_incomingOpc;
-    UMMTP3PointCode         *_incomingDpc;
-    SCCP_ServiceClass        _incomingServiceClass;
-    SCCP_ServiceType        _incomingServiceType;
-    int                     _incomingHandling;
-    int                     _incomingMaxHopCount;
-    BOOL                    _incomingFromLocal;
-    BOOL                    _incomingToLocal;
-    SccpAddress             *_incomingCallingPartyAddress;
-    SccpAddress             *_incomingCalledPartyAddress;
-    NSData                  *_incomingMtp3Data;
-    NSData                  *_incomingSccpData;
-    NSData                  *_incomingOptionalData;
-    SCCP_ReturnCause        _incomingReturnCause;
+    id<UMSCCP_UserProtocol>     _incomingLocalUser;
+    UMLayerMTP3                 *_incomingMtp3Layer;
+    NSString                    *_incomingLinkset;
+    NSDictionary                *_incomingOptions;
+    UMMTP3PointCode             *_incomingOpc;
+    UMMTP3PointCode             *_incomingDpc;
+    SCCP_ServiceClass           _incomingServiceClass;
+    SCCP_ServiceType            _incomingServiceType;
+    int                         _incomingHandling;
+    int                         _incomingMaxHopCount;
+    BOOL                        _incomingFromLocal;
+    BOOL                        _incomingToLocal;
+    SccpAddress                 *_incomingCallingPartyAddress;
+    SccpAddress                 *_incomingCalledPartyAddress;
+    NSData                      *_incomingMtp3Data;
+    NSData                      *_incomingSccpData;
+    NSData                      *_incomingOptionalData;
+    SCCP_ReturnCause            _incomingReturnCause;
 
-    id<UMSCCP_UserProtocol>    _outgoingLocalUser;
-    UMLayerMTP3                *_outgoingMtp3Layer;
-    NSString                *_outgoingLinkset;
-    NSDictionary             *_outgoingOptions;
-    UMMTP3PointCode            *_outgoingOpc;
-    UMMTP3PointCode         *_outgoingDpc;
-    SCCP_ServiceClass       _outgoingServiceClass;
-    SCCP_ServiceType        _outgoingServiceType;
-    int                     _outgoingHandling;
-    SccpAddress             *_outgoingCallingPartyAddress;
-    SccpAddress             *_outgoingCalledPartyAddress;
-    NSData                  *_outgoingMtp3Data;
-    NSData                  *_outgoingSccpData;
-    NSData                  *_outgoingOptionalData;
-    int                     _outgoingMaxHopCount;
-    BOOL                    _outgoingFromLocal;
-    BOOL                    _outgoingToLocal;
-    SCCP_ReturnCause        _outgoingReturnCause;
+    id<UMSCCP_UserProtocol>     _outgoingLocalUser;
+    UMLayerMTP3                 *_outgoingMtp3Layer;
+    NSString                    *_outgoingLinkset;
+    NSDictionary                *_outgoingOptions;
+    UMMTP3PointCode             *_outgoingOpc;
+    UMMTP3PointCode             *_outgoingDpc;
+    SCCP_ServiceClass           _outgoingServiceClass;
+    SCCP_ServiceType            _outgoingServiceType;
+    int                         _outgoingHandling;
+    SccpAddress                 *_outgoingCallingPartyAddress;
+    SccpAddress                 *_outgoingCalledPartyAddress;
+    NSData                      *_outgoingMtp3Data;
+    NSData                      *_outgoingSccpData;
+    NSData                      *_outgoingOptionalData;
+    int                         _outgoingMaxHopCount;
+    BOOL                        _outgoingFromLocal;
+    BOOL                        _outgoingToLocal;
+    SCCP_ReturnCause            _outgoingReturnCause;
 
     /* this can be used by filters: */
-    UMASN1Object            *_incomingTcapAsn1;
+    UMASN1Object                *_incomingTcapAsn1;
 
 	UMTCAP_itu_asn1_begin		*_incomingTcapBegin;
 	UMTCAP_itu_asn1_continue	*_incomingTcapContinue;
 	UMTCAP_itu_asn1_end			*_incomingTcapEnd;
 	UMTCAP_itu_asn1_abort		*_incomingTcapAbort;
 
-    int                     _incomingTcapType;
-    UMASN1Object            *_incomingGsmMapAsn1;
-    int                     _incomingGsmMapOperation;
-    int                     _incomingCategory;
-    NSString                *_incomingLocalTransactionId;
-    NSString                *_incomingRemoteTransactionId;
-    BOOL                    _canNotDecode;
+    int                         _incomingTcapCommand; /* UMTCAP_Command */
+    UMASN1Object                *_incomingGsmMapAsn1;
+    int                         _incomingGsmMapOperation;
+    int                         _incomingCategory;
+    NSString                    *_incomingLocalTransactionId;
+    NSString                    *_incomingRemoteTransactionId;
+    BOOL                        _canNotDecode;
     UMSynchronizedDictionary    *_tags;
     NSString                    *_custom1;
     NSString                    *_custom2;
@@ -152,7 +152,7 @@
 @property(readwrite,strong,atomic)  UMTCAP_itu_asn1_end			*incomingTcapEnd;
 @property(readwrite,strong,atomic)  UMTCAP_itu_asn1_abort		*incomingTcapAbort;
 @property(readwrite,strong,atomic)  UMASN1Object            *incomingGsmMapAsn1;/* this can be set by filters */
-@property(readwrite,assign,atomic)  int                     incomingTcapType;
+@property(readwrite,assign,atomic)  int                     incomingTcapCommand; /* UMTCAP_Command */
 @property(readwrite,assign,atomic)  int                     incomingGsmMapOperation;
 @property(readwrite,assign,atomic)  int                     incomingCategory;
 @property(readwrite,strong,atomic)  NSString                *incomingLocalTransactionId;
