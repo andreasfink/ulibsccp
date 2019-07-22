@@ -78,6 +78,7 @@
 	UMTCAP_itu_asn1_abort		*_incomingTcapAbort;
 
     int                         _incomingTcapCommand; /* UMTCAP_Command */
+    NSString                    *_incomingApplicationContext;
     UMASN1Object                *_incomingGsmMapAsn1;
     int                         _incomingGsmMapOperation;
     int                         _incomingCategory;
@@ -153,6 +154,7 @@
 @property(readwrite,strong,atomic)  UMTCAP_itu_asn1_abort		*incomingTcapAbort;
 @property(readwrite,strong,atomic)  UMASN1Object            *incomingGsmMapAsn1;/* this can be set by filters */
 @property(readwrite,assign,atomic)  int                     incomingTcapCommand; /* UMTCAP_Command */
+@property(readwrite,strong,atomic)  NSString                *incomingApplicationContext;
 @property(readwrite,assign,atomic)  int                     incomingGsmMapOperation;
 @property(readwrite,assign,atomic)  int                     incomingCategory;
 @property(readwrite,strong,atomic)  NSString                *incomingLocalTransactionId;
