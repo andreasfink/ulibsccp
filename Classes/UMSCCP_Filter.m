@@ -40,6 +40,11 @@ NSDictionary *plugin_info(void);
     _isActive = NO;
 }
 
+-(BOOL)isActive
+{
+    return _isActive;
+}
+
 - (void)processConfigFile
 {
 }

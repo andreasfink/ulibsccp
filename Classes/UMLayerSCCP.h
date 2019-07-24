@@ -20,7 +20,7 @@
 #import "UMSCCP_Segment.h"
 #import "UMLayerSCCPApplicationContextProtocol.h"
 #import "UMSCCP_Statistics.h"
-#import "UMSCCP_Filter.h"
+#import "UMSCCP_FilterProtocol.h"
 #import "UMSCCP_StatisticSection.h"
 #import "UMSCCP_Packet.h"
 
@@ -32,7 +32,6 @@ typedef enum SccpGtFileSection
     SccpGtFileSection_address_conversion,
 } SccpGtFileSection;
 
-@class UMSCCP_Filter;
 
 @interface UMLayerSCCP : UMLayer<UMLayerMTP3UserProtocol>
 {
@@ -59,8 +58,8 @@ typedef enum SccpGtFileSection
     SccpTranslationTableNumber  *_ntt;
     UMSCCP_Statistics           *_processingStats[UMSCCP_StatisticSection_MAX];
     UMThroughputCounter         *_throughputCounters[UMSCCP_StatisticSection_MAX];
-	UMSCCP_Filter				*_inboundFilter;
-	UMSCCP_Filter				*_outboundFilter;
+	id<UMSCCP_FilterProtocol>   _inboundFilter;
+	id<UMSCCP_FilterProtocol>   _outboundFilter;
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;

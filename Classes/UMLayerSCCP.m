@@ -877,8 +877,10 @@
         [self.logFeed debugText:s];
     }
 
-    [_inboundFilter filterInbound:packet];
-
+    if(_inboundFilter.isActive)
+    {
+        [_inboundFilter filterInbound:packet];
+    }
     BOOL returnValue = NO;
     id<UMSCCP_UserProtocol> localUser =NULL;
     UMMTP3PointCode *pc = NULL;
