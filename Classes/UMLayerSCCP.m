@@ -877,7 +877,7 @@
         [self.logFeed debugText:s];
     }
 
-    if(_inboundFilter.isActive)
+    if(_inboundFilter.isFilterActive)
     {
         [_inboundFilter filterInbound:packet];
     }

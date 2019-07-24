@@ -39,9 +39,9 @@ typedef int UMSCCP_FilterResult; /* bitmask */
 
 - (NSString *)filterName;
 - (NSString *)filterDescription;
-- (void)activate;
-- (void)deactivate;
-- (BOOL)isActive;
+- (void)filterActivate;
+- (void)filterDeactivate;
+- (BOOL)isFilterActive;
 
 - (UMSCCP_FilterResult) filterInbound:(UMSCCP_Packet *)packet; /* from MTP3 link */
 - (UMSCCP_FilterResult) filterOutbound:(UMSCCP_Packet *)packet; /* to MTP3 link */

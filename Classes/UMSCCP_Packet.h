@@ -19,17 +19,17 @@
 
 @interface UMSCCP_Packet : UMObject
 {
-    UMLayerSCCP                *_sccp;
-    NSDate                    *_created;
-    NSDate                    *_afterFilter1;
-    NSDate                    *_reassembled;
-    NSDate                    *_afterFilter2;
-    NSDate                    *_routed;
-    NSDate                    *_afterFilter3;
-    NSDate                    *_segmented;
-    NSDate                    *_afterFilter4;
-    NSDate                    *_queuedForDelivery;
-    SCCP_State                _state;
+    UMLayerSCCP                 *_sccp;
+    NSDate                      *_created;
+    NSDate                      *_afterFilter1;
+    NSDate                      *_reassembled;
+    NSDate                      *_afterFilter2;
+    NSDate                      *_routed;
+    NSDate                      *_afterFilter3;
+    NSDate                      *_segmented;
+    NSDate                      *_afterFilter4;
+    NSDate                      *_queuedForDelivery;
+    SCCP_State                  _state;
 
     id<UMSCCP_UserProtocol>     _incomingLocalUser;
     UMLayerMTP3                 *_incomingMtp3Layer;
@@ -86,16 +86,8 @@
     NSString                    *_incomingRemoteTransactionId;
     BOOL                        _canNotDecode;
     UMSynchronizedDictionary    *_tags;
-    NSString                    *_custom1;
-    NSString                    *_custom2;
-    NSString                    *_custom3;
-    NSString                    *_custom4;
-    NSString                    *_custom5;
-    NSString                    *_custom6;
-    NSString                    *_custom7;
-    NSString                    *_custom8;
-    NSString                    *_custom9;
-    NSString                    *_custom10;
+    UMSynchronizedDictionary    *_vars;    
+    SccpDestinationGroup        *_rerouteDestinationGroup;
 }
 
 
@@ -162,16 +154,8 @@
 @property(readwrite,assign,atomic) BOOL                     canNotDecode;
 
 @property(readwrite,strong,atomic) UMSynchronizedDictionary    *tags;
-@property(readwrite,strong,atomic) NSString                    *custom1;
-@property(readwrite,strong,atomic) NSString                    *custom2;
-@property(readwrite,strong,atomic) NSString                    *custom3;
-@property(readwrite,strong,atomic) NSString                    *custom4;
-@property(readwrite,strong,atomic) NSString                    *custom5;
-@property(readwrite,strong,atomic) NSString                    *custom6;
-@property(readwrite,strong,atomic) NSString                    *custom7;
-@property(readwrite,strong,atomic) NSString                    *custom8;
-@property(readwrite,strong,atomic) NSString                    *custom9;
-@property(readwrite,strong,atomic) NSString                    *custom10;
+@property(readwrite,strong,atomic) UMSynchronizedDictionary    *vars;
+@property(readwrite,strong,atomic) SccpDestinationGroup        *rerouteDestinationGroup;
 
 
 - (NSString *) incomingPacketType;
