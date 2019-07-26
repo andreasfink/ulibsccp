@@ -301,7 +301,7 @@ typedef enum SccpGtFileSection
                                               fromLocal:(BOOL)fromLocal;
 
 
-- (BOOL)routePacket:(UMSCCP_Packet *)packet;
+- (BOOL)routePacket:(UMSCCP_Packet *)packet; /* returns YES if sucessfully forwarded, NO if it wasn able to route it */
 
 
 - (NSUInteger)maxPayloadSizeForServiceType:(SCCP_ServiceType) serviceType

@@ -23,7 +23,7 @@
 }
 
 
--(NSString *)incomingPacketType
+- (NSString *)incomingPacketType
 {
     switch(_incomingServiceType)
     {
@@ -44,7 +44,7 @@
     }
 }
 
--(NSString *)outgoingPacketType
+- (NSString *)outgoingPacketType
 {
     switch(_outgoingServiceType)
     {

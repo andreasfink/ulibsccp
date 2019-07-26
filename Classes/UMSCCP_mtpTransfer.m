@@ -488,6 +488,16 @@
                 return;
             }
 
+            if((m_type != SCCP_UDT) || (_dst.ssn.ssn!=SCCP_SSN_SCCP_MG))
+            {
+                if([_sccpLayer routePacket:_packet] == NO)
+                {
+                    if(_sccpLayer.unrouteablePacketsTraceDestination)
+                    {
+                        [_sccpLayer.unrouteablePacketsTraceDestination logPacket:_packet];
+                    }
+                }
+            }
             switch(m_type)
             {
                 case SCCP_UDT:
@@ -506,7 +516,6 @@
                     }
                     else
                     {
-                        [_sccpLayer routePacket:_packet];
                         if(_packet.outgoingToLocal)
                         {
                             _statsSection = UMSCCP_StatisticSection_RX;
@@ -520,7 +529,6 @@
                     }
                     break;
                 case SCCP_UDTS:
-                    [_sccpLayer routePacket:_packet];
                     if(_packet.outgoingToLocal)
 
                     {
@@ -534,7 +542,6 @@
                     }
                     break;
                 case SCCP_XUDT:
-                    [_sccpLayer routePacket:_packet];
                     if(_packet.outgoingToLocal)
                     {
                         _statsSection = UMSCCP_StatisticSection_RX;
@@ -547,7 +554,6 @@
                     }
                     break;
                 case SCCP_XUDTS:
-                    [_sccpLayer routePacket:_packet];
                     if(_packet.outgoingToLocal)
                     {
                         _statsSection = UMSCCP_StatisticSection_RX;
