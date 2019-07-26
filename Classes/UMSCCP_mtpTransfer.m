@@ -63,7 +63,6 @@
 - (void)main
 {
     _startOfProcessing = [NSDate date];
-
     /* we build a pseudo MTP3 raw packet for debugging /tracing and logging */
     UMMTP3Label *label = [[UMMTP3Label alloc]init];
     label.opc = _opc;
