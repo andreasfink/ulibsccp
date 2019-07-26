@@ -97,7 +97,6 @@
         const uint8_t *d = _data.bytes;
         int i = 0;
         int m_type = d[i++];
-        int m_handling;
         int param_called_party_address;
         int param_calling_party_address;
         int param_data;
@@ -120,7 +119,7 @@
 
                 _packet.incomingServiceClass = _m_protocol_class;
                 _packet.outgoingServiceClass = _m_protocol_class;
-                if(m_handling & 0x08)
+                if(_m_handling & 0x08)
                 {
                     _packet.incomingHandling = SCCP_HANDLING_RETURN_ON_ERROR;
                     _packet.outgoingHandling = SCCP_HANDLING_RETURN_ON_ERROR;
@@ -158,13 +157,13 @@
                 _packet.incomingServiceClass = _m_protocol_class;
                 _packet.outgoingServiceClass = _m_protocol_class;
                 _decodedJson[@"sccp-protocol-class"]=@(_m_protocol_class);
-                m_handling = (d[i++]>>4) & 0x0F;
-                if(m_handling & 0x08)
+                _m_handling = (d[i++]>>4) & 0x0F;
+                if(_m_handling & 0x08)
                 {
                     _packet.incomingHandling = SCCP_HANDLING_RETURN_ON_ERROR;
                     _packet.outgoingHandling = SCCP_HANDLING_RETURN_ON_ERROR;
                 }
-                _decodedJson[@"sccp-protocol-handling"]=@(m_handling);
+                _decodedJson[@"sccp-protocol-handling"]=@(_m_handling);
                 param_hop_counter=d[i];
                 _packet.incomingMaxHopCount = param_hop_counter;
                 i++;
