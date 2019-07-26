@@ -21,3 +21,5 @@
 #import "UMSCCP_mtpTransfer.h"
 #import "UMSCCP_FilterProtocol.h"
 #import "UMLayerSCCPApplicationContextProtocol.h"
+#import "UMSCCP_TraceProtocol.h"
+

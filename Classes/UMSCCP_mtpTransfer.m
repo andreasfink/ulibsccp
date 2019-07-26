@@ -368,11 +368,129 @@
         _packet.incomingCalledPartyAddress = _dst;
         if(!decodeOnly)
         {
+            [_packet copyIncomingToOutgoing];
+            if(_sccpLayer.logLevel <=UMLOG_DEBUG)
+            {
+                NSMutableString *s = [[NSMutableString alloc]init];
+                if(_packet.incomingFromLocal)
+                {
+                    [s appendFormat:@"MsgType %@   from local\n",_packet.incomingPacketType];
+                }
+                else
+                {
+                    [s appendFormat:@"MsgType %@   LS: %@\n",_packet.incomingPacketType,_packet.incomingLinkset];
+                }
+                [s appendFormat:@"OPC: %@\tCgPA: %@src\n",_packet.incomingOpc,_packet.incomingCallingPartyAddress];
+                [s appendFormat:@"DPC: %@\tCdPA: %@src\n",_packet.incomingDpc,_packet.incomingCalledPartyAddress];
+                [_sccpLayer.logFeed debugText:s];
+            }
+
             switch(m_type)
             {
                 case SCCP_UDT:
                     _options[@"sccp-udt"] = @(YES);
-                    _packet.incomingOptions = _options;
+                    break;
+                case SCCP_UDTS:
+                    _options[@"sccp-udts"] = @(YES);
+                    break;
+                case SCCP_XUDT:
+                    _options[@"sccp-xudt"] = @(YES);
+                    break;
+                case SCCP_XUDTS:
+                    _options[@"sccp-xudts"] = @(YES);
+                    break;
+            }
+
+            _packet.incomingOptions = _options;
+
+            UMSCCP_FilterResult r =  UMSCCP_FILTER_RESULT_UNMODIFIED;
+            if(_sccpLayer.inboundFilter.isFilterActive)
+            {
+                r =  [_sccpLayer.inboundFilter filterInbound:_packet];
+            }
+            if(r ==UMSCCP_FILTER_RESULT_DROP)
+            {
+                [_sccpLayer.logFeed debugText:@"Filter returns DROP"];
+                return;
+            }
+            if(r & UMSCCP_FILTER_RESULT_STATUS)
+            {
+                SCCP_ServiceType st = SCCP_UDTS;
+                switch(_packet.outgoingServiceType)
+                {
+                    case SCCP_UDT:
+                    case SCCP_UDTS:
+                        st = SCCP_UDTS;
+                        break;
+                    case SCCP_XUDT:
+                    case SCCP_XUDTS:
+                        st = SCCP_XUDTS;
+                        break;
+                    case SCCP_LUDT:
+                    case SCCP_LUDTS:
+                        st = SCCP_LUDTS;
+                        break;
+                    default:
+                        switch(_packet.incomingServiceType)
+                    {
+                        case SCCP_UDT:
+                        case SCCP_UDTS:
+                            st = SCCP_UDTS;
+                            break;
+                        case SCCP_XUDT:
+                        case SCCP_XUDTS:
+                            st = SCCP_XUDTS;
+                            break;
+                        case SCCP_LUDT:
+                        case SCCP_LUDTS:
+                            st = SCCP_LUDTS;
+                            break;
+                    }
+                }
+                switch(st)
+                {
+                    case SCCP_UDTS:
+                        [_sccpLayer generateUDTS:_packet.incomingSccpData
+                                         calling:_packet.incomingCalledPartyAddress
+                                          called:_packet.incomingCallingPartyAddress
+                                           class:_packet.incomingServiceClass
+                                     returnCause:_packet.outgoingReturnCause
+                                             opc:_sccpLayer.mtp3.opc /* errors are always sent from this instance */
+                                             dpc:_packet.incomingOpc
+                                         options:@{}
+                                        provider:_sccpLayer.mtp3];
+                        break;
+                    case SCCP_XUDTS:
+                        [_sccpLayer generateXUDTS:_packet.incomingSccpData
+                                         calling:_packet.incomingCalledPartyAddress
+                                          called:_packet.incomingCallingPartyAddress
+                                           class:_packet.incomingServiceClass
+                                     returnCause:_packet.outgoingReturnCause
+                                             opc:_sccpLayer.mtp3.opc /* errors are always sent from this instance */
+                                             dpc:_packet.incomingOpc
+                                         options:@{}
+                                        provider:_sccpLayer.mtp3];
+                        break;
+                    case SCCP_LUDTS:
+                        [_sccpLayer generateLUDTS:_packet.incomingSccpData
+                                         calling:_packet.incomingCalledPartyAddress
+                                          called:_packet.incomingCallingPartyAddress
+                                           class:_packet.incomingServiceClass
+                                     returnCause:_packet.outgoingReturnCause
+                                             opc:_sccpLayer.mtp3.opc /* errors are always sent from this instance */
+                                             dpc:_packet.incomingOpc
+                                         options:@{}
+                                        provider:_sccpLayer.mtp3];
+                        break;
+                    default:
+                        break;
+                }
+                return;
+            }
+
+            switch(m_type)
+            {
+                case SCCP_UDT:
                     if(_dst.ssn.ssn==SCCP_SSN_SCCP_MG)
                     {
                         if([self process_udt_sccp_mg])
@@ -402,8 +520,6 @@
                     }
                     break;
                 case SCCP_UDTS:
-                    _options[@"sccp-udts"] = @(YES);
-                    _packet.incomingOptions = _options;
                     [_sccpLayer routePacket:_packet];
                     if(_packet.outgoingToLocal)
 
@@ -418,8 +534,6 @@
                     }
                     break;
                 case SCCP_XUDT:
-                    _options[@"sccp-xudt"] = @(YES);
-                    _packet.incomingOptions = _options;
                     [_sccpLayer routePacket:_packet];
                     if(_packet.outgoingToLocal)
                     {
@@ -433,8 +547,6 @@
                     }
                     break;
                 case SCCP_XUDTS:
-                    _options[@"sccp-xudts"] = @(YES);
-                    _packet.incomingOptions = _options;
                     [_sccpLayer routePacket:_packet];
                     if(_packet.outgoingToLocal)
                     {
@@ -460,7 +572,10 @@
         {
             [_mtp3Layer.problematicPacketDumper logRawPacket:rawMtp3];
         }
-
+        if(_sccpLayer.problematicTraceDestination)
+        {
+            [_sccpLayer.problematicTraceDestination logPacket:_packet];
+        }
         [self.logFeed majorErrorText:[NSString stringWithFormat:@"Error: %@",e]];
         if(decodeOnly)
         {
@@ -477,7 +592,6 @@
                       processingDelay:[_endOfProcessing timeIntervalSinceDate:_startOfProcessing]];
     [_sccpLayer increaseThroughputCounter:_statsSection];
     [_sccpLayer increaseThroughputCounter:_statsSection2];
-
 }
 
 - (BOOL)process_udt_sccp_mg /* returns true if processed locally */

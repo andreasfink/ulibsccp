@@ -854,7 +854,6 @@
 
 - (BOOL)routePacket:(UMSCCP_Packet *)packet
 {
-    [packet copyIncomingToOutgoing];
     if(packet.incomingOpc==NULL)
     {
         packet.incomingOpc = _mtp3.opc;
@@ -877,10 +876,6 @@
         [self.logFeed debugText:s];
     }
 
-    if(_inboundFilter.isFilterActive)
-    {
-        [_inboundFilter filterInbound:packet];
-    }
     BOOL returnValue = NO;
     id<UMSCCP_UserProtocol> localUser =NULL;
     UMMTP3PointCode *pc = NULL;
@@ -1933,6 +1928,47 @@
     return result;
 }
 
+- (UMMTP3_Error) generateXUDTS:(NSData *)data
+                      calling:(SccpAddress *)src
+                       called:(SccpAddress *)dst
+                        class:(SCCP_ServiceClass)pclass
+                  returnCause:(SCCP_ReturnCause)reasonCode
+                          opc:(UMMTP3PointCode *)opc
+                          dpc:(UMMTP3PointCode *)dpc
+                      options:(NSDictionary *)options
+                     provider:(UMLayerMTP3 *)provider
+{
+    return [self generateUDTS:data
+                      calling:src
+                       called:dst
+                        class:pclass
+                  returnCause:reasonCode
+                          opc:opc
+                          dpc:dpc
+                      options:options
+                     provider:provider];
+}
+
+- (UMMTP3_Error) generateLUDTS:(NSData *)data
+                       calling:(SccpAddress *)src
+                        called:(SccpAddress *)dst
+                         class:(SCCP_ServiceClass)pclass
+                   returnCause:(SCCP_ReturnCause)reasonCode
+                           opc:(UMMTP3PointCode *)opc
+                           dpc:(UMMTP3PointCode *)dpc
+                       options:(NSDictionary *)options
+                      provider:(UMLayerMTP3 *)provider
+{
+    return [self generateUDTS:data
+                      calling:src
+                       called:dst
+                        class:pclass
+                  returnCause:reasonCode
+                          opc:opc
+                          dpc:dpc
+                      options:options
+                     provider:provider];
+}
 
 - (UMMTP3_Error) generateUDTS:(NSData *)data
                       calling:(SccpAddress *)src

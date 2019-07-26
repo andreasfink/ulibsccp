@@ -23,6 +23,7 @@
 #import "UMSCCP_FilterProtocol.h"
 #import "UMSCCP_StatisticSection.h"
 #import "UMSCCP_Packet.h"
+#import "UMSCCP_TracefileProtocol.h"
 
 typedef enum SccpGtFileSection
 {
@@ -60,6 +61,10 @@ typedef enum SccpGtFileSection
     UMThroughputCounter         *_throughputCounters[UMSCCP_StatisticSection_MAX];
 	id<UMSCCP_FilterProtocol>   _inboundFilter;
 	id<UMSCCP_FilterProtocol>   _outboundFilter;
+
+    id<UMSCCP_TracefileProtocol>    _problematicTraceDestination;
+    id<UMSCCP_TracefileProtocol>    _unrouteablePacketsTraceDestination;
+
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;
@@ -74,6 +79,10 @@ typedef enum SccpGtFileSection
 
 @property(readwrite,strong,atomic) UMSynchronizedDictionary    *sccp_number_translations_dict;
 @property(readwrite,strong,atomic) UMSynchronizedDictionary    *sccp_destinations_dict;
+@property(readwrite,strong,atomic) id<UMSCCP_FilterProtocol>   inboundFilter;
+@property(readwrite,strong,atomic) id<UMSCCP_FilterProtocol>   outboundFilter;
+@property(readwrite,strong,atomic) id<UMSCCP_TracefileProtocol>    problematicTraceDestination;
+@property(readwrite,strong,atomic) id<UMSCCP_TracefileProtocol>    unrouteablePacketsTraceDestination;
 
 
 - (void)increaseThroughputCounter:(UMSCCP_StatisticSection)section;
@@ -228,6 +237,26 @@ typedef enum SccpGtFileSection
                           dpc:(UMMTP3PointCode *)dpc
                       options:(NSDictionary *)options
                      provider:(UMLayerMTP3 *)provider;
+
+- (UMMTP3_Error) generateXUDTS:(NSData *)data
+                       calling:(SccpAddress *)src
+                        called:(SccpAddress *)dst
+                         class:(SCCP_ServiceClass)pclass
+                   returnCause:(SCCP_ReturnCause)reasonCode
+                           opc:(UMMTP3PointCode *)opc
+                           dpc:(UMMTP3PointCode *)dpc
+                       options:(NSDictionary *)options
+                      provider:(UMLayerMTP3 *)provider;
+
+- (UMMTP3_Error) generateLUDTS:(NSData *)data
+                       calling:(SccpAddress *)src
+                        called:(SccpAddress *)dst
+                         class:(SCCP_ServiceClass)pclass
+                   returnCause:(SCCP_ReturnCause)reasonCode
+                           opc:(UMMTP3PointCode *)opc
+                           dpc:(UMMTP3PointCode *)dpc
+                       options:(NSDictionary *)options
+                      provider:(UMLayerMTP3 *)provider;
 
 -(UMMTP3_Error) sendXUDT:(NSData *)pdu
                  calling:(SccpAddress *)src

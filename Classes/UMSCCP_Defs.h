@@ -65,4 +65,3 @@ typedef enum SCCP_ReturnCause
     SCCP_ReturnCause_SegmentationFailure                    = 14,
 } SCCP_ReturnCause;
 
-
