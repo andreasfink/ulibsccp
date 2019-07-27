@@ -933,10 +933,10 @@
             NSString *s = @"grp=NULL and causeValue not set. Setting SCCP_ReturnCause_SCCPFailure";
             [self.logFeed debugText:s];
         }
-        causeValue = SCCP_ReturnCause_NoTranslationForThisSpecificAddress;
+        //causeValue = SCCP_ReturnCause_NoTranslationForThisSpecificAddress;
     }
 
-    else if(causeValue != SCCP_ReturnCause_not_set)
+    if(causeValue != SCCP_ReturnCause_not_set)
     {
         NSString *s = [NSString stringWithFormat:@"Can not forward UDT. No route to destination PC=%@. SRC=%@ DST=%@ DATA=%@",
                        packet.incomingOpc,
@@ -955,6 +955,7 @@
                            dpc:packet.incomingOpc
                        options:@{}
                       provider:_mtp3];
+            [_unrouteablePacketsTraceDestination logPacket:packet];
         }
     }
     else if(grp)
@@ -1992,12 +1993,28 @@
     packet.incomingServiceClass = pclass;
     packet.incomingMtp3Layer = provider;
     packet.incomingSccpData = data;
-    if([self routePacket:packet]==YES) /* success */
+
+    if(_routeErrorsBackToOriginatingPointCode || 1) /* if this flag is set, we send the packet back to the original OPC, no matter what. We dont use local routing table to send the UDTS backt to the calling address */
     {
-        return UMMTP3_no_error;
+        return [self sendUDTS:data
+               calling:src
+                called:dst
+                 class:pclass
+           returnCause:reasonCode
+                   opc:opc
+                   dpc:dpc
+               options:options
+                     provider:provider];
     }
-    return UMMTP3_error_no_route_to_destination;
-    
+    else
+    {
+        if([self routePacket:packet]==YES) /* success */
+        {
+            return UMMTP3_no_error;
+        }
+        return UMMTP3_error_no_route_to_destination;
+    }
+
 #if 0
     SccpAddress *src2 = [src copy];
     src2.ai.pointCodeIndicator = YES;

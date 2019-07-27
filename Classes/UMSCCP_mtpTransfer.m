@@ -450,37 +450,87 @@
                 switch(st)
                 {
                     case SCCP_UDTS:
-                        [_sccpLayer generateUDTS:_packet.incomingSccpData
-                                         calling:_packet.incomingCalledPartyAddress
-                                          called:_packet.incomingCallingPartyAddress
-                                           class:_packet.incomingServiceClass
-                                     returnCause:_packet.outgoingReturnCause
-                                             opc:_sccpLayer.mtp3.opc /* errors are always sent from this instance */
-                                             dpc:_packet.incomingOpc
-                                         options:@{}
-                                        provider:_sccpLayer.mtp3];
+                        if(_sccpLayer.routeErrorsBackToSource)
+                        {
+                            [_sccpLayer sendUDTS:_packet.incomingSccpData
+                                             calling:_packet.incomingCalledPartyAddress
+                                              called:_packet.incomingCallingPartyAddress
+                                               class:_packet.incomingServiceClass
+                                         returnCause:_packet.outgoingReturnCause
+                                                 opc:_sccpLayer.mtp3.opc /* errors are always sent from this instance */
+                                                 dpc:_packet.incomingOpc
+                                             options:@{}
+                                            provider:_sccpLayer.mtp3];
+                        }
+                        else
+                        {
+                            [_sccpLayer generateUDTS:_packet.incomingSccpData
+                                             calling:_packet.incomingCalledPartyAddress
+                                              called:_packet.incomingCallingPartyAddress
+                                               class:_packet.incomingServiceClass
+                                         returnCause:_packet.outgoingReturnCause
+                                                 opc:_sccpLayer.mtp3.opc /* errors are always sent from this instance */
+                                                 dpc:_packet.incomingOpc
+                                             options:@{}
+                                            provider:_sccpLayer.mtp3];
+                        }
                         break;
                     case SCCP_XUDTS:
-                        [_sccpLayer generateXUDTS:_packet.incomingSccpData
-                                         calling:_packet.incomingCalledPartyAddress
-                                          called:_packet.incomingCallingPartyAddress
-                                           class:_packet.incomingServiceClass
-                                     returnCause:_packet.outgoingReturnCause
-                                             opc:_sccpLayer.mtp3.opc /* errors are always sent from this instance */
-                                             dpc:_packet.incomingOpc
-                                         options:@{}
-                                        provider:_sccpLayer.mtp3];
+                        if(_sccpLayer.routeErrorsBackToSource)
+                        {
+                            [_sccpLayer sendXUDTS:_packet.incomingSccpData
+                                          calling:_packet.incomingCalledPartyAddress
+                                           called:_packet.incomingCallingPartyAddress
+                                            class:_packet.incomingServiceClass
+                                         hopCount:0x0F
+                                      returnCause:_packet.outgoingReturnCause
+                                              opc:_sccpLayer.mtp3.opc /* errors are always sent from this instance */
+                                              dpc:_packet.incomingOpc
+                                      optionsData:_packet.incomingOptionalData
+                                          options:@{}
+                                         provider:_sccpLayer.mtp3];
+                        }
+                        else
+                        {
+                            [_sccpLayer generateXUDTS:_packet.incomingSccpData
+                                              calling:_packet.incomingCalledPartyAddress
+                                               called:_packet.incomingCallingPartyAddress
+                                                class:_packet.incomingServiceClass
+                                          returnCause:_packet.outgoingReturnCause
+                                                  opc:_sccpLayer.mtp3.opc /* errors are always sent from this instance */
+                                                  dpc:_packet.incomingOpc
+                                              options:@{}
+                                             provider:_sccpLayer.mtp3];
+                        }
                         break;
                     case SCCP_LUDTS:
-                        [_sccpLayer generateLUDTS:_packet.incomingSccpData
-                                         calling:_packet.incomingCalledPartyAddress
-                                          called:_packet.incomingCallingPartyAddress
-                                           class:_packet.incomingServiceClass
-                                     returnCause:_packet.outgoingReturnCause
-                                             opc:_sccpLayer.mtp3.opc /* errors are always sent from this instance */
-                                             dpc:_packet.incomingOpc
-                                         options:@{}
-                                        provider:_sccpLayer.mtp3];
+#if 0       /* sendLUDTS is not implemented yet */
+                        if(_sccpLayer.routeErrorsBackToSource)
+                        {
+                            [_sccpLayer sendLUDTS:_packet.incomingSccpData
+                                          calling:_packet.incomingCalledPartyAddress
+                                           called:_packet.incomingCallingPartyAddress
+                                            class:_packet.incomingServiceClass
+                                      returnCause:_packet.outgoingReturnCause
+                                              opc:_sccpLayer.mtp3.opc
+                                              dpc:_packet.incomingOpc
+                                          options:@{}
+                                         provider:_sccpLayer.mtp3];
+
+                        }
+                        else
+#endif
+                        {
+                            [_sccpLayer generateLUDTS:_packet.incomingSccpData
+                                              calling:_packet.incomingCalledPartyAddress
+                                               called:_packet.incomingCallingPartyAddress
+                                                class:_packet.incomingServiceClass
+                                          returnCause:_packet.outgoingReturnCause
+                                                  opc:_sccpLayer.mtp3.opc /* errors are always sent from this instance */
+                                                  dpc:_packet.incomingOpc
+                                              options:@{}
+                                             provider:_sccpLayer.mtp3];
+                        }
                         break;
                     default:
                         break;
@@ -530,7 +580,6 @@
                     break;
                 case SCCP_UDTS:
                     if(_packet.outgoingToLocal)
-
                     {
                         _statsSection = UMSCCP_StatisticSection_RX;
                         _statsSection2 = UMSCCP_StatisticSection_UDTS_RX;

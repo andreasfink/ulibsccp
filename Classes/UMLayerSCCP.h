@@ -64,6 +64,7 @@ typedef enum SccpGtFileSection
 
     id<UMSCCP_TracefileProtocol>    _problematicTraceDestination;
     id<UMSCCP_TracefileProtocol>    _unrouteablePacketsTraceDestination;
+    BOOL                         _routeErrorsBackToOriginatingPointCode;
 
 }
 
@@ -83,7 +84,7 @@ typedef enum SccpGtFileSection
 @property(readwrite,strong,atomic) id<UMSCCP_FilterProtocol>   outboundFilter;
 @property(readwrite,strong,atomic) id<UMSCCP_TracefileProtocol>    problematicTraceDestination;
 @property(readwrite,strong,atomic) id<UMSCCP_TracefileProtocol>    unrouteablePacketsTraceDestination;
-
+@property(readwrite,assign,atomic) BOOL    routeErrorsBackToSource;
 
 - (void)increaseThroughputCounter:(UMSCCP_StatisticSection)section;
 
