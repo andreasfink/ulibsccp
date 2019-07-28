@@ -1994,7 +1994,7 @@
     packet.incomingMtp3Layer = provider;
     packet.incomingSccpData = data;
 
-    if(_routeErrorsBackToOriginatingPointCode || 1) /* if this flag is set, we send the packet back to the original OPC, no matter what. We dont use local routing table to send the UDTS backt to the calling address */
+    if(_routeErrorsBackToOriginatingPointCode || /* DISABLES CODE */ (1)) /* if this flag is set, we send the packet back to the original OPC, no matter what. We dont use local routing table to send the UDTS backt to the calling address */
     {
         return [self sendUDTS:data
                calling:src
@@ -2008,7 +2008,8 @@
     }
     else
     {
-        if([self routePacket:packet]==YES) /* success */
+        BOOL routingResult = [self routePacket:packet];
+        if(routingResult==YES) /* success */ 
         {
             return UMMTP3_no_error;
         }
