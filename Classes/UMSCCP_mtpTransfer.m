@@ -408,7 +408,7 @@
             {
                 r =  [_sccpLayer.inboundFilter filterInbound:_packet];
             }
-            if(r ==UMSCCP_FILTER_RESULT_DROP)
+            if(r & UMSCCP_FILTER_RESULT_DROP)
             {
                 [_sccpLayer.logFeed debugText:@"Filter returns DROP"];
                 return;

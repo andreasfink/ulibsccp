@@ -333,6 +333,17 @@ static int segmentReferenceId;
                     packet.incomingServiceType = SCCP_XUDT;
                     packet.incomingFromLocal = YES;
                     _statisticsSection2 = UMSCCP_StatisticSection_XUDT_TX;
+                    [packet copyIncomingToOutgoing];
+                    UMSCCP_FilterResult r = UMSCCP_FILTER_RESULT_UNMODIFIED;
+                    if(_sccpLayer.fromLocalFilter.isFilterActive)
+                    {
+                        r =  [_sccpLayer.fromLocalFilter filterInbound:packet];
+                    }
+                    if(r  & UMSCCP_FILTER_RESULT_DROP)
+                    {
+                        [_sccpLayer.logFeed debugText:@"fromLocalFilter returns DROP"];
+                        return;
+                    }
                     [_sccpLayer routePacket:packet];
                 }
             }
@@ -358,6 +369,17 @@ static int segmentReferenceId;
                 {
                     packet.incomingServiceType = SCCP_UDT;
                     _statisticsSection2 = UMSCCP_StatisticSection_UDT_TX;
+                }
+                [packet copyIncomingToOutgoing];
+                UMSCCP_FilterResult r = UMSCCP_FILTER_RESULT_UNMODIFIED;
+                if(_sccpLayer.fromLocalFilter.isFilterActive)
+                {
+                    r =  [_sccpLayer.fromLocalFilter filterInbound:packet];
+                }
+                if(r & UMSCCP_FILTER_RESULT_DROP)
+                {
+                    [_sccpLayer.logFeed debugText:@"fromLocalFilter returns DROP"];
+                    return;
                 }
                 [_sccpLayer routePacket:packet];
             }

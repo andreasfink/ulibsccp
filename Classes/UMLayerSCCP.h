@@ -61,6 +61,8 @@ typedef enum SccpGtFileSection
     UMThroughputCounter         *_throughputCounters[UMSCCP_StatisticSection_MAX];
 	id<UMSCCP_FilterProtocol>   _inboundFilter;
 	id<UMSCCP_FilterProtocol>   _outboundFilter;
+    id<UMSCCP_FilterProtocol>   _fromLocalFilter;
+    id<UMSCCP_FilterProtocol>   _toLocalFilter;
 
     id<UMSCCP_TracefileProtocol>    _problematicTraceDestination;
     id<UMSCCP_TracefileProtocol>    _unrouteablePacketsTraceDestination;
@@ -82,6 +84,8 @@ typedef enum SccpGtFileSection
 @property(readwrite,strong,atomic) UMSynchronizedDictionary    *sccp_destinations_dict;
 @property(readwrite,strong,atomic) id<UMSCCP_FilterProtocol>   inboundFilter;
 @property(readwrite,strong,atomic) id<UMSCCP_FilterProtocol>   outboundFilter;
+@property(readwrite,strong,atomic) id<UMSCCP_FilterProtocol>   fromLocalFilter;
+@property(readwrite,strong,atomic) id<UMSCCP_FilterProtocol>   toLocalFilter;
 @property(readwrite,strong,atomic) id<UMSCCP_TracefileProtocol>    problematicTraceDestination;
 @property(readwrite,strong,atomic) id<UMSCCP_TracefileProtocol>    unrouteablePacketsTraceDestination;
 @property(readwrite,assign,atomic) BOOL    routeErrorsBackToSource;

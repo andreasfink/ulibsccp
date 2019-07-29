@@ -858,8 +858,10 @@
     {
         packet.incomingOpc = _mtp3.opc;
     }
-    packet.outgoingOpc = _mtp3.opc;
-
+    if(packet.outgoingOpc==NULL)
+    {
+        packet.outgoingOpc = _mtp3.opc;
+    }
     if(self.logLevel <=UMLOG_DEBUG)
     {
         NSMutableString *s = [[NSMutableString alloc]init];
