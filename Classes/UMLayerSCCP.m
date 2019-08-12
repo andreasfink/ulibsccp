@@ -879,6 +879,7 @@
     }
 
     BOOL returnValue = NO;
+    BOOL doSendStatus = NO;
     id<UMSCCP_UserProtocol> localUser =NULL;
     UMMTP3PointCode *pc = NULL;
     UMLayerMTP3 *provider = _mtp3;
@@ -891,18 +892,35 @@
                                 newCalledAddress:&called_out
                                        localUser:&localUser
                                    fromLocalUser:packet.incomingFromLocal];
+    
     if(self.logLevel <=UMLOG_DEBUG)
     {
         NSString *s = [NSString stringWithFormat:@"findRoutes:%@ returns:\n\tdestinationGroup=%@\n\tcause=%d\n\tnewCalledAddress=%@\n\tfromLocalUser=%@\n\tfromLocal=%@\n",dst,grp,causeValue,called_out,localUser,packet.incomingFromLocal ? @"YES" : @"NO"];
         [self logDebug:s];
     }
 
-
     if(called_out!=NULL)
     {
         packet.outgoingCalledPartyAddress = called_out;
     }
-    if((localUser) && (causeValue == SCCP_ReturnCause_not_set))
+    
+    if(causeValue != SCCP_ReturnCause_not_set)
+    {
+        NSString *s = [NSString stringWithFormat:@"Can not forward %@. No route to destination PC=%@. SRC=%@ DST=%@ DATA=%@",
+                       packet.incomingPacketType,
+                       packet.incomingOpc,
+                       packet.incomingCallingPartyAddress,
+                       packet.incomingCalledPartyAddress,
+                       packet.incomingSccpData];
+        [self logMinorError:s];
+        if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
+        {
+            doSendStatus = YES;
+        }
+        [_unrouteablePacketsTraceDestination logPacket:packet];
+    }
+
+    else if(localUser)
     {
         packet.outgoingToLocal = YES;
         packet.outgoingLocalUser = localUser;
@@ -928,38 +946,7 @@
         }
         returnValue = YES;
     }
-    if((grp==NULL) && (causeValue != SCCP_ReturnCause_not_set))
-    {
-        if(self.logLevel <=UMLOG_DEBUG)
-        {
-            NSString *s = @"grp=NULL and causeValue not set. Setting SCCP_ReturnCause_SCCPFailure";
-            [self.logFeed debugText:s];
-        }
-        //causeValue = SCCP_ReturnCause_NoTranslationForThisSpecificAddress;
-    }
 
-    if(causeValue != SCCP_ReturnCause_not_set)
-    {
-        NSString *s = [NSString stringWithFormat:@"Can not forward UDT. No route to destination PC=%@. SRC=%@ DST=%@ DATA=%@",
-                       packet.incomingOpc,
-                       packet.incomingCallingPartyAddress,
-                       packet.incomingCalledPartyAddress,
-                       packet.incomingSccpData];
-        [self logMinorError:s];
-        if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
-        {
-            [self generateUDTS:packet.incomingSccpData
-                       calling:packet.incomingCalledPartyAddress
-                        called:packet.incomingCallingPartyAddress
-                         class:packet.incomingServiceClass
-                   returnCause:causeValue
-                           opc:_mtp3.opc /* errors are always sent from this instance */
-                           dpc:packet.incomingOpc
-                       options:@{}
-                      provider:_mtp3];
-            [_unrouteablePacketsTraceDestination logPacket:packet];
-        }
-    }
     else if(grp)
     {
         SccpDestination *dest = [grp chooseNextHopWithRoutingTable:_mtp3RoutingTable];
@@ -980,8 +967,9 @@
 
         if(pc==NULL)
         {
-            causeValue = SCCP_ReturnCause_SCCPFailure;
-            NSString *s = [NSString stringWithFormat:@"Can not forward UDT. No route to destination PC=%@. SRC=%@ DST=%@ DATA=%@",
+            causeValue = SCCP_ReturnCause_NoTranslationForThisSpecificAddress;
+            NSString *s = [NSString stringWithFormat:@"Can not forward %@. No route to destination PC=%@. SRC=%@ DST=%@ DATA=%@",
+                           packet.incomingPacketType,
                            packet.incomingOpc,
                            packet.incomingCallingPartyAddress,
                            packet.incomingCalledPartyAddress,
@@ -989,21 +977,13 @@
             [self logMinorError:s];
             if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
             {
-                [self generateUDTS:packet.incomingSccpData
-                           calling:packet.incomingCalledPartyAddress
-                            called:packet.incomingCallingPartyAddress
-                             class:packet.incomingServiceClass
-                       returnCause:causeValue
-                               opc:_mtp3.opc /* errors are always sent from this instance */
-                               dpc:packet.incomingOpc
-                           options:@{}
-                          provider:_mtp3];
+                doSendStatus = YES;
             }
+            [_unrouteablePacketsTraceDestination logPacket:packet];
         }
         else
         {
             UMMTP3_Error e;
-
             switch(packet.outgoingServiceType)
             {
                 case SCCP_UDT:
@@ -1067,6 +1047,7 @@
                 case UMMTP3_no_error:
                     break;
                 case UMMTP3_error_pdu_too_big:
+                    
                     s = [NSString stringWithFormat:@"Can not forward %@. PDU too big. SRC=%@ DST=%@ DATA=%@",packet.outgoingPacketType,packet.outgoingOpc,packet.outgoingDpc,packet.outgoingSccpData];
                     break;
                 case UMMTP3_error_no_route_to_destination:
@@ -1081,664 +1062,90 @@
                 [self logMinorError:s];
                 NSLog(@"Packet:\n%@\n",packet.description);
             }
-            if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
+
+
+             if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
             {
+                doSendStatus = YES;
                 switch(e)
                 {
                     case UMMTP3_error_no_route_to_destination:
-                        [self generateUDTS:packet.incomingSccpData
-                                   calling:packet.incomingCalledPartyAddress
-                                    called:packet.incomingCallingPartyAddress
-                                     class:packet.incomingServiceClass
-                               returnCause:SCCP_ReturnCause_MTPFailure
-                                       opc:_mtp3.opc /* errors are always sent from this instance */
-                                       dpc:packet.incomingOpc
-                                   options:@{}
-                                  provider:_mtp3];
+                        causeValue = SCCP_ReturnCause_MTPFailure;
+                        [_unrouteablePacketsTraceDestination logPacket:packet];
                         break;
                     case UMMTP3_error_pdu_too_big:
-                        [self generateUDTS:packet.incomingSccpData
-                                   calling:packet.incomingCalledPartyAddress
-                                    called:packet.incomingCallingPartyAddress
-                                     class:packet.incomingServiceClass
-                               returnCause:SCCP_ReturnCause_ErrorInMessageTransport
-                                       opc:_mtp3.opc /* errors are always sent from this instance */
-                                       dpc:packet.incomingOpc
-                                   options:@{}
-                                  provider:_mtp3];
+                        causeValue = SCCP_ReturnCause_ErrorInMessageTransport;
+                        [_problematicTraceDestination logPacket:packet];
                         break;
                     case UMMTP3_error_invalid_variant:
-                        [self generateUDTS:packet.incomingSccpData
-                                   calling:packet.incomingCalledPartyAddress
-                                    called:packet.incomingCallingPartyAddress
-                                     class:packet.incomingServiceClass
-                               returnCause:SCCP_ReturnCause_ErrorInLocalProcessing
-                                       opc:_mtp3.opc /* errors are always sent from this instance */
-                                       dpc:packet.incomingOpc
-                                   options:@{}
-                                  provider:_mtp3];
+                        causeValue = SCCP_ReturnCause_ErrorInLocalProcessing;
+                        [_problematicTraceDestination logPacket:packet];
                         break;
                     default:
+                        doSendStatus = NO;
                         break;
                 }
             }
         }
     }
-    else
+
+    if(doSendStatus)
     {
-        causeValue = SCCP_ReturnCause_Unequipped;
-        [self logMinorError:[NSString stringWithFormat:@"[1] Can not route %@. Cause %d SRC=%@ DST=%@ DATA=%@",packet.incomingPacketType,causeValue,packet.outgoingOpc,packet.outgoingDpc,packet.outgoingSccpData]];
         if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
         {
+            if(packet.incomingServiceType==SCCP_UDT)
+            {
+                [self generateUDTS:packet.incomingSccpData
+                           calling:packet.incomingCalledPartyAddress
+                            called:packet.incomingCallingPartyAddress
+                             class:packet.incomingServiceClass
+                       returnCause:causeValue
+                               opc:_mtp3.opc /* errors are always sent from this instance */
+                               dpc:packet.incomingOpc
+                           options:@{}
+                          provider:_mtp3];
+            }
+            else if(packet.incomingServiceType==SCCP_XUDT)
+            {
+                [self generateXUDTS:packet.incomingSccpData
+                            calling:packet.incomingCalledPartyAddress
+                             called:packet.incomingCallingPartyAddress
+                              class:packet.incomingServiceClass
+                        returnCause:causeValue
+                                opc:_mtp3.opc /* errors are always sent from this instance */
+                                dpc:packet.incomingOpc
+                            options:@{}
+                           provider:_mtp3];
+            }
+            else if(packet.incomingServiceType==SCCP_LUDT)
+            {
+                [self generateLUDTS:packet.incomingSccpData
+                            calling:packet.incomingCalledPartyAddress
+                             called:packet.incomingCallingPartyAddress
+                              class:packet.incomingServiceClass
+                        returnCause:causeValue
+                                opc:_mtp3.opc /* errors are always sent from this instance */
+                                dpc:packet.incomingOpc
+                            options:@{}
+                           provider:_mtp3];
+            }
+            [_unrouteablePacketsTraceDestination logPacket:packet];
+            
             [self generateUDTS:packet.incomingSccpData
                        calling:packet.incomingCalledPartyAddress
                         called:packet.incomingCallingPartyAddress
                          class:packet.incomingServiceClass
-                        returnCause:causeValue
+                   returnCause:causeValue
                            opc:_mtp3.opc /* errors are always sent from this instance */
                            dpc:packet.incomingOpc
                        options:@{}
                       provider:_mtp3];
         }
+
     }
     packet.routed = [[NSDate alloc]init];
     return returnValue;
 }
-
-#if 0
-- (BOOL) routeUDT:(NSData *)data /* returns true if processed locally, false if transited */
-          calling:(SccpAddress *)src
-           called:(SccpAddress *)dst
-            class:(SCCP_ServiceClass)pclass
-         handling:(SCCP_Handling)handling
-              opc:(UMMTP3PointCode *)opc
-              dpc:(UMMTP3PointCode *)dpc
-          options:(NSDictionary *)options
-         provider:(UMLayerMTP3 *)provider
-        fromLocal:(BOOL)fromLocal
-{
-    NSString *incomingLinkset = options[@"mtp3-incoming-linkset"];
-
-
-    if(self.logLevel <=UMLOG_DEBUG)
-    {
-        NSMutableString *s = [[NSMutableString alloc]init];
-        [s appendFormat:@"MsgType udt   LS: %@\n",incomingLinkset];
-        [s appendFormat:@"OPC: %@\tCgPA: %@\n",opc,src];
-        [s appendFormat:@"DPC: %@\tCdPA: %@\n",dpc,dst];
-        [self.logFeed debugText:s];
-    }
-
-    //[_inboundFilter filterInbound:_packet];
-
-    BOOL returnValue = NO;
-    int causeValue = -1;
-    id<UMSCCP_UserProtocol> localUser =NULL;
-    UMMTP3PointCode *pc = NULL;
-
-    /* predefined routing */
-    if((dpc) && (provider) && (fromLocal))
-    {
-        if(self.logLevel <=UMLOG_DEBUG)
-        {
-            NSString *s = [NSString stringWithFormat:@"using predefiend route %@",pc];
-            [self.logFeed debugText:s];
-        }
-        pc = dpc;
-    }
-    else
-    {
-        provider = _mtp3;
-        if(self.logLevel <=UMLOG_DEBUG)
-        {
-            NSString *s = [NSString stringWithFormat:@"calling findRoute (CdPA %@ local %d incomingLinkset %@)",dst,fromLocal,incomingLinkset];
-            [self.logFeed debugText:s];
-        }
-        [self findRoute:&dst
-             causeValue:&causeValue
-              localUser:&localUser
-              pointCode:&pc
-              fromLocal:fromLocal
-        incomingLinkset:incomingLinkset];
-        if(self.logLevel <=UMLOG_DEBUG)
-        {
-            NSString *s = [NSString stringWithFormat:@"findRoute (DST=%@,local=%d) returns causeValue=%d, localUser=%@, pc=%@",dst,fromLocal,causeValue,localUser,pc];
-            [self.logFeed debugText:s];
-        }
-    }
-
-    if((_ntt) && (fromLocal) && (dst.tt.tt==0))
-    {
-        dst.tt = [_ntt copy];
-    }
-
-    if(opc==NULL)
-    {
-        opc = _mtp3.opc;
-    }
-    if(causeValue >= 0)
-    {
-        NSString *s = [NSString stringWithFormat:@"Can not forward UDT. No route to destination PC=%@. SRC=%@ DST=%@ DATA=%@",pc,src,dst,data];
-        [self logMinorError:s];
-        if(handling == SCCP_HANDLING_RETURN_ON_ERROR)
-        {
-            [self generateUDTS:data
-                       calling:dst
-                        called:src
-                        returnCause:causeValue
-                           opc:_mtp3.opc /* errors are always sent from this instance */
-                           dpc:opc
-                       options:@{}
-                      provider:_mtp3];
-        }
-    }
-    else if(pc)
-    {
-
-        UMMTP3_Error e = [self sendUDT:data
-                               calling:src
-                                called:dst
-                                 class:pclass
-                              handling:handling
-                                   opc:opc
-                                   dpc:pc
-                               options:options
-                              provider:provider];
-        NSString *s= NULL;
-        switch(e)
-        {
-            case UMMTP3_no_error:
-                break;
-            case UMMTP3_error_pdu_too_big:
-                s = [NSString stringWithFormat:@"Can not forward UDT. PDU too big. SRC=%@ DST=%@ DATA=%@",src,dst,data];
-                break;
-            case UMMTP3_error_no_route_to_destination:
-                s = [NSString stringWithFormat:@"Can not forward UDT. No route to destination PC=%@. SRC=%@ DST=%@ DATA=%@",pc,src,dst,data];
-                break;
-            case UMMTP3_error_invalid_variant:
-                s = [NSString stringWithFormat:@"Can not forward UDT. Invalid variant. SRC=%@ DST=%@ DATA=%@",src,dst,data];
-                break;
-        }
-        if(s)
-        {
-            [self logMinorError:s];
-        }
-        if(handling & SCCP_HANDLING_RETURN_ON_ERROR)
-        {
-            switch(e)
-            {
-                case UMMTP3_error_no_route_to_destination:
-                    [self generateUDTS:data
-                               calling:dst
-                                called:src
-                                returnCause:SCCP_ReturnCause_MTPFailure
-                                   opc:_mtp3.opc
-                                   dpc:opc
-                               options:@{}
-                              provider:_mtp3];
-                    break;
-                case UMMTP3_error_pdu_too_big:
-                    [self generateUDTS:data
-                               calling:dst
-                                called:src
-                                returnCause:SCCP_ReturnCause_ErrorInMessageTransport
-                                   opc:_mtp3.opc
-                                   dpc:opc
-                               options:@{}
-                              provider:provider];
-
-                    break;
-                case UMMTP3_error_invalid_variant:
-                    [self generateUDTS:data
-                               calling:dst
-                                called:src
-                                returnCause:SCCP_ReturnCause_ErrorInLocalProcessing
-                                   opc:_mtp3.opc
-                                   dpc:opc
-                               options:@{}
-                              provider:provider];
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-    else if(localUser)
-    {
-        [localUser sccpNUnitdata:data
-                    callingLayer:self
-                         calling:src
-                          called:dst
-                qualityOfService:0
-                           class:pclass
-                        handling:handling
-                         options:options];
-        returnValue = YES;
-    }
-    else
-    {
-        causeValue = SCCP_ReturnCause_Unequipped;
-        [self logMinorError:[NSString stringWithFormat:@"[1] Can not route UDT. Cause %d SRC=%@ DST=%@ DATA=%@",causeValue,src,dst,data]];
-        if(handling & SCCP_HANDLING_RETURN_ON_ERROR)
-        {
-            [self generateUDTS:data
-                       calling:dst
-                        called:src
-                        returnCause:causeValue
-                           opc:_mtp3.opc
-                           dpc:opc
-                       options:@{}
-                      provider:_mtp3];
-        }
-    }
-    return returnValue;
-}
-#endif
-
-#if 0
-- (BOOL) routeUDTS:(NSData *)data /* returns true if processed locally, false if transited */
-           calling:(SccpAddress *)src
-            called:(SccpAddress *)dst
-            reason:(int)reasonCode
-               opc:(UMMTP3PointCode *)opc
-               dpc:(UMMTP3PointCode *)dpc
-           options:(NSDictionary *)options
-          provider:(UMLayerMTP3 *)provider
-         fromLocal:(BOOL)fromLocal
-{
-    NSString *incomingLinkset = options[@"mtp3-incoming-linkset"];
-
-    if(self.logLevel <=UMLOG_DEBUG)
-    {
-        NSMutableString *s = [[NSMutableString alloc]init];
-        [s appendFormat:@"MsgType udts   LS: %@\n",incomingLinkset];
-        [s appendFormat:@"OPC: %@\tCgPA: %@src\n",opc,src];
-        [s appendFormat:@"DPC: %@\tCgPA: %@src\n",dpc,dst];
-        [self.logFeed debugText:s];
-    }
-
-    BOOL returnValue = NO;
-    id<UMSCCP_UserProtocol> localUser =NULL;
-    UMMTP3PointCode *pc = NULL;
-
-    if((dpc) && (provider) && (fromLocal)) /* only from layer above, we can do a force route. otherwise we would loop to self */
-    {
-        pc = dpc;
-    }
-    else
-    {
-        int causeValue = -1;
-        UMMTP3PointCode *pc = NULL;
-        provider = _mtp3;
-
-        if(self.logLevel <=UMLOG_DEBUG)
-        {
-            NSString *s = [NSString stringWithFormat:@"calling findRoute (DST=%@,local=%d,pc=%@)",dst,fromLocal,pc];
-            [self.logFeed debugText:s];
-        }
-
-        [self findRoute:&dst
-             causeValue:&causeValue
-              localUser:&localUser
-              pointCode:&pc
-              fromLocal:fromLocal
-        incomingLinkset:incomingLinkset];
-
-        if(self.logLevel <=UMLOG_DEBUG)
-        {
-            NSString *s = [NSString stringWithFormat:@"findRoute (DST=%@,local=%d) returns causeValue=%d, localUser=%@, pc=%@",dst,fromLocal,causeValue,localUser,pc];
-            [self.logFeed debugText:s];
-        }
-    }
-    if(localUser)
-    {
-        [localUser sccpNNotice:data
-                  callingLayer:self
-                       calling:src
-                        called:dst
-                        reason:reasonCode
-                       options:options];
-        returnValue = YES;
-    }
-    else if(pc)
-    {
-        UMMTP3_Error e = [self forwardUDTS:data
-                                   calling:src
-                                    called:dst
-                                    reason:reasonCode
-                                       opc:_mtp3.opc
-                                       dpc:pc
-                                   options:options
-                                  provider:provider];
-
-        NSString *s = NULL;
-        switch(e)
-        {
-            case UMMTP3_no_error:
-                break;
-            case UMMTP3_error_pdu_too_big:
-                s = [NSString stringWithFormat:@"Can not forward UDTS. PDU too big. Dropping PDU. SRC=%@ DST=%@ REASON=%d DATA=%@",src,dst,reasonCode,data];
-                break;
-            case UMMTP3_error_no_route_to_destination:
-                s = [NSString stringWithFormat:@"Can not forward UDTS. No route to destination. Dropping PDU.  SRC=%@ DST=%@ REASON=%d DATA=%@",src,dst,reasonCode,data];
-                break;
-            case UMMTP3_error_invalid_variant:
-                s = [NSString stringWithFormat:@"Can not forward UDTS. Invalid variant. Dropping PDU. SRC=%@ DST=%@ REASON=%d DATA=%@",src,dst,reasonCode,data];
-                break;
-        }
-        if(s)
-        {
-            [self logMinorError:s];
-        }
-    }
-    else
-    {
-        [self logMinorError:[NSString stringWithFormat:@"[2] Can not route UDTS %@->%@ Reason=%d %@",src,dst,reasonCode,data]];
-    }
-    return returnValue;
-}
-#endif
-
-#if 0
-- (BOOL) routeXUDT:(NSData *)data /* returns true if processed locally, false if transited */
-           calling:(SccpAddress *)src
-            called:(SccpAddress *)dst
-             class:(SCCP_ServiceClass)pclass
-          handling:(SCCP_Handling)handling
-          hopCount:(int)hopCount
-               opc:(UMMTP3PointCode *)opc
-               dpc:(UMMTP3PointCode *)dpc
-       optionsData:(NSData *)xoptionsdata
-           options:(NSDictionary *)options
-          provider:(UMLayerMTP3 *)provider
-         fromLocal:(BOOL)fromLocal
-{
-    if(opc==NULL)
-    {
-        opc = _mtp3.opc;
-    }
-    NSString *incomingLinkset = options[@"mtp3-incoming-linkset"];
-    if(self.logLevel <=UMLOG_DEBUG)
-    {
-        NSMutableString *s = [[NSMutableString alloc]init];
-        [s appendFormat:@"MsgType xudt   LS: %@\n",incomingLinkset];
-        [s appendFormat:@"OPC: %@\tCgPA: %@src\n",opc,src];
-        [s appendFormat:@"DPC: %@\tCgPA: %@src\n",dpc,dst];
-        [self.logFeed debugText:s];
-    }
-
-    BOOL returnValue = NO;
-    int causeValue = -1;
-
-    id<UMSCCP_UserProtocol> localUser =NULL;
-    UMMTP3PointCode *pc = NULL;
-
-    hopCount--;
-    if(hopCount < 0)
-    {
-        causeValue = SCCP_ReturnCause_HopCounterViolation;
-    }
-    else
-    {
-        /* predefined routing */
-        if((dpc) && (provider) && (fromLocal)) /* only from layer above, we can do a force route. otherwise we would loop to self */
-        {
-            pc = dpc;
-        }
-        else
-        {
-            int causeValue = -1;
-            id<UMSCCP_UserProtocol> localUser =NULL;
-            UMMTP3PointCode *pc = NULL;
-            provider = _mtp3;
-            [self findRoute:&dst
-                 causeValue:&causeValue
-                  localUser:&localUser
-                  pointCode:&pc
-                  fromLocal:fromLocal
-            incomingLinkset:incomingLinkset];
-        }
-    }
-    if(causeValue >=0)
-    {
-        NSString *s = [NSString stringWithFormat:@"Can not forward XUDT. No route to destination PC=%@. SRC=%@ DST=%@ DATA=%@",pc,src,dst,data];
-        [self logMinorError:s];
-        if(handling & SCCP_HANDLING_RETURN_ON_ERROR)
-        {
-            [self sendXUDTS:data
-                    calling:src
-                     called:dst
-                      class:packet.outgoingServiceClass
-                   handling:packet.outgoingHandling
-                returnCause:causeValue
-                   hopCount:_xudts_max_hop_count
-                        opc:_mtp3.opc
-                        dpc:opc
-                optionsData:xoptionsdata
-                    options:@{}
-                   provider:provider];
-        }
-    }
-    else if(pc)
-    {
-        UMMTP3_Error e = [self sendXUDT:data
-                                calling:src
-                                 called:dst
-                                  class:pclass   /* MGMT is class 0 */
-                               handling:handling
-                               hopCount:hopCount
-                                    opc:opc
-                                    dpc:pc
-                            optionsData:xoptionsdata
-                                options:options
-                               provider:provider];
-        NSString *s = NULL;
-        switch(e)
-        {
-            case UMMTP3_no_error:
-                break;
-            case UMMTP3_error_pdu_too_big:
-                s = [NSString stringWithFormat:@"Can not forward XUDT. PDU too big. SRC=%@ DST=%@ DATA=%@",src,dst,data];
-                causeValue = SCCP_ReturnCause_ErrorInMessageTransport;
-                break;
-            case UMMTP3_error_no_route_to_destination:
-                s = [NSString stringWithFormat:@"Can not forward XUDT. No route to destination. SRC=%@ DST=%@ DATA=%@",src,dst,data];
-                causeValue = SCCP_ReturnCause_NoTranslationForThisSpecificAddress;
-
-                break;
-            case UMMTP3_error_invalid_variant:
-                s = [NSString stringWithFormat:@"Can not forward XUDT. Invalid variant. SRC=%@ DST=%@ DATA=%@",src,dst,data];
-                causeValue = SCCP_ReturnCause_NoTranslationForAnAddressOfSuchNature;
-                break;
-        }
-        if(s)
-        {
-            [self logMinorError:s];
-        }
-        if(handling & SCCP_HANDLING_RETURN_ON_ERROR)
-        {
-            switch(e)
-            {
-                case UMMTP3_error_no_route_to_destination:
-                    causeValue = SCCP_ReturnCause_MTPFailure;
-                    break;
-                case UMMTP3_error_pdu_too_big:
-                    causeValue = SCCP_ReturnCause_ErrorInMessageTransport;
-                    break;
-                case UMMTP3_error_invalid_variant:
-                    causeValue = SCCP_ReturnCause_ErrorInLocalProcessing;
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-    else if(localUser)
-    {
-        [localUser sccpNUnitdata:data
-                    callingLayer:self
-                         calling:src
-                          called:dst
-                qualityOfService:0
-                           class:pclass
-                        handling:handling
-                         options:options];
-        returnValue = YES;
-    }
-    return returnValue;
-}
-#endif
-
-#if 0
--(BOOL) routeXUDTsegment:(UMSCCP_Segment *)segment /* returns true if processed locally, false if transited */
-                 calling:(SccpAddress *)src
-                  called:(SccpAddress *)dst
-                   class:(SCCP_ServiceClass)pclass
-                handling:(SCCP_Handling)handling
-                hopCount:(int)hopCount
-                     opc:(UMMTP3PointCode *)opc
-                     dpc:(UMMTP3PointCode *)dpc
-             optionsData:(NSData *)xoptionsdata
-                 options:(NSDictionary *)options
-                provider:(UMLayerMTP3 *)provider
-               fromLocal:(BOOL)fromLocal
-{
-    BOOL returnValue = NO;
-    NSMutableData *optionsData = [[NSMutableData alloc]init];
-    [optionsData appendByte:0x10]; /* optional parameter "segmentation" */
-    [optionsData appendByte:0x04]; /* length of optional parameter */
-    [optionsData appendData:[segment segmentationHeader]];
-    if(xoptionsdata)
-    {
-        [optionsData appendData:xoptionsdata]; /* length of optional parameter */
-    }
-    else
-    {
-        [optionsData appendByte:0x00]; /* end of optional parameters */
-    }
-    returnValue = [self routeXUDT:segment.data
-                          calling:src
-                           called:dst
-                            class:pclass
-                         handling:handling
-                         hopCount:hopCount
-                              opc:opc
-                              dpc:dpc
-                      optionsData:optionsData
-                          options:options
-                         provider:provider
-                        fromLocal:fromLocal];
-    return returnValue;
-}
-#endif
-
-#if 0
-- (BOOL) routeXUDTS:(NSData *)data  /* returns true if processed locally, false if transited */
-            calling:(SccpAddress *)src
-             called:(SccpAddress *)dst
-             reason:(int)reasonCode
-           hopCount:(int)hopCount
-                opc:(UMMTP3PointCode *)opc
-                dpc:(UMMTP3PointCode *)dpc
-        optionsData:(NSData *)xoptionsdata
-            options:(NSDictionary *)options
-           provider:(UMLayerMTP3 *)provider
-          fromLocal:(BOOL)fromLocal;
-{
-    NSString *incomingLinkset = options[@"mtp3-incoming-linkset"];
-    if(self.logLevel <=UMLOG_DEBUG)
-    {
-        NSMutableString *s = [[NSMutableString alloc]init];
-        [s appendFormat:@"MsgType xudts   LS: %@\n",incomingLinkset];
-        [s appendFormat:@"OPC: %@\tCgPA: %@src\n",opc,src];
-        [s appendFormat:@"DPC: %@\tCgPA: %@src\n",dpc,dst];
-        [self.logFeed debugText:s];
-    }
-
-    BOOL returnValue = NO;
-    id<UMSCCP_UserProtocol> localUser =NULL;
-    UMMTP3PointCode *pc = NULL;
-
-    hopCount--;
-    if(hopCount < 0)
-    {
-        [self logMinorError:[NSString stringWithFormat:@"Dropping XUDT to maxhopcount reached SRC=%@ DST=%@ DATA=%@",src,dst,data]];
-        return returnValue;
-    }
-
-    if((dpc) && (provider))
-    {
-        pc = dpc;
-    }
-
-    else
-    {
-        int causeValue = -1;
-        id<UMSCCP_UserProtocol> localUser =NULL;
-        UMMTP3PointCode *pc = NULL;
-        provider = _mtp3;
-        [self findRoute:&dst
-             causeValue:&causeValue
-              localUser:&localUser
-              pointCode:&pc
-              fromLocal:fromLocal
-        incomingLinkset:incomingLinkset];
-
-    }
-
-    if(localUser)
-    {
-        /* FIXME: we should do reassembly here before delivering to upper layer */
-        [localUser sccpNNotice:data
-                  callingLayer:self
-                       calling:src
-                        called:dst
-                        reason:reasonCode
-                       options:options];
-        returnValue= YES;
-    }
-    else if(pc)
-    {
-        UMMTP3_Error e = [self sendXUDTS:data
-                                 calling:src
-                                  called:dst
-                                   class:packet.outgoingServiceClass
-                                handling:packet.outgoingHandling
-                             returnCause:reasonCode
-                                hopCount:hopCount
-                                     opc:_mtp3.opc
-                                     dpc:pc
-                             optionsData:xoptionsdata
-                                 options:options
-                                provider:provider];
-        NSString *s = NULL;
-        switch(e)
-        {
-            case UMMTP3_no_error:
-                break;
-            case UMMTP3_error_pdu_too_big:
-                s = [NSString stringWithFormat:@"Can not forward UDTS. PDU too big. Dropping PDU. SRC=%@ DST=%@ REASON=%d DATA=%@",src,dst,reasonCode,data];
-                break;
-            case UMMTP3_error_no_route_to_destination:
-                s = [NSString stringWithFormat:@"Can not forward UDTS. No route to destination. Dropping PDU.  SRC=%@ DST=%@ REASON=%d DATA=%@",src,dst,reasonCode,data];
-                break;
-            case UMMTP3_error_invalid_variant:
-                s = [NSString stringWithFormat:@"Can not forward UDTS. Invalid variant. Dropping PDU. SRC=%@ DST=%@ REASON=%d DATA=%@",src,dst,reasonCode,data];
-                break;
-        }
-        if(s)
-        {
-            [self logMinorError:s];
-        }
-    }
-    else
-    {
-        [self logMinorError:[NSString stringWithFormat:@"[3] Can not route UDTS %@->%@ Reason=%d %@",src,dst,reasonCode,data]];
-    }
-    return returnValue;
-}
-
-#endif
 
 - (UMMTP3_Error) sendUDT:(NSData *)data
                  calling:(SccpAddress *)src
