@@ -873,8 +873,8 @@
         {
             [s appendFormat:@"MsgType %@   LS: %@\n",packet.incomingPacketType,packet.incomingLinkset];
         }
-        [s appendFormat:@"OPC: %@\tCgPA: %@src\n",packet.incomingOpc,packet.incomingCallingPartyAddress];
-        [s appendFormat:@"DPC: %@\tCdPA: %@src\n",packet.incomingDpc,packet.incomingCalledPartyAddress];
+        [s appendFormat:@"OPC: %@\tCgPA: %@\n",packet.incomingOpc,packet.incomingCallingPartyAddress];
+        [s appendFormat:@"DPC: %@\tCdPA: %@\n",packet.incomingDpc,packet.incomingCalledPartyAddress];
         [self.logFeed debugText:s];
     }
 
@@ -895,7 +895,7 @@
     
     if(self.logLevel <=UMLOG_DEBUG)
     {
-        NSString *s = [NSString stringWithFormat:@"findRoutes:%@ returns:\n\tdestinationGroup=%@\n\tcause=%d\n\tnewCalledAddress=%@\n\tfromLocalUser=%@\n\tfromLocal=%@\n",dst,grp,causeValue,called_out,localUser,packet.incomingFromLocal ? @"YES" : @"NO"];
+        NSString *s = [NSString stringWithFormat:@"findRoutes:%@ returns:\n\tdestinationGroup=%@\n\tcause=%d\n\tnewCalledAddress=%@\n\tlocalUser=%@\n\tfromLocal=%@\n",dst,grp,causeValue,called_out,localUser,packet.incomingFromLocal ? @"YES" : @"NO"];
         [self logDebug:s];
     }
 
