@@ -1613,7 +1613,10 @@
 
                 SccpDestination *e = [[SccpDestination alloc]init];
                 e.dpc = pc;
-                e.ntt = @(_ntt.tt);
+                if(_ntt)
+                {
+                    e.ntt = @(_ntt.tt);
+                }
                 [destination addEntry:e];
             }
         }
