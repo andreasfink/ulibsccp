@@ -9,7 +9,7 @@
 #import "UMSCCP_Filter.h"
 
 
-int         plugin_init(void);
+int         plugin_init(NSDictionary *dict);
 int         plugin_exit(void);
 NSString *  plugin_name(void);
 UMPlugin *  plugin_create(void);
@@ -83,12 +83,12 @@ NSDictionary *plugin_info(void);
 @end
 
 
-int         plugin_init(void)
+int plugin_init(NSDictionary *dict)
 {
     return 0;
 }
 
-int         plugin_exit(void)
+int plugin_exit(void)
 {
     return 0;
 }
