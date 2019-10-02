@@ -335,9 +335,9 @@ static int segmentReferenceId;
                     _statisticsSection2 = UMSCCP_StatisticSection_XUDT_TX;
                     [packet copyIncomingToOutgoing];
                     UMSCCP_FilterResult r = UMSCCP_FILTER_RESULT_UNMODIFIED;
-                    if(_sccpLayer.fromLocalFilter.isFilterActive)
+                    if(_sccpLayer.filterDelegate)
                     {
-                        r =  [_sccpLayer.fromLocalFilter filterInbound:packet];
+                        r =  [_sccpLayer.filterDelegate filterInbound:packet];
                     }
                     if(r  & UMSCCP_FILTER_RESULT_DROP)
                     {
@@ -372,9 +372,9 @@ static int segmentReferenceId;
                 }
                 [packet copyIncomingToOutgoing];
                 UMSCCP_FilterResult r = UMSCCP_FILTER_RESULT_UNMODIFIED;
-                if(_sccpLayer.fromLocalFilter.isFilterActive)
+                if(_sccpLayer.filterDelegate)
                 {
-                    r =  [_sccpLayer.fromLocalFilter filterInbound:packet];
+                    r =  [_sccpLayer.filterDelegate filterFromLocalSubsystem:packet];
                 }
                 if(r & UMSCCP_FILTER_RESULT_DROP)
                 {

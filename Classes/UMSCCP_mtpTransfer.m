@@ -404,9 +404,9 @@
             _packet.incomingOptions = _options;
 
             UMSCCP_FilterResult r =  UMSCCP_FILTER_RESULT_UNMODIFIED;
-            if(_sccpLayer.inboundFilter.isFilterActive)
+            if(_sccpLayer.filterDelegate)
             {
-                r =  [_sccpLayer.inboundFilter filterInbound:_packet];
+                r = [_sccpLayer.filterDelegate filterInbound:_packet];
             }
             if(r & UMSCCP_FILTER_RESULT_DROP)
             {

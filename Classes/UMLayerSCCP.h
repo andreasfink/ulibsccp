@@ -59,15 +59,23 @@ typedef enum SccpGtFileSection
     SccpTranslationTableNumber  *_ntt;
     UMSCCP_Statistics           *_processingStats[UMSCCP_StatisticSection_MAX];
     UMThroughputCounter         *_throughputCounters[UMSCCP_StatisticSection_MAX];
+    
+    /* this is now done in appDelegate
+    NSString *_inboundFilterName;
+    NSString *_outboundFilterName;
+    NSString *_fromLocalFilterName;
+    NSString *_toLocalFilterName;
+
 	id<UMSCCP_FilterProtocol>   _inboundFilter;
 	id<UMSCCP_FilterProtocol>   _outboundFilter;
     id<UMSCCP_FilterProtocol>   _fromLocalFilter;
     id<UMSCCP_FilterProtocol>   _toLocalFilter;
+     */
 
     id<UMSCCP_TracefileProtocol>    _problematicTraceDestination;
     id<UMSCCP_TracefileProtocol>    _unrouteablePacketsTraceDestination;
     BOOL                         _routeErrorsBackToOriginatingPointCode;
-
+    id _filterDelegate;
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;
@@ -82,10 +90,20 @@ typedef enum SccpGtFileSection
 
 @property(readwrite,strong,atomic) UMSynchronizedDictionary    *sccp_number_translations_dict;
 @property(readwrite,strong,atomic) UMSynchronizedDictionary    *sccp_destinations_dict;
+@property(readwrite,strong,atomic)  id filterDelegate;
+
+/*
 @property(readwrite,strong,atomic) id<UMSCCP_FilterProtocol>   inboundFilter;
 @property(readwrite,strong,atomic) id<UMSCCP_FilterProtocol>   outboundFilter;
 @property(readwrite,strong,atomic) id<UMSCCP_FilterProtocol>   fromLocalFilter;
 @property(readwrite,strong,atomic) id<UMSCCP_FilterProtocol>   toLocalFilter;
+@property(readwrite,strong,atomic) NSString *  inboundFilterName;
+@property(readwrite,strong,atomic) NSString *   outboundFilterName;
+@property(readwrite,strong,atomic) NSString *   fromLocalFilterName;
+@property(readwrite,strong,atomic) NSString *   toLocalFilterName;
+*/
+
+
 @property(readwrite,strong,atomic) id<UMSCCP_TracefileProtocol>    problematicTraceDestination;
 @property(readwrite,strong,atomic) id<UMSCCP_TracefileProtocol>    unrouteablePacketsTraceDestination;
 @property(readwrite,assign,atomic) BOOL    routeErrorsBackToSource;

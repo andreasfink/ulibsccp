@@ -877,7 +877,7 @@
 
     BOOL returnValue = NO;
     BOOL doSendStatus = NO;
-    id<UMSCCP_UserProtocol> localUser =NULL;
+    id<UMSCCP_UserProtocol> localUser = NULL;
     UMMTP3PointCode *pc = NULL;
     UMLayerMTP3 *provider = _mtp3;
 
@@ -1644,7 +1644,6 @@
         }
         NSLog(@"gtt files read");
     }
-
 }
 
 

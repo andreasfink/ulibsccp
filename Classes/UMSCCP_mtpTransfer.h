@@ -29,7 +29,6 @@
     NSMutableDictionary *_options;
     UMLayerSCCP *_sccpLayer;
     UMLayerMTP3 *_mtp3Layer;
-
     SccpAddress     *_src;
     SccpAddress     *_dst;
     NSData          *_sccp_pdu;
@@ -50,8 +49,7 @@
     NSDate                  *_endOfProcessing;
     UMSCCP_StatisticSection _statsSection;
     UMSCCP_StatisticSection _statsSection2;
-
-	UMSCCP_Packet		*_packet;
+	UMSCCP_Packet		    *_packet;
 }
 
 @property(readwrite,strong,atomic)  UMSynchronizedSortedDictionary *decodedJson;
