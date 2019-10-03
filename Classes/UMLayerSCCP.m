@@ -487,6 +487,14 @@
 {
     SccpDestinationGroup *destination = NULL;
     SccpAddress *called1 = [called copy];
+    
+    if(self.logLevel <=UMLOG_DEBUG)
+    {
+        [self.logFeed debugText:
+         [NSString stringWithFormat:@"entering findRoutes:(called=%@) cause:newCalledAddress:localUser:fromLocalUser:(%@)",
+          called.description,(fromLocalUser ? @"YES":@"NO")]];
+    }
+
     if(_stpMode==NO)
     {
         if(!fromLocalUser)
@@ -543,7 +551,7 @@
         {
             if(self.logLevel <=UMLOG_DEBUG)
             {
-                [self.logFeed debugText:@" Route by global title"];
+                [self.logFeed debugText:@" Route by global title (STP mode)"];
             }
 
             SccpGttRegistry *registry = self.gttSelectorRegistry;
@@ -570,6 +578,10 @@
                 }
                 if(cause)
                 {
+                    if(self.logLevel <=UMLOG_DEBUG)
+                    {
+                        [self.logFeed debugText:@"setting cause to NoTranslationForAnAddressOfSuchNature"];
+                    }
                     *cause = SCCP_ReturnCause_NoTranslationForAnAddressOfSuchNature;
                 }
                 return NULL;
@@ -584,20 +596,33 @@
                         [self.logFeed debugText:[NSString stringWithFormat:@"pre-translation: ->%@",called1]];
                     }
                 }
+                
+                if(self.logLevel <=UMLOG_DEBUG)
+                {
+                    [self.logFeed debugText:@"calling findNextHopForDestination:"];
+                }
                 SccpGttRoutingTableEntry *rte = [gttSelector findNextHopForDestination:called1];
                 if(rte.routeTo == NULL)
                 {
+                    if(self.logLevel <=UMLOG_DEBUG)
+                    {
+                        [self.logFeed debugText:@"routeTo is NULL, lets use routeToName: instead"];
+                    }
                     rte.routeTo = [registry getDestinationGroupByName:rte.routeToName];
                 }
+                
                 destination = rte.routeTo;
-
                 if(self.logLevel <= UMLOG_DEBUG)
                 {
-                    [self.logFeed debugText:[NSString stringWithFormat:@" %@",destination.description]];
+                    [self.logFeed debugText:[NSString stringWithFormat:@" destination is set to %@",destination.description]];
                 }
 
                 if(destination == NULL)
                 {
+                    if(self.logLevel <=UMLOG_DEBUG)
+                    {
+                        [self.logFeed debugText:@"setting cause to NoTranslationForThisSpecificAddress"];
+                    }
                     *cause = SCCP_ReturnCause_NoTranslationForThisSpecificAddress;
                 }
                 if(gttSelector.postTranslation)
@@ -611,6 +636,10 @@
                 if(called_out)
                 {
                     *called_out = called1;
+                    if(self.logLevel <=UMLOG_DEBUG)
+                    {
+                        [self.logFeed debugText:@" *called out is set"];
+                    }
                 }
             }
         }
@@ -619,7 +648,7 @@
             /* routed by subsystem */
             if(self.logLevel <=UMLOG_DEBUG)
             {
-                [self.logFeed debugText:@" Route by subsystem"];
+                [self.logFeed debugText:@" Route by subsystem (STP mode)"];
             }
 
             id<UMSCCP_UserProtocol> upperLayer = [self getUserForSubsystem:called1.ssn number:called1];
@@ -640,6 +669,10 @@
                 }
             }
         }
+    }
+    if(self.logLevel <=UMLOG_DEBUG)
+    {
+        [self.logFeed debugText:[NSString stringWithFormat:@" returning destination=%@",destination.description]];
     }
     return destination;
 }
