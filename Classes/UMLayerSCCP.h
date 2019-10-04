@@ -90,7 +90,7 @@ typedef enum SccpGtFileSection
 
 @property(readwrite,strong,atomic) UMSynchronizedDictionary    *sccp_number_translations_dict;
 @property(readwrite,strong,atomic) UMSynchronizedDictionary    *sccp_destinations_dict;
-@property(readwrite,strong,atomic)  id filterDelegate;
+@property(readwrite,strong,atomic)  id<UMSCCP_FilterDelegateProtocol> filterDelegate;
 
 /*
 @property(readwrite,strong,atomic) id<UMSCCP_FilterProtocol>   inboundFilter;

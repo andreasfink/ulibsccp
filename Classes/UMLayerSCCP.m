@@ -142,7 +142,8 @@
                                                              si:si
                                                              ni:ni
                                                         options:options];
-    [self queueFromLowerWithPriority:task];
+    [task main];
+//    [self queueFromLowerWithPriority:task];
 }
 
 - (void)mtpResume:(NSData *)data
@@ -158,7 +159,8 @@
                                                                si:si
                                                                ni:ni
                                                           options:options];
-    [self queueFromLowerWithPriority:task];
+    [task main];
+//    [self queueFromLowerWithPriority:task];
 }
 
 - (void)mtpStatus:(NSData *)data
@@ -176,7 +178,8 @@
                                                                si:si
                                                                ni:ni
                                                           options:options];
-    [self queueFromLowerWithPriority:task];
+    [task main];
+//    [self queueFromLowerWithPriority:task];
 }
 
 - (id<UMSCCP_UserProtocol>)getUserForSubsystem:(SccpSubSystemNumber *)ssn
@@ -606,7 +609,7 @@
                 {
                     if(self.logLevel <=UMLOG_DEBUG)
                     {
-                        [self.logFeed debugText:@"routeTo is NULL, lets use routeToName: instead"];
+                        [self.logFeed debugText:[NSString stringWithFormat:@"routeTo is NULL, lets use routeToName:%@ instead",rte.routeToName]];
                     }
                     rte.routeTo = [registry getDestinationGroupByName:rte.routeToName];
                 }
@@ -1582,6 +1585,7 @@
 
 - (void)setConfig:(NSDictionary *)cfg applicationContext:(id<UMLayerSCCPApplicationContextProtocol>)appContext
 {
+    _filterDelegate = appContext;
     [self readLayerConfig:cfg];
     if(cfg[@"attach-to"])
     {

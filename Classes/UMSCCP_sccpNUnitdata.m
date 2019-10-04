@@ -337,7 +337,7 @@ static int segmentReferenceId;
                     UMSCCP_FilterResult r = UMSCCP_FILTER_RESULT_UNMODIFIED;
                     if(_sccpLayer.filterDelegate)
                     {
-                        r =  [_sccpLayer.filterDelegate filterInbound:packet];
+                        r =  [_sccpLayer.filterDelegate filterFromLocalSubsystem:packet];
                     }
                     if(r  & UMSCCP_FILTER_RESULT_DROP)
                     {
