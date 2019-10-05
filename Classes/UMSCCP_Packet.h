@@ -88,6 +88,7 @@
     UMSynchronizedDictionary    *_tags;
     UMSynchronizedDictionary    *_vars;    
     SccpDestinationGroup        *_rerouteDestinationGroup;
+    UMLogLevel                  _logLevel;
 }
 
 
@@ -156,6 +157,7 @@
 @property(readwrite,strong,atomic) UMSynchronizedDictionary    *tags;
 @property(readwrite,strong,atomic) UMSynchronizedDictionary    *vars;
 @property(readwrite,strong,atomic) SccpDestinationGroup        *rerouteDestinationGroup;
+@property(readwrite,assign,atomic) UMLogLevel                  logLevel;
 
 
 - (NSString *) incomingPacketType;
