@@ -371,7 +371,7 @@
         if(!decodeOnly)
         {
             [_packet copyIncomingToOutgoing];
-            if(_sccpLayer.logLevel <=UMLOG_DEBUG)
+            if(_packet.logLevel <=UMLOG_DEBUG)
             {
                 NSMutableString *s = [[NSMutableString alloc]init];
                 if(_packet.incomingFromLocal)
