@@ -32,6 +32,8 @@
     {
 		_packet = [[UMSCCP_Packet alloc]init];
 		_packet.sccp = layer;
+        _packet.logFeed = layer.logFeed;
+        _packet.logLevel = layer.logLevel;
 		_packet.incomingOpc = xopc;
 		_packet.incomingDpc = xdpc;
         _data = xdata;
@@ -404,6 +406,8 @@
             _packet.incomingOptions = _options;
 
             UMSCCP_FilterResult r =  UMSCCP_FILTER_RESULT_UNMODIFIED;
+            
+        
             if(_sccpLayer.filterDelegate)
             {
                 r = [_sccpLayer.filterDelegate filterInbound:_packet];

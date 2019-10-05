@@ -321,6 +321,9 @@ static int segmentReferenceId;
                     s.remainingSegment = (int)count - i -1;
 
                     UMSCCP_Packet *packet = [[UMSCCP_Packet alloc]init];
+                    packet.sccp = _sccpLayer;
+                    packet.logFeed = _sccpLayer.logFeed;
+                    packet.logLevel = _sccpLayer.logLevel;
                     packet.incomingMtp3Layer = _sccpLayer.mtp3;
                     packet.incomingCallingPartyAddress = _src;
                     packet.incomingCalledPartyAddress = _dst;

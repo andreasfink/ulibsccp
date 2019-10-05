@@ -75,7 +75,7 @@ typedef enum SccpGtFileSection
     id<UMSCCP_TracefileProtocol>    _problematicTraceDestination;
     id<UMSCCP_TracefileProtocol>    _unrouteablePacketsTraceDestination;
     BOOL                         _routeErrorsBackToOriginatingPointCode;
-    id _filterDelegate;
+    id<UMSCCP_FilterDelegateProtocol> _filterDelegate;
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;
