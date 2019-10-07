@@ -88,8 +88,6 @@ typedef enum SccpGtFileSection
 @property(readwrite,assign) BOOL stpMode;
 @property(readwrite,strong) UMMTP3PointCode *next_pc;
 
-@property(readwrite,strong,atomic) UMSynchronizedDictionary    *sccp_number_translations_dict;
-@property(readwrite,strong,atomic) UMSynchronizedDictionary    *sccp_destinations_dict;
 @property(readwrite,strong,atomic)  id<UMSCCP_FilterDelegateProtocol> filterDelegate;
 
 /*
