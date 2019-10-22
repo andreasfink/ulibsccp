@@ -35,19 +35,23 @@ typedef int UMSCCP_FilterResult; /* bitmask */
 
 
 @protocol UMSCCP_FilterProtocol
-
-
 - (NSString *)filterName;
 - (NSString *)filterDescription;
-- (void)filterActivate;
-- (void)filterDeactivate;
-- (BOOL)isFilterActive;
+- (NSError *)setConfigFileName:(NSString *)configFileName;
+- (NSError *)setConfigString:(NSString *)config;
+
+- (NSError *)loadConfigFromFile:(NSString *)filename;
+- (NSError *)loadConfigFromString:(NSString *)str;
+- (void)processConfig:(NSString *)str error:(NSError **)e;
+
+- (void)activate;
+- (void)deactivate;
+- (BOOL)isActive;
 
 - (UMSCCP_FilterResult) filterInbound:(UMSCCP_Packet *)packet; /* from MTP3 link */
 - (UMSCCP_FilterResult) filterOutbound:(UMSCCP_Packet *)packet; /* to MTP3 link */
 - (UMSCCP_FilterResult) filterFromLocalSubsystem:(UMSCCP_Packet *)packet; /* from local MTP3 user */
 - (UMSCCP_FilterResult) filterToLocalSubsystem:(UMSCCP_Packet *)packet; /* to local MTP3 user */
-
 @end
 
 @protocol UMSCCP_FilterDelegateProtocol

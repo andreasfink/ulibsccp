@@ -19,15 +19,60 @@ NSDictionary *plugin_info(void);
 
 @implementation UMSCCP_Filter
 
-- (UMSCCP_Filter *)initWithConfigFile:(NSString *)configFileName
+
+- (NSError *)setConfigFileName:(NSString *)configFileName
 {
-    self = [super init];
-    if(self)
+    return [self loadConfigFromFile:_filterConfigFileName];
+}
+
+
+
+- (NSError *)setConfigString:(NSString *)str
+{
+    return [self loadConfigFromFile:_filterConfigFileName];
+}
+
+
+
+- (NSError *)loadConfigFromFile:(NSString *)filename
+{
+    NSError *e = NULL;
+    NSString *str = [NSString stringWithContentsOfFile:filename encoding:NSUTF8StringEncoding error:&e];
+    if(e)
     {
-        _filterConfigFile = configFileName;
-        [self processConfigFile];
+        NSLog(@"Can not read config from file %@. Error %@",filename,e);
+        return e;
     }
-    return self;
+    [self processConfig:str error:&e];
+    if(e)
+    {
+        NSLog(@"Error while reading config file %@ %@",filename,e);
+    }
+    else
+    {
+        _filterConfigString = str;
+        _filterConfigFile = str;
+    }
+    return e;
+}
+
+- (NSError *)loadConfigFromString:(NSString *)str
+{
+    NSError *e = NULL;
+    [self processConfig:str error:&e];
+    if(e)
+    {
+        NSLog(@"Error processing config string %@ %@",str,e);
+    }
+    else
+    {
+        _filterConfigString = str;
+    }
+    return e;
+}
+
+- (void)processConfig:(NSString *)str error:(NSError **)e
+{
 }
 
 - (void)activate
@@ -43,10 +88,6 @@ NSDictionary *plugin_info(void);
 -(BOOL)isActive
 {
     return _isActive;
-}
-
-- (void)processConfigFile
-{
 }
 
 

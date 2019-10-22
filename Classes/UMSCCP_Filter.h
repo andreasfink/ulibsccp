@@ -15,16 +15,22 @@
 
 @interface UMSCCP_Filter : UMPlugin
 {
-    NSString  *_filterConfigFile;
+    NSString    *_filterConfigFileName;
+    NSString    *_filterConfigString;
     BOOL        _isActive;
 }
 
 @property(readwrite,strong,atomic)      NSString *filterConfigFile;
 
-- (UMSCCP_Filter *)initWithConfigFile:(NSString *)configFile;
 - (NSString *)filterName;
 - (NSString *)filterDescription;
-- (void)processConfigFile;
+- (NSError *)setConfigFileName:(NSString *)configFileName;
+- (NSError *)setConfigString:(NSString *)config;
+
+- (NSError *)loadConfigFromFile:(NSString *)filename;
+- (NSError *)loadConfigFromString:(NSString *)str;
+- (void)processConfig:(NSString *)str error:(NSError **)e;
+
 - (void)activate;
 - (void)deactivate;
 - (BOOL)isActive;

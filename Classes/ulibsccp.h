@@ -22,4 +22,4 @@
 #import "UMSCCP_FilterProtocol.h"
 #import "UMLayerSCCPApplicationContextProtocol.h"
 #import "UMSCCP_TracefileProtocol.h"
-
+#import "UMSCCP_Filter.h"

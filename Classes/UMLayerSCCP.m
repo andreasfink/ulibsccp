@@ -1162,17 +1162,20 @@
                             options:@{}
                            provider:_mtp3];
             }
+            else
+            {
+                [self generateUDTS:packet.incomingSccpData
+                           calling:packet.incomingCalledPartyAddress
+                            called:packet.incomingCallingPartyAddress
+                             class:packet.incomingServiceClass
+                       returnCause:causeValue
+                               opc:_mtp3.opc /* errors are always sent from this instance */
+                               dpc:packet.incomingOpc
+                           options:@{}
+                          provider:_mtp3];
+            }
             [_unrouteablePacketsTraceDestination logPacket:packet];
             
-            [self generateUDTS:packet.incomingSccpData
-                       calling:packet.incomingCalledPartyAddress
-                        called:packet.incomingCallingPartyAddress
-                         class:packet.incomingServiceClass
-                   returnCause:causeValue
-                           opc:_mtp3.opc /* errors are always sent from this instance */
-                           dpc:packet.incomingOpc
-                       options:@{}
-                      provider:_mtp3];
         }
 
     }
