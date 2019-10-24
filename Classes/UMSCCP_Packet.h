@@ -92,6 +92,12 @@
     UMSynchronizedDictionary    *_vars;    
     SccpDestinationGroup        *_rerouteDestinationGroup;
     UMLogLevel                  _logLevel;
+
+    NSString                    *_msisdn;
+    NSString                    *_imsi;
+    NSString                    *_smsc;
+    NSString                    *_hlr;
+    NSString                    *_msc;
 }
 
 
@@ -165,6 +171,11 @@
 @property(readwrite,strong,atomic) UMSynchronizedDictionary    *vars;
 @property(readwrite,strong,atomic) SccpDestinationGroup        *rerouteDestinationGroup;
 @property(readwrite,assign,atomic) UMLogLevel                  logLevel;
+@property(readwrite,strong,atomic) NSString                    *msisdn;
+@property(readwrite,strong,atomic) NSString                    *imsi;
+@property(readwrite,strong,atomic) NSString                    *smsc;
+@property(readwrite,strong,atomic) NSString                    *hlr;
+@property(readwrite,strong,atomic) NSString                    *msc;
 
 
 - (NSString *) incomingPacketType;

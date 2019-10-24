@@ -421,6 +421,8 @@ typedef enum UMTCAP_Command
 
 - (NSDictionary *)dictionaryValue
 {
+    NSMutableDictionary *dict = [[NSMutableDictionary alloc]init];
+
 #define DICT_SET_STRING(dict,name,str)  \
     { \
         NSString *s = str; \
@@ -437,7 +439,61 @@ typedef enum UMTCAP_Command
 #define DICT_SET_INTEGER(dict,name,i)    dict[name] = [NSString stringWithFormat:@"%d",i];
 #define DICT_SET_BOOL(dict,name,b)    dict[name] =  b ? @"1" : @"0";
 
-    NSMutableDictionary *dict = [[NSMutableDictionary alloc]init];
+
+    DICT_SET_STRING(dict,@"msisdn",_msisdn);
+    DICT_SET_STRING(dict,@"imsi",_imsi);
+    DICT_SET_STRING(dict,@"transparent",@"1");
+
+    /*
+    date_srism,
+    date_srism_resp,
+    date_forwardsm,
+    date_forwardsm_resp,
+     */
+
+
+    DICT_SET_STRING(dict,@"mtp_inbound_linkset",_incomingLinkset);
+    DICT_SET_INTEGER(dict,@"mtp_inbound_opc",_incomingOpc.integerValue);
+    DICT_SET_INTEGER(dict,@"mtp_inbound_dpc",_incomingDpc.integerValue);
+    DICT_SET_INTEGER(dict,@"mtp_inbound_si",3); /* we are in SCCP so there's nothing else possible */
+
+    DICT_SET_STRING(dict,@"mtp_outbound_linkset",_outgoingLinkset);
+    DICT_SET_INTEGER(dict,@"mtp_outbound_opc",_outgoingOpc.integerValue);
+    DICT_SET_INTEGER(dict,@"mtp_outbound_dpc",_outgoingDpc.integerValue);
+    DICT_SET_INTEGER(dict,@"mtp_outbound_si",3); /* we are in SCCP so there's nothing else possible */
+
+
+    DICT_SET_STRING(dict,@"sccp_inbound_raw_packet",_incomingSccpData.hexString);
+
+    DICT_SET_INTEGER(dict,@"sccp_inbound_calling_nai",_incomingCallingPartyAddress.nai.nai);
+    DICT_SET_INTEGER(dict,@"sccp_inbound_calling_npi",_incomingCallingPartyAddress.npi.npi);
+    DICT_SET_INTEGER(dict,@"sccp_inbound_calling_ssn",_incomingCallingPartyAddress.ssn.ssn);
+    DICT_SET_INTEGER(dict,@"sccp_inbound_calling_tt",_incomingCallingPartyAddress.tt.tt);
+    DICT_SET_STRING(dict,@"sccp_inbound_calling_address",_incomingCallingPartyAddress.address);
+    DICT_SET_STRING(dict,@"sccp_inbound_calling_country",_incomingCallingPartyAddress.country);
+
+    DICT_SET_INTEGER(dict,@"sccp_inbound_called_nai",_incomingCalledPartyAddress.nai.nai);
+    DICT_SET_INTEGER(dict,@"sccp_inbound_called_npi",_incomingCalledPartyAddress.npi.npi);
+    DICT_SET_INTEGER(dict,@"sccp_inbound_called_ssn",_incomingCalledPartyAddress.ssn.ssn);
+    DICT_SET_INTEGER(dict,@"sccp_inbound_called_tt",_incomingCalledPartyAddress.tt.tt);
+    DICT_SET_STRING(dict,@"sccp_inbound_called_address",_incomingCalledPartyAddress.address);
+    DICT_SET_STRING(dict,@"sccp_inbound_called_country",_incomingCalledPartyAddress.country);
+
+
+    DICT_SET_INTEGER(dict,@"sccp_outbound_calling_nai",_outgoingCallingPartyAddress.nai.nai);
+    DICT_SET_INTEGER(dict,@"sccp_outbound_calling_npi",_outgoingCallingPartyAddress.npi.npi);
+    DICT_SET_INTEGER(dict,@"sccp_outbound_calling_ssn",_outgoingCallingPartyAddress.ssn.ssn);
+    DICT_SET_INTEGER(dict,@"sccp_outbound_calling_tt",_outgoingCallingPartyAddress.tt.tt);
+    DICT_SET_STRING(dict,@"sccp_outbound_calling_address",_outgoingCallingPartyAddress.address);
+    DICT_SET_STRING(dict,@"sccp_outbound_calling_country",_outgoingCallingPartyAddress.country);
+
+    DICT_SET_INTEGER(dict,@"sccp_outbound_called_nai",_outgoingCalledPartyAddress.nai.nai);
+    DICT_SET_INTEGER(dict,@"sccp_outbound_called_npi",_outgoingCalledPartyAddress.npi.npi);
+    DICT_SET_INTEGER(dict,@"sccp_outbound_called_ssn",_outgoingCalledPartyAddress.ssn.ssn);
+    DICT_SET_INTEGER(dict,@"sccp_outbound_called_tt",_outgoingCalledPartyAddress.tt.tt);
+    DICT_SET_STRING(dict,@"sccp_outbound_called_address",_outgoingCalledPartyAddress.address);
+    DICT_SET_STRING(dict,@"sccp_outbound_called_country",_outgoingCalledPartyAddress.country);
+
 
     DICT_SET_STRING(dict,@"created",[_created stringValue]);
     DICT_SET_STRING(dict,@"afterFilter1",[_afterFilter1 stringValue]);
