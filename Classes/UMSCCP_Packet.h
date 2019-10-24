@@ -95,8 +95,8 @@
 }
 
 
-@property(readwrite,strong,atomic)    UMLayerSCCP                *sccp;
-@property(readwrite,strong,atomic)    NSDate                    *created;
+@property(readwrite,strong,atomic)    UMLayerSCCP           *sccp;
+@property(readwrite,strong,atomic)    NSDate                *created;
 @property(readwrite,strong,atomic)    NSDate                    *reassembled;
 @property(readwrite,strong,atomic)    NSDate                    *routed;
 @property(readwrite,strong,atomic)    NSDate                    *segmented;
@@ -177,5 +177,6 @@
 - (BOOL) hasTag:(NSString *)tag;
 - (void)clearAllTags;
 
+- (NSDictionary *)dictionaryValue;
 @end
 
