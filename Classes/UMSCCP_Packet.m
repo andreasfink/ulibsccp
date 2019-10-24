@@ -767,11 +767,9 @@ typedef enum UMTCAP_Command
     DICT_SET_STRING(dict,@"incomingRemoteTransactionId",_incomingRemoteTransactionId);
     DICT_SET_BOOL(dict,@"canNotDecode",_canNotDecode);
     DICT_SET_STRING(dict,@"incomingRemoteTransactionId",_incomingRemoteTransactionId);
-
-    UMSynchronizedDictionary    *_tags;
-        UMSynchronizedDictionary    *_vars;
-        SccpDestinationGroup        *_rerouteDestinationGroup;
-        UMLogLevel                  _logLevel;
-    }
+    DICT_SET_STRING(dict,@"tags",[[_tags allKeys] jsonCompactString]);
+    DICT_SET_STRING(dict,@"vars",[_vars jsonCompactString]);
+    DICT_SET_STRING(dict,@"rerouteDestinationGroup",_rerouteDestinationGroup.name);
+    return dict;
 }
 @end
