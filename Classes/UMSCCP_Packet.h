@@ -16,6 +16,7 @@
 @class UMTCAP_itu_asn1_continue;
 @class UMTCAP_itu_asn1_end;
 @class UMTCAP_itu_asn1_abort;
+@class UMTCAP_itu_asn1_unidirectional;
 
 @interface UMSCCP_Packet : UMObject
 {
@@ -44,7 +45,9 @@
     BOOL                        _incomingFromLocal;
     BOOL                        _incomingToLocal;
     SccpAddress                 *_incomingCallingPartyAddress;
+    NSString                    *_incomingCallingPartyCountry;
     SccpAddress                 *_incomingCalledPartyAddress;
+    NSString                    *_incomingCalledPartyCountry;
     NSData                      *_incomingMtp3Data;
     NSData                      *_incomingSccpData;
     NSData                      *_incomingOptionalData;
@@ -76,7 +79,7 @@
 	UMTCAP_itu_asn1_continue	*_incomingTcapContinue;
 	UMTCAP_itu_asn1_end			*_incomingTcapEnd;
 	UMTCAP_itu_asn1_abort		*_incomingTcapAbort;
-
+    UMTCAP_itu_asn1_unidirectional *_incomingTcapUnidirectional;
     int                         _incomingTcapCommand; /* UMTCAP_Command */
     NSString                    *_incomingApplicationContext;
     UMASN1Object                *_incomingGsmMapAsn1;
@@ -112,7 +115,9 @@
 @property(readwrite,assign,atomic)  int                     incomingHandling;
 @property(readwrite,assign,atomic)  int                     incomingMaxHopCount;
 @property(readwrite,strong,atomic)  SccpAddress             *incomingCallingPartyAddress;
+@property(readwrite,strong,atomic)  NSString                *incomingCallingPartyCountry;
 @property(readwrite,strong,atomic)  SccpAddress             *incomingCalledPartyAddress;
+@property(readwrite,strong,atomic)  NSString                *incomingCalledPartyCountry;
 @property(readwrite,strong,atomic)  NSData                  *incomingMtp3Data;
 @property(readwrite,strong,atomic)  NSData                  *incomingSccpData;
 @property(readwrite,strong,atomic)  NSData                  *incomingOptionalData;
@@ -145,6 +150,8 @@
 @property(readwrite,strong,atomic)  UMTCAP_itu_asn1_continue	*incomingTcapContinue;
 @property(readwrite,strong,atomic)  UMTCAP_itu_asn1_end			*incomingTcapEnd;
 @property(readwrite,strong,atomic)  UMTCAP_itu_asn1_abort		*incomingTcapAbort;
+@property(readwrite,strong,atomic)  UMTCAP_itu_asn1_unidirectional *incomingTcapUnidirectional;
+
 @property(readwrite,strong,atomic)  UMASN1Object            *incomingGsmMapAsn1;/* this can be set by filters */
 @property(readwrite,assign,atomic)  int                     incomingTcapCommand; /* UMTCAP_Command */
 @property(readwrite,strong,atomic)  NSString                *incomingApplicationContext;

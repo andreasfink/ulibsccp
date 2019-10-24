@@ -1432,6 +1432,8 @@
     packet.incomingDpc = dpc;
     packet.incomingCallingPartyAddress = src;
     packet.incomingCalledPartyAddress = dst;
+    packet.incomingCallingPartyCountry = [packet.incomingCallingPartyAddress country];
+    packet.incomingCalledPartyCountry = [packet.incomingCalledPartyAddress country];
     packet.incomingServiceType = SCCP_UDTS;
     packet.incomingReturnCause = reasonCode;
     packet.incomingOptions = options;

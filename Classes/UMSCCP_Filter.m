@@ -22,14 +22,14 @@ NSDictionary *plugin_info(void);
 
 - (NSError *)setConfigFileName:(NSString *)configFileName
 {
-    return [self loadConfigFromFile:_filterConfigFileName];
+    return [self loadConfigFromFile:configFileName];
 }
 
 
 
 - (NSError *)setConfigString:(NSString *)str
 {
-    return [self loadConfigFromFile:_filterConfigFileName];
+    return [self loadConfigFromString:str];
 }
 
 
