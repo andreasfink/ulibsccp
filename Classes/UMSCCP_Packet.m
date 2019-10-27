@@ -419,9 +419,9 @@ typedef enum UMTCAP_Command
     return s;
 }
 
-- (NSDictionary *)dictionaryValue
+- (UMSynchronizedSortedDictionary *)dictionaryValue
 {
-    NSMutableDictionary *dict = [[NSMutableDictionary alloc]init];
+    UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
 
 #define DICT_SET_STRING(dict,name,str)  \
     { \
@@ -439,7 +439,7 @@ typedef enum UMTCAP_Command
 #define DICT_SET_INTEGER(dict,name,i)    dict[name] = [NSString stringWithFormat:@"%d",i];
 #define DICT_SET_BOOL(dict,name,b)    dict[name] =  b ? @"1" : @"0";
 
-
+    DICT_SET_STRING(dict,@"timestamp",[_created stringValue]);
     DICT_SET_STRING(dict,@"msisdn",_msisdn);
     DICT_SET_STRING(dict,@"imsi",_imsi);
     DICT_SET_STRING(dict,@"transparent",@"1");
@@ -451,381 +451,201 @@ typedef enum UMTCAP_Command
     date_forwardsm_resp,
      */
 
-
+    DICT_SET_STRING(dict,@"mtp_inbound_instance",[_incomingMtp3Layer layerName]);
     DICT_SET_STRING(dict,@"mtp_inbound_linkset",_incomingLinkset);
+    DICT_SET_STRING(dict,@"mtp_inbound_localuser",[_incomingLocalUser layerName]);
     DICT_SET_INTEGER(dict,@"mtp_inbound_opc",_incomingOpc.integerValue);
     DICT_SET_INTEGER(dict,@"mtp_inbound_dpc",_incomingDpc.integerValue);
     DICT_SET_INTEGER(dict,@"mtp_inbound_si",3); /* we are in SCCP so there's nothing else possible */
 
+    DICT_SET_STRING(dict,@"mtp_outbound_instance",[_outgoingMtp3Layer layerName]);
+    DICT_SET_STRING(dict,@"mtp_outbound_linkset",_outgoingLinkset);
+    DICT_SET_STRING(dict,@"mtp_outound_localuser",[_outgoingLocalUser layerName]);
     DICT_SET_STRING(dict,@"mtp_outbound_linkset",_outgoingLinkset);
     DICT_SET_INTEGER(dict,@"mtp_outbound_opc",_outgoingOpc.integerValue);
     DICT_SET_INTEGER(dict,@"mtp_outbound_dpc",_outgoingDpc.integerValue);
     DICT_SET_INTEGER(dict,@"mtp_outbound_si",3); /* we are in SCCP so there's nothing else possible */
 
-
-    DICT_SET_STRING(dict,@"sccp_inbound_raw_packet",_incomingSccpData.hexString);
+    DICT_SET_STRING(dict,@"mtp_inbound_raw_packet",_incomingMtp3Data.hexString);
+    /* we skip 'mtp_debug' */
 
     DICT_SET_INTEGER(dict,@"sccp_inbound_calling_nai",_incomingCallingPartyAddress.nai.nai);
     DICT_SET_INTEGER(dict,@"sccp_inbound_calling_npi",_incomingCallingPartyAddress.npi.npi);
-    DICT_SET_INTEGER(dict,@"sccp_inbound_calling_ssn",_incomingCallingPartyAddress.ssn.ssn);
-    DICT_SET_INTEGER(dict,@"sccp_inbound_calling_tt",_incomingCallingPartyAddress.tt.tt);
     DICT_SET_STRING(dict,@"sccp_inbound_calling_address",_incomingCallingPartyAddress.address);
     DICT_SET_STRING(dict,@"sccp_inbound_calling_country",_incomingCallingPartyAddress.country);
+    DICT_SET_INTEGER(dict,@"sccp_inbound_calling_ssn",_incomingCallingPartyAddress.ssn.ssn);
+    DICT_SET_INTEGER(dict,@"sccp_inbound_calling_tt",_incomingCallingPartyAddress.tt.tt);
 
     DICT_SET_INTEGER(dict,@"sccp_inbound_called_nai",_incomingCalledPartyAddress.nai.nai);
     DICT_SET_INTEGER(dict,@"sccp_inbound_called_npi",_incomingCalledPartyAddress.npi.npi);
-    DICT_SET_INTEGER(dict,@"sccp_inbound_called_ssn",_incomingCalledPartyAddress.ssn.ssn);
-    DICT_SET_INTEGER(dict,@"sccp_inbound_called_tt",_incomingCalledPartyAddress.tt.tt);
     DICT_SET_STRING(dict,@"sccp_inbound_called_address",_incomingCalledPartyAddress.address);
     DICT_SET_STRING(dict,@"sccp_inbound_called_country",_incomingCalledPartyAddress.country);
+    DICT_SET_INTEGER(dict,@"sccp_inbound_called_ssn",_incomingCalledPartyAddress.ssn.ssn);
+    DICT_SET_INTEGER(dict,@"sccp_inbound_called_tt",_incomingCalledPartyAddress.tt.tt);
 
 
     DICT_SET_INTEGER(dict,@"sccp_outbound_calling_nai",_outgoingCallingPartyAddress.nai.nai);
     DICT_SET_INTEGER(dict,@"sccp_outbound_calling_npi",_outgoingCallingPartyAddress.npi.npi);
-    DICT_SET_INTEGER(dict,@"sccp_outbound_calling_ssn",_outgoingCallingPartyAddress.ssn.ssn);
-    DICT_SET_INTEGER(dict,@"sccp_outbound_calling_tt",_outgoingCallingPartyAddress.tt.tt);
     DICT_SET_STRING(dict,@"sccp_outbound_calling_address",_outgoingCallingPartyAddress.address);
     DICT_SET_STRING(dict,@"sccp_outbound_calling_country",_outgoingCallingPartyAddress.country);
+    DICT_SET_INTEGER(dict,@"sccp_outbound_calling_ssn",_outgoingCallingPartyAddress.ssn.ssn);
+    DICT_SET_INTEGER(dict,@"sccp_outbound_calling_tt",_outgoingCallingPartyAddress.tt.tt);
 
     DICT_SET_INTEGER(dict,@"sccp_outbound_called_nai",_outgoingCalledPartyAddress.nai.nai);
     DICT_SET_INTEGER(dict,@"sccp_outbound_called_npi",_outgoingCalledPartyAddress.npi.npi);
-    DICT_SET_INTEGER(dict,@"sccp_outbound_called_ssn",_outgoingCalledPartyAddress.ssn.ssn);
-    DICT_SET_INTEGER(dict,@"sccp_outbound_called_tt",_outgoingCalledPartyAddress.tt.tt);
     DICT_SET_STRING(dict,@"sccp_outbound_called_address",_outgoingCalledPartyAddress.address);
     DICT_SET_STRING(dict,@"sccp_outbound_called_country",_outgoingCalledPartyAddress.country);
+    DICT_SET_INTEGER(dict,@"sccp_outbound_called_ssn",_outgoingCalledPartyAddress.ssn.ssn);
+    DICT_SET_INTEGER(dict,@"sccp_outbound_called_tt",_outgoingCalledPartyAddress.tt.tt);
 
-
-    DICT_SET_STRING(dict,@"created",[_created stringValue]);
-    DICT_SET_STRING(dict,@"afterFilter1",[_afterFilter1 stringValue]);
-    DICT_SET_STRING(dict,@"reassembled",[_reassembled stringValue]);
+    UMSynchronizedSortedDictionary *dict2 = [[UMSynchronizedSortedDictionary alloc]init];
+    DICT_SET_STRING(dict2,@"created",[_created stringValue]);
+    DICT_SET_STRING(dict2,@"afterFilter1",[_afterFilter1 stringValue]);
+    DICT_SET_STRING(dict2,@"reassembled",[_reassembled stringValue]);
     DICT_SET_STRING(dict,@"afterFilter2",[_afterFilter2 stringValue]);
-    DICT_SET_STRING(dict,@"routed",[_routed stringValue]);
-    DICT_SET_STRING(dict,@"afterFilter3",[_afterFilter3 stringValue]);
-    DICT_SET_STRING(dict,@"segmented",[_segmented stringValue]);
-    DICT_SET_STRING(dict,@"queuedForDelivery",[_queuedForDelivery stringValue]);
+    DICT_SET_STRING(dict2,@"routed",[_routed stringValue]);
+    DICT_SET_STRING(dict2,@"afterFilter3",[_afterFilter3 stringValue]);
+    DICT_SET_STRING(dict2,@"segmented",[_segmented stringValue]);
+    DICT_SET_STRING(dict2,@"queuedForDelivery",[_queuedForDelivery stringValue]);
+    DICT_SET_STRING(dict,@"sccp_debug",[dict2 jsonCompactString]);
+
     switch(_state)
     {
         case SCCP_STATE_IDLE:
-            dict[@"state"] = @"IDLE";
+            dict[@"sccp_state"] = @"IDLE";
             break;
 
         case SCCP_STATE_DATA_TRANSFER:
-            dict[@"state"] = @"DATA_TRANSFER";
+            dict[@"sccp_state"] = @"DATA_TRANSFER";
             break;
 
         case SCCP_STATE_INCOMING_CONNECTION_PENDING:
-            dict[@"state"] = @"INCOMING_CONNECTION_PENDING";
+            dict[@"sccp_state"] = @"INCOMING_CONNECTION_PENDING";
             break;
 
         case SCCP_STATE_PROVIDER_INITIATED_RESET_PENDING:
-            dict[@"state"] = @"PROVIDER_INITIATED_RESET_PENDING";
+            dict[@"sccp_state"] = @"PROVIDER_INITIATED_RESET_PENDING";
             break;
 
         case SCCP_STATE_OUTGOING_CONNECTION_PENDING:
-            dict[@"state"] = @"OUTGOING_CONNECTION_PENDING";
+            dict[@"sccp_state"] = @"OUTGOING_CONNECTION_PENDING";
             break;
 
         case SCCP_STATE_USER_REQUEST_RESET_PENDING:
-            dict[@"state"] = @"USER_REQUEST_RESET_PENDING";
+            dict[@"sccp_state"] = @"USER_REQUEST_RESET_PENDING";
             break;
         default:
-            dict[@"state"] = @"USER_REQUEST_RESET_PENDING";
+            dict[@"sccp_state"] = @"USER_REQUEST_RESET_PENDING";
 
     }
-    DICT_SET_STRING(dict,@"incomingLocalUser",[_incomingLocalUser layerName]);
-    DICT_SET_STRING(dict,@"incomingMtp3Layer",[_incomingMtp3Layer layerName]);
-    DICT_SET_STRING(dict,@"incomingLinkset",_incomingLinkset);
-    DICT_SET_STRING(dict,@"incomingOptions",_incomingOptions.jsonCompactString);
-    DICT_SET_INTEGER(dict,@"incomingOpc",_incomingOpc.integerValue);
-    DICT_SET_STRING(dict,@"incomingOpcString",_incomingOpc.stringValue);
-    DICT_SET_INTEGER(dict,@"incomingDpc",_incomingDpc.integerValue);
-    DICT_SET_STRING(dict,@"incomingDpcString",_incomingDpc.stringValue);
+
 
     switch(_incomingServiceClass)
     {
         case SCCP_CLASS_UNDEFINED:
-            dict[@"incomingServiceClass"] = @"UNDEFINED";
+            dict[@"sccp_service_class"] = @"UNDEFINED";
             break;
         case SCCP_CLASS_BASIC:
-            dict[@"incomingServiceClass"] = @"BASIC";
+            dict[@"sccp_service_class"] = @"BASIC";
             break;
         case SCCP_CLASS_INSEQ_CL:
-            dict[@"incomingServiceClass"] = @"INSEQ_CL";
+            dict[@"sccp_service_class"] = @"INSEQ_CL";
             break;
         case SCCP_CLASS_BASIC_CO:
-            dict[@"incomingServiceClass"] = @"BASIC_CO";
+            dict[@"sccp_service_class"] = @"BASIC_CO";
             break;
         case SCCP_CLASS_FLOW_CONTROL_CO:
-            dict[@"incomingServiceClass"] = @"FLOW_CONTROL_CO";
+            dict[@"sccp_service_class"] = @"FLOW_CONTROL_CO";
             break;
         default:
-            dict[@"incomingServiceClass"] = @"";
+            dict[@"sccp_service_class"] = @"";
     }
+    BOOL hasCause = NO;
     switch(_incomingServiceType)
     {
         case    SCCP_UDT:
-            dict[@"incomingServiceType"] = @"UDT";
+            dict[@"sccp_service_type"] = @"UDT";
             break;
         case    SCCP_UDTS:
-            dict[@"incomingServiceType"] = @"UDTS";
+            dict[@"sccp_service_type"] = @"UDTS";
+            hasCause = YES;
+
             break;
         case    SCCP_XUDT:
-            dict[@"incomingServiceType"] = @"XUDT";
+            dict[@"sccp_service_type"] = @"XUDT";
             break;
         case    SCCP_XUDTS:
-            dict[@"incomingServiceType"] = @"XUDTS";
+            dict[@"sccp_service_type"] = @"XUDTS";
+            hasCause = YES;
             break;
         case    SCCP_LUDT:
-            dict[@"incomingServiceType"] = @"LUDT";
+            dict[@"sccp_service_type"] = @"LUDT";
             break;
         case    SCCP_LUDTS:
-            dict[@"incomingServiceType"] = @"LUDTS";
+            dict[@"sccp_service_type"] = @"LUDTS";
+            hasCause = YES;
             break;
         default:
-            dict[@"incomingServiceType"] = @"";
+            dict[@"sccp_service_type"] = @"";
             break;
     }
-    DICT_SET_INTEGER(dict,@"incomingHandling",_incomingHandling);
-    DICT_SET_INTEGER(dict,@"incomingMaxHopCount",_incomingMaxHopCount);
-    DICT_SET_INTEGER(dict,@"incomingFromLocal",_incomingFromLocal);
-    DICT_SET_INTEGER(dict,@"incomingToLocal",_incomingToLocal);
-    DICT_SET_STRING(dict,@"incomingCallingPartyAddress",_incomingCallingPartyAddress.stringValueE164);
-    DICT_SET_STRING(dict,@"incomingCallingPartyCountry",_incomingCallingPartyCountry);
-    DICT_SET_STRING(dict,@"incomingCalledPartyAddress",_incomingCalledPartyAddress.stringValueE164);
-    DICT_SET_STRING(dict,@"incomingCalledPartyCountry",_incomingCalledPartyCountry);
-    DICT_SET_STRING(dict,@"incomingMtp3Data",_incomingMtp3Data.hexString);
-    DICT_SET_STRING(dict,@"incomingSccpData",_incomingSccpData.hexString);
-    DICT_SET_STRING(dict,@"incomingOptionalData",_incomingOptionalData.hexString);
-    switch(_incomingReturnCause)
+    DICT_SET_INTEGER(dict,@"sccp_handling",_incomingHandling);
+    DICT_SET_INTEGER(dict,@"sccp_hopcount",_incomingMaxHopCount);
+    if(hasCause)
     {
-        case SCCP_ReturnCause_NoTranslationForAnAddressOfSuchNature:
-            dict[@"incomingReturnCause"] = @"NoTranslationForAnAddressOfSuchNature";
-            break;
-        case SCCP_ReturnCause_NoTranslationForThisSpecificAddress:
-            dict[@"incomingReturnCause"] = @"NoTranslationForThisSpecificAddress";
-            break;
-        case SCCP_ReturnCause_SubsystemCongestion:
-            dict[@"incomingReturnCause"] = @"SubsystemCongestion";
-            break;
-        case SCCP_ReturnCause_SubsystemFailure:
-            dict[@"incomingReturnCause"] = @"SubsystemFailure";
-            break;
-        case SCCP_ReturnCause_Unequipped:
-            dict[@"incomingReturnCause"] = @"Unequipped";
-            break;
-        case SCCP_ReturnCause_MTPFailure:
-            dict[@"incomingReturnCause"] = @"MTPFailure";
-            break;
-        case SCCP_ReturnCause_NetworkCongestion:
-            dict[@"incomingReturnCause"] = @"NetworkCongestion";
-            break;
-        case SCCP_ReturnCause_Unqualified:
-            dict[@"incomingReturnCause"] = @"Unqualified";
-            break;
-        case SCCP_ReturnCause_ErrorInMessageTransport:
-            dict[@"incomingReturnCause"] = @"ErrorInMessageTransport";
-            break;
-        case SCCP_ReturnCause_ErrorInLocalProcessing:
-            dict[@"incomingReturnCause"] = @"ErrorInLocalProcessing";
-            break;
-        case SCCP_ReturnCause_DestinationCannotPerformReassembly:
-            dict[@"incomingReturnCause"] = @"DestinationCannotPerformReassembly";
-            break;
-        case SCCP_ReturnCause_SCCPFailure:
-            dict[@"incomingReturnCause"] = @"SCCPFailure";
-            break;
-        case SCCP_ReturnCause_HopCounterViolation:
-            dict[@"incomingReturnCause"] = @"HopCounterViolation";
-            break;
-        case SCCP_ReturnCause_SegmentationNotSupported:
-            dict[@"incomingReturnCause"] = @"SegmentationNotSupported";
-            break;
-        case SCCP_ReturnCause_SegmentationFailure:
-            dict[@"incomingReturnCause"] = @"SegmentationFailure";
-            break;
-        case SCCP_ReturnCause_not_set:
-        default:
-                dict[@"incomingServiceType"] = @"";
+        switch(_incomingReturnCause)
+        {
+            case SCCP_ReturnCause_NoTranslationForAnAddressOfSuchNature:
+                dict[@"sccp_return_cause"] = @"0: NOTRANS NOA";
                 break;
-    }
-    DICT_SET_STRING(dict,@"outgoingLocalUser",_outgoingLocalUser.layerName);
-    DICT_SET_STRING(dict,@"outgoingMtp3Layer",_outgoingMtp3Layer.layerName);
-    DICT_SET_STRING(dict,@"outgoingOptions",_outgoingOptions.jsonCompactString);
-    DICT_SET_INTEGER(dict,@"outgoingOpc",_outgoingOpc.integerValue);
-    DICT_SET_STRING(dict,@"outgoingOpcString",_outgoingOpc.stringValue);
-    DICT_SET_INTEGER(dict,@"outgoingDpc",_outgoingDpc.integerValue);
-    DICT_SET_STRING(dict,@"outgoingDpcString",_outgoingDpc.stringValue);
-
-    switch(_outgoingServiceClass)
-    {
-        case SCCP_CLASS_UNDEFINED:
-            dict[@"outgoingServiceClass"] = @"UNDEFINED";
-            break;
-        case SCCP_CLASS_BASIC:
-            dict[@"outgoingServiceClass"] = @"BASIC";
-            break;
-        case SCCP_CLASS_INSEQ_CL:
-            dict[@"outgoingServiceClass"] = @"INSEQ_CL";
-            break;
-        case SCCP_CLASS_BASIC_CO:
-            dict[@"outgoingServiceClass"] = @"BASIC_CO";
-            break;
-        case SCCP_CLASS_FLOW_CONTROL_CO:
-            dict[@"outgoingServiceClass"] = @"FLOW_CONTROL_CO";
-            break;
-        default:
-            dict[@"outgoingServiceClass"] = @"";
-    }
-    switch(_outgoingServiceType)
-    {
-        case    SCCP_UDT:
-            dict[@"outgoingServiceType"] = @"UDT";
-            break;
-        case    SCCP_UDTS:
-            dict[@"outgoingServiceType"] = @"UDTS";
-            break;
-        case    SCCP_XUDT:
-            dict[@"outgoingServiceType"] = @"XUDT";
-            break;
-        case    SCCP_XUDTS:
-            dict[@"outgoingServiceType"] = @"XUDTS";
-            break;
-        case    SCCP_LUDT:
-            dict[@"outgoingServiceType"] = @"LUDT";
-            break;
-        case    SCCP_LUDTS:
-            dict[@"outgoingServiceType"] = @"LUDTS";
-            break;
-        default:
-            dict[@"outgoingServiceType"] = @"";
-            break;
-    }
-
-    DICT_SET_STRING(dict,@"outgoingCallingPartyAddress",_outgoingCallingPartyAddress.stringValueE164);
-    DICT_SET_STRING(dict,@"outgoingCallingPartyCountry",[_outgoingCallingPartyAddress country]);
-    DICT_SET_STRING(dict,@"outgoingCalledPartyAddress",_outgoingCalledPartyAddress.stringValueE164);
-    DICT_SET_STRING(dict,@"outgoingCalledPartyCountry",[_outgoingCalledPartyAddress country]);
-    DICT_SET_STRING(dict,@"outgoingMtp3Data",_outgoingMtp3Data.hexString);
-    DICT_SET_STRING(dict,@"outgoingSccpData",_outgoingSccpData.hexString);
-    DICT_SET_STRING(dict,@"outgoingOptionalData",_outgoingOptionalData.hexString);
-    DICT_SET_INTEGER(dict,@"outgoingMaxHopCount",_outgoingMaxHopCount);
-    DICT_SET_BOOL(dict,@"outgoingFromLocal",_outgoingFromLocal);
-    DICT_SET_BOOL(dict,@"outgoingToLocal",_outgoingToLocal);
-    switch(_outgoingReturnCause)
-    {
-        case SCCP_ReturnCause_NoTranslationForAnAddressOfSuchNature:
-            dict[@"outgoingReturnCause"] = @"NoTranslationForAnAddressOfSuchNature";
-            break;
-        case SCCP_ReturnCause_NoTranslationForThisSpecificAddress:
-            dict[@"outgoingReturnCause"] = @"NoTranslationForThisSpecificAddress";
-            break;
-        case SCCP_ReturnCause_SubsystemCongestion:
-            dict[@"outgoingReturnCause"] = @"SubsystemCongestion";
-            break;
-        case SCCP_ReturnCause_SubsystemFailure:
-            dict[@"outgoingReturnCause"] = @"SubsystemFailure";
-            break;
-        case SCCP_ReturnCause_Unequipped:
-            dict[@"outgoingReturnCause"] = @"Unequipped";
-            break;
-        case SCCP_ReturnCause_MTPFailure:
-            dict[@"outgoingReturnCause"] = @"MTPFailure";
-            break;
-        case SCCP_ReturnCause_NetworkCongestion:
-            dict[@"outgoingReturnCause"] = @"NetworkCongestion";
-            break;
-        case SCCP_ReturnCause_Unqualified:
-            dict[@"outgoingReturnCause"] = @"Unqualified";
-            break;
-        case SCCP_ReturnCause_ErrorInMessageTransport:
-            dict[@"outgoingReturnCause"] = @"ErrorInMessageTransport";
-            break;
-        case SCCP_ReturnCause_ErrorInLocalProcessing:
-            dict[@"outgoingReturnCause"] = @"ErrorInLocalProcessing";
-            break;
-        case SCCP_ReturnCause_DestinationCannotPerformReassembly:
-            dict[@"outgoingReturnCause"] = @"DestinationCannotPerformReassembly";
-            break;
-        case SCCP_ReturnCause_SCCPFailure:
-            dict[@"outgoingReturnCause"] = @"SCCPFailure";
-            break;
-        case SCCP_ReturnCause_HopCounterViolation:
-            dict[@"outgoingReturnCause"] = @"HopCounterViolation";
-            break;
-        case SCCP_ReturnCause_SegmentationNotSupported:
-            dict[@"outgoingReturnCause"] = @"SegmentationNotSupported";
-            break;
-        case SCCP_ReturnCause_SegmentationFailure:
-            dict[@"outgoingReturnCause"] = @"SegmentationFailure";
-            break;
-        case SCCP_ReturnCause_not_set:
-        default:
-                dict[@"outgoingReturnCause"] = @"";
+            case SCCP_ReturnCause_NoTranslationForThisSpecificAddress:
+                dict[@"sccp_return_cause"] = @"1: NOTRANS ADDR";
                 break;
-
+            case SCCP_ReturnCause_SubsystemCongestion:
+                dict[@"sccp_return_cause"] = @"2: CONGESTION";
+                break;
+            case SCCP_ReturnCause_SubsystemFailure:
+                dict[@"sccp_return_cause"] = @"3: SSFAIL";
+                break;
+            case SCCP_ReturnCause_Unequipped:
+                dict[@"sccp_return_cause"] = @"4: UNEQUIPPED";
+                break;
+            case SCCP_ReturnCause_MTPFailure:
+                dict[@"sccp_return_cause"] = @"5: MTPFAIL";
+                break;
+            case SCCP_ReturnCause_NetworkCongestion:
+                dict[@"sccp_return_cause"] = @"6: NETCONGEST";
+                break;
+            case SCCP_ReturnCause_Unqualified:
+                dict[@"sccp_return_cause"] = @"7: UNQUALIFIED";
+                break;
+            case SCCP_ReturnCause_ErrorInMessageTransport:
+                dict[@"sccp_return_cause"] = @"8: ERROR IN MSGTRANS";
+                break;
+            case SCCP_ReturnCause_ErrorInLocalProcessing:
+                dict[@"sccp_return_cause"] = @"9: ERROR LOCAL PROC";
+                break;
+            case SCCP_ReturnCause_DestinationCannotPerformReassembly:
+                dict[@"sccp_return_cause"] = @"10: REASSEMBLY NOT SUPP";
+                break;
+            case SCCP_ReturnCause_SCCPFailure:
+                dict[@"sccp_return_cause"] = @"11: SCCPFAILURE";
+                break;
+            case SCCP_ReturnCause_HopCounterViolation:
+                dict[@"sccp_return_cause"] = @"12: HOPCOUNT";
+                break;
+            case SCCP_ReturnCause_SegmentationNotSupported:
+                dict[@"sccp_return_cause"] = @"13: SEGMENTATION NOTSUPP";
+                break;
+            case SCCP_ReturnCause_SegmentationFailure:
+                dict[@"sccp_return_cause"] = @"14: SEGMENTATION FAILURE";
+                break;
+            case SCCP_ReturnCause_not_set:
+            default:
+                    dict[@"sccp_return_cause"] = @"";
+                    break;
+        }
     }
-    DICT_SET_STRING(dict,@"incomingTcapAsn1",[((UMASN1Object *)_incomingTcapAsn1) jsonCompactString ]);
-    DICT_SET_STRING(dict,@"incomingTcapBegin",[((UMASN1Object *)_incomingTcapBegin) jsonCompactString ]);
-    DICT_SET_STRING(dict,@"incomingTcapContinue",[((UMASN1Object *)_incomingTcapContinue) jsonCompactString ]);
-    DICT_SET_STRING(dict,@"incomingTcapEnd",[((UMASN1Object *)_incomingTcapEnd) jsonCompactString ]);
-    DICT_SET_STRING(dict,@"incomingTcapAbort",[((UMASN1Object *)_incomingTcapAbort) jsonCompactString ]);
-    DICT_SET_STRING(dict,@"incomingTcapUnidirectional",[((UMASN1Object *)_incomingTcapUnidirectional) jsonCompactString]);
-    switch(_incomingTcapCommand)
-    {
-        case TCAP_TAG_ANSI_UNIDIRECTIONAL:
-            dict[@"incomingTcapCommand"] = @"ANSI_UNIDIRECTIONAL";
-            break;
-        case TCAP_TAG_ANSI_QUERY_WITH_PERM:
-            dict[@"incomingTcapCommand"] = @"ANSI_QUERY_WITH_PERM:";
-            break;
-        case TCAP_TAG_ANSI_QUERY_WITHOUT_PERM:
-            dict[@"incomingTcapCommand"] = @"ANSI_QUERY_WITHOUT_PERM";
-            break;
-        case TCAP_TAG_ANSI_RESPONSE:
-            dict[@"incomingTcapCommand"] = @"ANSI_RESPONSE";
-            break;
-        case TCAP_TAG_ANSI_CONVERSATION_WITH_PERM:
-            dict[@"incomingTcapCommand"] = @"CONVERSATION_WITH_PERM";
-            break;
-        case TCAP_TAG_ANSI_CONVERSATION_WITHOUT_PERM:
-            dict[@"incomingTcapCommand"] = @"ANSI_CONVERSATION_WITHOUT_PERM";
-            break;
-
-        case TCAP_TAG_ANSI_ABORT:
-            dict[@"incomingTcapCommand"] = @"ANSI_ABORT";
-            break;
-                /* ITU commands are equal to asn1.tag number */
-        case TCAP_TAG_ITU_UNIDIRECTIONAL:
-            dict[@"incomingTcapCommand"] = @"UNIDIRECTIONAL";
-            break;
-        case TCAP_TAG_ITU_BEGIN:
-            dict[@"incomingTcapCommand"] = @"BEGIN";
-            break;
-        case TCAP_TAG_ITU_END:
-            dict[@"incomingTcapCommand"] = @"END";
-            break;
-        case TCAP_TAG_ITU_CONTINUE:
-            dict[@"incomingTcapCommand"] = @"CONTINUE";
-            break;
-        case TCAP_TAG_ITU_ABORT:
-            dict[@"incomingTcapCommand"] = @"ABORT";
-            break;
-        default:
-            dict[@"incomingTcapCommand"] = @"";
-            break;
-    }
-
-    DICT_SET_STRING(dict,@"incomingApplicationContext",_incomingApplicationContext);
-    DICT_SET_STRING(dict,@"incomingGsmMapAsn1",[_incomingGsmMapAsn1 jsonCompactString]);
-    DICT_SET_INTEGER(dict,@"incomingGsmMapOperation",_incomingGsmMapOperation);
-    DICT_SET_INTEGER(dict,@"incomingCategory",_incomingCategory);
-    DICT_SET_STRING(dict,@"incomingLocalTransactionId",_incomingLocalTransactionId);
-    DICT_SET_STRING(dict,@"incomingRemoteTransactionId",_incomingRemoteTransactionId);
-    DICT_SET_BOOL(dict,@"canNotDecode",_canNotDecode);
-    DICT_SET_STRING(dict,@"incomingRemoteTransactionId",_incomingRemoteTransactionId);
-    DICT_SET_STRING(dict,@"tags",[[_tags allKeys] jsonCompactString]);
-    DICT_SET_STRING(dict,@"vars",[_vars jsonCompactString]);
-    DICT_SET_STRING(dict,@"rerouteDestinationGroup",_rerouteDestinationGroup.name);
     return dict;
 }
 @end

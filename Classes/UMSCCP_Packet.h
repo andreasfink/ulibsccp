@@ -92,6 +92,8 @@
     UMSynchronizedDictionary    *_vars;    
     SccpDestinationGroup        *_rerouteDestinationGroup;
     UMLogLevel                  _logLevel;
+    NSString                    *_incoming_tcap_otid;
+    NSString                    *_incoming_tcap_dtid;
 
     NSString                    *_msisdn;
     NSString                    *_imsi;
@@ -157,9 +159,9 @@
 @property(readwrite,strong,atomic)  UMTCAP_itu_asn1_end			*incomingTcapEnd;
 @property(readwrite,strong,atomic)  UMTCAP_itu_asn1_abort		*incomingTcapAbort;
 @property(readwrite,strong,atomic)  UMTCAP_itu_asn1_unidirectional *incomingTcapUnidirectional;
+@property(readwrite,assign,atomic)  int                      incomingTcapCommand; /* UMTCAP_Command */
 
 @property(readwrite,strong,atomic)  UMASN1Object            *incomingGsmMapAsn1;/* this can be set by filters */
-@property(readwrite,assign,atomic)  int                     incomingTcapCommand; /* UMTCAP_Command */
 @property(readwrite,strong,atomic)  NSString                *incomingApplicationContext;
 @property(readwrite,assign,atomic)  int                     incomingGsmMapOperation;
 @property(readwrite,assign,atomic)  int                     incomingCategory;
@@ -177,6 +179,8 @@
 @property(readwrite,strong,atomic) NSString                    *hlr;
 @property(readwrite,strong,atomic) NSString                    *msc;
 
+@property(readwrite,strong,atomic) NSString                    *incoming_tcap_otid;
+@property(readwrite,strong,atomic) NSString                    *incoming_tcap_dtid;
 
 - (NSString *) incomingPacketType;
 - (NSString *) outgoingPacketType;
@@ -188,6 +192,6 @@
 - (BOOL) hasTag:(NSString *)tag;
 - (void)clearAllTags;
 
-- (NSDictionary *)dictionaryValue;
+- (UMSynchronizedSortedDictionary *)dictionaryValue;
 @end
 

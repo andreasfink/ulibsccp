@@ -75,6 +75,7 @@
     [label appendToMutableData:rawMtp3];
     [rawMtp3 appendData:_data];
     _packet.incomingMtp3Data = rawMtp3;
+
     if(_options==NULL)
     {
         _options = [[NSMutableDictionary alloc]init];

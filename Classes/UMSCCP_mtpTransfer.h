@@ -27,8 +27,8 @@
     UMMTP3PointCode *_opc;
     UMMTP3PointCode *_dpc;
     NSMutableDictionary *_options;
-    UMLayerSCCP *_sccpLayer;
-    UMLayerMTP3 *_mtp3Layer;
+    UMLayerSCCP     *_sccpLayer;
+    UMLayerMTP3     *_mtp3Layer;
     SccpAddress     *_src;
     SccpAddress     *_dst;
     NSData          *_sccp_pdu;
