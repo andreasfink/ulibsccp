@@ -127,7 +127,7 @@ static int segmentReferenceId;
         BOOL useXUDT        = [_options[@"sccp-xudt"] boolValue];
         BOOL useLUDT        = [_options[@"sccp-ludt"] boolValue];
         BOOL useSegments    = [_options[@"sccp-segment"] boolValue];
-        int segmentSize    = [_options[@"sccp-segment-size"] boolValue];
+        int segmentSize    = [_options[@"sccp-segment-size"] intValue];
         NSDictionary *sccp_options = _options[@"sccp-optional"];
         NSMutableData *optional_data;
         if(sccp_options)
@@ -237,6 +237,10 @@ static int segmentReferenceId;
                                                 calledAddressSize:cds
                                                     usingSegments:useSegments
                                                          provider:_sccpLayer.mtp3];
+                if((segmentSize !=0) && (maxPdu>segmentSize))
+                {
+                    maxPdu = segmentSize;
+                }
 
                 if(_data.length > maxPdu)
                 {
@@ -258,7 +262,10 @@ static int segmentReferenceId;
                                                 calledAddressSize:cds
                                                     usingSegments:useSegments
                                                          provider:_sccpLayer.mtp3];
-
+                if((segmentSize !=0) && (maxPdu>segmentSize))
+                {
+                    maxPdu = segmentSize;
+                }
                 if(_data.length > maxPdu)
                 {
                     /* no choice, we must segment */
@@ -269,15 +276,14 @@ static int segmentReferenceId;
                                                     calledAddressSize:cds
                                                         usingSegments:useSegments
                                                              provider:_sccpLayer.mtp3];
-
+                    if((segmentSize !=0) && (maxPdu>segmentSize))
+                    {
+                        maxPdu = segmentSize;
+                    }
                 }
             }
             if(useSegments) /* we want or must use segments. we prepare it only here */
             {
-                if(segmentSize < maxPdu)
-                {
-                    maxPdu = segmentSize;
-                }
                 int ref;
                 @synchronized(self)
                 {
@@ -289,7 +295,7 @@ static int segmentReferenceId;
                 _dataSegments = [[NSMutableArray alloc]init];
                 UMSCCP_Segment *segment = [[UMSCCP_Segment alloc]init];
                 segment.first = YES;
-                segment.class1 = YES;
+                segment.class1 = (_protocolClass == SCCP_CLASS_INSEQ_CL);
                 segmentReferenceId = ref;
 
                 const uint8_t *bytes = _data.bytes;
@@ -311,7 +317,7 @@ static int segmentReferenceId;
 
                     segment = [[UMSCCP_Segment alloc]init];
                     segment.first = NO;
-                    segment.class1 = YES;
+                    segment.class1 = (_protocolClass == SCCP_CLASS_INSEQ_CL);
                     segmentReferenceId = ref;
                     p = p + m;
                 }
@@ -340,10 +346,39 @@ static int segmentReferenceId;
                     packet.incomingCalledPartyCountry = [packet.incomingCalledPartyAddress country];
                     packet.incomingServiceClass = _protocolClass;
                     packet.incomingHandling = _handling;
-                    packet.incomingSccpData = _data;
+                    packet.incomingSccpData = s.data;
                     packet.incomingOptions = _options;
                     packet.incomingMaxHopCount = _maxHopCount;
-                    packet.incomingOptionalData = optional_data;
+                    uint8_t sh[6];
+                    uint8_t firstByte = 0;
+                    if(s.first)
+                    {
+                        firstByte = firstByte | 0x80;
+                    }
+                    if(s.class1)
+                    {
+                        firstByte = firstByte | 0x40;
+                    }
+                    firstByte = firstByte | (s.remainingSegment & 0x0F); /* remaining segments counter */
+                    sh[0] = 0x10; /* segmentation header */
+                    sh[1] = 4; /* lenght */
+                    sh[2] = firstByte;
+                    sh[3] = (s.reference >> 16) & 0xff;
+                    sh[4] = (s.reference >> 8) & 0xff;
+                    sh[5] = (s.reference >> 0) & 0xff;
+
+                    NSMutableData *optional_data_of_segment = [[NSMutableData alloc]init];
+                    [optional_data_of_segment appendBytes:&sh length:6];
+                    if(optional_data.length == 0)
+                    {
+                        char b = 0;
+                        [optional_data_of_segment appendBytes:&b length:1]; /* end of optional parameters */
+                    }
+                    else
+                    {
+                        [optional_data_of_segment appendData:optional_data]; /* already includes the end of optional parameters */
+                    }
+                    packet.incomingOptionalData = optional_data_of_segment;
                     packet.incomingServiceType = SCCP_XUDT;
                     packet.incomingFromLocal = YES;
                     _statisticsSection2 = UMSCCP_StatisticSection_XUDT_TX;
@@ -364,6 +399,9 @@ static int segmentReferenceId;
             else /* we have pure data only */
             {
                 UMSCCP_Packet *packet = [[UMSCCP_Packet alloc]init];
+                packet.sccp = _sccpLayer;
+                packet.logFeed = _sccpLayer.logFeed;
+                packet.logLevel = _sccpLayer.logLevel;
                 packet.incomingMtp3Layer = _sccpLayer.mtp3;
                 packet.incomingCallingPartyAddress = _src;
                 packet.incomingCalledPartyAddress = _dst;
