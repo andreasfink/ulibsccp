@@ -123,8 +123,11 @@ static int segmentReferenceId;
         NSUInteger cas = srcEncoded.length;
         NSUInteger cds = dstEncoded.length;
         NSUInteger maxPdu = 0;
+        BOOL useUDT         = [_options[@"sccp-udt"] boolValue];
         BOOL useXUDT        = [_options[@"sccp-xudt"] boolValue];
+        BOOL useLUDT        = [_options[@"sccp-ludt"] boolValue];
         BOOL useSegments    = [_options[@"sccp-segment"] boolValue];
+        int segmentSize    = [_options[@"sccp-segment-size"] boolValue];
         NSDictionary *sccp_options = _options[@"sccp-optional"];
         NSMutableData *optional_data;
         if(sccp_options)
@@ -271,6 +274,10 @@ static int segmentReferenceId;
             }
             if(useSegments) /* we want or must use segments. we prepare it only here */
             {
+                if(segmentSize < maxPdu)
+                {
+                    maxPdu = segmentSize;
+                }
                 int ref;
                 @synchronized(self)
                 {
