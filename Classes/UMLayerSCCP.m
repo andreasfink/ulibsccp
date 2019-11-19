@@ -928,7 +928,7 @@
     
     if(self.logLevel <=UMLOG_DEBUG)
     {
-        NSString *s = [NSString stringWithFormat:@"findRoutes:%@ returns:\n\tdestinationGroup=%@\n\tcause=%d\n\tnewCalledAddress=%@\n\tlocalUser=%@\n\tfromLocal=%@\n",dst,grp,causeValue,called_out,localUser,packet.incomingFromLocal ? @"YES" : @"NO"];
+        NSString *s = [NSString stringWithFormat:@"findRoutes:%@ returns:\n\tdestinationGroup=%@\n\tcause=%d\n\tnewCalledAddress=%@\n\tlocalUser=%@\n\tfromLocal=%@\n",dst,[grp descriptionWithRt:_mtp3RoutingTable],causeValue,called_out,localUser,packet.incomingFromLocal ? @"YES" : @"NO"];
         [self logDebug:s];
     }
 
@@ -982,13 +982,38 @@
 
     else if(grp)
     {
+        /* routing to */
+
+        
+        
         SccpDestination *dest = [grp chooseNextHopWithRoutingTable:_mtp3RoutingTable];
+        if(self.logLevel <=UMLOG_DEBUG)
+        {
+            NSMutableString *s = [[NSMutableString alloc]init];
+            [s appendFormat:@"[grp  chooseNextHopWithRoutingTable:_mtp3RoutingTable] returns %@",dest];
+            [self.logFeed debugText:s];
+        }
+
+
         if(dest.ntt)
         {
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                NSMutableString *s = [[NSMutableString alloc]init];
+                [s appendFormat:@"Set NTT %@",dest.ntt];
+                [self.logFeed debugText:s];
+            }
+
             packet.outgoingCalledPartyAddress.tt.tt = [dest.ntt intValue];
         }
         if(_ntt)
         {
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                NSMutableString *s = [[NSMutableString alloc]init];
+                [s appendFormat:@"Set NTT (global) %@",dest.ntt];
+                [self.logFeed debugText:s];
+            }
             packet.outgoingCalledPartyAddress.tt = _ntt;
         }
 
