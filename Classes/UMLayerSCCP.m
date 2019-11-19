@@ -983,9 +983,6 @@
     else if(grp)
     {
         /* routing to */
-
-        
-        
         SccpDestination *dest = [grp chooseNextHopWithRoutingTable:_mtp3RoutingTable];
         if(self.logLevel <=UMLOG_DEBUG)
         {
@@ -1019,6 +1016,11 @@
 
         if(dest.dpc)
         {
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                NSString * s = [NSString stringWithFormat:@"Set DPC=%@",dest.dpc];
+                [self.logFeed debugText:s];
+            }
             pc = dest.dpc;
         }
         packet.outgoingDpc = pc;
