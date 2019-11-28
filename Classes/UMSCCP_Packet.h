@@ -17,6 +17,7 @@
 @class UMTCAP_itu_asn1_end;
 @class UMTCAP_itu_asn1_abort;
 @class UMTCAP_itu_asn1_unidirectional;
+@class UMSMS;
 
 @interface UMSCCP_Packet : UMObject
 {
@@ -100,6 +101,8 @@
     NSString                    *_smsc;
     NSString                    *_hlr;
     NSString                    *_msc;
+    UMSMS                       *_sms;
+    NSString                    *_partsInfo;
 }
 
 
@@ -181,6 +184,8 @@
 
 @property(readwrite,strong,atomic) NSString                    *incoming_tcap_otid;
 @property(readwrite,strong,atomic) NSString                    *incoming_tcap_dtid;
+@property(readwrite,strong,atomic) UMSMS                       *sms;
+@property(readwrite,strong,atomic)  NSString                    *partsInfo;
 
 - (NSString *) incomingPacketType;
 - (NSString *) outgoingPacketType;

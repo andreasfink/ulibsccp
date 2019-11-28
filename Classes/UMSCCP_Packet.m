@@ -650,7 +650,7 @@ typedef enum UMTCAP_Command
 }
 
 /* this is for SMS filters Other fields are appended in the filters */
-- (UMSynchronizedSortedDictionary *)dictionaryValue2
+- (UMSynchronizedSortedDictionary *)dictionaryValueForwardSM
 {
     UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
 
