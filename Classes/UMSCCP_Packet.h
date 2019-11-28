@@ -193,5 +193,7 @@
 - (void)clearAllTags;
 
 - (UMSynchronizedSortedDictionary *)dictionaryValue;
+- (UMSynchronizedSortedDictionary *)dictionaryValueForwardSM;
+
 @end
 

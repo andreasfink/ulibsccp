@@ -648,4 +648,49 @@ typedef enum UMTCAP_Command
     }
     return dict;
 }
+
+/* this is for SMS filters Other fields are appended in the filters */
+- (UMSynchronizedSortedDictionary *)dictionaryValue2
+{
+    UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
+
+#define DICT_SET_STRING(dict,name,str)  \
+    { \
+        NSString *s = str; \
+        if(s) \
+        { \
+            dict[name] = s; \
+        } \
+        else \
+        { \
+            dict[name] = @""; \
+        } \
+    }
+
+#define DICT_SET_INTEGER(dict,name,i)    dict[name] = [NSString stringWithFormat:@"%d",i];
+#define DICT_SET_BOOL(dict,name,b)    dict[name] =  b ? @"1" : @"0";
+
+    DICT_SET_STRING(dict,@"msisdn",_msisdn);
+    DICT_SET_STRING(dict,@"transparent",@"1");
+    DICT_SET_STRING(dict,@"date_srism",@"");
+    DICT_SET_STRING(dict,@"date_srism_resp",@"");
+    DICT_SET_STRING(dict,@"date_forwardsm",@"");
+    DICT_SET_STRING(dict,@"date_forwardsm_resp",@"");
+
+    DICT_SET_INTEGER(dict,@"sccp_inbound_calling_forwardsm_nai",_incomingCallingPartyAddress.nai.nai);
+    DICT_SET_INTEGER(dict,@"sccp_inbound_calling_forwardsm_npi",_incomingCallingPartyAddress.npi.npi);
+    DICT_SET_INTEGER(dict,@"sccp_inbound_calling_forwardsm_ssn",_incomingCallingPartyAddress.ssn.ssn);
+    DICT_SET_INTEGER(dict,@"sccp_inbound_calling_forwardsm_tt", _incomingCallingPartyAddress.tt.tt);
+    DICT_SET_STRING(dict,@"sccp_inbound_calling_forwardsm_address",_incomingCallingPartyAddress.address);
+    DICT_SET_STRING(dict,@"sccp_inbound_calling_forwardsm_country",_incomingCallingPartyAddress.country); /* NEW */
+
+    DICT_SET_INTEGER(dict,@"sccp_inbound_called_forwardsm_nai",_incomingCalledPartyAddress.nai.nai);
+    DICT_SET_INTEGER(dict,@"sccp_inbound_called_forwardsm_npi",_incomingCalledPartyAddress.npi.npi);
+    DICT_SET_INTEGER(dict,@"sccp_inbound_called_forwardsm_ssn",_incomingCalledPartyAddress.ssn.ssn);
+    DICT_SET_INTEGER(dict,@"sccp_inbound_called_forwardsm_tt", _incomingCalledPartyAddress.tt.tt);
+    DICT_SET_STRING(dict,@"sccp_inbound_called_forwardsm_address",_incomingCalledPartyAddress.address);
+    DICT_SET_STRING(dict,@"sccp_inbound_called_forwardsm_country",_incomingCalledPartyAddress.country); /* NEW */
+
+    return dict;
+}
 @end
