@@ -31,6 +31,10 @@
     if(self)
     {
 		_packet = [[UMSCCP_Packet alloc]init];
+        if(xoptions[@"created-timestamp"])
+        {
+            _packet.created = xoptions[@"created-timestamp"];
+        }
 		_packet.sccp = layer;
         _packet.logFeed = layer.logFeed;
         _packet.logLevel = layer.logLevel;
