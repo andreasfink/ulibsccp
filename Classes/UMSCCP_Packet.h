@@ -103,6 +103,7 @@
     NSString                    *_msc;
     UMSMS                       *_sms;
     NSString                    *_partsInfo;
+    BOOL                        _cdrWritten;
 }
 
 
@@ -185,7 +186,8 @@
 @property(readwrite,strong,atomic) NSString                    *incoming_tcap_otid;
 @property(readwrite,strong,atomic) NSString                    *incoming_tcap_dtid;
 @property(readwrite,strong,atomic) UMSMS                       *sms;
-@property(readwrite,strong,atomic)  NSString                    *partsInfo;
+@property(readwrite,strong,atomic) NSString                    *partsInfo;
+@property(readwrite,assign,atomic) BOOL                        cdrWritten;
 
 - (NSString *) incomingPacketType;
 - (NSString *) outgoingPacketType;
