@@ -605,43 +605,87 @@
                     [self.logFeed debugText:@"calling findNextHopForDestination:"];
                 }
                 SccpGttRoutingTableEntry *rte = [gttSelector findNextHopForDestination:called1];
-                if(rte.routeTo == NULL)
+                if(rte.deliverLocal)
                 {
                     if(self.logLevel <=UMLOG_DEBUG)
                     {
-                        [self.logFeed debugText:[NSString stringWithFormat:@"routeTo is NULL, lets use routeToName:%@ instead",rte.routeToName]];
+                        [self.logFeed debugText:@" Route by GT to local"];
                     }
-                    rte.routeTo = [registry getDestinationGroupByName:rte.routeToName];
-                }
-                
-                destination = rte.routeTo;
-                if(self.logLevel <= UMLOG_DEBUG)
-                {
-                    [self.logFeed debugText:[NSString stringWithFormat:@" destination is set to %@",destination.description]];
-                }
 
-                if(destination == NULL)
-                {
-                    if(self.logLevel <=UMLOG_DEBUG)
+                    id<UMSCCP_UserProtocol> upperLayer = [self getUserForSubsystem:called1.ssn number:called1];
+                    if(upperLayer == NULL)
                     {
-                        [self.logFeed debugText:@"setting cause to NoTranslationForThisSpecificAddress"];
+                        [self.logFeed majorErrorText:[NSString stringWithFormat:@"no upper layer found for %@",called1.debugDescription]];
+                        *cause = SCCP_ReturnCause_Unequipped;
                     }
-                    *cause = SCCP_ReturnCause_NoTranslationForThisSpecificAddress;
+                    else
+                    {
+                        if(self.logLevel <=UMLOG_DEBUG)
+                        {
+                            [self.logFeed debugText:@" Route to upper layer"];
+                        }
+                        if(gttSelector.postTranslation)
+                        {
+                            called1 = [gttSelector.postTranslation translateAddress:called1];
+                            if(self.logLevel <= UMLOG_DEBUG)
+                            {
+                                [self.logFeed debugText:[NSString stringWithFormat:@"post-translation: ->%@",called1]];
+                            }
+                        }
+                        if(called_out)
+                        {
+                            *called_out = called1;
+                            if(self.logLevel <=UMLOG_DEBUG)
+                            {
+                                [self.logFeed debugText:@" *called out is set"];
+                            }
+                        }
+                        if(localUser)
+                        {
+                            *localUser = upperLayer;
+                        }
+                    }
                 }
-                if(gttSelector.postTranslation)
+                else
                 {
-                    called1 = [gttSelector.postTranslation translateAddress:called1];
+                    if(rte.routeTo == NULL)
+                    {
+                        if(self.logLevel <=UMLOG_DEBUG)
+                        {
+                            [self.logFeed debugText:[NSString stringWithFormat:@"routeTo is NULL, lets use routeToName:%@ instead",rte.routeToName]];
+                        }
+                        rte.routeTo = [registry getDestinationGroupByName:rte.routeToName];
+                    }
+
+                    destination = rte.routeTo;
                     if(self.logLevel <= UMLOG_DEBUG)
                     {
-                        [self.logFeed debugText:[NSString stringWithFormat:@"post-translation: ->%@",called1]];
+                        [self.logFeed debugText:[NSString stringWithFormat:@" destination is set to %@",destination.description]];
                     }
-                }
-                if(called_out)
-                {
-                    *called_out = called1;
-                    if(self.logLevel <=UMLOG_DEBUG)
+
+                    if(destination == NULL)
                     {
-                        [self.logFeed debugText:@" *called out is set"];
+                        if(self.logLevel <=UMLOG_DEBUG)
+                        {
+                            [self.logFeed debugText:@"setting cause to NoTranslationForThisSpecificAddress"];
+                        }
+                        *cause = SCCP_ReturnCause_NoTranslationForThisSpecificAddress;
+                    }
+                    if(gttSelector.postTranslation)
+                    {
+                        called1 = [gttSelector.postTranslation translateAddress:called1];
+                        if(self.logLevel <= UMLOG_DEBUG)
+                        {
+                            [self.logFeed debugText:[NSString stringWithFormat:@"post-translation: ->%@",called1]];
+                        }
+                    }
+                    if(called_out)
+                    {
+                        *called_out = called1;
+                        if(self.logLevel <=UMLOG_DEBUG)
+                        {
+                            [self.logFeed debugText:@" *called out is set"];
+                        }
                     }
                 }
             }
