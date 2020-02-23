@@ -454,6 +454,11 @@ typedef enum UMTCAP_Command
     DICT_SET_STRING(dict,@"mtp_inbound_instance",[_incomingMtp3Layer layerName]);
     DICT_SET_STRING(dict,@"mtp_inbound_linkset",_incomingLinkset);
     DICT_SET_STRING(dict,@"mtp_inbound_localuser",[_incomingLocalUser layerName]);
+    DICT_SET_INTEGER(dict,@"mtp3_srism_opc",_incomingOpc.integerValue);
+    DICT_SET_INTEGER(dict,@"mtp3_srism_dpc",_incomingDpc.integerValue);
+    DICT_SET_INTEGER(dict,@"mtp3_forwardsm_opc",_incomingOpc.integerValue);
+    DICT_SET_INTEGER(dict,@"mtp3_forwardsm_dpc",_incomingDpc.integerValue);
+
     DICT_SET_INTEGER(dict,@"mtp_inbound_opc",_incomingOpc.integerValue);
     DICT_SET_INTEGER(dict,@"mtp_inbound_dpc",_incomingDpc.integerValue);
     DICT_SET_INTEGER(dict,@"mtp_inbound_si",3); /* we are in SCCP so there's nothing else possible */
