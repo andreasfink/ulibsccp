@@ -31,6 +31,42 @@ typedef enum UMTCAP_Command
 } UMTCAP_Command;
 #endif
 
+
+
+
+#define DICT_SET_STRING(dict,name,str)  \
+    { \
+        id ptr = str; \
+        NSString *s; \
+        if([ptr isKindOfClass:[NSString class]]) \
+        { \
+            s = (NSString *)ptr; \
+        } \
+        else if([ptr isKindOfClass:[NSDate class]]) \
+        { \
+            s = [ptr stringValue]; \
+        } \
+        else if([ptr isKindOfClass:[NSNumber class]]) \
+        { \
+            s = [ptr stringValue]; \
+        } \
+        else \
+        { \
+            NSLog(@"Can  not convert %@ to string",[ptr class]); \
+        } \
+        if(s.length> 0) \
+        { \
+            dict[name] = s; \
+        } \
+        else \
+        { \
+            dict[name] = @""; \
+        } \
+    }
+
+#define DICT_SET_INTEGER(dict,name,i)    dict[name] = [NSString stringWithFormat:@"%d",i];
+#define DICT_SET_BOOL(dict,name,b)       dict[name] =  b ? @"1" : @"0";
+
 @implementation UMSCCP_Packet
 
 - (UMSCCP_Packet *)init
@@ -423,23 +459,8 @@ typedef enum UMTCAP_Command
 {
     UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
 
-#define DICT_SET_STRING(dict,name,str)  \
-    { \
-        NSString *s = str; \
-        if(s) \
-        { \
-            dict[name] = s; \
-        } \
-        else \
-        { \
-            dict[name] = @""; \
-        } \
-    }
 
-#define DICT_SET_INTEGER(dict,name,i)    dict[name] = [NSString stringWithFormat:@"%d",i];
-#define DICT_SET_BOOL(dict,name,b)    dict[name] =  b ? @"1" : @"0";
-
-    DICT_SET_STRING(dict,@"timestamp",[_created stringValue]);
+    DICT_SET_STRING(dict,@"timestamp",_created);
     DICT_SET_STRING(dict,@"msisdn",_msisdn);
     DICT_SET_STRING(dict,@"imsi",_imsi);
     DICT_SET_STRING(dict,@"transparent",@"1");
@@ -659,21 +680,6 @@ typedef enum UMTCAP_Command
 {
     UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
 
-#define DICT_SET_STRING(dict,name,str)  \
-    { \
-        NSString *s = str; \
-        if(s) \
-        { \
-            dict[name] = s; \
-        } \
-        else \
-        { \
-            dict[name] = @""; \
-        } \
-    }
-
-#define DICT_SET_INTEGER(dict,name,i)    dict[name] = [NSString stringWithFormat:@"%d",i];
-#define DICT_SET_BOOL(dict,name,b)    dict[name] =  b ? @"1" : @"0";
 
     DICT_SET_STRING(dict,@"msisdn",_msisdn);
     DICT_SET_STRING(dict,@"transparent",@"1");
