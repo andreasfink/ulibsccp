@@ -52,7 +52,7 @@ typedef enum UMTCAP_Command
         } \
         else \
         { \
-            NSLog(@"Can  not convert %@ to string",[ptr class]); \
+            NSLog(@"Can  not convert field %@ (type=%@) to string",name,[ptr class]); \
         } \
         if(s.length> 0) \
         { \
@@ -459,8 +459,8 @@ typedef enum UMTCAP_Command
 {
     UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
 
-
-    DICT_SET_STRING(dict,@"timestamp",_created);
+    NSString *s = [_created stringValue];
+    DICT_SET_STRING(dict,@"timestamp",s);
     DICT_SET_STRING(dict,@"msisdn",_msisdn);
     DICT_SET_STRING(dict,@"imsi",_imsi);
     DICT_SET_STRING(dict,@"transparent",@"1");
