@@ -21,9 +21,9 @@
 
 @interface UMSCCP_mtpTransfer : UMLayerTask
 {
-    NSData *_data;
-    int _si;
-    int _ni;
+    NSData          *_data;
+    int             _si;
+    int             _ni;
     UMMTP3PointCode *_opc;
     UMMTP3PointCode *_dpc;
     NSMutableDictionary *_options;
