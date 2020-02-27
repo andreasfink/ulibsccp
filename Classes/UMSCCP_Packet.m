@@ -36,27 +36,34 @@ typedef enum UMTCAP_Command
 
 #define DICT_SET_STRING(dict,name,str)  \
     { \
-        id ptr = str; \
-        NSString *s; \
-        if([ptr isKindOfClass:[NSString class]]) \
+        if(str) \
         { \
-            s = (NSString *)ptr; \
-        } \
-        else if([ptr isKindOfClass:[NSDate class]]) \
-        { \
-            s = [ptr stringValue]; \
-        } \
-        else if([ptr isKindOfClass:[NSNumber class]]) \
-        { \
-            s = [ptr stringValue]; \
-        } \
-        else \
-        { \
-            NSLog(@"Can  not convert field %@ (type=%@) to string",name,[ptr class]); \
-        } \
-        if(s.length> 0) \
-        { \
-            dict[name] = s; \
+id ptr = str; \
+            NSString *s; \
+            if([ptr isKindOfClass:[NSString class]]) \
+            { \
+                s = (NSString *)ptr; \
+            } \
+            else if([ptr isKindOfClass:[NSDate class]]) \
+            { \
+                s = [ptr stringValue]; \
+            } \
+            else if([ptr isKindOfClass:[NSNumber class]]) \
+            { \
+                s = [ptr stringValue]; \
+            } \
+            else \
+            { \
+                NSLog(@"Can  not convert field %@ (type=%@) to string",name,[ptr class]); \
+            } \
+            if(s.length> 0) \
+            { \
+                dict[name] = s; \
+            } \
+            else \
+            { \
+                dict[name] = @""; \
+            } \
         } \
         else \
         { \
