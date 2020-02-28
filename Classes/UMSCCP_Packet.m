@@ -471,14 +471,6 @@ typedef enum UMTCAP_Command
     DICT_SET_STRING(dict,@"msisdn",_msisdn);
     DICT_SET_STRING(dict,@"imsi",_imsi);
     DICT_SET_STRING(dict,@"transparent",@"1");
-
-    /*
-    date_srism,
-    date_srism_resp,
-    date_forwardsm,
-    date_forwardsm_resp,
-     */
-
     DICT_SET_STRING(dict,@"mtp_inbound_instance",[_incomingMtp3Layer layerName]);
     DICT_SET_STRING(dict,@"mtp_inbound_linkset",_incomingLinkset);
     DICT_SET_STRING(dict,@"mtp_inbound_localuser",[_incomingLocalUser layerName]);
