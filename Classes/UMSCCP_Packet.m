@@ -38,7 +38,7 @@ typedef enum UMTCAP_Command
     { \
         if(str) \
         { \
-id ptr = str; \
+            id ptr = str; \
             NSString *s; \
             if([ptr isKindOfClass:[NSString class]]) \
             { \
