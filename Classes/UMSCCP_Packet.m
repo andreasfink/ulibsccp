@@ -467,31 +467,31 @@ typedef enum UMTCAP_Command
     UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
 
     NSString *s = [_created stringValue];
-    DICT_SET_STRING(dict,@"timestamp",s);
-    DICT_SET_STRING(dict,@"msisdn",_msisdn);
-    DICT_SET_STRING(dict,@"imsi",_imsi);
-    DICT_SET_STRING(dict,@"transparent",@"1");
-    DICT_SET_STRING(dict,@"mtp_inbound_instance",[_incomingMtp3Layer layerName]);
-    DICT_SET_STRING(dict,@"mtp_inbound_linkset",_incomingLinkset);
-    DICT_SET_STRING(dict,@"mtp_inbound_localuser",[_incomingLocalUser layerName]);
-    DICT_SET_INTEGER(dict,@"mtp3_srism_opc",_incomingOpc.integerValue);
-    DICT_SET_INTEGER(dict,@"mtp3_srism_dpc",_incomingDpc.integerValue);
-    DICT_SET_INTEGER(dict,@"mtp3_forwardsm_opc",_incomingOpc.integerValue);
-    DICT_SET_INTEGER(dict,@"mtp3_forwardsm_dpc",_incomingDpc.integerValue);
+    DICT_SET_STRING(dict, @"timestamp",s);
+    DICT_SET_STRING(dict, @"msisdn",_msisdn);
+    DICT_SET_STRING(dict, @"imsi",_imsi);
+    DICT_SET_STRING(dict, @"transparent",@"1");
+    DICT_SET_STRING(dict, @"mtp_inbound_instance",[_incomingMtp3Layer layerName]);
+    DICT_SET_STRING(dict, @"mtp_inbound_linkset",_incomingLinkset);
+    DICT_SET_STRING(dict, @"mtp_inbound_localuser",[_incomingLocalUser layerName]);
+    DICT_SET_INTEGER(dict,@"mtp_srism_opc",_incomingOpc.integerValue);
+    DICT_SET_INTEGER(dict,@"mtp_srism_dpc",_incomingDpc.integerValue);
+    DICT_SET_INTEGER(dict,@"mtp_forwardsm_opc",_incomingOpc.integerValue);
+    DICT_SET_INTEGER(dict,@"mtp_forwardsm_dpc",_incomingDpc.integerValue);
+    DICT_SET_STRING(dict, @"mtp_inbound_raw_packet",[_incomingMtp3Data hexString]);
 
     DICT_SET_INTEGER(dict,@"mtp_inbound_opc",_incomingOpc.integerValue);
     DICT_SET_INTEGER(dict,@"mtp_inbound_dpc",_incomingDpc.integerValue);
     DICT_SET_INTEGER(dict,@"mtp_inbound_si",3); /* we are in SCCP so there's nothing else possible */
 
-    DICT_SET_STRING(dict,@"mtp_outbound_instance",[_outgoingMtp3Layer layerName]);
-    DICT_SET_STRING(dict,@"mtp_outbound_linkset",_outgoingLinkset);
-    DICT_SET_STRING(dict,@"mtp_outound_localuser",[_outgoingLocalUser layerName]);
-    DICT_SET_STRING(dict,@"mtp_outbound_linkset",_outgoingLinkset);
+    DICT_SET_STRING(dict, @"mtp_outbound_instance",[_outgoingMtp3Layer layerName]);
+    DICT_SET_STRING(dict, @"mtp_outbound_linkset",_outgoingLinkset);
+    DICT_SET_STRING(dict, @"mtp_outound_localuser",[_outgoingLocalUser layerName]);
+    DICT_SET_STRING(dict, @"mtp_outbound_linkset",_outgoingLinkset);
     DICT_SET_INTEGER(dict,@"mtp_outbound_opc",_outgoingOpc.integerValue);
     DICT_SET_INTEGER(dict,@"mtp_outbound_dpc",_outgoingDpc.integerValue);
     DICT_SET_INTEGER(dict,@"mtp_outbound_si",3); /* we are in SCCP so there's nothing else possible */
 
-    DICT_SET_STRING(dict,@"mtp_inbound_raw_packet",_incomingMtp3Data.hexString);
     /* we skip 'mtp_debug' */
 
     DICT_SET_INTEGER(dict,@"sccp_inbound_calling_nai",_incomingCallingPartyAddress.nai.nai);
