@@ -32,8 +32,6 @@ typedef enum UMTCAP_Command
 #endif
 
 
-
-
 #define DICT_SET_STRING(dict,name,str)  \
     { \
         if(str) \
