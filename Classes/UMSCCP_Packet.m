@@ -468,7 +468,7 @@ typedef enum UMTCAP_Command
     DICT_SET_STRING(dict, @"timestamp",s);
     DICT_SET_STRING(dict, @"msisdn",_msisdn);
     DICT_SET_STRING(dict, @"imsi",_imsi);
-    DICT_SET_STRING(dict, @"transparent",@"1");
+    dict[@"transparent"] = @"1";
     DICT_SET_STRING(dict, @"mtp_inbound_instance",[_incomingMtp3Layer layerName]);
     DICT_SET_STRING(dict, @"mtp_inbound_linkset",_incomingLinkset);
     DICT_SET_STRING(dict, @"mtp_inbound_localuser",[_incomingLocalUser layerName]);
@@ -677,11 +677,11 @@ typedef enum UMTCAP_Command
 {
     UMSynchronizedSortedDictionary *dict = [self dictionaryValue];
     DICT_SET_STRING(dict,@"msisdn",_msisdn);
-    DICT_SET_STRING(dict,@"transparent",@"1");
-    DICT_SET_STRING(dict,@"date_srism",@"");
-    DICT_SET_STRING(dict,@"date_srism_resp",@"");
-    DICT_SET_STRING(dict,@"date_forwardsm",@"");
-    DICT_SET_STRING(dict,@"date_forwardsm_resp",@"");
+    dict[@"transparent"] = @"1";
+    dict[@"date_srism"] = @"";
+    dict[@"date_srism_resp"] =@"";
+    dict[@"date_forwardsm"] = @"";
+    dict[@"date_forwardsm_resp"] = @"";
 
     DICT_SET_INTEGER(dict,@"sccp_inbound_calling_forwardsm_nai",_incomingCallingPartyAddress.nai.nai);
     DICT_SET_INTEGER(dict,@"sccp_inbound_calling_forwardsm_npi",_incomingCallingPartyAddress.npi.npi);
