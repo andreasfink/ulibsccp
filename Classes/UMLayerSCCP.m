@@ -113,6 +113,7 @@
                  ni:(int)ni
         linksetName:(NSString *)linksetName
             options:(NSDictionary *)xoptions
+              ttmap:(UMMTP3TranslationTableMap *)map
 {
     NSMutableDictionary*options;
     if(xoptions)
@@ -125,7 +126,7 @@
     }
     options[@"mtp3-incoming-linkset"] = linksetName;
 
-    UMSCCP_mtpTransfer *task = [[UMSCCP_mtpTransfer alloc]initForSccp:self mtp3:mtp3Layer opc:opc dpc:dpc si:si ni:ni data:data options:options];
+    UMSCCP_mtpTransfer *task = [[UMSCCP_mtpTransfer alloc]initForSccp:self mtp3:mtp3Layer opc:opc dpc:dpc si:si ni:ni data:data options:options map:map];
     [self queueFromLower:task];
 }
 

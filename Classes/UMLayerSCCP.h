@@ -193,7 +193,9 @@ typedef enum SccpGtFileSection
                  si:(int)si
                  ni:(int)ni
         linksetName:(NSString *)linksetName
-            options:(NSDictionary *)options;
+            options:(NSDictionary *)options
+              ttmap:(UMMTP3TranslationTableMap *)map;
+
 
 - (void)mtpPause:(NSData *)data
     callingLayer:(id)mtp3Layer

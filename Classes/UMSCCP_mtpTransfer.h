@@ -50,12 +50,14 @@
     UMSCCP_StatisticSection _statsSection;
     UMSCCP_StatisticSection _statsSection2;
 	UMSCCP_Packet		    *_packet;
+    UMMTP3TranslationTableMap *_map;
 }
 
 @property(readwrite,strong,atomic)  UMSynchronizedSortedDictionary *decodedJson;
 @property(readwrite,strong,atomic)  SccpAddress *decodedCalling;
 @property(readwrite,strong,atomic)  SccpAddress *decodedCalled;
 @property(readwrite,strong,atomic)  NSData *decodedData;
+@property(readwrite,strong,atomic)  UMMTP3TranslationTableMap *map;
 
 - (UMSCCP_mtpTransfer *)initForSccp:(UMLayerSCCP *)layer
                                mtp3:(UMLayerMTP3 *)mtp3
@@ -64,7 +66,7 @@
                                  si:(int)si
                                  ni:(int)ni
                                data:(NSData *)data
-                            options:(NSDictionary *)options;
-
+                            options:(NSDictionary *)options
+                                map:(UMMTP3TranslationTableMap *)map;
 
 @end

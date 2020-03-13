@@ -25,7 +25,9 @@
                                  si:(int)xsi
                                  ni:(int)xni
                                data:(NSData *)xdata
-                            options:(NSDictionary *)xoptions;
+                            options:(NSDictionary *)xoptions
+                                map:(UMMTP3TranslationTableMap *)ttmap;
+
 {
     self = [super initWithName:@"UMSCCP_mtpTransfer" receiver:layer sender:mtp3 requiresSynchronisation:NO];
     if(self)
@@ -40,6 +42,7 @@
         _packet.logLevel = layer.logLevel;
 		_packet.incomingOpc = xopc;
 		_packet.incomingDpc = xdpc;
+        _map = ttmap;
         _data = xdata;
 
         if(xoptions)
@@ -236,8 +239,13 @@
             i = (int)d[param_called_party_address];
             dstData = [NSData dataWithBytes:&d[param_called_party_address+1] length:i];
             _dst = [[SccpAddress alloc]initWithItuData:dstData];
+            if(_map)
+            {
+                _dst.tt.tt = [_map mapTT:_dst.tt.tt];
+            }
             _decodedJson[@"sccp-called-party-address"]=[_dst dictionaryValue];
             _packet.incomingCalledPartyAddress = _dst;
+
 
         }
         if(param_calling_party_address>0)
