@@ -26,6 +26,27 @@
                                  ni:(int)xni
                                data:(NSData *)xdata
                             options:(NSDictionary *)xoptions
+{
+    return [self initForSccp:layer
+                        mtp3:mtp3
+                         opc:xopc
+                         dpc:xdpc
+                          si:xsi
+                          ni:xni
+                        data:xdata
+                     options:xoptions
+                         map:NULL];
+
+}
+
+- (UMSCCP_mtpTransfer *)initForSccp:(UMLayerSCCP *)layer
+                               mtp3:(UMLayerMTP3 *)mtp3
+                                opc:(UMMTP3PointCode *)xopc
+                                dpc:(UMMTP3PointCode *)xdpc
+                                 si:(int)xsi
+                                 ni:(int)xni
+                               data:(NSData *)xdata
+                            options:(NSDictionary *)xoptions
                                 map:(UMMTP3TranslationTableMap *)ttmap;
 
 {

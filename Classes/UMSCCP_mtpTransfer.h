@@ -69,4 +69,13 @@
                             options:(NSDictionary *)options
                                 map:(UMMTP3TranslationTableMap *)map;
 
+- (UMSCCP_mtpTransfer *)initForSccp:(UMLayerSCCP *)layer
+                               mtp3:(UMLayerMTP3 *)mtp3
+                                opc:(UMMTP3PointCode *)opc
+                                dpc:(UMMTP3PointCode *)dpc
+                                 si:(int)si
+                                 ni:(int)ni
+                               data:(NSData *)data
+                            options:(NSDictionary *)options;
+
 @end
