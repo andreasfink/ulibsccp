@@ -16,7 +16,7 @@
     self = [super init];
     if(self)
     {
-        _lock =[[UMMutex alloc]initWithName:@"UMSCCP_StatisticData"];
+        _lock = [[UMMutex alloc]initWithName:@"UMSCCP_StatisticData"];
     }
     return self;
 }
