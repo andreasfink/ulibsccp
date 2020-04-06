@@ -81,6 +81,9 @@ typedef enum UMTCAP_Command
 	{
 		_created = [NSDate date];
         _tags = [[UMSynchronizedDictionary alloc]init];
+        _incomingReturnCause = SCCP_ReturnCause_not_set;
+        _outgoingReturnCause = SCCP_ReturnCause_not_set;
+
 	}
 	return self;
 }
@@ -148,7 +151,6 @@ typedef enum UMTCAP_Command
     _outgoingMtp3Data               = _incomingMtp3Data;
     _outgoingSccpData               = _incomingSccpData;
     _outgoingOptionalData           = _incomingOptionalData;
-    _outgoingReturnCause            = _incomingReturnCause;
 }
 
 
