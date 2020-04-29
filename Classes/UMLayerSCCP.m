@@ -75,10 +75,20 @@
     _gttSelectorRegistry = [[SccpGttRegistry alloc]init];
     _gttSelectorRegistry.logLevel = self.logLevel;
     _gttSelectorRegistry.logFeed = self.logFeed;
-    for(int i=0;i<UMSCCP_StatisticSection_MAX;i++)
+    
+    [self runSelectorInBackground:@selector(initializeStatistics)];
+}
+
+- (void)initializeStatistics
+{
+    @autoreleasepool
     {
-        _processingStats[i] = [[UMSCCP_Statistics alloc] init];
-        _throughputCounters[i] = [[UMThroughputCounter alloc] init];
+        for(int i=0;i<UMSCCP_StatisticSection_MAX;i++)
+        {
+            _processingStats[i] = [[UMSCCP_Statistics alloc] init];
+            _throughputCounters[i] = [[UMThroughputCounter alloc] init];
+        }
+        self.statisticsReady = YES;
     }
 }
 
@@ -2333,8 +2343,10 @@
                processingDelay:(NSTimeInterval)processingDelay
 {
     UMAssert( (section < UMSCCP_StatisticSection_MAX),@"unknown section");
-    [_processingStats[section] addWaitingDelay:waitingDelay processingDelay:processingDelay];
-
+    if(self.statisticsReady)
+    {
+        [_processingStats[section] addWaitingDelay:waitingDelay processingDelay:processingDelay];
+    }
 }
 
 - (void)increaseThroughputCounter:(UMSCCP_StatisticSection)section
@@ -2345,82 +2357,89 @@
 - (UMSynchronizedSortedDictionary *)statisticalInfo
 {
     UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
-    UMSynchronizedSortedDictionary *throughput = [[UMSynchronizedSortedDictionary alloc]init];
-    UMSynchronizedSortedDictionary *delays = [[UMSynchronizedSortedDictionary alloc]init];
-
-    for(UMSCCP_StatisticSection i=0;i<UMSCCP_StatisticSection_MAX;i++)
+    if(self.statisticsReady)
     {
-        NSString *key;
-        switch(i)
+        UMSynchronizedSortedDictionary *throughput = [[UMSynchronizedSortedDictionary alloc]init];
+        UMSynchronizedSortedDictionary *delays = [[UMSynchronizedSortedDictionary alloc]init];
+
+        for(UMSCCP_StatisticSection i=0;i<UMSCCP_StatisticSection_MAX;i++)
         {
-            case  UMSCCP_StatisticSection_RX:
-                key = @"rx";
-                break;
-            case UMSCCP_StatisticSection_TX:
-                key = @"tx";
-                break;
-            case UMSCCP_StatisticSection_TRANSIT:
-                key = @"transit";
-                break;
+            NSString *key;
+            switch(i)
+            {
+                case  UMSCCP_StatisticSection_RX:
+                    key = @"rx";
+                    break;
+                case UMSCCP_StatisticSection_TX:
+                    key = @"tx";
+                    break;
+                case UMSCCP_StatisticSection_TRANSIT:
+                    key = @"transit";
+                    break;
 
-            case UMSCCP_StatisticSection_UDT_RX:
-                key = @"rx-udt";
-                break;
+                case UMSCCP_StatisticSection_UDT_RX:
+                    key = @"rx-udt";
+                    break;
 
-            case UMSCCP_StatisticSection_UDTS_RX:
-                key = @"rx-udts";
-                break;
+                case UMSCCP_StatisticSection_UDTS_RX:
+                    key = @"rx-udts";
+                    break;
 
-            case UMSCCP_StatisticSection_XUDT_RX:
-                key = @"rx-xudt";
-                break;
+                case UMSCCP_StatisticSection_XUDT_RX:
+                    key = @"rx-xudt";
+                    break;
 
-            case UMSCCP_StatisticSection_XUDTS_RX:
-                key = @"rx-xudts";
-                break;
+                case UMSCCP_StatisticSection_XUDTS_RX:
+                    key = @"rx-xudts";
+                    break;
 
-            case UMSCCP_StatisticSection_UDT_TX:
-                key = @"tx-udt";
-                break;
+                case UMSCCP_StatisticSection_UDT_TX:
+                    key = @"tx-udt";
+                    break;
 
-            case UMSCCP_StatisticSection_UDTS_TX:
-                key = @"tx-udts";
-                break;
+                case UMSCCP_StatisticSection_UDTS_TX:
+                    key = @"tx-udts";
+                    break;
 
-            case UMSCCP_StatisticSection_XUDT_TX:
-                key = @"tx-xudt";
-                break;
+                case UMSCCP_StatisticSection_XUDT_TX:
+                    key = @"tx-xudt";
+                    break;
 
-            case UMSCCP_StatisticSection_XUDTS_TX:
-                key = @"tx-xudts";
-                break;
+                case UMSCCP_StatisticSection_XUDTS_TX:
+                    key = @"tx-xudts";
+                    break;
 
-            case UMSCCP_StatisticSection_UDT_TRANSIT:
-                key = @"tr-udt";
-                break;
+                case UMSCCP_StatisticSection_UDT_TRANSIT:
+                    key = @"tr-udt";
+                    break;
 
-            case UMSCCP_StatisticSection_UDTS_TRANSIT:
-                key = @"tr-udts";
-                break;
+                case UMSCCP_StatisticSection_UDTS_TRANSIT:
+                    key = @"tr-udts";
+                    break;
 
-            case UMSCCP_StatisticSection_XUDT_TRANSIT:
-                key = @"tr-xudt";
-                break;
+                case UMSCCP_StatisticSection_XUDT_TRANSIT:
+                    key = @"tr-xudt";
+                    break;
 
-            case UMSCCP_StatisticSection_XUDTS_TRANSIT:
-                key = @"tr-xudts";
-                break;
+                case UMSCCP_StatisticSection_XUDTS_TRANSIT:
+                    key = @"tr-xudts";
+                    break;
+            }
+
+            UMThroughputCounter *tc = _throughputCounters[i];
+            UMSCCP_Statistics   *stat = _processingStats[i];
+
+            throughput[key] = [tc getSpeedTripleJson];
+            delays[key] = [stat getStatDict];
         }
 
-        UMThroughputCounter *tc = _throughputCounters[i];
-        UMSCCP_Statistics   *stat = _processingStats[i];
-
-        throughput[key] = [tc getSpeedTripleJson];
-        delays[key] = [stat getStatDict];
+        dict[@"throughput"] = throughput;
+        dict[@"delays"] = delays;
     }
-
-    dict[@"throughput"] = throughput;
-    dict[@"delays"] = delays;
+    else
+    {
+        dict[@"error"] = @"still-initializing";
+    }
     return dict;
 }
 

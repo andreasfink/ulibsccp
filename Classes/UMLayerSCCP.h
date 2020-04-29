@@ -59,7 +59,7 @@ typedef enum SccpGtFileSection
     SccpTranslationTableNumber  *_ntt;
     UMSCCP_Statistics           *_processingStats[UMSCCP_StatisticSection_MAX];
     UMThroughputCounter         *_throughputCounters[UMSCCP_StatisticSection_MAX];
-    
+    BOOL                        _statisticsReady;
     /* this is now done in appDelegate
     NSString *_inboundFilterName;
     NSString *_outboundFilterName;
@@ -86,6 +86,7 @@ typedef enum SccpGtFileSection
 @property(readwrite,assign) int xudt_max_hop_count;
 @property(readwrite,assign) int xudts_max_hop_count;
 @property(readwrite,assign) BOOL stpMode;
+@property(readwrite,assign) BOOL statisticsReady;
 @property(readwrite,strong) UMMTP3PointCode *next_pc;
 
 @property(readwrite,strong,atomic)  id<UMSCCP_FilterDelegateProtocol> filterDelegate;
