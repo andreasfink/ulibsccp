@@ -310,7 +310,7 @@ static int segmentReferenceId;
                 while(p < n)
                 {
 
-                    NSUInteger m;
+                    NSUInteger m = maxPdu;
                     if(segmentSizes.count > index)
                     {
                         NSNumber *mi = segmentSizes[index++];
@@ -324,12 +324,12 @@ static int segmentReferenceId;
                     {
                         m = (n-p);
                     }
-                    segment.data = [NSData dataWithBytes:&bytes[p] length:m];
-                    [_dataSegments addObject:segment];
                     segment = [[UMSCCP_Segment alloc]init];
                     segment.first = NO;
                     segment.class1 = (_protocolClass == SCCP_CLASS_INSEQ_CL);
-                    segmentReferenceId = ref;
+                    segment.reference = ref;
+                    segment.data = [NSData dataWithBytes:&bytes[p] length:m];
+                    [_dataSegments addObject:segment];
                     p = p + m;
                 }
                 NSUInteger count = _dataSegments.count;
@@ -337,6 +337,7 @@ static int segmentReferenceId;
                 {
                     UMSCCP_Segment *s = [_dataSegments objectAtIndex:(NSUInteger)i];
                     s.remainingSegment = (int)count - i -1;
+                    s.segmentIndex = i;
                 }
                 _data = NULL;
                 for(int i=0;i<count;i++)

@@ -326,6 +326,8 @@ typedef enum SccpGtFileSection
 
 
 - (BOOL)routePacket:(UMSCCP_Packet *)packet; /* returns YES if sucessfully forwarded, NO if it wasn able to route it */
+- (BOOL)routePackets:(NSArray *)packets; /* compared to the above, this sends an array of packets over the same path and makes sure the sequence is kept */
+/* Note: this doesnt work if all packets dont have the same routing destination ! */
 
 
 - (NSUInteger)maxPayloadSizeForServiceType:(SCCP_ServiceType) serviceType

@@ -13,6 +13,7 @@
 
 @interface UMSCCP_Segment : UMObject
 {
+    int _segmentIndex;
     BOOL first;
     BOOL class1;
     int remainingSegment;
@@ -21,6 +22,7 @@
     NSData *data;
 }
 
+@property(readwrite,assign)    int segmentIndex;
 @property(readwrite,assign)    BOOL first;
 @property(readwrite,assign)    BOOL class1;
 @property(readwrite,assign)    int remainingSegment;
