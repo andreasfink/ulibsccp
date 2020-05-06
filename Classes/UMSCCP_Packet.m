@@ -8,6 +8,7 @@
 
 #import "UMSCCP_Packet.h"
 #import "UMLayerSCCP.h"
+#import "UMSCCP_Segment.h"
 
 #if !defined(UMTCAP_Command)
 typedef enum UMTCAP_Command
@@ -151,6 +152,7 @@ typedef enum UMTCAP_Command
     _outgoingMtp3Data               = _incomingMtp3Data;
     _outgoingSccpData               = _incomingSccpData;
     _outgoingOptionalData           = _incomingOptionalData;
+    _outgoingSegment                = _incomingSegment;
 }
 
 

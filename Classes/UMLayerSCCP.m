@@ -1124,7 +1124,9 @@
                               provider:provider];
                     break;
                 case SCCP_XUDT:
-                    e = [self sendXUDT:packet.outgoingSccpData
+                    if(packet.outgoingSegment)
+                    {                        
+                        e = [self sendXUDTsegment:packet.outgoingSegment
                                calling:packet.outgoingCallingPartyAddress
                                 called:packet.outgoingCalledPartyAddress
                                  class:packet.outgoingServiceClass
@@ -1135,6 +1137,22 @@
                            optionsData:packet.outgoingOptionalData
                                options:packet.outgoingOptions
                               provider:provider];
+                    }
+                    else
+                    {
+                        e = [self sendXUDT:packet.outgoingSccpData
+                                   calling:packet.outgoingCallingPartyAddress
+                                    called:packet.outgoingCalledPartyAddress
+                                     class:packet.outgoingServiceClass
+                                  handling:packet.outgoingHandling
+                                  hopCount:packet.outgoingMaxHopCount
+                                       opc:packet.outgoingOpc
+                                       dpc:packet.outgoingDpc
+                               optionsData:packet.outgoingOptionalData
+                                   options:packet.outgoingOptions
+                                  provider:provider];
+
+                    }
                     break;
                 case SCCP_XUDTS:
                     e = [self sendXUDTS:packet.outgoingSccpData

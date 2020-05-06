@@ -347,6 +347,7 @@ static int segmentReferenceId;
                     packet.incomingServiceClass = _protocolClass;
                     packet.incomingHandling = _handling;
                     packet.incomingSccpData = s.data;
+                    packet.incomingSegment = s;
                     packet.incomingOptions = _options;
                     packet.incomingMaxHopCount = _maxHopCount;
                     uint8_t sh[6];

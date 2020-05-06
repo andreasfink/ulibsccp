@@ -18,6 +18,7 @@
 @class UMTCAP_itu_asn1_abort;
 @class UMTCAP_itu_asn1_unidirectional;
 @class UMSMS;
+@class UMSCCP_Segment;
 
 @interface UMSCCP_Packet : UMObject
 {
@@ -32,7 +33,8 @@
     NSDate                      *_afterFilter4;
     NSDate                      *_queuedForDelivery;
     SCCP_State                  _state;
-
+    UMSCCP_Segment              *_incomingSegment;
+    
     id<UMSCCP_UserProtocol>     _incomingLocalUser;
     UMLayerMTP3                 *_incomingMtp3Layer;
     NSString                    *_incomingLinkset;
@@ -67,6 +69,8 @@
     SccpAddress                 *_outgoingCalledPartyAddress;
     NSData                      *_outgoingMtp3Data;
     NSData                      *_outgoingSccpData;
+    UMSCCP_Segment              *_outgoingSegment;
+
     NSData                      *_outgoingOptionalData;
     int                         _outgoingMaxHopCount;
     BOOL                        _outgoingFromLocal;
@@ -131,6 +135,7 @@
 @property(readwrite,strong,atomic)  NSString                *incomingCalledPartyCountry;
 @property(readwrite,strong,atomic)  NSData                  *incomingMtp3Data;
 @property(readwrite,strong,atomic)  NSData                  *incomingSccpData;
+@property(readwrite,strong,atomic)  UMSCCP_Segment          *incomingSegment;
 @property(readwrite,strong,atomic)  NSData                  *incomingOptionalData;
 @property(readwrite,assign,atomic)  BOOL                    incomingFromLocal;
 @property(readwrite,assign,atomic)  BOOL                    incomingToLocal;
@@ -150,6 +155,7 @@
 @property(readwrite,strong,atomic)  SccpAddress             *outgoingCalledPartyAddress;
 @property(readwrite,strong,atomic)  NSData                  *outgoingMtp3Data;
 @property(readwrite,strong,atomic)  NSData                  *outgoingSccpData;
+@property(readwrite,strong,atomic)  UMSCCP_Segment          *outgoingSegment;
 @property(readwrite,strong,atomic)  NSData                  *outgoingOptionalData;
 @property(readwrite,assign,atomic)  BOOL                    outgoingFromLocal;
 @property(readwrite,assign,atomic)  BOOL                    outgoingToLocal;
