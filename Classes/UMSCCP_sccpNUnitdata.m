@@ -128,6 +128,7 @@ static int segmentReferenceId;
         //BOOL useLUDT        = [_options[@"sccp-ludt"] boolValue];
         BOOL useSegments    = [_options[@"sccp-segment"] boolValue];
         int segmentSize    = [_options[@"sccp-segment-size"] intValue];
+        NSArray *segmentSizes =  _options[@"sccp-segment-sizes"];
 
         NSDictionary *sccp_options = _options[@"sccp-optional"];
         NSMutableData *optional_data;
@@ -301,24 +302,30 @@ static int segmentReferenceId;
                 segment.first = YES;
                 segment.class1 = (_protocolClass == SCCP_CLASS_INSEQ_CL);
                 segmentReferenceId = ref;
-
+                    
                 const uint8_t *bytes = _data.bytes;
                 NSUInteger n = _data.length;
                 NSUInteger p = 0;
+                NSUInteger index;
                 while(p < n)
                 {
+
                     NSUInteger m;
-                    if((n - p) > maxPdu)
+                    if(segmentSizes.count > index)
+                    {
+                        NSNumber *mi = segmentSizes[index++];
+                        m = [mi intValue];
+                    }
+                    else
                     {
                         m = maxPdu;
                     }
-                    else
+                    if((n - p) < m)
                     {
                         m = (n-p);
                     }
                     segment.data = [NSData dataWithBytes:&bytes[p] length:m];
                     [_dataSegments addObject:segment];
-
                     segment = [[UMSCCP_Segment alloc]init];
                     segment.first = NO;
                     segment.class1 = (_protocolClass == SCCP_CLASS_INSEQ_CL);
