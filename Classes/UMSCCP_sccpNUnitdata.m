@@ -128,6 +128,7 @@ static int segmentReferenceId;
         //BOOL useLUDT        = [_options[@"sccp-ludt"] boolValue];
         BOOL useSegments    = [_options[@"sccp-segment"] boolValue];
         int segmentSize    = [_options[@"sccp-segment-size"] intValue];
+
         NSDictionary *sccp_options = _options[@"sccp-optional"];
         NSMutableData *optional_data;
         if(sccp_options)
@@ -361,15 +362,17 @@ static int segmentReferenceId;
                         firstByte = firstByte | 0x40;
                     }
                     firstByte = firstByte | (s.remainingSegment & 0x0F); /* remaining segments counter */
-                    sh[0] = 0x10; /* segmentation header */
-                    sh[1] = 4; /* lenght */
-                    sh[2] = firstByte;
-                    sh[3] = (s.reference >> 16) & 0xff;
-                    sh[4] = (s.reference >> 8) & 0xff;
-                    sh[5] = (s.reference >> 0) & 0xff;
+                   
 
                     NSMutableData *optional_data_of_segment = [[NSMutableData alloc]init];
-                    [optional_data_of_segment appendBytes:&sh length:6];
+                    /* this is now done in the send routine itself when segments are passed */
+                    // sh[0] = 0x10; /* segmentation header */
+                    // sh[1] = 4; /* lenght */
+                    // sh[2] = firstByte;
+                    // sh[3] = (s.reference >> 16) & 0xff;
+                    // sh[4] = (s.reference >> 8) & 0xff;
+                    // sh[5] = (s.reference >> 0) & 0xff;
+                    // [optional_data_of_segment appendBytes:&sh length:6];
                     if(optional_data.length == 0)
                     {
                         char b = 0;

@@ -273,13 +273,14 @@
                         options:(NSDictionary *)options
                        provider:(UMLayerMTP3 *)provider
 {
+    /* we assume here the segmentation header is alread included */
     NSMutableData *optionsData = [[NSMutableData alloc]init];
     [optionsData appendByte:0x10]; /* optional parameter "segmentation" */
     [optionsData appendByte:0x04]; /* length of optional parameter */
     [optionsData appendData:[segment segmentationHeader]];
     if(xoptionsdata)
     {
-        [optionsData appendData:xoptionsdata]; /* length of optional parameter */
+        [optionsData appendData:xoptionsdata]; /* optional parameters including end */
     }
     else
     {
