@@ -238,7 +238,7 @@ static int segmentReferenceId;
                                                 calledAddressSize:cds
                                                     usingSegments:useSegments
                                                          provider:_sccpLayer.mtp3];
-                if((segmentSize !=0) && (maxPdu>segmentSize))
+                if((segmentSize !=0) && (segmentSize<maxPdu))
                 {
                     maxPdu = segmentSize;
                 }
@@ -253,10 +253,13 @@ static int segmentReferenceId;
                                                     calledAddressSize:cds
                                                         usingSegments:YES
                                                              provider:_sccpLayer.mtp3];
-
+                    if((segmentSize !=0) && (segmentSize<maxPdu))
+                    {
+                        maxPdu = segmentSize;
+                    }
                 }
             }
-            else
+            else /* use XUDT is set */
             {
                 maxPdu = [_sccpLayer maxPayloadSizeForServiceType:SCCP_XUDT
                                                callingAddressSize:cas
@@ -351,28 +354,8 @@ static int segmentReferenceId;
                     packet.incomingSegment = s;
                     packet.incomingOptions = _options;
                     packet.incomingMaxHopCount = _maxHopCount;
-                    uint8_t sh[6];
-                    uint8_t firstByte = 0;
-                    if(s.first)
-                    {
-                        firstByte = firstByte | 0x80;
-                    }
-                    if(s.class1)
-                    {
-                        firstByte = firstByte | 0x40;
-                    }
-                    firstByte = firstByte | (s.remainingSegment & 0x0F); /* remaining segments counter */
-                   
 
                     NSMutableData *optional_data_of_segment = [[NSMutableData alloc]init];
-                    /* this is now done in the send routine itself when segments are passed */
-                    // sh[0] = 0x10; /* segmentation header */
-                    // sh[1] = 4; /* lenght */
-                    // sh[2] = firstByte;
-                    // sh[3] = (s.reference >> 16) & 0xff;
-                    // sh[4] = (s.reference >> 8) & 0xff;
-                    // sh[5] = (s.reference >> 0) & 0xff;
-                    // [optional_data_of_segment appendBytes:&sh length:6];
                     if(optional_data.length == 0)
                     {
                         char b = 0;
