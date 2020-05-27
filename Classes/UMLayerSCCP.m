@@ -153,7 +153,11 @@
                                                              si:si
                                                              ni:ni
                                                         options:options];
-    [task main];
+    @autoreleasepool
+    {
+        [task main];
+    }
+
 //    [self queueFromLowerWithPriority:task];
 }
 
@@ -170,7 +174,10 @@
                                                                si:si
                                                                ni:ni
                                                           options:options];
-    [task main];
+    @autoreleasepool
+    {
+        [task main];
+    }
 //    [self queueFromLowerWithPriority:task];
 }
 
@@ -189,7 +196,10 @@
                                                                si:si
                                                                ni:ni
                                                           options:options];
-    [task main];
+    @autoreleasepool
+    {
+        [task main];
+    }
 //    [self queueFromLowerWithPriority:task];
 }
 
