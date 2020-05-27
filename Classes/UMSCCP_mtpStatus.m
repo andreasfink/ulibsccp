@@ -38,8 +38,11 @@
 
 - (void)main
 {
-    [_sccp.mtp3RoutingTable setStatus:SccpL3RouteStatus_restricted
-                         forPointCode:_affectedPointCode];
+    @autoreleasepool
+    {
+        [_sccp.mtp3RoutingTable setStatus:SccpL3RouteStatus_restricted
+                             forPointCode:_affectedPointCode];
+    }
 }
 
 @end

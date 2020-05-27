@@ -35,8 +35,11 @@
 
 - (void)main
 {
-    [_sccp.mtp3RoutingTable setStatus:SccpL3RouteStatus_available
+    @autoreleasepool
+    {
+        [_sccp.mtp3RoutingTable setStatus:SccpL3RouteStatus_available
                          forPointCode:_affectedPointCode];
+    }
 }
 
 @end
