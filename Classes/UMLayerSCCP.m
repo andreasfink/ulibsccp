@@ -125,19 +125,22 @@
             options:(NSDictionary *)xoptions
               ttmap:(UMMTP3TranslationTableMap *)map
 {
-    NSMutableDictionary*options;
-    if(xoptions)
+    @autoreleasepool
     {
-        options = [xoptions mutableCopy];
-    }
-    else
-    {
-        options = [[NSMutableDictionary alloc]init];
-    }
-    options[@"mtp3-incoming-linkset"] = linksetName;
+        NSMutableDictionary*options;
+        if(xoptions)
+        {
+            options = [xoptions mutableCopy];
+        }
+        else
+        {
+            options = [[NSMutableDictionary alloc]init];
+        }
+        options[@"mtp3-incoming-linkset"] = linksetName;
 
-    UMSCCP_mtpTransfer *task = [[UMSCCP_mtpTransfer alloc]initForSccp:self mtp3:mtp3Layer opc:opc dpc:dpc si:si ni:ni data:data options:options map:map];
-    [self queueFromLower:task];
+        UMSCCP_mtpTransfer *task = [[UMSCCP_mtpTransfer alloc]initForSccp:self mtp3:mtp3Layer opc:opc dpc:dpc si:si ni:ni data:data options:options map:map];
+        [self queueFromLower:task];
+    }
 }
 
 - (void)mtpPause:(NSData *)data
@@ -147,18 +150,21 @@
               ni:(int)ni
          options:(NSDictionary *)options
 {
-    UMSCCP_mtpPause *task = [[UMSCCP_mtpPause alloc]initForSccp:self
-                                                           mtp3:mtp3Layer
-                                              affectedPointCode:affPC
-                                                             si:si
-                                                             ni:ni
-                                                        options:options];
     @autoreleasepool
     {
-        [task main];
-    }
+        UMSCCP_mtpPause *task = [[UMSCCP_mtpPause alloc]initForSccp:self
+                                                               mtp3:mtp3Layer
+                                                  affectedPointCode:affPC
+                                                                 si:si
+                                                                 ni:ni
+                                                            options:options];
+        @autoreleasepool
+        {
+            [task main];
+        }
 
 //    [self queueFromLowerWithPriority:task];
+    }
 }
 
 - (void)mtpResume:(NSData *)data
@@ -168,17 +174,17 @@
                ni:(int)ni
           options:(NSDictionary *)options
 {
-    UMSCCP_mtpResume *task = [[UMSCCP_mtpResume alloc]initForSccp:self
-                                                             mtp3:mtp3Layer
-                                                affectedPointCode:affPC
-                                                               si:si
-                                                               ni:ni
-                                                          options:options];
     @autoreleasepool
     {
+        UMSCCP_mtpResume *task = [[UMSCCP_mtpResume alloc]initForSccp:self
+                                                                 mtp3:mtp3Layer
+                                                    affectedPointCode:affPC
+                                                                   si:si
+                                                                   ni:ni
+                                                              options:options];
         [task main];
+  //    [self queueFromLowerWithPriority:task];
     }
-//    [self queueFromLowerWithPriority:task];
 }
 
 - (void)mtpStatus:(NSData *)data
@@ -189,18 +195,18 @@
            status:(int)status
           options:(NSDictionary *)options
 {
-    UMSCCP_mtpStatus *task = [[UMSCCP_mtpStatus alloc]initForSccp:self
-                                                             mtp3:mtp3Layer
-                                                affectedPointCode:affPC
-                                                           status:status
-                                                               si:si
-                                                               ni:ni
-                                                          options:options];
     @autoreleasepool
     {
-        [task main];
+        UMSCCP_mtpStatus *task = [[UMSCCP_mtpStatus alloc]initForSccp:self
+                                                                 mtp3:mtp3Layer
+                                                    affectedPointCode:affPC
+                                                               status:status
+                                                                   si:si
+                                                                   ni:ni
+                                                              options:options];
+            [task main];
+      //    [self queueFromLowerWithPriority:task];
     }
-//    [self queueFromLowerWithPriority:task];
 }
 
 - (id<UMSCCP_UserProtocol>)getUserForSubsystem:(SccpSubSystemNumber *)ssn
@@ -1897,17 +1903,20 @@
             handling:(SCCP_Handling)handling
              options:(NSDictionary *)options
 {
-    UMSCCP_sccpNUnitdata *task;
-    task = [[UMSCCP_sccpNUnitdata alloc]initForSccp:self
-                                               user:userLayer
-                                           userData:data
-                                            calling:src
-                                             called:dst
-                                   qualityOfService:qos
-                                              class:pclass
-                                           handling:handling
-                                            options:options];
-    [self queueFromUpper:task];
+    @autoreleasepool
+    {
+        UMSCCP_sccpNUnitdata *task;
+        task = [[UMSCCP_sccpNUnitdata alloc]initForSccp:self
+                                                   user:userLayer
+                                               userData:data
+                                                calling:src
+                                                 called:dst
+                                       qualityOfService:qos
+                                                  class:pclass
+                                               handling:handling
+                                                options:options];
+        [self queueFromUpper:task];
+    }
 }
 
 - (void)sccpNNotice:(NSData *)data
@@ -1916,7 +1925,7 @@
              called:(SccpAddress *)dst
             options:(NSDictionary *)options
 {
-    NSLog(@"sccpNNotice not implemented");
+//    NSLog(@"sccpNNotice not implemented");
 }
 
 - (void)sccpNState:(NSData *)data
@@ -1925,7 +1934,7 @@
             called:(SccpAddress *)dst
            options:(NSDictionary *)options
 {
-    NSLog(@"sccpNState not implemented");
+//    NSLog(@"sccpNState not implemented");
 }
 
 
@@ -1935,7 +1944,7 @@
             called:(SccpAddress *)dst
            options:(NSDictionary *)options
 {
-    NSLog(@"sccpNCoord not implemented");
+//    NSLog(@"sccpNCoord not implemented");
 }
 
 
@@ -1955,7 +1964,7 @@
               called:(SccpAddress *)dst
              options:(NSDictionary *)options
 {
-    NSLog(@"sccpNPcState not implemented");
+ //   NSLog(@"sccpNPcState not implemented");
 }
 
 
@@ -2083,204 +2092,211 @@
 
 - (id)decodePdu:(NSData *)data /* should return a type which can be converted to json */
 {
-    SccpAddress *dst = NULL;
-    SccpAddress *src = NULL;
-    int m_protocol_class = -1;
-    int m_return_cause = -1;
-    int m_handling = -1;
-    int m_type = -1;
-    int m_hopcounter = -1;
-    NSData *sccp_pdu = NULL;
-    NSData *segment = NULL;
-    int param_called_party_address;
-    int param_calling_party_address;
-    int param_data;
-    int param_segment;
-
-    UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
-    @try
+    UMSynchronizedSortedDictionary *dict;
+    @autoreleasepool
     {
-        NSUInteger len = data.length;
-        if(len < 6)
-        {
-            @throw([NSException exceptionWithName:@"SCCP_TOO_SMALL_PACKET_RECEIVED" reason:NULL userInfo:NULL] );
-        }
-        const uint8_t *d = data.bytes;
-        int i = 0;
-        int m_type = d[i++];
+        SccpAddress *dst = NULL;
+        SccpAddress *src = NULL;
+        int m_protocol_class = -1;
+        int m_return_cause = -1;
+        int m_handling = -1;
+        int m_type = -1;
+        int m_hopcounter = -1;
+        NSData *sccp_pdu = NULL;
+        NSData *segment = NULL;
+        int param_called_party_address;
+        int param_calling_party_address;
+        int param_data;
+        int param_segment;
 
-        switch(m_type)
+       dict = [[UMSynchronizedSortedDictionary alloc]init];
+        @try
         {
-            case SCCP_UDT:
-                m_protocol_class = d[i] & 0x0F;
-                m_handling = (d[i++]>>4) & 0x0F;
-                param_called_party_address = d[i] + i;
-                i++;
-                param_calling_party_address = d[i] + i;
-                i++;
-                param_data = d[i] + i;
-                i++;
-                param_segment = -1;
-                break;
+            NSUInteger len = data.length;
+            if(len < 6)
+            {
+                @throw([NSException exceptionWithName:@"SCCP_TOO_SMALL_PACKET_RECEIVED" reason:NULL userInfo:NULL] );
+            }
+            const uint8_t *d = data.bytes;
+            int i = 0;
+            int m_type = d[i++];
 
-            case SCCP_UDTS:
-                m_return_cause = d[i++] & 0x0F;
-                param_called_party_address = d[i] + i;
-                i++;
-                param_calling_party_address = d[i] + i;
-                i++;
-                param_data      = d[i] + i;
-                i++;
-                param_segment   = -1;
-                break;
+            switch(m_type)
+            {
+                case SCCP_UDT:
+                    m_protocol_class = d[i] & 0x0F;
+                    m_handling = (d[i++]>>4) & 0x0F;
+                    param_called_party_address = d[i] + i;
+                    i++;
+                    param_calling_party_address = d[i] + i;
+                    i++;
+                    param_data = d[i] + i;
+                    i++;
+                    param_segment = -1;
+                    break;
 
-            case SCCP_XUDT:
-                m_protocol_class = d[i] & 0x0F;
-                m_handling = (d[i++]>>4) & 0x0F;
-                param_called_party_address = d[i] + i;
-                i++;
-                param_calling_party_address = d[i] + i;
-                i++;
-                param_data = d[i] + i;
-                i++;
-                param_segment = -1;
-                break;
+                case SCCP_UDTS:
+                    m_return_cause = d[i++] & 0x0F;
+                    param_called_party_address = d[i] + i;
+                    i++;
+                    param_calling_party_address = d[i] + i;
+                    i++;
+                    param_data      = d[i] + i;
+                    i++;
+                    param_segment   = -1;
+                    break;
 
-            case SCCP_XUDTS:
-                m_return_cause = d[i++] & 0x0F;
-                m_hopcounter = d[i++] & 0x0F;
-                param_called_party_address = d[i] + i;
-                i++;
-                param_calling_party_address = d[i] + i;
-                i++;
-                param_data      = d[i] + i;
-                i++;
-                param_segment   = d[i] + i;
-                i++;
-                break;
+                case SCCP_XUDT:
+                    m_protocol_class = d[i] & 0x0F;
+                    m_handling = (d[i++]>>4) & 0x0F;
+                    param_called_party_address = d[i] + i;
+                    i++;
+                    param_calling_party_address = d[i] + i;
+                    i++;
+                    param_data = d[i] + i;
+                    i++;
+                    param_segment = -1;
+                    break;
 
-            default:
-                @throw([NSException exceptionWithName:@"SCCP_UNKNOWN_PACKET_TYPE" reason:NULL userInfo:NULL] );
-        }
-        if(param_called_party_address > len)
-        {
-            @throw([NSException exceptionWithName:@"SCCP_PTR1_POINTS_BEYOND_END" reason:NULL userInfo:NULL] );
-        }
+                case SCCP_XUDTS:
+                    m_return_cause = d[i++] & 0x0F;
+                    m_hopcounter = d[i++] & 0x0F;
+                    param_called_party_address = d[i] + i;
+                    i++;
+                    param_calling_party_address = d[i] + i;
+                    i++;
+                    param_data      = d[i] + i;
+                    i++;
+                    param_segment   = d[i] + i;
+                    i++;
+                    break;
 
-        if(param_calling_party_address > len)
-        {
-            @throw([NSException exceptionWithName:@"SCCP_PTR2_POINTS_BEYOND_END" reason:NULL userInfo:NULL] );
-        }
-        if(param_data > len)
-        {
-            @throw([NSException exceptionWithName:@"SCCP_PTR3_POINTS_BEYOND_END" reason:NULL userInfo:NULL] );
-        }
-        if((param_segment > len) && (param_segment > 0))
-        {
-            @throw([NSException exceptionWithName:@"SCCP_PTR4_POINTS_BEYOND_END" reason:NULL userInfo:NULL] );
-        }
+                default:
+                    @throw([NSException exceptionWithName:@"SCCP_UNKNOWN_PACKET_TYPE" reason:NULL userInfo:NULL] );
+            }
+            if(param_called_party_address > len)
+            {
+                @throw([NSException exceptionWithName:@"SCCP_PTR1_POINTS_BEYOND_END" reason:NULL userInfo:NULL] );
+            }
 
-        NSData *dstData = NULL;
-        NSData *srcData = NULL;
+            if(param_calling_party_address > len)
+            {
+                @throw([NSException exceptionWithName:@"SCCP_PTR2_POINTS_BEYOND_END" reason:NULL userInfo:NULL] );
+            }
+            if(param_data > len)
+            {
+                @throw([NSException exceptionWithName:@"SCCP_PTR3_POINTS_BEYOND_END" reason:NULL userInfo:NULL] );
+            }
+            if((param_segment > len) && (param_segment > 0))
+            {
+                @throw([NSException exceptionWithName:@"SCCP_PTR4_POINTS_BEYOND_END" reason:NULL userInfo:NULL] );
+            }
 
-        if(param_called_party_address>0)
-        {
-            i = (int)d[param_called_party_address];
-            dstData = [NSData dataWithBytes:&d[param_called_party_address+1] length:i];
-            dst = [[SccpAddress alloc]initWithItuData:dstData];
+            NSData *dstData = NULL;
+            NSData *srcData = NULL;
+
+            if(param_called_party_address>0)
+            {
+                i = (int)d[param_called_party_address];
+                dstData = [NSData dataWithBytes:&d[param_called_party_address+1] length:i];
+                dst = [[SccpAddress alloc]initWithItuData:dstData];
+            }
+            if(param_calling_party_address>0)
+            {
+                i = (int)d[param_calling_party_address];
+                srcData = [NSData dataWithBytes:&d[param_calling_party_address+1] length:i];
+                src = [[SccpAddress alloc]initWithItuData:srcData];
+
+            }
+            if(param_data > 0)
+            {
+                i = (int)d[param_data];
+                sccp_pdu = [NSData dataWithBytes:&d[param_data+1] length:i];
+            }
+            if(param_segment > 0)
+            {
+                i = (int)d[param_segment];
+                segment = [NSData dataWithBytes:&d[param_segment+1] length:i];
+            }
+
+            if(src == NULL)
+            {
+                @throw([NSException exceptionWithName:@"SCCP_MISSING_CALLING_PARTY_ADDRESS" reason:NULL userInfo:NULL] );
+            }
+            if(dst==NULL)
+            {
+                @throw([NSException exceptionWithName:@"SCCP_MISSING_CALLED_PARTY_ADDRESS" reason:NULL userInfo:NULL] );
+            }
+
+            switch(m_type)
+            {
+                case SCCP_UDT:
+                    dict[@"pdu-type"] = @"UDT";
+                    break;
+                case SCCP_UDTS:
+                    dict[@"pdu-type"] = @"UDTS";
+                    break;
+                case SCCP_XUDT:
+                    dict[@"pdu-type"] = @"XUDT";
+                    break;
+                case SCCP_XUDTS:
+                    dict[@"pdu-type"] = @"XUDTS";
+                    break;
+            }
         }
-        if(param_calling_party_address>0)
+        @catch(NSException *e)
         {
-            i = (int)d[param_calling_party_address];
-            srcData = [NSData dataWithBytes:&d[param_calling_party_address+1] length:i];
-            src = [[SccpAddress alloc]initWithItuData:srcData];
+            dict[@"decoding-error"] = e.name;
+        }
+        if(dst)
+        {
+            dict[@"called-address"] = [dst objectValue];
 
         }
-        if(param_data > 0)
+        if(src)
         {
-            i = (int)d[param_data];
-            sccp_pdu = [NSData dataWithBytes:&d[param_data+1] length:i];
+            dict[@"calling-address"] = [src objectValue];
         }
-        if(param_segment > 0)
+        if(m_protocol_class != -1)
         {
-            i = (int)d[param_segment];
-            segment = [NSData dataWithBytes:&d[param_segment+1] length:i];
+            dict[@"protocol-class"] = @(m_protocol_class);
         }
-
-        if(src == NULL)
+        if(m_return_cause != -1)
         {
-            @throw([NSException exceptionWithName:@"SCCP_MISSING_CALLING_PARTY_ADDRESS" reason:NULL userInfo:NULL] );
+            dict[@"return-cause"] = @(m_return_cause);
         }
-        if(dst==NULL)
+        if(m_handling != -1)
         {
-            @throw([NSException exceptionWithName:@"SCCP_MISSING_CALLED_PARTY_ADDRESS" reason:NULL userInfo:NULL] );
+            dict[@"handling"] = @(m_handling);
         }
-
-        switch(m_type)
+        if(m_type != -1)
         {
-            case SCCP_UDT:
-                dict[@"pdu-type"] = @"UDT";
-                break;
-            case SCCP_UDTS:
-                dict[@"pdu-type"] = @"UDTS";
-                break;
-            case SCCP_XUDT:
-                dict[@"pdu-type"] = @"XUDT";
-                break;
-            case SCCP_XUDTS:
-                dict[@"pdu-type"] = @"XUDTS";
-                break;
+            dict[@"type"] = @(m_type);
         }
-    }
-    @catch(NSException *e)
-    {
-        dict[@"decoding-error"] = e.name;
-    }
-    if(dst)
-    {
-        dict[@"called-address"] = [dst objectValue];
-
-    }
-    if(src)
-    {
-        dict[@"calling-address"] = [src objectValue];
-    }
-    if(m_protocol_class != -1)
-    {
-        dict[@"protocol-class"] = @(m_protocol_class);
-    }
-    if(m_return_cause != -1)
-    {
-        dict[@"return-cause"] = @(m_return_cause);
-    }
-    if(m_handling != -1)
-    {
-        dict[@"handling"] = @(m_handling);
-    }
-    if(m_type != -1)
-    {
-        dict[@"type"] = @(m_type);
-    }
-    if(m_hopcounter != -1)
-    {
-        dict[@"hop-counter"] = @(m_hopcounter);
-    }
-    if(sccp_pdu)
-    {
-        dict[@"pdu"] = [sccp_pdu hexString];
-    }
-    if(segment)
-    {
-        dict[@"segment"] = [segment hexString];
+        if(m_hopcounter != -1)
+        {
+            dict[@"hop-counter"] = @(m_hopcounter);
+        }
+        if(sccp_pdu)
+        {
+            dict[@"pdu"] = [sccp_pdu hexString];
+        }
+        if(segment)
+        {
+            dict[@"segment"] = [segment hexString];
+        }
     }
     return dict;
 }
 
 - (NSString *)status
 {
-    NSMutableDictionary *m = [_subsystemUsers mutableCopy];
-    NSString *s = [NSString stringWithFormat:@"Routing %@",m.description];
-    return s;
+    @autoreleasepool
+    {
+        NSMutableDictionary *m = [_subsystemUsers mutableCopy];
+        NSString *s = [NSString stringWithFormat:@"Routing %@",m.description];
+        return s;
+    }
 }
 
 
@@ -2387,91 +2403,94 @@
 
 - (UMSynchronizedSortedDictionary *)statisticalInfo
 {
-    UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
-    if(self.statisticsReady)
+    @autoreleasepool
     {
-        UMSynchronizedSortedDictionary *throughput = [[UMSynchronizedSortedDictionary alloc]init];
-        UMSynchronizedSortedDictionary *delays = [[UMSynchronizedSortedDictionary alloc]init];
-
-        for(UMSCCP_StatisticSection i=0;i<UMSCCP_StatisticSection_MAX;i++)
+        UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
+        if(self.statisticsReady)
         {
-            NSString *key;
-            switch(i)
+            UMSynchronizedSortedDictionary *throughput = [[UMSynchronizedSortedDictionary alloc]init];
+            UMSynchronizedSortedDictionary *delays = [[UMSynchronizedSortedDictionary alloc]init];
+
+            for(UMSCCP_StatisticSection i=0;i<UMSCCP_StatisticSection_MAX;i++)
             {
-                case  UMSCCP_StatisticSection_RX:
-                    key = @"rx";
-                    break;
-                case UMSCCP_StatisticSection_TX:
-                    key = @"tx";
-                    break;
-                case UMSCCP_StatisticSection_TRANSIT:
-                    key = @"transit";
-                    break;
+                NSString *key;
+                switch(i)
+                {
+                    case  UMSCCP_StatisticSection_RX:
+                        key = @"rx";
+                        break;
+                    case UMSCCP_StatisticSection_TX:
+                        key = @"tx";
+                        break;
+                    case UMSCCP_StatisticSection_TRANSIT:
+                        key = @"transit";
+                        break;
 
-                case UMSCCP_StatisticSection_UDT_RX:
-                    key = @"rx-udt";
-                    break;
+                    case UMSCCP_StatisticSection_UDT_RX:
+                        key = @"rx-udt";
+                        break;
 
-                case UMSCCP_StatisticSection_UDTS_RX:
-                    key = @"rx-udts";
-                    break;
+                    case UMSCCP_StatisticSection_UDTS_RX:
+                        key = @"rx-udts";
+                        break;
 
-                case UMSCCP_StatisticSection_XUDT_RX:
-                    key = @"rx-xudt";
-                    break;
+                    case UMSCCP_StatisticSection_XUDT_RX:
+                        key = @"rx-xudt";
+                        break;
 
-                case UMSCCP_StatisticSection_XUDTS_RX:
-                    key = @"rx-xudts";
-                    break;
+                    case UMSCCP_StatisticSection_XUDTS_RX:
+                        key = @"rx-xudts";
+                        break;
 
-                case UMSCCP_StatisticSection_UDT_TX:
-                    key = @"tx-udt";
-                    break;
+                    case UMSCCP_StatisticSection_UDT_TX:
+                        key = @"tx-udt";
+                        break;
 
-                case UMSCCP_StatisticSection_UDTS_TX:
-                    key = @"tx-udts";
-                    break;
+                    case UMSCCP_StatisticSection_UDTS_TX:
+                        key = @"tx-udts";
+                        break;
 
-                case UMSCCP_StatisticSection_XUDT_TX:
-                    key = @"tx-xudt";
-                    break;
+                    case UMSCCP_StatisticSection_XUDT_TX:
+                        key = @"tx-xudt";
+                        break;
 
-                case UMSCCP_StatisticSection_XUDTS_TX:
-                    key = @"tx-xudts";
-                    break;
+                    case UMSCCP_StatisticSection_XUDTS_TX:
+                        key = @"tx-xudts";
+                        break;
 
-                case UMSCCP_StatisticSection_UDT_TRANSIT:
-                    key = @"tr-udt";
-                    break;
+                    case UMSCCP_StatisticSection_UDT_TRANSIT:
+                        key = @"tr-udt";
+                        break;
 
-                case UMSCCP_StatisticSection_UDTS_TRANSIT:
-                    key = @"tr-udts";
-                    break;
+                    case UMSCCP_StatisticSection_UDTS_TRANSIT:
+                        key = @"tr-udts";
+                        break;
 
-                case UMSCCP_StatisticSection_XUDT_TRANSIT:
-                    key = @"tr-xudt";
-                    break;
+                    case UMSCCP_StatisticSection_XUDT_TRANSIT:
+                        key = @"tr-xudt";
+                        break;
 
-                case UMSCCP_StatisticSection_XUDTS_TRANSIT:
-                    key = @"tr-xudts";
-                    break;
+                    case UMSCCP_StatisticSection_XUDTS_TRANSIT:
+                        key = @"tr-xudts";
+                        break;
+                }
+
+                UMThroughputCounter *tc = _throughputCounters[i];
+                UMSCCP_Statistics   *stat = _processingStats[i];
+
+                throughput[key] = [tc getSpeedTripleJson];
+                delays[key] = [stat getStatDict];
             }
 
-            UMThroughputCounter *tc = _throughputCounters[i];
-            UMSCCP_Statistics   *stat = _processingStats[i];
-
-            throughput[key] = [tc getSpeedTripleJson];
-            delays[key] = [stat getStatDict];
+            dict[@"throughput"] = throughput;
+            dict[@"delays"] = delays;
         }
-
-        dict[@"throughput"] = throughput;
-        dict[@"delays"] = delays;
+        else
+        {
+            dict[@"error"] = @"still-initializing";
+        }
+        return dict;
     }
-    else
-    {
-        dict[@"error"] = @"still-initializing";
-    }
-    return dict;
 }
 
 - (SccpGttSelector *)parseSelectorWords:(NSArray *)words currentSelector:(SccpGttSelector *)currentSel registry:(SccpGttRegistry *)registry
