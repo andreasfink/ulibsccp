@@ -23,4 +23,5 @@
 #import "UMLayerSCCPApplicationContextProtocol.h"
 #import "UMSCCP_TracefileProtocol.h"
 #import "UMSCCP_Filter.h"
-
+#import "UMSCCP_StatisticDb.h"
+#import "UMSCCP_StatisticDbRecord.h"

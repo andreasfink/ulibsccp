@@ -23,6 +23,8 @@
 #import <ulibgt/ulibgt.h>
 #import "UMSCCP_Statistics.h"
 #import "UMSCCP_StatisticSection.h"
+#import "UMSCCP_StatisticDb.h"
+#import "UMSCCP_StatisticDbRecord.h"
 
 @implementation UMLayerSCCP
 
@@ -77,6 +79,14 @@
     _gttSelectorRegistry.logFeed = self.logFeed;
     
     [self runSelectorInBackground:@selector(initializeStatistics)];
+    _housekeepingTimer = [[UMTimer alloc]initWithTarget:self
+                                               selector:@selector(housekeeping)
+                                                 object:NULL
+                                                seconds:6
+                                                   name:@"housekeeping"
+                                                repeats:YES
+                                        runInForeground:YES];
+
 }
 
 - (void)initializeStatistics
@@ -509,12 +519,27 @@
     return result;
 }
 
-
 - (SccpDestinationGroup *)findRoutes:(SccpAddress *)called
                                cause:(SCCP_ReturnCause *)cause
                     newCalledAddress:(SccpAddress **)called_out
                            localUser:(id<UMSCCP_UserProtocol> *)localUser
                        fromLocalUser:(BOOL)fromLocalUser
+{
+   return [self findRoutes:called
+                     cause:cause
+          newCalledAddress:called_out
+                 localUser:localUser
+             fromLocalUser:fromLocalUser
+                usedSelector:NULL];
+
+}
+- (SccpDestinationGroup *)findRoutes:(SccpAddress *)called
+                               cause:(SCCP_ReturnCause *)cause
+                    newCalledAddress:(SccpAddress **)called_out
+                           localUser:(id<UMSCCP_UserProtocol> *)localUser
+                       fromLocalUser:(BOOL)fromLocalUser
+                        usedSelector:(NSString **)usedSelector
+
 {
     SccpDestinationGroup *destination = NULL;
     SccpAddress *called1 = [called copy];
@@ -591,7 +616,6 @@
                                                                      gti:called1.ai.globalTitleIndicator
                                                                       np:called1.npi.npi
                                                                      nai:called1.nai.nai];
-
             if(self.logLevel <=UMLOG_DEBUG)
             {
                 [self.logFeed debugText:[NSString stringWithFormat:@" gtt-selector=%@",gttSelector.name]];
@@ -599,6 +623,10 @@
 
             if(gttSelector == NULL)
             {
+                if(usedSelector)
+                {
+                    *usedSelector = gttSelector.name;
+                }
                 /* we send a UDTS back as we have no forward route */
                 if(self.logLevel <=UMLOG_DEBUG)
                 {
@@ -846,11 +874,13 @@
     SCCP_ReturnCause cause = SCCP_ReturnCause_not_set;
     SccpAddress *called_out = dst;
     NSString *m3ua_as = NULL;
+    NSString *usedSelector=@"";
     SccpDestinationGroup *grp = [self findRoutes:dst
                                            cause:&cause
                                 newCalledAddress:&called_out
                                        localUser:&localUser
-                                   fromLocalUser:fromLocal];
+                                   fromLocalUser:fromLocal
+                                    usedSelector:&usedSelector];
     if(grp)
     {
         [self chooseRouteFromGroup:grp
@@ -956,7 +986,10 @@
     {
         dict[@"routed-to-local-user"] = localUser.layerName;
     }
-
+    if(usedSelector)
+    {
+        dict[@"used-selector"] = usedSelector;
+    }
     return dict;
 }
 
@@ -994,12 +1027,14 @@
     SccpAddress *dst = packet.incomingCalledPartyAddress;
     SCCP_ReturnCause causeValue = SCCP_ReturnCause_not_set;
     SccpAddress *called_out = NULL;
+    NSString *usedSelector=NULL;
     SccpDestinationGroup *grp = [self findRoutes:dst
                                            cause:&causeValue
                                 newCalledAddress:&called_out
                                        localUser:&localUser
-                                   fromLocalUser:packet.incomingFromLocal];
-    
+                                   fromLocalUser:packet.incomingFromLocal
+                                    usedSelector:&usedSelector];
+    packet.routingSelector = usedSelector;
     if(self.logLevel <=UMLOG_DEBUG)
     {
         NSString *s = [NSString stringWithFormat:@"findRoutes:%@ returns:\n\tdestinationGroup=%@\n\tcause=%d\n\tnewCalledAddress=%@\n\tlocalUser=%@\n\tfromLocal=%@\n",dst,[grp descriptionWithRt:_mtp3RoutingTable],causeValue,called_out,localUser,packet.incomingFromLocal ? @"YES" : @"NO"];
@@ -1711,104 +1746,128 @@
 
 - (void)setConfig:(NSDictionary *)cfg applicationContext:(id<UMLayerSCCPApplicationContextProtocol>)appContext
 {
-    _filterDelegate = appContext;
-    [self readLayerConfig:cfg];
-    if(cfg[@"attach-to"])
+    @autoreleasepool
     {
-        _mtp3_name =  [cfg[@"attach-to"] stringValue];
-        _mtp3 = [appContext getMTP3:_mtp3_name];
-        if(_mtp3 == NULL)
+        _filterDelegate = appContext;
+        _dbDelegate =appContext;
+        [self readLayerConfig:cfg];
+        if(cfg[@"attach-to"])
         {
-            NSString *s = [NSString stringWithFormat:@"Can not find mtp3 layer '%@' referred from sccp '%@'",_mtp3_name,self.layerName];
-            @throw([NSException exceptionWithName:[NSString stringWithFormat:@"CONFIG_ERROR FILE %s line:%ld",__FILE__,(long)__LINE__]
-                                           reason:s
-                                         userInfo:NULL]);
+            _mtp3_name =  [cfg[@"attach-to"] stringValue];
+            _mtp3 = [appContext getMTP3:_mtp3_name];
+            if(_mtp3 == NULL)
+            {
+                NSString *s = [NSString stringWithFormat:@"Can not find mtp3 layer '%@' referred from sccp '%@'",_mtp3_name,self.layerName];
+                @throw([NSException exceptionWithName:[NSString stringWithFormat:@"CONFIG_ERROR FILE %s line:%ld",__FILE__,(long)__LINE__]
+                                               reason:s
+                                             userInfo:NULL]);
+            }
+            [_mtp3 setUserPart:MTP3_SERVICE_INDICATOR_SCCP user:self];
         }
-        [_mtp3 setUserPart:MTP3_SERVICE_INDICATOR_SCCP user:self];
-    }
-    if(cfg[@"mode"])
-    {
-        NSString *v = [cfg[@"mode"] stringValue];
-        if([v isEqualToString:@"stp"])
+        if(cfg[@"mode"])
         {
-            _stpMode = YES;
+            NSString *v = [cfg[@"mode"] stringValue];
+            if([v isEqualToString:@"stp"])
+            {
+                _stpMode = YES;
+            }
+            else if([v isEqualToString:@"ssp"])
+            {
+                _stpMode = NO;
+            }
         }
-        else if([v isEqualToString:@"ssp"])
-        {
-            _stpMode = NO;
-        }
-    }
 
-    if(cfg[@"variant"])
-    {
-        NSString *v = [cfg[@"variant"] stringValue];
-        if([v isEqualToString:@"itu"])
+        if(cfg[@"variant"])
         {
-            _sccpVariant = SCCP_VARIANT_ITU;
+            NSString *v = [cfg[@"variant"] stringValue];
+            if([v isEqualToString:@"itu"])
+            {
+                _sccpVariant = SCCP_VARIANT_ITU;
+            }
+            if([v isEqualToString:@"ansi"])
+            {
+                _sccpVariant = SCCP_VARIANT_ANSI;
+            }
+            else
+            {
+                _sccpVariant = SCCP_VARIANT_ITU;
+            }
         }
-        if([v isEqualToString:@"ansi"])
+
+        NSNumber *n = cfg[@"ntt"];
+        if(n)
         {
-            _sccpVariant = SCCP_VARIANT_ANSI;
+            _ntt = [[SccpTranslationTableNumber alloc]initWithInt:[n intValue]];
+        }
+
+        NSArray<NSString *> *sa = cfg[@"next-pc"];
+        if(sa.count>0)
+        {
+            SccpDestinationGroup *destination = [[SccpDestinationGroup alloc]init];
+            NSMutableArray<UMMTP3PointCode *> *a = [[NSMutableArray alloc]init];
+            for(NSString *s in sa)
+            {
+                UMMTP3PointCode *pc = [[UMMTP3PointCode alloc]initWithString:s variant:_mtp3.variant];
+                if(pc)
+                {
+                    [a addObject:pc];
+
+                    SccpDestination *e = [[SccpDestination alloc]init];
+                    e.dpc = pc;
+                    if(_ntt)
+                    {
+                        e.ntt = @(_ntt.tt);
+                    }
+                    [destination addEntry:e];
+                }
+            }
+            _next_pcs = a;
+            _default_destination_group = destination;
+        }
+
+        [_gttSelectorRegistry updateLogLevel:self.logLevel];
+        [_gttSelectorRegistry updateLogFeed:self.logFeed];
+        if(cfg[@"gt-file"])
+        {
+            NSArray<NSString *> *a =cfg[@"gt-file"];
+            for(NSString *f in a)
+            {
+                [self readFromGtFile:f];
+            }
+            NSLog(@"gt files read");
+        }
+        if(cfg[@"gtt-file"])
+        {
+            NSArray<NSString *> *a =cfg[@"gtt-file"];
+            for(NSString *f in a)
+            {
+                [self readFromGtFile:f];
+            }
+            NSLog(@"gtt files read");
+        }
+        
+        if(cfg[@"statistic-db-instance"])
+        {
+            _statisticDbInstance       = [cfg[@"statistic-db-instance"] stringValue];
+        }
+        if(cfg[@"statistic-db-pool"])
+        {
+           _statisticDbPool        = [cfg[@"statistic-db-pool"] stringValue];
+        }
+        if(cfg[@"statistic-db-table"])
+        {
+           _statisticDbTable       = [cfg[@"statistic-db-table"] stringValue];
+        }
+        if(cfg[@"statistic-db-autocreate"])
+        {
+           _statisticDbAutoCreate  = @([cfg[@"statistic-db-autocreate"] boolValue]);
         }
         else
         {
-            _sccpVariant = SCCP_VARIANT_ITU;
+           _statisticDbAutoCreate=@(YES);
         }
-    }
-
-    NSNumber *n = cfg[@"ntt"];
-    if(n)
-    {
-        _ntt = [[SccpTranslationTableNumber alloc]initWithInt:[n intValue]];
-    }
-
-    NSArray<NSString *> *sa = cfg[@"next-pc"];
-    if(sa.count>0)
-    {
-        SccpDestinationGroup *destination = [[SccpDestinationGroup alloc]init];
-        NSMutableArray<UMMTP3PointCode *> *a = [[NSMutableArray alloc]init];
-        for(NSString *s in sa)
-        {
-            UMMTP3PointCode *pc = [[UMMTP3PointCode alloc]initWithString:s variant:_mtp3.variant];
-            if(pc)
-            {
-                [a addObject:pc];
-
-                SccpDestination *e = [[SccpDestination alloc]init];
-                e.dpc = pc;
-                if(_ntt)
-                {
-                    e.ntt = @(_ntt.tt);
-                }
-                [destination addEntry:e];
-            }
-        }
-        _next_pcs = a;
-        _default_destination_group = destination;
-    }
-
-    [_gttSelectorRegistry updateLogLevel:self.logLevel];
-    [_gttSelectorRegistry updateLogFeed:self.logFeed];
-    if(cfg[@"gt-file"])
-    {
-        NSArray<NSString *> *a =cfg[@"gt-file"];
-        for(NSString *f in a)
-        {
-            [self readFromGtFile:f];
-        }
-        NSLog(@"gt files read");
-    }
-    if(cfg[@"gtt-file"])
-    {
-        NSArray<NSString *> *a =cfg[@"gtt-file"];
-        for(NSString *f in a)
-        {
-            [self readFromGtFile:f];
-        }
-        NSLog(@"gtt files read");
     }
 }
-
 
 - (NSDictionary *)config
 {
@@ -2029,7 +2088,25 @@
 
 - (void)startUp
 {
-
+    @autoreleasepool
+    {
+        if(_statisticDbPool && _statisticDbTable)
+        {
+            if(_statisticDbInstance==NULL)
+            {
+                _statisticDbInstance = _layerName;
+            }
+            _statisticDb = [[UMSCCP_StatisticDb alloc]initWithPoolName:_statisticDbPool
+                                                            tableName:_statisticDbTable
+                                                           appContext:_dbDelegate
+                                                           autocreate:_statisticDbAutoCreate.boolValue
+                                                             instance:_statisticDbInstance];
+            if(_statisticDbAutoCreate.boolValue)
+            {
+                [_statisticDb doAutocreate];
+            }
+        }
+    }
 }
 
 + (NSString *)reasonString:(SCCP_ReturnCause)reason
@@ -3049,6 +3126,11 @@
         NSString *s = [NSString stringWithFormat:@"Exception while reading file: %@\n%@",fn,e];
         [self logMajorError:s];
     }
+}
+
+- (void)housekeeping
+{
+    [_statisticDb flush];
 }
 
 @end

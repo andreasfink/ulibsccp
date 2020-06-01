@@ -434,6 +434,57 @@ static int segmentReferenceId;
                         return;
                     }
                     [_sccpLayer routePacket:packet];
+                    
+                    
+                    if(_sccpLayer.statisticDb)
+                    {
+                        NSString *callingPrefix = packet.incomingCallingPartyAddress.address;
+                        NSString *calledPrefix = packet.incomingCalledPartyAddress.address;
+
+                        if(packet.incomingCallingPartyAddress.npi.npi == SCCP_NPI_ISDN_MOBILE_E214)
+                        {
+                            callingPrefix =  [_sccpLayer.statisticDb e214prefixOf:packet.incomingCallingPartyAddress.address];
+                        }
+                        else if(packet.incomingCallingPartyAddress.npi.npi == SCCP_NPI_LAND_MOBILE_E212)
+                        {
+                            callingPrefix =  [_sccpLayer.statisticDb e212prefixOf:packet.incomingCallingPartyAddress.address];
+
+                        }
+                        else
+                        {
+                            callingPrefix =  [_sccpLayer.statisticDb e164prefixOf:packet.incomingCallingPartyAddress.address];
+                        }
+
+                        
+                        if(packet.incomingCalledPartyAddress.npi.npi == SCCP_NPI_ISDN_MOBILE_E214)
+                        {
+                            calledPrefix =  [_sccpLayer.statisticDb e214prefixOf:packet.incomingCalledPartyAddress.address];
+                        }
+                        else if(packet.incomingCalledPartyAddress.npi.npi == SCCP_NPI_LAND_MOBILE_E212)
+                        {
+                            calledPrefix =  [_sccpLayer.statisticDb e212prefixOf:packet.incomingCalledPartyAddress.address];
+
+                        }
+                        else
+                        {
+                            calledPrefix =  [_sccpLayer.statisticDb e164prefixOf:packet.incomingCalledPartyAddress.address];
+                        }
+
+                        NSString *gttSelector=packet.routingSelector;
+                        NSString *incomingLinkset = @"local";
+                        NSString *outgoingLinkset = packet.outgoingLinkset;
+                        if(packet.outgoingToLocal)
+                        {
+                            outgoingLinkset=@"local";
+                        }
+                        [_sccpLayer.statisticDb addByteCount:(int)packet.outgoingSccpData.length
+                                             incomingLinkset:incomingLinkset
+                                             outgoingLinkset:outgoingLinkset
+                                               callingPrefix:callingPrefix
+                                                calledPrefix:calledPrefix
+                                                 gttSelector:gttSelector
+                                               sccpOperation:packet.incomingServiceType];
+                    }
                 }
             }
         }

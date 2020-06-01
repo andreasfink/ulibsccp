@@ -24,6 +24,7 @@
 #import "UMSCCP_StatisticSection.h"
 #import "UMSCCP_Packet.h"
 #import "UMSCCP_TracefileProtocol.h"
+#import "UMSCCP_StatisticDb.h"
 
 typedef enum SccpGtFileSection
 {
@@ -60,6 +61,13 @@ typedef enum SccpGtFileSection
     UMSCCP_Statistics           *_processingStats[UMSCCP_StatisticSection_MAX];
     UMThroughputCounter         *_throughputCounters[UMSCCP_StatisticSection_MAX];
     BOOL                        _statisticsReady;
+    
+    NSString                    *_statisticDbPool;
+    NSString                    *_statisticDbTable;
+    NSNumber                    *_statisticDbAutoCreate;
+    UMSCCP_StatisticDb          *_statisticDb;
+    NSString                    *_statisticDbInstance;
+
     /* this is now done in appDelegate
     NSString *_inboundFilterName;
     NSString *_outboundFilterName;
@@ -76,6 +84,8 @@ typedef enum SccpGtFileSection
     id<UMSCCP_TracefileProtocol>    _unrouteablePacketsTraceDestination;
     BOOL                         _routeErrorsBackToOriginatingPointCode;
     id<UMSCCP_FilterDelegateProtocol> _filterDelegate;
+    id<UMLayerSCCPApplicationContextProtocol>_dbDelegate;
+    UMTimer                     *_housekeepingTimer;
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;
@@ -90,6 +100,9 @@ typedef enum SccpGtFileSection
 @property(readwrite,strong) UMMTP3PointCode *next_pc;
 
 @property(readwrite,strong,atomic)  id<UMSCCP_FilterDelegateProtocol> filterDelegate;
+
+@property(readwrite,strong,atomic)  UMSCCP_StatisticDb          *statisticDb;
+
 
 /*
 @property(readwrite,strong,atomic) id<UMSCCP_FilterProtocol>   inboundFilter;

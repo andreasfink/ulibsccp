@@ -93,8 +93,7 @@
 - (void)main
 {
     @autoreleasepool
-        {
-
+    {
         _startOfProcessing = [NSDate date];
         /* we build a pseudo MTP3 raw packet for debugging /tracing and logging */
         UMMTP3Label *label = [[UMMTP3Label alloc]init];
@@ -660,10 +659,64 @@
                         }
                         break;
                 }
+                
+                if(_sccpLayer.statisticDb)
+                {
+                    NSString *callingPrefix = _packet.incomingCallingPartyAddress.address;
+                    NSString *calledPrefix = _packet.incomingCalledPartyAddress.address;
+
+                    if(_packet.incomingCallingPartyAddress.npi.npi == SCCP_NPI_ISDN_MOBILE_E214)
+                    {
+                        callingPrefix =  [_sccpLayer.statisticDb e214prefixOf:_packet.incomingCallingPartyAddress.address];
+                    }
+                    else if(_packet.incomingCallingPartyAddress.npi.npi == SCCP_NPI_LAND_MOBILE_E212)
+                    {
+                        callingPrefix =  [_sccpLayer.statisticDb e212prefixOf:_packet.incomingCallingPartyAddress.address];
+
+                    }
+                    else
+                    {
+                        callingPrefix =  [_sccpLayer.statisticDb e164prefixOf:_packet.incomingCallingPartyAddress.address];
+                    }
+
+                    
+                    if(_packet.incomingCalledPartyAddress.npi.npi == SCCP_NPI_ISDN_MOBILE_E214)
+                    {
+                        calledPrefix =  [_sccpLayer.statisticDb e214prefixOf:_packet.incomingCalledPartyAddress.address];
+                    }
+                    else if(_packet.incomingCalledPartyAddress.npi.npi == SCCP_NPI_LAND_MOBILE_E212)
+                    {
+                        calledPrefix =  [_sccpLayer.statisticDb e212prefixOf:_packet.incomingCalledPartyAddress.address];
+
+                    }
+                    else
+                    {
+                        calledPrefix =  [_sccpLayer.statisticDb e164prefixOf:_packet.incomingCalledPartyAddress.address];
+                    }
+
+                    NSString *gttSelector=_packet.routingSelector;
+                    NSString *incomingLinkset = _packet.incomingLinkset;
+                    NSString *outgoingLinkset = _packet.outgoingLinkset;
+                    if(_packet.incomingFromLocal)
+                    {
+                        incomingLinkset=@"local";
+                    }
+                    if(_packet.outgoingToLocal)
+                    {
+                        outgoingLinkset=@"local";
+                    }
+                    [_sccpLayer.statisticDb addByteCount:(int)_packet.outgoingSccpData.length
+                                         incomingLinkset:incomingLinkset
+                                         outgoingLinkset:outgoingLinkset
+                                           callingPrefix:callingPrefix
+                                            calledPrefix:calledPrefix
+                                             gttSelector:gttSelector
+                                           sccpOperation:_packet.incomingServiceType];
+                }
             }
             else
             {
-                
+                /* only decoding */
             }
         }
         @catch(NSException *e)
