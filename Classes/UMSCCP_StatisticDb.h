@@ -20,7 +20,8 @@
     UMSynchronizedDictionary *_entries;
     NSDateFormatter *_ymdhDateFormatter;
     NSString *_instance;
-    
+    NSString *_poolName;
+
     UMSynchronizedDictionary *_e164;
     UMSynchronizedDictionary *_e212;
     UMSynchronizedDictionary *_e214;

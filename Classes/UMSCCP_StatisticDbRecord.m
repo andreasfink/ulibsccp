@@ -52,7 +52,7 @@
             if(![query isInCache])
             {
                 NSArray *fields = @[
-                                    @"key",
+                                    @"dbkey",
                                     @"ymdh",
                                     @"instance",
                                     @"incoming_linkset",
@@ -114,7 +114,7 @@
                 [query setType:UMDBQUERYTYPE_INCREASE_BY_KEY];
                 [query setTable:dbt];
                 [query setFields:@[@"msu_count",@"bytes_count"]];
-                [query setPrimaryKeyName:@"key"];
+                [query setPrimaryKeyName:@"dbkey"];
                 [query addToCache];
             }
             NSArray *params = [NSArray arrayWithObjects:

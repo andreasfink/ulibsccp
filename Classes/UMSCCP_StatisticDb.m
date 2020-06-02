@@ -13,19 +13,18 @@
 
 static dbFieldDef UMSCCP_StatisticDb_fields[] =
 {
-    {"key",                 NULL,       NO,     DB_PRIMARY_INDEX,   DB_FIELD_TYPE_STRING,              255,   0,NULL,NULL,1},
-    {"ymdh",                NULL,       NO,     DB_INDEXED,         DB_FIELD_TYPE_STRING,              10,    0,NULL,NULL,2},
-    {"instance",            NULL,       NO,     DB_INDEXED,         DB_FIELD_TYPE_STRING,              32,    0,NULL,NULL,3},
-    {"incoming_linkset",    NULL,       NO,     DB_INDEXED,         DB_FIELD_TYPE_STRING,              32,    0,NULL,NULL,4},
-    {"outgoing_linkset",    NULL,       NO,     DB_INDEXED,         DB_FIELD_TYPE_STRING,              32,    0,NULL,NULL,5},
-    {"calling_prefix",      NULL,       NO,     DB_INDEXED,         DB_FIELD_TYPE_STRING,              32,    0,NULL,NULL,6},
-    {"called_prefix",       NULL,       NO,     DB_INDEXED,         DB_FIELD_TYPE_STRING,              32,    0,NULL,NULL,7},
-    {"called_prefix",       NULL,       NO,     DB_INDEXED,         DB_FIELD_TYPE_STRING,              32,    0,NULL,NULL,8},
-    {"gtt_selector",        NULL,       NO,     DB_INDEXED,         DB_FIELD_TYPE_STRING,              32,    0,NULL,NULL,9},
-    {"sccp_operation",      NULL,       NO,     DB_INDEXED,         DB_FIELD_TYPE_INTEGER,             0,     0,NULL,NULL,10},
-    {"msu_count",           NULL,       NO,     DB_NOT_INDEXED,     DB_FIELD_TYPE_INTEGER,             0,     0,NULL,NULL,11},
-    {"bytes_count",         NULL,       NO,     DB_NOT_INDEXED,     DB_FIELD_TYPE_INTEGER,             0,     0,NULL,NULL,12},
-    { "",                   NULL,       NO,     DB_NOT_INDEXED,     DB_FIELD_TYPE_END,                 0,     0,NULL,NULL,13},
+    {"dbkey",               NULL,       NO,     DB_PRIMARY_INDEX,   DB_FIELD_TYPE_VARCHAR,             255,   0,NULL,NULL,1},
+    {"ymdh",                NULL,       NO,     DB_INDEXED,         DB_FIELD_TYPE_VARCHAR,             10,    0,NULL,NULL,2},
+    {"instance",            NULL,       NO,     DB_INDEXED,         DB_FIELD_TYPE_VARCHAR,             32,    0,NULL,NULL,3},
+    {"incoming_linkset",    NULL,       NO,     DB_INDEXED,         DB_FIELD_TYPE_VARCHAR,             32,    0,NULL,NULL,4},
+    {"outgoing_linkset",    NULL,       NO,     DB_INDEXED,         DB_FIELD_TYPE_VARCHAR,             32,    0,NULL,NULL,5},
+    {"calling_prefix",      NULL,       NO,     DB_INDEXED,         DB_FIELD_TYPE_VARCHAR,             32,    0,NULL,NULL,6},
+    {"called_prefix",       NULL,       NO,     DB_INDEXED,         DB_FIELD_TYPE_VARCHAR,             32,    0,NULL,NULL,7},
+    {"gtt_selector",        NULL,       NO,     DB_INDEXED,         DB_FIELD_TYPE_VARCHAR,             32,    0,NULL,NULL,8},
+    {"sccp_operation",      NULL,       NO,     DB_INDEXED,         DB_FIELD_TYPE_INTEGER,             0,     0,NULL,NULL,9},
+    {"msu_count",           NULL,       NO,     DB_NOT_INDEXED,     DB_FIELD_TYPE_INTEGER,             0,     0,NULL,NULL,10},
+    {"bytes_count",         NULL,       NO,     DB_NOT_INDEXED,     DB_FIELD_TYPE_INTEGER,             0,     0,NULL,NULL,11},
+    { "",                   NULL,       NO,     DB_NOT_INDEXED,     DB_FIELD_TYPE_END,                 0,     0,NULL,NULL,255},
 };
 
 @implementation UMSCCP_StatisticDb
@@ -43,7 +42,9 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
                                    @"table-name" : table,
                                    @"autocreate" : @(autocreate),
                                    @"pool-name"  : pool };
+        _poolName = pool;
         _table = [[UMDbTable alloc]initWithConfig:config andPools:appContext.dbPools];
+        _pool = appContext.dbPools[_poolName];
         _lock = [[UMMutex alloc]initWithName:@"UMMTP3StatisticDb-lock"];
         _entries = [[UMSynchronizedDictionary alloc]init];
         _instance = instance;
@@ -66,9 +67,14 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
 
 - (void)doAutocreate
 {
-    UMDbSession *session = [_table.pool grabSession:__FILE__ line:__LINE__ func:__func__];
+    if(_pool==NULL)
+    {
+        _pool = _table.pools[_poolName];
+    }
+
+    UMDbSession *session = [_pool grabSession:__FILE__ line:__LINE__ func:__func__];
     [_table autoCreate:UMSCCP_StatisticDb_fields session:session];
-    [_table.pool returnSession:session file:__FILE__ line:__LINE__ func:__func__];
+    [_pool returnSession:session file:__FILE__ line:__LINE__ func:__func__];
 }
 
 
@@ -119,7 +125,7 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
     for(NSString *key in keys)
     {
         UMMTP3StatisticDbRecord *rec = tmp[key];
-        [rec flushToPool:_table.pool table:_table];
+        [rec flushToPool:_pool table:_table];
     }
 }
 
