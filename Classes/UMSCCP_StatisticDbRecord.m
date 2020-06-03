@@ -9,6 +9,8 @@
 #import "UMSCCP_StatisticDbRecord.h"
 #import <ulibdb/ulibdb.h>
 
+#define UMSCCP_STATISTICS_DEBUG 1
+
 @implementation UMSCCP_StatisticDbRecord
 
 - (UMSCCP_StatisticDbRecord *)init

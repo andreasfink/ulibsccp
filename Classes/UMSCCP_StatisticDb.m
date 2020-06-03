@@ -10,6 +10,7 @@
 #import "UMSCCP_StatisticDbRecord.h"
 #import "UMLayerSCCPApplicationContextProtocol.h"
 
+#define UMSCCP_STATISTICS_DEBUG 1
 
 static dbFieldDef UMSCCP_StatisticDb_fields[] =
 {
@@ -86,46 +87,85 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
          gttSelector:(NSString *)selector
        sccpOperation:(int)sccpOperation
 {
-    NSString *ymdh = [_ymdhDateFormatter stringFromDate:[NSDate date]];
-
-    NSString *key = [UMSCCP_StatisticDbRecord keystringFor:ymdh
-                                           incomingLinkset:incomingLinkset
-                                           outgoingLinkset:outgoingLinkset
-                                             callingPrefix:callingPrefix
-                                              calledPrefix:calledPrefix
-                                               gttSelector:selector
-                                             sccpOperation:sccpOperation
-                                                  instance:_instance];
-    [_lock lock];
-    UMSCCP_StatisticDbRecord *rec = _entries[key];
-    if(rec == NULL)
+    @autoreleasepool
     {
-        rec = [[UMSCCP_StatisticDbRecord alloc]init];
-        rec.ymdh = ymdh;
-        rec.incoming_linkset = incomingLinkset;
-        rec.outgoing_linkset = outgoingLinkset;
-        rec.calling_prefix = callingPrefix;
-        rec.called_prefix = calledPrefix;
-        rec.gtt_selector = selector;
-        rec.instance = _instance;
-        _entries[key] = rec;
+#if defined(UMSCCP_STATISTICS_DEBUG)
+            NSLog(@"UMSCCP_STATISTICS_DEBUG: addByteCount:%d\n"
+                  @"                      incomingLinkset:%@\n"
+                  @"                      outgoingLinkset:%@\n"
+                  @"                        callingPrefix:%@\n"
+                  @"                         calledPrefix:%@\n"
+                  @"                             selector:%@\n"
+                  @"                        sccpOperation:%d\n"
+                  ,byteCount,incomingLinkset,outgoingLinkset,callingPrefix,calledPrefix,selector,sccpOperation);
+#endif
+
+        NSString *ymdh = [_ymdhDateFormatter stringFromDate:[NSDate date]];
+#if defined(UMSCCP_STATISTICS_DEBUG)
+        NSLog(@"UMSCCP_STATISTICS_DEBUG: ymdh:%@",ymdh);
+#endif
+
+        NSString *key = [UMSCCP_StatisticDbRecord keystringFor:ymdh
+                                               incomingLinkset:incomingLinkset
+                                               outgoingLinkset:outgoingLinkset
+                                                 callingPrefix:callingPrefix
+                                                  calledPrefix:calledPrefix
+                                                   gttSelector:selector
+                                                 sccpOperation:sccpOperation
+                                                      instance:_instance];
+#if defined(UMSCCP_STATISTICS_DEBUG)
+        NSLog(@"UMSCCP_STATISTICS_DEBUG: key:%@\n"
+              @"                        ymdh:%@",key,ymdh);
+#endif
+
+        [_lock lock];
+        UMSCCP_StatisticDbRecord *rec = _entries[key];
+        if(rec == NULL)
+        {
+#if defined(UMSCCP_STATISTICS_DEBUG)
+
+            NSLog(@"UMSCCP_STATISTICS_DEBUG: creating new record");
+#endif
+            
+            rec = [[UMSCCP_StatisticDbRecord alloc]init];
+            rec.ymdh = ymdh;
+            rec.incoming_linkset = incomingLinkset;
+            rec.outgoing_linkset = outgoingLinkset;
+            rec.calling_prefix = callingPrefix;
+            rec.called_prefix = calledPrefix;
+            rec.gtt_selector = selector;
+            rec.instance = _instance;
+            _entries[key] = rec;
+        }
+#if defined(UMSCCP_STATISTICS_DEBUG)
+        else
+        {
+            NSLog(@"UMSCCP_STATISTICS_DEBUG: using existing record");
+        }
+ #endif
+        [_lock unlock];
+        [rec increaseMsuCount:1 byteCount:byteCount];
     }
-    [_lock unlock];
-    [rec increaseMsuCount:1 byteCount:byteCount];
 }
 
 - (void)flush
 {
-    [_lock lock];
-    UMSynchronizedDictionary *tmp = _entries;
-    _entries = [[UMSynchronizedDictionary alloc]init];
-    [_lock unlock];
-    
-    NSArray *keys = [tmp allKeys];
-    for(NSString *key in keys)
+    @autoreleasepool
     {
-        UMMTP3StatisticDbRecord *rec = tmp[key];
-        [rec flushToPool:_pool table:_table];
+#if defined(UMSCCP_STATISTICS_DEBUG)
+        NSLog(@"UMSCCP_STATISTICS_DEBUG: flush");
+#endif
+        [_lock lock];
+        UMSynchronizedDictionary *tmp = _entries;
+        _entries = [[UMSynchronizedDictionary alloc]init];
+        [_lock unlock];
+        
+        NSArray *keys = [tmp allKeys];
+        for(NSString *key in keys)
+        {
+            UMMTP3StatisticDbRecord *rec = tmp[key];
+            [rec flushToPool:_pool table:_table];
+        }
     }
 }
 
