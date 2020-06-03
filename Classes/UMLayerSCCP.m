@@ -2092,6 +2092,7 @@
     {
         if(_statisticDbPool && _statisticDbTable)
         {
+            [_housekeepingTimer start];
             if(_statisticDbInstance==NULL)
             {
                 _statisticDbInstance = _layerName;
