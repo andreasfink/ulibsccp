@@ -56,8 +56,8 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
         [self addMncPrefixes:_e212];
 
         NSTimeZone *tz = [NSTimeZone timeZoneWithName:@"UTC"];
-        NSDateFormatter *_ymdhDateFormatter= [[NSDateFormatter alloc]init];
-        NSLocale *ukLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_UK"];
+        _ymdhDateFormatter= [[NSDateFormatter alloc]init];
+        NSLocale *ukLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_GB"];
         [_ymdhDateFormatter setLocale:ukLocale];
         [_ymdhDateFormatter setDateFormat:@"yyyyMMddHH"];
         [_ymdhDateFormatter setTimeZone:tz];
