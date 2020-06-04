@@ -10,6 +10,6 @@ Libs: -L${libdir} -l:libulibsccp.@SHARED_LIBRARY_EXTENSION@.@MAJORVER@.@MINORVER
 Name: ulibsccp
 Description: universal sccp library
 Version: @VERSION@
-Requires: ulibmtp3 ulibm2pa ulibsctp ulib ulibgt
+Requires: ulibmtp3 ulibm2pa ulibsctp ulib ulibgt ulibdb
 
 
