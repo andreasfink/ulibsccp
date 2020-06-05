@@ -600,6 +600,10 @@
                 *cause = SCCP_ReturnCause_NoTranslationForAnAddressOfSuchNature;
             }
         }
+        if(usedSelector!=NULL)
+        {
+            *usedSelector=@"ssp-default";
+        }
     }
     else /* STP mode */
     {
@@ -623,10 +627,6 @@
 
             if(gttSelector == NULL)
             {
-                if(usedSelector)
-                {
-                    *usedSelector = gttSelector.name;
-                }
                 /* we send a UDTS back as we have no forward route */
                 if(self.logLevel <=UMLOG_DEBUG)
                 {
@@ -645,8 +645,13 @@
                 }
                 return NULL;
             }
-            else
+            else /* GTT SELECTOR IS NOT NULL */
             {
+                if(usedSelector)
+                {
+                    *usedSelector = gttSelector.name;
+                }
+
                 if(gttSelector.preTranslation)
                 {
                     called1 = [gttSelector.preTranslation translateAddress:called1];
