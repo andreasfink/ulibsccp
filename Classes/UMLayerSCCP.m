@@ -1048,7 +1048,7 @@
     
     if(causeValue != SCCP_ReturnCause_not_set)
     {
-        NSString *s = [NSString stringWithFormat:@"Can not forward %@. No route to destination PC=%@. SRC=%@ DST=%@ DATA=%@",
+        NSString *s = [NSString stringWithFormat:@"Can not forward %@. Sending no route to destination to PC=%@. SRC=%@ DST=%@ DATA=%@",
                        packet.incomingPacketType,
                        packet.incomingOpc,
                        packet.incomingCallingPartyAddress,
