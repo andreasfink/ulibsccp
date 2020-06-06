@@ -149,6 +149,10 @@
 
 - (void)flushToPool:(UMDbPool *)pool table:(UMDbTable *)table
 {
+#if defined(UMSCCP_STATISTICS_DEBUG)
+        NSLog(@"UMSCCP_STATISTICS_DEBUG: flushToPool:%@ table:%@",pool.poolName,table.tableName);
+#endif
+
     [_lock lock];
     if([self updateDb:pool table:table] == NO)
     {

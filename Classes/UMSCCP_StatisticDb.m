@@ -30,7 +30,7 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
 
 @implementation UMSCCP_StatisticDb
 
-- (UMSCCP_StatisticDb *)initWithPoolName:(NSString *)pool
+- (UMSCCP_StatisticDb *)initWithPoolName:(NSString *)poolName
                               tableName:(NSString *)table
                              appContext:(id<UMLayerSCCPApplicationContextProtocol>)appContext
                              autocreate:(BOOL)autocreate
@@ -42,10 +42,10 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
         NSDictionary *config =@{ @"enable"     : @(YES),
                                    @"table-name" : table,
                                    @"autocreate" : @(autocreate),
-                                   @"pool-name"  : pool };
-        _poolName = pool;
+                                   @"pool-name"  : poolName };
+        _poolName = poolName;
+        _pool = [appContext dbPools][_poolName];
         _table = [[UMDbTable alloc]initWithConfig:config andPools:appContext.dbPools];
-        _pool = appContext.dbPools[_poolName];
         _lock = [[UMMutex alloc]initWithName:@"UMMTP3StatisticDb-lock"];
         _entries = [[UMSynchronizedDictionary alloc]init];
         _instance = instance;
@@ -163,7 +163,7 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
         NSArray *keys = [tmp allKeys];
         for(NSString *key in keys)
         {
-            UMMTP3StatisticDbRecord *rec = tmp[key];
+            UMSCCP_StatisticDbRecord *rec = tmp[key];
             [rec flushToPool:_pool table:_table];
         }
     }
