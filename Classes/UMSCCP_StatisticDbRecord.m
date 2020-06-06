@@ -86,7 +86,17 @@
                                 NULL];
             UMDbSession *session = [pool grabSession:FLF];
             unsigned long long affectedRows = 0;
-            success = [session cachedQueryWithNoResult:query parameters:params allowFail:YES primaryKeyValue:NULL affectedRows:&affectedRows];
+            success = [session cachedQueryWithNoResult:query parameters:params allowFail:YES primaryKeyValue:key affectedRows:&affectedRows];
+#if defined(UMSCCP_STATISTICS_DEBUG)
+            if(success==NO)
+            {
+                NSLog(@"Insert SQL failed: %@",query.lastSql);
+            }
+            else
+            {
+                NSLog(@"Insert SQL success: %@",query.lastSql);
+            }
+#endif
             [session.pool returnSession:session file:FLF];
         }
         @catch (NSException *e)
@@ -126,6 +136,16 @@
             NSString *key = [self keystring];
             UMDbSession *session = [pool grabSession:FLF];
             success = [session cachedQueryWithNoResult:query parameters:params allowFail:YES primaryKeyValue:key];
+#if defined(UMSCCP_STATISTICS_DEBUG)
+            if(success==NO)
+            {
+                NSLog(@"Update SQL failed: %@",query.lastSql);
+            }
+            else
+            {
+                NSLog(@"Update SQL success: %@",query.lastSql);
+            }
+#endif
             [session.pool returnSession:session file:FLF];
         }
         @catch (NSException *e)
