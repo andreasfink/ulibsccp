@@ -90,6 +90,7 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
 {
     @autoreleasepool
     {
+#if defined (UMSCCP_STATISTICS_DEBUG)
             NSLog(@"UMSCCP_STATISTICS_DEBUG: addByteCount:%d\n"
                   @"                      incomingLinkset:%@\n"
                   @"                      outgoingLinkset:%@\n"
@@ -98,7 +99,7 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
                   @"                             selector:%@\n"
                   @"                        sccpOperation:%d\n"
                   ,byteCount,incomingLinkset,outgoingLinkset,callingPrefix,calledPrefix,selector,sccpOperation);
-
+#endif
         NSString *ymdh = [_ymdhDateFormatter stringFromDate:[NSDate date]];
         NSString *sccpOperationString = @"unknown";
         switch(sccpOperation)
