@@ -153,7 +153,7 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
     @autoreleasepool
     {
 #if defined(UMSCCP_STATISTICS_DEBUG)
-        NSLog(@"UMSCCP_STATISTICS_DEBUG: flush");
+        NSLog(@"UMSCCP_STATISTICS_DEBUG: flush. count = %d",(int)_entries.count);
 #endif
         [_lock lock];
         UMSynchronizedDictionary *tmp = _entries;
