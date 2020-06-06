@@ -150,7 +150,7 @@
 - (void)flushToPool:(UMDbPool *)pool table:(UMDbTable *)table
 {
 #if defined(UMSCCP_STATISTICS_DEBUG)
-        NSLog(@"UMSCCP_STATISTICS_DEBUG: flushToPool:%@ table:%@",pool.poolName,table.tableName);
+    NSLog(@"UMSCCP_STATISTICS_DEBUG: flushToPool:%@ table:%@",pool.poolName,table.tableName);
 #endif
 
     [_lock lock];
@@ -165,4 +165,19 @@
     [_lock unlock];
 }
 
+
+- (id)proxyForJson
+{
+    UMSynchronizedSortedDictionary *d = [[UMSynchronizedSortedDictionary alloc]init];
+    d[@"_ymdh"]             =_ymdh ? _ymdh : @"(null)";
+    d[@"_instance"]         =_instance ? _instance : @"(null)";
+    d[@"_incoming_linkset"] =_incoming_linkset ? _incoming_linkset : @"(null)";
+    d[@"_outgoing_linkset"] =_outgoing_linkset ? _outgoing_linkset : @"(null)";
+    d[@"_calling_prefix"]   =_calling_prefix ? _calling_prefix : @"(null)";
+    d[@"_gtt_selector"]     =_gtt_selector ? _gtt_selector : @"(null)";
+    d[@"_sccp_operation"]   = @(_sccp_operation);
+    d[@"_msu_count"]        = @(_msu_count);
+    d[@"_bytes_count"]      = @(_bytes_count);
+    return d;
+}
 @end

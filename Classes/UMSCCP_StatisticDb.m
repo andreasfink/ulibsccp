@@ -158,9 +158,14 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
         [_lock lock];
         UMSynchronizedDictionary *tmp = _entries;
         _entries = [[UMSynchronizedDictionary alloc]init];
+
+#if defined(UMSCCP_STATISTICS_DEBUG)
+        NSLog(@"UMSCCP_STATISTICS_DEBUG: \n%@",[_entries jsonString]);
+#endif
         [_lock unlock];
         
         NSArray *keys = [tmp allKeys];
+        
         for(NSString *key in keys)
         {
             UMSCCP_StatisticDbRecord *rec = tmp[key];
