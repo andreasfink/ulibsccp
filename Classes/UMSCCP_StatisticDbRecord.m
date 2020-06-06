@@ -87,6 +87,12 @@
             UMDbSession *session = [pool grabSession:FLF];
             unsigned long long affectedRows = 0;
             success = [session cachedQueryWithNoResult:query parameters:params allowFail:YES primaryKeyValue:NULL affectedRows:&affectedRows];
+#ifdef UMSCCP_STATISTICS_DEBUG
+            if(success==NO)
+            {
+                NSLog(@"Update is not successful. SQL = %@",query.lastSql);
+            }
+#endif
             [session.pool returnSession:session file:FLF];
         }
         @catch (NSException *e)
@@ -126,6 +132,12 @@
             NSString *key = [self keystring];
             UMDbSession *session = [pool grabSession:FLF];
             success = [session cachedQueryWithNoResult:query parameters:params allowFail:YES primaryKeyValue:key];
+#ifdef UMSCCP_STATISTICS_DEBUG
+            if(success==NO)
+            {
+                NSLog(@"Update is not successful. SQL = %@",query.lastSql);
+            }
+#endif
             [session.pool returnSession:session file:FLF];
         }
         @catch (NSException *e)
