@@ -175,8 +175,12 @@
 #endif
 
     [_lock lock];
-    if([self updateDb:pool table:table] == NO)
+    BOOL success = [self updateDb:pool table:table];
+    if(success == NO)
     {
+#if defined(UMSCCP_STATISTICS_DEBUG)
+        NSLog(@"UMSCCP_STATISTICS_DEBUG: trying insert instead\n");
+#endif
         if([self insertIntoDb:pool table:table])
         {
             _msu_count = 0;
