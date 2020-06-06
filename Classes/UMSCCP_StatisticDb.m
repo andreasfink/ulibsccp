@@ -11,6 +11,7 @@
 #import "UMLayerSCCPApplicationContextProtocol.h"
 #import "UMSCCP_Defs.h"
 
+
 //#define UMSCCP_STATISTICS_DEBUG 1
 
 static dbFieldDef UMSCCP_StatisticDb_fields[] =

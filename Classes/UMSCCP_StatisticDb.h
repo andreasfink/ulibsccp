@@ -9,6 +9,7 @@
 #import <ulib/ulib.h>
 #import <ulibdb/ulibdb.h>
 #import "UMLayerSCCPApplicationContextProtocol.h"
+#import "UMSCCP_Defs.h"
 
 @class UMDigitTree;
 
