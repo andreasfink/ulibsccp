@@ -12,8 +12,6 @@
 #import "UMSCCP_Defs.h"
 
 
-//#define UMSCCP_STATISTICS_DEBUG 1
-
 static dbFieldDef UMSCCP_StatisticDb_fields[] =
 {
     {"dbkey",               NULL,       NO,     DB_PRIMARY_INDEX,   DB_FIELD_TYPE_VARCHAR,             255,   0,NULL,NULL,1},
@@ -24,7 +22,7 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
     {"calling_prefix",      NULL,       NO,     DB_INDEXED,         DB_FIELD_TYPE_VARCHAR,             32,    0,NULL,NULL,6},
     {"called_prefix",       NULL,       NO,     DB_INDEXED,         DB_FIELD_TYPE_VARCHAR,             32,    0,NULL,NULL,7},
     {"gtt_selector",        NULL,       NO,     DB_INDEXED,         DB_FIELD_TYPE_VARCHAR,             32,    0,NULL,NULL,8},
-    {"sccp_operation",      NULL,       NO,     DB_INDEXED,         DB_FIELD_TYPE_VARCHAR,             32,     0,NULL,NULL,9},
+    {"sccp_operation",      NULL,       NO,     DB_INDEXED,         DB_FIELD_TYPE_VARCHAR,             32,    0,NULL,NULL,9},
     {"msu_count",           NULL,       NO,     DB_NOT_INDEXED,     DB_FIELD_TYPE_INTEGER,             0,     0,NULL,NULL,10},
     {"bytes_count",         NULL,       NO,     DB_NOT_INDEXED,     DB_FIELD_TYPE_INTEGER,             0,     0,NULL,NULL,11},
     { "",                   NULL,       NO,     DB_NOT_INDEXED,     DB_FIELD_TYPE_END,                 0,     0,NULL,NULL,255},
@@ -91,7 +89,6 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
 {
     @autoreleasepool
     {
-#if defined(UMSCCP_STATISTICS_DEBUG)
             NSLog(@"UMSCCP_STATISTICS_DEBUG: addByteCount:%d\n"
                   @"                      incomingLinkset:%@\n"
                   @"                      outgoingLinkset:%@\n"
@@ -100,14 +97,9 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
                   @"                             selector:%@\n"
                   @"                        sccpOperation:%d\n"
                   ,byteCount,incomingLinkset,outgoingLinkset,callingPrefix,calledPrefix,selector,sccpOperation);
-#endif
 
         NSString *ymdh = [_ymdhDateFormatter stringFromDate:[NSDate date]];
-#if defined(UMSCCP_STATISTICS_DEBUG)
-        NSLog(@"UMSCCP_STATISTICS_DEBUG: ymdh:%@",ymdh);
-#endif
-
-        NSString *sccpOperationString;
+        NSString *sccpOperationString = @"unknown";
         switch(sccpOperation)
         {
             case SCCP_UDT:
@@ -125,7 +117,6 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
             case SCCP_LUDT:
                 sccpOperationString =@"LUDT";
                 break;
-
             case SCCP_LUDTS:
                 sccpOperationString =@"LUDTS";
                 break;
@@ -142,20 +133,10 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
                                                    gttSelector:selector
                                                  sccpOperation:sccpOperationString
                                                       instance:_instance];
-#if defined(UMSCCP_STATISTICS_DEBUG)
-        NSLog(@"UMSCCP_STATISTICS_DEBUG: key:%@\n"
-              @"                        ymdh:%@",key,ymdh);
-#endif
-
         [_lock lock];
         UMSCCP_StatisticDbRecord *rec = _entries[key];
         if(rec == NULL)
         {
-#if defined(UMSCCP_STATISTICS_DEBUG)
-
-            NSLog(@"UMSCCP_STATISTICS_DEBUG: creating new record");
-#endif
-            
             rec = [[UMSCCP_StatisticDbRecord alloc]init];
             rec.ymdh = ymdh;
             rec.incoming_linkset = incomingLinkset;
@@ -167,12 +148,6 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
             rec.instance = _instance;
             _entries[key] = rec;
         }
-#if defined(UMSCCP_STATISTICS_DEBUG)
-        else
-        {
-            NSLog(@"UMSCCP_STATISTICS_DEBUG: using existing record");
-        }
- #endif
         [_lock unlock];
         [rec increaseMsuCount:1 byteCount:byteCount];
     }
@@ -182,20 +157,13 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
 {
     @autoreleasepool
     {
-#if defined(UMSCCP_STATISTICS_DEBUG)
         NSLog(@"UMSCCP_STATISTICS_DEBUG: flush. count = %d",(int)_entries.count);
-#endif
         [_lock lock];
         UMSynchronizedDictionary *tmp = _entries;
         _entries = [[UMSynchronizedDictionary alloc]init];
-
-#if defined(UMSCCP_STATISTICS_DEBUG)
-        NSLog(@"UMSCCP_STATISTICS_DEBUG: \n%@",[_entries jsonString]);
-#endif
         [_lock unlock];
         
         NSArray *keys = [tmp allKeys];
-        
         for(NSString *key in keys)
         {
             UMSCCP_StatisticDbRecord *rec = tmp[key];

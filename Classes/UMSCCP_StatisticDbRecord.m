@@ -9,8 +9,6 @@
 #import "UMSCCP_StatisticDbRecord.h"
 #import <ulibdb/ulibdb.h>
 
-//#define UMSCCP_STATISTICS_DEBUG 1
-
 @implementation UMSCCP_StatisticDbRecord
 
 - (UMSCCP_StatisticDbRecord *)init
@@ -87,16 +85,6 @@
             UMDbSession *session = [pool grabSession:FLF];
             unsigned long long affectedRows = 0;
             success = [session cachedQueryWithNoResult:query parameters:params allowFail:YES primaryKeyValue:key affectedRows:&affectedRows];
-#if defined(UMSCCP_STATISTICS_DEBUG)
-            if(success==NO)
-            {
-                NSLog(@"Insert SQL failed: %@",query.lastSql);
-            }
-            else
-            {
-                NSLog(@"Insert SQL success: %@",query.lastSql);
-            }
-#endif
             [session.pool returnSession:session file:FLF];
         }
         @catch (NSException *e)
@@ -119,7 +107,6 @@
         @try
         {
             [_lock lock];
-            
             UMDbQuery *query = [UMDbQuery queryForFile:__FILE__ line: __LINE__];
             if(![query isInCache])
             {
@@ -136,16 +123,6 @@
             NSString *key = [self keystring];
             UMDbSession *session = [pool grabSession:FLF];
             success = [session cachedQueryWithNoResult:query parameters:params allowFail:YES primaryKeyValue:key];
-#if defined(UMSCCP_STATISTICS_DEBUG)
-            if(success==NO)
-            {
-                NSLog(@"Update SQL failed: %@",query.lastSql);
-            }
-            else
-            {
-                NSLog(@"Update SQL success: %@",query.lastSql);
-            }
-#endif
             [session.pool returnSession:session file:FLF];
         }
         @catch (NSException *e)
@@ -163,28 +140,28 @@
 - (void)increaseMsuCount:(int)msuCount byteCount:(int)byteCount
 {
     [_lock lock];
-    _msu_count += msuCount;
+    _msu_count   += msuCount;
     _bytes_count += byteCount;
     [_lock unlock];
 }
 
 - (void)flushToPool:(UMDbPool *)pool table:(UMDbTable *)table
 {
-#if defined(UMSCCP_STATISTICS_DEBUG)
-    NSLog(@"UMSCCP_STATISTICS_DEBUG: flushToPool:%@ table:%@",pool.poolName,table.tableName);
-#endif
+    NSLog(@"SCCP Statistic: %@",self.description);
 
     [_lock lock];
     BOOL success = [self updateDb:pool table:table];
     if(success == NO)
     {
-#if defined(UMSCCP_STATISTICS_DEBUG)
-        NSLog(@"UMSCCP_STATISTICS_DEBUG: trying insert instead\n");
-#endif
-        if([self insertIntoDb:pool table:table])
+        success = [self insertIntoDb:pool table:table];
+        if(success==YES)
         {
             _msu_count = 0;
             _bytes_count = 0;
+        }
+        else
+        {
+            NSLog(@"SCCP Statistics: insert into DB failed");
         }
     }
     [_lock unlock];
