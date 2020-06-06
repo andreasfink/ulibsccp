@@ -130,14 +130,15 @@
                                  NULL];
             NSString *key = [self keystring];
             UMDbSession *session = [pool grabSession:FLF];
-            success = [session cachedQueryWithNoResult:query parameters:params allowFail:YES primaryKeyValue:key];
-            if(success)
+            unsigned long long rowCount=0;
+            success = [session cachedQueryWithNoResult:query
+                                            parameters:params
+                                             allowFail:YES
+                                       primaryKeyValue:key
+                                          affectedRows:&rowCount];
+            if(rowCount==0)
             {
-                NSLog(@"SQL-SUCCESS: %@",query.lastSql);
-            }
-            else
-            {
-                NSLog(@"SQL-FAIL: %@",query.lastSql);
+                success = NO;
             }
             [session.pool returnSession:session file:FLF];
         }
