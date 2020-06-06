@@ -85,6 +85,14 @@
             UMDbSession *session = [pool grabSession:FLF];
             unsigned long long affectedRows = 0;
             success = [session cachedQueryWithNoResult:query parameters:params allowFail:YES primaryKeyValue:key affectedRows:&affectedRows];
+            if(success)
+            {
+                NSLog(@"SQL-SUCCESS: %@",query.lastSql);
+            }
+            else
+            {
+                NSLog(@"SQL-FAIL: %@",query.lastSql);
+            }
             [session.pool returnSession:session file:FLF];
         }
         @catch (NSException *e)
@@ -123,6 +131,14 @@
             NSString *key = [self keystring];
             UMDbSession *session = [pool grabSession:FLF];
             success = [session cachedQueryWithNoResult:query parameters:params allowFail:YES primaryKeyValue:key];
+            if(success)
+            {
+                NSLog(@"SQL-SUCCESS: %@",query.lastSql);
+            }
+            else
+            {
+                NSLog(@"SQL-FAIL: %@",query.lastSql);
+            }
             [session.pool returnSession:session file:FLF];
         }
         @catch (NSException *e)
