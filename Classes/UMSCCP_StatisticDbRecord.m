@@ -157,6 +157,7 @@
             [_lock unlock];
         }
     }
+    return success;
 }
 
 - (void)increaseMsuCount:(int)msuCount byteCount:(int)byteCount
