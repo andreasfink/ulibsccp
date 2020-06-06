@@ -39,7 +39,7 @@
        callingPrefix:(NSString *)callingPrefix
         calledPrefix:(NSString *)calledPrefix
          gttSelector:(NSString *)selector
-       sccpOperation:(int)sccpOperation;
+       sccpOperation:(SCCP_ServiceType)sccpOperation;
 
 - (void)doAutocreate;
 - (void)flush;

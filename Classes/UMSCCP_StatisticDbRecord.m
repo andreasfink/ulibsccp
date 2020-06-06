@@ -9,7 +9,7 @@
 #import "UMSCCP_StatisticDbRecord.h"
 #import <ulibdb/ulibdb.h>
 
-#define UMSCCP_STATISTICS_DEBUG 1
+//#define UMSCCP_STATISTICS_DEBUG 1
 
 @implementation UMSCCP_StatisticDbRecord
 
@@ -26,7 +26,7 @@
 - (NSString *)keystring
 {
     
-    return [NSString stringWithFormat:@"%@:%@:%@:%@:%@:%@:%d:%@",_ymdh,_incoming_linkset,_calling_prefix,_outgoing_linkset,_called_prefix,_gtt_selector,_sccp_operation,_instance];
+    return [NSString stringWithFormat:@"%@:%@:%@:%@:%@:%@:%@:%@",_ymdh,_incoming_linkset,_calling_prefix,_outgoing_linkset,_called_prefix,_gtt_selector,_sccp_operation,_instance];
 
 }
 
@@ -36,10 +36,10 @@
              callingPrefix:(NSString *)callingPrefix
               calledPrefix:(NSString *)calledPrefix
                gttSelector:(NSString *)selector
-             sccpOperation:(int)sccpOperation
+             sccpOperation:(NSString *)sccpOperation
                   instance:(NSString *)instance
 {
-    return [NSString stringWithFormat:@"%@:%@:%@:%@:%@:%@:%d:%@",ymdh,incomingLinkset,callingPrefix,outgoingLinkset,calledPrefix,selector,sccpOperation,instance];
+    return [NSString stringWithFormat:@"%@:%@:%@:%@:%@:%@:%@:%@",ymdh,incomingLinkset,callingPrefix,outgoingLinkset,calledPrefix,selector,sccpOperation,instance];
 }
 
 - (BOOL)insertIntoDb:(UMDbPool *)pool table:(UMDbTable *)dbt /* returns YES on success */
@@ -80,7 +80,7 @@
                                 STRING_NONEMPTY(_calling_prefix),
                                 STRING_NONEMPTY(_called_prefix),
                                 STRING_NONEMPTY(_gtt_selector),
-                                STRING_FROM_INT(_sccp_operation),
+                                STRING_NONEMPTY(_sccp_operation),
                                 STRING_FROM_INT(_msu_count),
                                 STRING_FROM_INT(_bytes_count),
                                 NULL];
@@ -194,13 +194,13 @@
 - (id)proxyForJson
 {
     UMSynchronizedSortedDictionary *d = [[UMSynchronizedSortedDictionary alloc]init];
-    d[@"_ymdh"]             =_ymdh ? _ymdh : @"(null)";
-    d[@"_instance"]         =_instance ? _instance : @"(null)";
-    d[@"_incoming_linkset"] =_incoming_linkset ? _incoming_linkset : @"(null)";
-    d[@"_outgoing_linkset"] =_outgoing_linkset ? _outgoing_linkset : @"(null)";
-    d[@"_calling_prefix"]   =_calling_prefix ? _calling_prefix : @"(null)";
-    d[@"_gtt_selector"]     =_gtt_selector ? _gtt_selector : @"(null)";
-    d[@"_sccp_operation"]   = @(_sccp_operation);
+    d[@"_ymdh"]             = _ymdh ? _ymdh : @"(null)";
+    d[@"_instance"]         = _instance ? _instance : @"(null)";
+    d[@"_incoming_linkset"] = _incoming_linkset ? _incoming_linkset : @"(null)";
+    d[@"_outgoing_linkset"] = _outgoing_linkset ? _outgoing_linkset : @"(null)";
+    d[@"_calling_prefix"]   = _calling_prefix ? _calling_prefix : @"(null)";
+    d[@"_gtt_selector"]     = _gtt_selector ? _gtt_selector : @"(null)";
+    d[@"_sccp_operation"]   = _sccp_operation ? _sccp_operation : @"(null)";
     d[@"_msu_count"]        = @(_msu_count);
     d[@"_bytes_count"]      = @(_bytes_count);
     return d;
