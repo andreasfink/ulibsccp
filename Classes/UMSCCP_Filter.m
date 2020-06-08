@@ -71,8 +71,14 @@ NSDictionary *plugin_info(void);
     return e;
 }
 
-- (void)processConfig:(NSString *)str error:(NSError **)e
+- (BOOL)processConfig:(NSString *)str
+                error:(NSError **)e
 {
+    if(e)
+    {
+        *e = NULL;
+    }
+    return NO;
 }
 
 - (void)activate

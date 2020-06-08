@@ -29,7 +29,7 @@
 
 - (NSError *)loadConfigFromFile:(NSString *)filename;
 - (NSError *)loadConfigFromString:(NSString *)str;
-- (void)processConfig:(NSString *)str error:(NSError **)e;
+- (BOOL)processConfig:(NSString *)str error:(NSError **)e;
 
 - (void)activate;
 - (void)deactivate;

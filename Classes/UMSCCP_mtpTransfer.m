@@ -94,6 +94,8 @@
 {
     @autoreleasepool
     {
+        NSString *outgoingLinkset=NULL;
+
         _startOfProcessing = [NSDate date];
         /* we build a pseudo MTP3 raw packet for debugging /tracing and logging */
         UMMTP3Label *label = [[UMMTP3Label alloc]init];
@@ -504,7 +506,9 @@
                                                      opc:_sccpLayer.mtp3.opc /* errors are always sent from this instance */
                                                      dpc:_packet.incomingOpc
                                                  options:@{}
-                                                provider:_sccpLayer.mtp3];
+                                                provider:_sccpLayer.mtp3
+                                         routedToLinkset:&outgoingLinkset];
+                                _packet.outgoingLinkset = outgoingLinkset;
                             }
                             else
                             {
@@ -532,7 +536,9 @@
                                                   dpc:_packet.incomingOpc
                                           optionsData:_packet.incomingOptionalData
                                               options:@{}
-                                             provider:_sccpLayer.mtp3];
+                                             provider:_sccpLayer.mtp3
+                                      routedToLinkset:&outgoingLinkset];
+                                _packet.outgoingLinkset = outgoingLinkset;
                             }
                             else
                             {
@@ -758,6 +764,7 @@
     
     const uint8_t *dat = _sccp_pdu.bytes;
     NSUInteger len = _sccp_pdu.length;
+    NSString *outgoingLinkset = NULL;
     
     /* Management Message */
     if(len<1)
@@ -845,7 +852,9 @@
                                                   opc:_opc
                                                   dpc:_dpc
                                               options:@{}
-                                             provider:_sccpLayer.mtp3];
+                                             provider:_sccpLayer.mtp3
+                                       routedToLinkset:&outgoingLinkset];
+            _packet.outgoingLinkset = outgoingLinkset;
             break;
         }
         case 0x04: /* SOR subsystem-out-of-service-request */

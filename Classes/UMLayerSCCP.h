@@ -250,7 +250,8 @@ typedef enum SccpGtFileSection
                     opc:(UMMTP3PointCode *)opc
                     dpc:(UMMTP3PointCode *)dpc
                 options:(NSDictionary *)options
-               provider:(UMLayerMTP3 *)provider;
+               provider:(UMLayerMTP3 *)provider
+        routedToLinkset:(NSString **)outgoingLinkset;
 
     /* this is for transiting UDTS */
 - (UMMTP3_Error) sendUDTS:(NSData *)data
@@ -261,7 +262,8 @@ typedef enum SccpGtFileSection
                       opc:(UMMTP3PointCode *)opc
                       dpc:(UMMTP3PointCode *)dpc
                   options:(NSDictionary *)options
-                 provider:(UMLayerMTP3 *)provider;
+                 provider:(UMLayerMTP3 *)provider
+          routedToLinkset:(NSString **)outgoingLinkset;
 
 
     /* this is for UDTS generated locally */
@@ -305,7 +307,8 @@ typedef enum SccpGtFileSection
                      dpc:(UMMTP3PointCode *)dpc
              optionsData:(NSData *)xoptionsdata
                  options:(NSDictionary *)options
-                provider:(UMLayerMTP3 *)provider;
+                provider:(UMLayerMTP3 *)provider
+         routedToLinkset:(NSString **)outgoingLinkset;
 
 
 -(UMMTP3_Error) sendXUDTsegment:(UMSCCP_Segment *)pdu
@@ -318,7 +321,8 @@ typedef enum SccpGtFileSection
                             dpc:(UMMTP3PointCode *)dpc
                     optionsData:(NSData *)xoptionsdata
                         options:(NSDictionary *)options
-                       provider:(UMLayerMTP3 *)provider;
+                       provider:(UMLayerMTP3 *)provider
+                routedToLinkset:(NSString **)outgoingLinkset;
 
 -(UMMTP3_Error) sendXUDTS:(NSData *)data
                   calling:(SccpAddress *)src
@@ -330,8 +334,8 @@ typedef enum SccpGtFileSection
                       dpc:(UMMTP3PointCode *)dpc
               optionsData:(NSData *)xoptionsdata
                   options:(NSDictionary *)options
-                 provider:(UMLayerMTP3 *)provider;
-
+                 provider:(UMLayerMTP3 *)provider
+          routedToLinkset:(NSString **)outgoingLinkset;
 
 - (UMSynchronizedSortedDictionary *) routeTestForMSISDN:(NSString *)msisdn
                                         translationType:(int)tt
