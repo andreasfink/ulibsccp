@@ -18,7 +18,7 @@
     NSString *_calling_prefix;
     NSString *_called_prefix;
     NSString *_gtt_selector;
-    int     _sccp_operation;
+    NSString *_sccp_operation;
     int     _msu_count;
     int     _bytes_count;
     UMMutex *_lock;
@@ -32,7 +32,7 @@
 @property(readwrite,strong,atomic)  NSString *calling_prefix;
 @property(readwrite,strong,atomic)  NSString *called_prefix;
 @property(readwrite,strong,atomic)  NSString *gtt_selector;
-@property(readwrite,assign,atomic)  int     sccp_operation;
+@property(readwrite,strong,atomic)  NSString *sccp_operation;
 @property(readwrite,assign,atomic)  int     msu_count;
 @property(readwrite,assign,atomic)  int     bytes_count;
 
@@ -44,7 +44,7 @@
              callingPrefix:(NSString *)callingPrefix
               calledPrefix:(NSString *)calledPrefix
                gttSelector:(NSString *)selector
-             sccpOperation:(int)sccpOperation
+             sccpOperation:(NSString *)sccpOperation
                   instance:(NSString *)instance;
 
 - (void)increaseMsuCount:(int)msuCount byteCount:(int)byteCount;
