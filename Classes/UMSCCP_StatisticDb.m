@@ -792,6 +792,8 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
     [self addE164prefix:@"691"];
     [self addE164prefix:@"692"];
     [self addE164prefix:@"7"];
+    [self addE164prefix:@"8"];
+    [self addE164prefix:@"800"];
     [self addE164prefix:@"81"];
     [self addE164prefix:@"82"];
     [self addE164prefix:@"84"];
@@ -803,6 +805,7 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
     [self addE164prefix:@"86"];
     [self addE164prefix:@"880"];
     [self addE164prefix:@"886"];
+    [self addE164prefix:@"9"];
     [self addE164prefix:@"90"];
     [self addE164prefix:@"91"];
     [self addE164prefix:@"92"];
@@ -826,6 +829,7 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
     [self addE164prefix:@"975"];
     [self addE164prefix:@"976"];
     [self addE164prefix:@"977"];
+    [self addE164prefix:@"979"];
     [self addE164prefix:@"98"];
     [self addE164prefix:@"992"];
     [self addE164prefix:@"993"];
@@ -1366,6 +1370,7 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
     [self addE214prefix:@"691"];
     [self addE214prefix:@"692"];
     [self addE214prefix:@"7"];
+    [self addE214prefix:@"8"];
     [self addE214prefix:@"81"];
     [self addE214prefix:@"82"];
     [self addE214prefix:@"84"];
@@ -1377,6 +1382,7 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
     [self addE214prefix:@"86"];
     [self addE214prefix:@"880"];
     [self addE214prefix:@"886"];
+    [self addE214prefix:@"9"];
     [self addE214prefix:@"90"];
     [self addE214prefix:@"91"];
     [self addE214prefix:@"92"];
@@ -1400,6 +1406,7 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
     [self addE214prefix:@"975"];
     [self addE214prefix:@"976"];
     [self addE214prefix:@"977"];
+    [self addE214prefix:@"979"];
     [self addE214prefix:@"98"];
     [self addE214prefix:@"992"];
     [self addE214prefix:@"993"];
