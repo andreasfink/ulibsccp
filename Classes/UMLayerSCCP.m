@@ -2037,26 +2037,41 @@
 
 }
 
-- (void)startUp
+- (void)startStatisticsDb
 {
     @autoreleasepool
     {
         if(_statisticDbPool && _statisticDbTable)
         {
-            [_housekeepingTimer start];
             if(_statisticDbInstance==NULL)
             {
                 _statisticDbInstance = _layerName;
             }
-            _statisticDb = [[UMSCCP_StatisticDb alloc]initWithPoolName:_statisticDbPool
-                                                            tableName:_statisticDbTable
-                                                           appContext:_dbDelegate
-                                                           autocreate:_statisticDbAutoCreate.boolValue
-                                                             instance:_statisticDbInstance];
-            if(_statisticDbAutoCreate.boolValue)
+            if(_statisticDb == NULL)
             {
-                [_statisticDb doAutocreate];
+               _statisticDb = [[UMSCCP_StatisticDb alloc]initWithPoolName:_statisticDbPool
+                                                               tableName:_statisticDbTable
+                                                              appContext:_dbDelegate
+                                                              autocreate:_statisticDbAutoCreate.boolValue
+                                                                instance:_statisticDbInstance];
             }
+        }
+    }
+}
+
+- (void)startUp
+{
+    @autoreleasepool
+    {
+        [self startStatisticsDb];
+
+        if(_statisticDbPool && _statisticDbTable)
+        {
+            [_housekeepingTimer start];
+        }
+        if(_statisticDbAutoCreate.boolValue)
+        {
+            [_statisticDb doAutocreate];
         }
     }
 }

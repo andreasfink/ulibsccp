@@ -366,6 +366,7 @@ typedef enum SccpGtFileSection
 - (void)traceDroppedPacket:(UMSCCP_Packet *)packet options:(NSDictionary *)dict;
 - (NSDictionary *)apiStatus;
 - (UMSynchronizedSortedDictionary *)routeStatus;
+- (void)startStatisticsDb;
 
 - (void)stopDetachAndDestroy;
 - (void)addProcessingStatistic:(UMSCCP_StatisticSection)section

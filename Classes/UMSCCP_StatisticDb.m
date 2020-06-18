@@ -181,12 +181,13 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
 
 - (void)addE212prefix:(NSString *)prefix
 {
-    
+    _e212[prefix] = prefix;
+
 }
 
 - (void)addE214prefix:(NSString *)prefix
 {
-    
+    _e214[prefix] = prefix;
 }
 
 - (NSString *)prefixOf:(NSString *)in  dict:(UMSynchronizedDictionary *)dict
