@@ -193,12 +193,14 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
 - (NSArray *)listPrefixesE164
 {
     NSArray *a = [_e164 allKeys];
+    a = [a sortedArrayUsingSelector:@selector(compare:)];
     return a;
 }
 
 - (NSArray *)listPrefixesE212
 {
     NSArray *a = [_e212 allKeys];
+    a = [a sortedArrayUsingSelector:@selector(compare:)];
     return a;
 }
 
@@ -206,6 +208,7 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
 - (NSArray *)listPrefixesE214
 {
     NSArray *a = [_e214 allKeys];
+    a = [a sortedArrayUsingSelector:@selector(compare:)];
     return a;
 }
 

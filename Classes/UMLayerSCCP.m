@@ -3212,19 +3212,22 @@
 
 - (NSString *)webE164
 {
-    NSString *s = [[_statisticDb listPrefixesE164] jsonString];
+    NSArray *a  = [_statisticDb listPrefixesE164];
+    NSString *s = [a jsonString];
     return s;
 }
 
 - (NSString *)webE212
 {
-    NSString *s = [[_statisticDb listPrefixesE212] jsonString];
+    NSArray *a  = [_statisticDb listPrefixesE212];
+    NSString *s = [a jsonString];
     return s;
 }
 
 - (NSString *)webE214
 {
-    NSString *s = [[_statisticDb listPrefixesE214] jsonString];
+    NSArray *a  = [_statisticDb listPrefixesE214];
+    NSString *s = [a jsonString];
     return s;
 }
 
