@@ -263,7 +263,14 @@
             {
                 i = (int)d[param_called_party_address];
                 dstData = [NSData dataWithBytes:&d[param_called_party_address+1] length:i];
-                _dst = [[SccpAddress alloc]initWithItuData:dstData];
+                if(_sccpLayer.variant == SCCP_VARIANT_ANSI)
+                {
+                    _dst = [[SccpAddress alloc]initWithAnsiData:dstData];
+                }
+                else
+                {
+                    _dst = [[SccpAddress alloc]initWithItuData:dstData];
+                }
                 if(_map)
                 {
                     _dst.tt.tt = [_map mapTT:_dst.tt.tt];
@@ -277,7 +284,14 @@
             {
                 i = (int)d[param_calling_party_address];
                 srcData = [NSData dataWithBytes:&d[param_calling_party_address+1] length:i];
-                _src = [[SccpAddress alloc]initWithItuData:srcData];
+                if(_sccpLayer.variant == SCCP_VARIANT_ANSI)
+                {
+                    _src = [[SccpAddress alloc]initWithAnsiData:srcData];
+                }
+                else
+                {
+                    _src = [[SccpAddress alloc]initWithItuData:srcData];
+                }
                 _decodedJson[@"sccp-calling-party-address"]=[_src dictionaryValue];
                 _packet.incomingCalledPartyAddress = _src;
             }
