@@ -52,5 +52,9 @@
 - (NSString *)e212prefixOf:(NSString *)in;
 - (NSString *)e214prefixOf:(NSString *)in;
 
+- (NSArray *)listPrefixesE164;
+- (NSArray *)listPrefixesE212;
+- (NSArray *)listPrefixesE214;
+
 @end
 

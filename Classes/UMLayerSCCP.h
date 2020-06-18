@@ -373,4 +373,10 @@ typedef enum SccpGtFileSection
                   waitingDelay:(NSTimeInterval)waitingDelay
                processingDelay:(NSTimeInterval)processingDelay;
 
+- (void)  httpGetPost:(UMHTTPRequest *)req;
+
+- (NSString *)webE164;
+- (NSString *)webE212;
+- (NSString *)webE214;
+
 @end

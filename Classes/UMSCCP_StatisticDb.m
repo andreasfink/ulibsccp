@@ -190,7 +190,27 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
     _e214[prefix] = prefix;
 }
 
-- (NSString *)prefixOf:(NSString *)in  dict:(UMSynchronizedDictionary *)dict
+- (NSArray *)listPrefixesE164
+{
+    NSArray *a = [_e164 allKeys];
+    return a;
+}
+
+- (NSArray *)listPrefixesE212
+{
+    NSArray *a = [_e212 allKeys];
+    return a;
+}
+
+
+- (NSArray *)listPrefixesE214
+{
+    NSArray *a = [_e214 allKeys];
+    return a;
+}
+
+- (NSString *)prefixOf:(NSString *)in
+                  dict:(UMSynchronizedDictionary *)dict
 {
     NSInteger n = in.length;
     for(NSInteger i=(n-1);i>0;i--)

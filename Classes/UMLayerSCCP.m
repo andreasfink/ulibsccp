@@ -3100,6 +3100,135 @@
     [_statisticDb flush];
 }
 
+
+- (void)  httpGetPost:(UMHTTPRequest *)req
+{
+    @autoreleasepool
+    {
+        NSDictionary *p = req.params;
+        int pcount=0;
+        for(NSString *n in p.allKeys)
+        {
+            if(([n isEqualToString:@"user"])  || ([n isEqualToString:@"pass"]))
+            {
+                continue;
+            }
+            pcount++;
+        }
+        @try
+        {
+            NSString *path = req.url.relativePath;
+            if([path hasSuffix:@"/sccp/index.php"])
+            {
+                path = @"/sccp";
+            }
+            else if([path isEqualToString:@"/sccp/"])
+            {
+                path = @"/sccp";
+            }
+            if([path hasSuffix:@".php"])
+            {
+                path = [path substringToIndex:path.length - 4];
+            }
+            if([path hasSuffix:@".html"])
+            {
+                path = [path substringToIndex:path.length - 5];
+            }
+            if([path hasSuffix:@"/"])
+            {
+                path = [path substringToIndex:path.length - 1];
+            }
+            if([path isEqualToString:@"/sccp/list-e164"])
+            {
+                [req setResponsePlainText:[self webE164]];
+            }
+            if([path isEqualToString:@"/sccp/list-e212"])
+            {
+                [req setResponsePlainText:[self webE212]];
+            }
+
+            if([path isEqualToString:@"/sccp/list-e214"])
+            {
+                [req setResponsePlainText:[self webE214]];
+            }
+            if([path isEqualToString:@"/sccp"])
+            {
+                [req setResponseHtmlString:[self webIndexForm]];
+            }
+        }
+        @catch(NSException *e)
+        {
+
+            NSMutableDictionary *d1 = [[NSMutableDictionary alloc]init];
+            if(e.name)
+            {
+                d1[@"name"] = e.name;
+            }
+            if(e.reason)
+            {
+                d1[@"reason"] = e.reason;
+            }
+            if(e.userInfo)
+            {
+                d1[@"user-info"] = e.userInfo;
+            }
+            NSDictionary *d =   @{ @"error" : @{ @"exception": d1 } };
+            [req setResponsePlainText:[d jsonString]];
+        }
+    }
+}
+
+
+- (void)webHeader:(NSMutableString *)s title:(NSString *)t
+{
+    [s appendString:@"<html>\n"];
+    [s appendString:@"<head>\n"];
+    [s appendString:@"    <link rel=\"stylesheet\" href=\"/css/style.css\" type=\"text/css\">\n"];
+    [s appendFormat:@"    <title>%@</title>\n",t];
+    [s appendString:@"</head>\n"];
+    [s appendString:@"<body>\n"];
+}
+
+- (NSString *)webIndexForm
+{
+    static NSMutableString *s = NULL;
+
+    if(s)
+    {
+        return s;
+    }
+    s = [[NSMutableString alloc]init];
+    [self webHeader:s title:@"SCCP Debug Main Menu"];
+    [s appendString:@"<h2>SCCP Debug Main Menu</h2>\n"];
+    [s appendString:@"<UL>\n"];
+    [s appendString:@"<LI><a href=\"/sccp/list-e164\">list-e164</a>\n"];
+    [s appendString:@"<LI><a href=\"/sccp/list-e212\">list-e212</a>\n"];
+    [s appendString:@"<LI><a href=\"/sccp/list-e214\">list-e214</a>\n"];
+    [s appendString:@"</UL>\n"];
+    [s appendString:@"</body>\n"];
+    [s appendString:@"</html>\n"];
+    return s;
+}
+
+- (NSString *)webE164
+{
+    NSString *s = [[_statisticDb listPrefixesE164] jsonString];
+    return s;
+}
+
+- (NSString *)webE212
+{
+    NSString *s = [[_statisticDb listPrefixesE212] jsonString];
+    return s;
+}
+
+- (NSString *)webE214
+{
+    NSString *s = [[_statisticDb listPrefixesE214] jsonString];
+    return s;
+}
+
+
 @end
 
 
