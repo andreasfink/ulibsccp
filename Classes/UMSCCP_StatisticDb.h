@@ -26,6 +26,9 @@
     UMSynchronizedDictionary *_e164;
     UMSynchronizedDictionary *_e212;
     UMSynchronizedDictionary *_e214;
+    UMDigitTree *_e164_dt;
+    UMDigitTree *_e212_dt;
+    UMDigitTree *_e214_dt;
 }
 
 - (UMSCCP_StatisticDb *)initWithPoolName:(NSString *)pool

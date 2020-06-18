@@ -1021,6 +1021,13 @@
     {
         dict[@"used-selector"] = usedSelector;
     }
+    
+    
+    NSString * s = [_statisticDb e164prefixOf:called_out.address];
+    if(s)
+    {
+        dict[@"sccp-statistic-prefix"] = s;
+    }
     return dict;
 }
 
