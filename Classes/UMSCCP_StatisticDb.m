@@ -804,6 +804,7 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
     [self addE164prefix:@"856"];
     [self addE164prefix:@"86"];
     [self addE164prefix:@"880"];
+    [self addE164prefix:@"882"];
     [self addE164prefix:@"886"];
     [self addE164prefix:@"9"];
     [self addE164prefix:@"90"];
@@ -1382,6 +1383,7 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
     [self addE214prefix:@"86"];
     [self addE214prefix:@"880"];
     [self addE214prefix:@"886"];
+    [self addE214prefix:@"882"];
     [self addE214prefix:@"9"];
     [self addE214prefix:@"90"];
     [self addE214prefix:@"91"];
