@@ -86,6 +86,9 @@ typedef enum SccpGtFileSection
     id<UMSCCP_FilterDelegateProtocol> _filterDelegate;
     id<UMLayerSCCPApplicationContextProtocol>_dbDelegate;
     UMTimer                     *_housekeepingTimer;
+    BOOL                        _automaticAnsiItuConversion;
+    NSNumber                    *_conversion_e164_tt;
+    NSNumber                    *_conversion_e212_tt;
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;
@@ -103,6 +106,9 @@ typedef enum SccpGtFileSection
 
 @property(readwrite,strong,atomic)  UMSCCP_StatisticDb          *statisticDb;
 
+@property(readwrite,assign,atomic)  BOOL                        automaticAnsiItuConversion;
+@property(readwrite,strong,atomic)  NSNumber                    *conversion_e164_tt;
+@property(readwrite,strong,atomic)  NSNumber                    *conversion_e212_tt;
 
 /*
 @property(readwrite,strong,atomic) id<UMSCCP_FilterProtocol>   inboundFilter;

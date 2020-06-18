@@ -1021,8 +1021,7 @@
     {
         dict[@"used-selector"] = usedSelector;
     }
-    
-    
+
     NSString * s = [_statisticDb e164prefixOf:called_out.address];
     if(s)
     {
@@ -1397,6 +1396,112 @@
                 provider:(UMLayerMTP3 *)provider
          routedToLinkset:(NSString **)outgoingLinkset
 {
+    if(_automaticAnsiItuConversion==YES)
+    {
+        if(_sccpVariant==SCCP_VARIANT_ANSI)
+        {
+            if(dst.ai.globalTitleIndicator == 4) /* we need to convert to GTI=2 */
+            {
+                if(dst.npi.npi == SCCP_NPI_ISDN_E164)
+                {
+                    dst.tt.tt = [_conversion_e164_tt intValue];
+                }
+                else if(dst.npi.npi == SCCP_NPI_LAND_MOBILE_E212)
+                {
+                    dst.tt.tt = [_conversion_e212_tt intValue];
+                }
+
+                if(dst.nai.nai == SCCP_NAI_INTERNATIONAL)
+                {
+                    if([dst.address hasPrefix:@"1"])
+                    {
+                        dst.address = [dst.address substringFromIndex:1];
+                    }
+                    else
+                    {
+                        dst.address = [NSString stringWithFormat:@"011%@",dst.address];
+                    }
+                    dst.nai.nai = SCCP_NAI_NATIONAL;
+                }
+                dst.ai.globalTitleIndicator =2;
+            }
+            if(src.ai.globalTitleIndicator == 4) /* we need to convert to GTI=2 */
+            {
+                if(src.npi.npi == SCCP_NPI_ISDN_E164)
+                {
+                    src.tt.tt = [_conversion_e164_tt intValue];
+                }
+                else if(src.npi.npi == SCCP_NPI_LAND_MOBILE_E212)
+                {
+                    src.tt.tt = [_conversion_e212_tt intValue];
+                }
+
+                if(src.nai.nai == SCCP_NAI_INTERNATIONAL)
+                {
+                    if([src.address hasPrefix:@"1"])
+                    {
+                        src.address = [dst.address substringFromIndex:1];
+                    }
+                    else
+                    {
+                        src.address = [NSString stringWithFormat:@"011%@",dst.address];
+                    }
+                    src.nai.nai = SCCP_NAI_NATIONAL;
+                }
+                src.ai.globalTitleIndicator =2;
+            }
+        }
+        else if(_sccpVariant == SCCP_VARIANT_ITU)
+        {
+            if(dst.ai.globalTitleIndicator == 2) /* we need to convert to GTI=4 */
+            {
+                if(dst.tt.tt == [_conversion_e164_tt intValue])
+                {
+                    dst.npi.npi = SCCP_NPI_ISDN_E164;
+                    dst.tt.tt = 0;
+                }
+                else if(dst.tt.tt == [_conversion_e212_tt intValue])
+                {
+                    dst.npi.npi = SCCP_NPI_LAND_MOBILE_E212;
+                    dst.tt.tt = 0;
+                }
+
+                if([dst.address hasPrefix:@"011"])
+                {
+                    dst.address = [dst.address substringFromIndex:3];
+                }
+                else
+                {
+                    dst.address = [NSString stringWithFormat:@"1%@",dst.address];
+                }
+                dst.nai.nai = SCCP_NAI_INTERNATIONAL;
+            }
+            if(src.ai.globalTitleIndicator == 2) /* we need to convert to GTI=4 */
+            {
+                src.ai.globalTitleIndicator = 4;
+               if(src.tt.tt == [_conversion_e164_tt intValue])
+               {
+                   src.npi.npi = SCCP_NPI_ISDN_E164;
+                   src.tt.tt = 0;
+               }
+               else if(src.tt.tt == [_conversion_e212_tt intValue])
+               {
+                   src.npi.npi = SCCP_NPI_LAND_MOBILE_E212;
+                   src.tt.tt = 0;
+               }
+            
+               if([src.address hasPrefix:@"011"])
+               {
+                   src.address = [dst.address substringFromIndex:3];
+               }
+               else
+               {
+                   src.address = [NSString stringWithFormat:@"1%@",dst.address];
+               }
+               src.nai.nai = SCCP_NAI_INTERNATIONAL;
+            }
+        }
+    }
     NSData *srcEncoded = [src encode:_sccpVariant];
     NSData *dstEncoded = [dst encode:_sccpVariant];
 
@@ -1823,6 +1928,19 @@
         else
         {
            _statisticDbAutoCreate=@(YES);
+        }
+        
+        if(cfg[@"automatic-ansi-itu-conversion"])
+        {
+            _automaticAnsiItuConversion = [cfg[@"automatic-ansi-itu-conversion"] boolValue];
+        }
+        if(cfg[@"ansi-tt-e164"])
+        {
+            _conversion_e164_tt = @([cfg[@"ansi-tt-e164"] intValue]);
+        }
+        if(cfg[@"ansi-tt-e212"])
+        {
+            _conversion_e212_tt = @([cfg[@"ansi-tt-e212"] intValue]);
         }
     }
 }
