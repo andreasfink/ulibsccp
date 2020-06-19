@@ -38,8 +38,13 @@
 {
     @autoreleasepool
     {
+        if(_sccp.logLevel <= UMLOG_DEBUG)
+        {
+            NSString *s =  [NSString stringWithFormat:@"mtpPause AffectedPointCode: %@",_affectedPointCode];
+            [_sccp logDebug:s];
+        }
         [_sccp.mtp3RoutingTable setStatus:SccpL3RouteStatus_unavailable
-                         forPointCode:_affectedPointCode];
+                             forPointCode:_affectedPointCode];
     }
 }
 @end

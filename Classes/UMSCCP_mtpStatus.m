@@ -40,6 +40,11 @@
 {
     @autoreleasepool
     {
+        if(_sccp.logLevel <= UMLOG_DEBUG)
+        {
+            NSString *s =  [NSString stringWithFormat:@"mtpStatus AffectedPointCode: %@",_affectedPointCode];
+            [_sccp logDebug:s];
+        }
         [_sccp.mtp3RoutingTable setStatus:SccpL3RouteStatus_restricted
                              forPointCode:_affectedPointCode];
     }

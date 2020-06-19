@@ -1171,16 +1171,15 @@
             pc = dest.dpc;
         }
         packet.outgoingDpc = pc;
-
         if(pc==NULL)
         {
             causeValue = SCCP_ReturnCause_NoTranslationForThisSpecificAddress;
-            NSString *s = [NSString stringWithFormat:@"Can not forward %@. No route to destination PC=%@. SRC=%@ DST=%@ DATA=%@",
+            NSString *s = [NSString stringWithFormat:@"Can not forward %@ (NoTranslationForThisSpecificAddress). No route to destination DPC=%@ SRC=%@ DST=%@ DATA=%@",
                            packet.incomingPacketType,
-                           packet.incomingOpc,
-                           packet.incomingCallingPartyAddress,
-                           packet.incomingCalledPartyAddress,
-                           packet.incomingSccpData];
+                           packet.outgoingDpc,
+                           packet.outgoingCallingPartyAddress,
+                           packet.outgoingCalledPartyAddress,
+                           packet.outgoingSccpData];
             [self logMinorError:s];
             if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
             {
@@ -1286,7 +1285,7 @@
                     s = [NSString stringWithFormat:@"Can not forward %@. PDU too big. SRC=%@ DST=%@ DATA=%@",packet.outgoingPacketType,packet.outgoingOpc,packet.outgoingDpc,packet.outgoingSccpData];
                     break;
                 case UMMTP3_error_no_route_to_destination:
-                    s = [NSString stringWithFormat:@"Can not forward %@. No route to destination PC=%@. SRC=%@ DST=%@ DATA=%@",packet.outgoingPacketType,pc,packet.outgoingOpc,packet.outgoingDpc,packet.outgoingSccpData];
+                    s = [NSString stringWithFormat:@"Can not forward %@. No route to destination DPC=%@ SRC=%@ DST=%@ DATA=%@",packet.outgoingPacketType,packet.outgoingDpc,packet.outgoingCallingPartyAddress,packet.outgoingCalledPartyAddress,packet.outgoingSccpData];
                     break;
                 case UMMTP3_error_invalid_variant:
                     s = [NSString stringWithFormat:@"Can not forward %@. Invalid variant. SRC=%@ DST=%@ DATA=%@",packet.outgoingPacketType,packet.outgoingOpc,packet.outgoingDpc,packet.outgoingSccpData];
