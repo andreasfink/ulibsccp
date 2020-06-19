@@ -273,7 +273,7 @@
             {
                 i = (int)d[param_called_party_address];
                 dstData = [NSData dataWithBytes:&d[param_called_party_address+1] length:i];
-                if(_sccpLayer.variant == SCCP_VARIANT_ANSI)
+                if(_sccpLayer.sccpVariant == SCCP_VARIANT_ANSI)
                 {
 #if defined(SCCP_DECODING_DEBUG)
                     NSLog(@"Decoding ANSI SCCP Called Party Address %@",dstData);
@@ -304,7 +304,7 @@
             {
                 i = (int)d[param_calling_party_address];
                 srcData = [NSData dataWithBytes:&d[param_calling_party_address+1] length:i];
-                if(_sccpLayer.variant == SCCP_VARIANT_ANSI)
+                if(_sccpLayer.sccpVariant == SCCP_VARIANT_ANSI)
                 {
 #if defined(SCCP_DECODING_DEBUG)
                     NSLog(@"Decoding ANSI SCCP Calling Party Address %@",dstData);

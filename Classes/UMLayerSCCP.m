@@ -28,7 +28,7 @@
 
 @implementation UMLayerSCCP
 
--(UMMTP3Variant) variant
+-(UMMTP3Variant) mtp3variant
 {
     return _mtp3.variant;
 }

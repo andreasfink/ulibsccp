@@ -130,7 +130,7 @@ typedef enum SccpGtFileSection
 
 - (UMSynchronizedSortedDictionary *)statisticalInfo;
 - (UMLayerMTP3 *)mtp3;
-- (UMMTP3Variant) variant;
+- (UMMTP3Variant) mtp3variant;
 
 - (NSString *)status;
 
