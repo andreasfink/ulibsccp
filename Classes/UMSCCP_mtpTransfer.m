@@ -258,18 +258,40 @@
             }
             NSData *dstData = NULL;
             NSData *srcData = NULL;
-
+#if defined(SCCP_DECODING_DEBUG)
+            if(_sccpLayer.variant == SCCP_VARIANT_ANSI)
+            {
+                NSLog(@"We are in ANSI mode");
+            }
+            else
+            {
+                NSLog(@"We are NOT in ANSI mode");
+            }
+#endif
+            
             if(param_called_party_address>0)
             {
                 i = (int)d[param_called_party_address];
                 dstData = [NSData dataWithBytes:&d[param_called_party_address+1] length:i];
                 if(_sccpLayer.variant == SCCP_VARIANT_ANSI)
                 {
+#if defined(SCCP_DECODING_DEBUG)
+                    NSLog(@"Decoding ANSI SCCP Called Party Address %@",dstData);
+#endif
                     _dst = [[SccpAddress alloc]initWithAnsiData:dstData];
+#if defined(SCCP_DECODING_DEBUG)
+                    NSLog(@"resulting %@",_dst.description);
+#endif
                 }
                 else
                 {
+#if defined(SCCP_DECODING_DEBUG)
+                    NSLog(@"Decoding ITU SCCP Called Party Address %@",dstData);
+#endif
                     _dst = [[SccpAddress alloc]initWithItuData:dstData];
+#if defined(SCCP_DECODING_DEBUG)
+                    NSLog(@"resulting %@",_dst.description);
+#endif
                 }
                 if(_map)
                 {
@@ -277,8 +299,6 @@
                 }
                 _decodedJson[@"sccp-called-party-address"]=[_dst dictionaryValue];
                 _packet.incomingCalledPartyAddress = _dst;
-
-
             }
             if(param_calling_party_address>0)
             {
@@ -286,11 +306,23 @@
                 srcData = [NSData dataWithBytes:&d[param_calling_party_address+1] length:i];
                 if(_sccpLayer.variant == SCCP_VARIANT_ANSI)
                 {
+#if defined(SCCP_DECODING_DEBUG)
+                    NSLog(@"Decoding ANSI SCCP Calling Party Address %@",dstData);
+#endif
                     _src = [[SccpAddress alloc]initWithAnsiData:srcData];
+#if defined(SCCP_DECODING_DEBUG)
+                    NSLog(@"result: %@",_src.description);
+#endif
                 }
                 else
                 {
+#if defined(SCCP_DECODING_DEBUG)
+                    NSLog(@"Decoding ITU SCCP Calling Party Address %@",dstData);
+#endif
                     _src = [[SccpAddress alloc]initWithItuData:srcData];
+#if defined(SCCP_DECODING_DEBUG)
+                        NSLog(@"result: %@",_src.description);
+#endif
                 }
                 _decodedJson[@"sccp-calling-party-address"]=[_src dictionaryValue];
                 _packet.incomingCalledPartyAddress = _src;
