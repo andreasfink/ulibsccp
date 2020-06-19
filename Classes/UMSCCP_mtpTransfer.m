@@ -259,7 +259,7 @@
             NSData *dstData = NULL;
             NSData *srcData = NULL;
 #if defined(SCCP_DECODING_DEBUG)
-            if(_sccpLayer.variant == SCCP_VARIANT_ANSI)
+            if(_sccpLayer.sccpVariant == SCCP_VARIANT_ANSI)
             {
                 NSLog(@"We are in ANSI mode");
             }
