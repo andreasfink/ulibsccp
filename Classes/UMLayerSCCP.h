@@ -25,6 +25,7 @@
 #import "UMSCCP_Packet.h"
 #import "UMSCCP_TracefileProtocol.h"
 #import "UMSCCP_StatisticDb.h"
+@class UMSCCP_Statistics;
 
 typedef enum SccpGtFileSection
 {
