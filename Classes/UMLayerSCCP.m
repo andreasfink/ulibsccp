@@ -1147,8 +1147,18 @@
                 [s appendFormat:@"Set NTT %@",dest.ntt];
                 [self.logFeed debugText:s];
             }
-
             packet.outgoingCalledPartyAddress.tt.tt = [dest.ntt intValue];
+        }
+        
+        if(dest.callingNtt)
+        {
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                NSMutableString *s = [[NSMutableString alloc]init];
+                [s appendFormat:@"Set Calling-TT %@",dest.callingNtt];
+                [self.logFeed debugText:s];
+            }
+            packet.outgoingCallingPartyAddress.tt.tt = [dest.callingNtt intValue];
         }
         if(_ntt)
         {
