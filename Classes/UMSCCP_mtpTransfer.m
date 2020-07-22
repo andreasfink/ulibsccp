@@ -470,8 +470,8 @@
                     {
                         [s appendFormat:@"MsgType %@   LS: %@\n",_packet.incomingPacketType,_packet.incomingLinkset];
                     }
-                    [s appendFormat:@"OPC: %@\tCgPA: %@src\n",_packet.incomingOpc,_packet.incomingCallingPartyAddress];
-                    [s appendFormat:@"DPC: %@\tCdPA: %@src\n",_packet.incomingDpc,_packet.incomingCalledPartyAddress];
+                    [s appendFormat:@"OPC: %@\tCgPA: %@\n",_packet.incomingOpc,_packet.incomingCallingPartyAddress];
+                    [s appendFormat:@"DPC: %@\tCdPA: %@\n",_packet.incomingDpc,_packet.incomingCalledPartyAddress];
                     [_sccpLayer.logFeed debugText:s];
                 }
 

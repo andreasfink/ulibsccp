@@ -147,8 +147,8 @@ typedef enum UMTCAP_Command
     _outgoingMaxHopCount            = _incomingMaxHopCount - 1;
     _outgoingFromLocal              = _incomingFromLocal;
     _outgoingToLocal                = _incomingToLocal;
-    _outgoingCallingPartyAddress    = _incomingCallingPartyAddress;
-    _outgoingCalledPartyAddress     = _incomingCalledPartyAddress;
+    _outgoingCallingPartyAddress    = [_incomingCallingPartyAddress copy];
+    _outgoingCalledPartyAddress     = [_incomingCalledPartyAddress copy];
     _outgoingMtp3Data               = _incomingMtp3Data;
     _outgoingSccpData               = _incomingSccpData;
     _outgoingOptionalData           = _incomingOptionalData;

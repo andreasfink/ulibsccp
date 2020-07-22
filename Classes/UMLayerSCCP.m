@@ -1042,16 +1042,19 @@
     if(self.logLevel <=UMLOG_DEBUG)
     {
         NSMutableString *s = [[NSMutableString alloc]init];
+        [s appendFormat:@"Entering routePacket:\n"];
         if(packet.incomingFromLocal)
         {
-            [s appendFormat:@"MsgType %@   from local\n",packet.incomingPacketType];
+            [s appendFormat:@"  SCCP %@   from local\n",packet.incomingPacketType];
         }
         else
         {
-            [s appendFormat:@"MsgType %@   LS: %@\n",packet.incomingPacketType,packet.incomingLinkset];
+            [s appendFormat:@"  SCCP %@   from linksetLS: %@\n",packet.incomingPacketType,packet.incomingLinkset];
         }
-        [s appendFormat:@"OPC: %@\tCgPA: %@\n",packet.incomingOpc,packet.incomingCallingPartyAddress];
-        [s appendFormat:@"DPC: %@\tCdPA: %@\n",packet.incomingDpc,packet.incomingCalledPartyAddress];
+        [s appendFormat:@"  OPC: %@\n",packet.incomingOpc];
+        [s appendFormat:@"  DPC: %@\n",packet.incomingDpc];
+        [s appendFormat:@"  CgPA: %@\n",packet.incomingCallingPartyAddress];
+        [s appendFormat:@"  CdPA: %@\n",packet.incomingCalledPartyAddress];
         [self.logFeed debugText:s];
     }
 
@@ -1074,7 +1077,13 @@
     packet.routingSelector = usedSelector;
     if(self.logLevel <=UMLOG_DEBUG)
     {
-        NSString *s = [NSString stringWithFormat:@"findRoutes:%@ returns:\n\tdestinationGroup=%@\n\tcause=%d\n\tnewCalledAddress=%@\n\tlocalUser=%@\n\tfromLocal=%@\n",dst,[grp descriptionWithRt:_mtp3RoutingTable],causeValue,called_out,localUser,packet.incomingFromLocal ? @"YES" : @"NO"];
+        NSMutableString *s = [[NSMutableString alloc]init];
+        [s appendFormat:@"findRoutes(%@) returns:\n",dst];
+        [s appendString:[grp descriptionWithRt:_mtp3RoutingTable]];
+        [s appendFormat:@"    causeValue: %d\n",causeValue];
+        [s appendFormat:@"    newCalledAddress: %@\n",called_out];
+        [s appendFormat:@"    localUser: %@\n",localUser];
+        [s appendFormat:@"    fromLocal: %@\n",packet.incomingFromLocal ? @"YES" : @"NO"];
         [self logDebug:s];
     }
 
@@ -1134,41 +1143,53 @@
         if(self.logLevel <=UMLOG_DEBUG)
         {
             NSMutableString *s = [[NSMutableString alloc]init];
-            [s appendFormat:@"[grp  chooseNextHopWithRoutingTable:_mtp3RoutingTable] returns %@",dest];
+            [s appendFormat:@"[grp  chooseNextHopWithRoutingTable:_mtp3RoutingTable] returns:\n %@",dest];
             [self.logFeed debugText:s];
         }
 
 
-        if(dest.ntt)
+        if(dest.overrideCalledTT)
         {
             if(self.logLevel <=UMLOG_DEBUG)
             {
                 NSMutableString *s = [[NSMutableString alloc]init];
-                [s appendFormat:@"Set NTT %@",dest.ntt];
+                [s appendFormat:@"override-called-tt to %@",dest.overrideCalledTT];
                 [self.logFeed debugText:s];
             }
-            packet.outgoingCalledPartyAddress.tt.tt = [dest.ntt intValue];
+            packet.outgoingCalledPartyAddress.tt.tt = [dest.overrideCalledTT intValue];
         }
         
-        if(dest.callingNtt)
+        if(dest.overrideCallingTT)
         {
             if(self.logLevel <=UMLOG_DEBUG)
             {
                 NSMutableString *s = [[NSMutableString alloc]init];
-                [s appendFormat:@"Set Calling-TT %@",dest.callingNtt];
+                [s appendFormat:@"override-calling-tt to %@",dest.overrideCallingTT];
                 [self.logFeed debugText:s];
             }
-            packet.outgoingCallingPartyAddress.tt.tt = [dest.callingNtt intValue];
+            packet.outgoingCallingPartyAddress.tt.tt = [dest.overrideCallingTT intValue];
         }
-        if(_ntt)
+        
+        if(_overrideCalledTT)
         {
             if(self.logLevel <=UMLOG_DEBUG)
             {
                 NSMutableString *s = [[NSMutableString alloc]init];
-                [s appendFormat:@"Set NTT (global) %@",dest.ntt];
+                [s appendFormat:@"sccp-instance override-called-tt to %d",_overrideCalledTT.tt];
                 [self.logFeed debugText:s];
             }
-            packet.outgoingCalledPartyAddress.tt = _ntt;
+            packet.outgoingCalledPartyAddress.tt.tt = _overrideCalledTT.tt;
+        }
+        
+        if(_overrideCallingTT)
+        {
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                NSMutableString *s = [[NSMutableString alloc]init];
+                [s appendFormat:@"sccp-instance override-calling-tt to %d",_overrideCallingTT.tt];
+                [self.logFeed debugText:s];
+            }
+            packet.outgoingCallingPartyAddress.tt.tt = _overrideCallingTT.tt;
         }
 
         if(dest.dpc)
@@ -1872,10 +1893,23 @@
             }
         }
 
-        NSNumber *n = cfg[@"ntt"];
+        NSString *n = [cfg[@"override-called-tt"] stringValue];
         if(n)
         {
-            _ntt = [[SccpTranslationTableNumber alloc]initWithInt:[n intValue]];
+            _overrideCalledTT = [[SccpTranslationTableNumber alloc]initWithInt:[n intValue]];
+        }
+        
+        n = [cfg[@"ntt"] stringValue];
+        if(n)
+        {
+            _overrideCalledTT = [[SccpTranslationTableNumber alloc]initWithInt:[n intValue]];
+        }
+
+        
+        n = [cfg[@"override-calling-tt"] stringValue];
+        if(n)
+        {
+            _overrideCallingTT = [[SccpTranslationTableNumber alloc]initWithInt:[n intValue]];
         }
 
         NSArray<NSString *> *sa = cfg[@"next-pc"];
@@ -1892,10 +1926,15 @@
 
                     SccpDestination *e = [[SccpDestination alloc]init];
                     e.dpc = pc;
-                    if(_ntt)
+                    if(_overrideCallingTT)
                     {
-                        e.ntt = @(_ntt.tt);
+                        e.overrideCallingTT = @(_overrideCallingTT.tt);
                     }
+                    if(_overrideCalledTT)
+                    {
+                        e.overrideCalledTT = @(_overrideCalledTT.tt);
+                    }
+
                     [destination addEntry:e];
                 }
             }
@@ -2923,7 +2962,7 @@
         }
         if(nttString)
         {
-            e.ntt = @([nttString integerValue]);
+            e.overrideCalledTT = @([nttString integerValue]);
         }
         if(weightString)
         {
