@@ -161,8 +161,6 @@
 
 - (void)flushToPool:(UMDbPool *)pool table:(UMDbTable *)table
 {
-    NSLog(@"SCCP Statistic: %@",self.description);
-
     [_lock lock];
     BOOL success = [self updateDb:pool table:table];
     if(success == NO)
