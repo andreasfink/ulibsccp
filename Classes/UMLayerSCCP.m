@@ -1124,14 +1124,14 @@
         }
         else
         {
-            [localUser sccpNUnitdata:packet.outgoingSccpData
-                        callingLayer:self
-                             calling:packet.outgoingCallingPartyAddress
-                              called:packet.outgoingCalledPartyAddress
-                    qualityOfService:0
-                               class:packet.outgoingServiceClass
-                            handling:packet.outgoingHandling
-                             options:packet.outgoingOptions];
+            [self localDeliverNUnitdata:packet.outgoingSccpData
+                                 toUser:localUser
+                                calling:packet.outgoingCallingPartyAddress
+                                 called:packet.outgoingCalledPartyAddress
+                       qualityOfService:0
+                                  class:packet.outgoingServiceClass
+                               handling:packet.outgoingHandling
+                                options:packet.outgoingOptions];
         }
         returnValue = YES;
     }
@@ -3410,7 +3410,62 @@
     return s;
 }
 
-
+- (void) localDeliverNUnitdata:(NSData *)data
+                        toUser:(id<UMSCCP_UserProtocol>)localUser
+                       calling:(SccpAddress *)callingPartyAddress
+                        called:(SccpAddress *)calledPartyAddress
+              qualityOfService:(int)qos
+                         class:(SCCP_ServiceClass)serviceClass
+                      handling:(SCCP_Handling)handling
+                       options:(NSDictionary *)options
+{
+    BOOL accepted = [localUser sccpNUnitdata:data
+                                callingLayer:self
+                                     calling:callingPartyAddress
+                                      called:calledPartyAddress
+                            qualityOfService:qos
+                                       class:serviceClass
+                                    handling:handling
+                                     options:options
+                            verifyAcceptance:YES];
+    if(accepted==NO)
+    {
+        /* this session belongs to some other task. lets try to find it. */
+        NSArray *allKeys = [_subsystemUsers allKeys];
+        for (NSNumber *key in allKeys)
+        {
+            NSMutableDictionary *a = _subsystemUsers[key];
+            if(a)
+            {
+                NSArray *allNumbers = [a allKeys];
+                for(NSString *number in allNumbers)
+                {
+                    id<UMSCCP_UserProtocol> user = a[number];
+                    if(user == localUser)
+                    {
+                        continue; /* we already tried that one*/
+                    }
+                    else
+                    {
+                        accepted = [localUser sccpNUnitdata:data
+                                                   callingLayer:self
+                                                        calling:callingPartyAddress
+                                                         called:calledPartyAddress
+                                               qualityOfService:qos
+                                                          class:serviceClass
+                                                       handling:handling
+                                                        options:options
+                                               verifyAcceptance:YES];
+                        if(accepted==YES)
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 @end
 
 

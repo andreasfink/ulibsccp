@@ -43,7 +43,7 @@
     UMMTP3PointCode             *_incomingDpc;
     SCCP_ServiceClass           _incomingServiceClass;
     SCCP_ServiceType            _incomingServiceType;
-    int                         _incomingHandling;
+    SCCP_Handling               _incomingHandling;
     int                         _incomingMaxHopCount;
     BOOL                        _incomingFromLocal;
     BOOL                        _incomingToLocal;
@@ -64,7 +64,7 @@
     UMMTP3PointCode             *_outgoingDpc;
     SCCP_ServiceClass           _outgoingServiceClass;
     SCCP_ServiceType            _outgoingServiceType;
-    int                         _outgoingHandling;
+    SCCP_Handling               _outgoingHandling;
     SccpAddress                 *_outgoingCallingPartyAddress;
     SccpAddress                 *_outgoingCalledPartyAddress;
     NSData                      *_outgoingMtp3Data;
@@ -128,7 +128,7 @@
 @property(readwrite,strong,atomic)    UMMTP3PointCode         *incomingDpc;
 @property(readwrite,assign,atomic)  SCCP_ServiceClass       incomingServiceClass;
 @property(readwrite,assign,atomic)  SCCP_ServiceType        incomingServiceType;
-@property(readwrite,assign,atomic)  int                     incomingHandling;
+@property(readwrite,assign,atomic)  SCCP_Handling           incomingHandling;
 @property(readwrite,assign,atomic)  int                     incomingMaxHopCount;
 @property(readwrite,strong,atomic)  SccpAddress             *incomingCallingPartyAddress;
 @property(readwrite,strong,atomic)  NSString                *incomingCallingPartyCountry;
@@ -150,7 +150,7 @@
 @property(readwrite,strong,atomic)    UMMTP3PointCode         *outgoingDpc;
 @property(readwrite,assign,atomic)  SCCP_ServiceClass       outgoingServiceClass;
 @property(readwrite,assign,atomic)  SCCP_ServiceType        outgoingServiceType;
-@property(readwrite,assign,atomic)  int                     outgoingHandling;
+@property(readwrite,assign,atomic)  SCCP_Handling           outgoingHandling;
 @property(readwrite,assign,atomic)  int                     outgoingMaxHopCount;
 @property(readwrite,strong,atomic)  SccpAddress             *outgoingCallingPartyAddress;
 @property(readwrite,strong,atomic)  SccpAddress             *outgoingCalledPartyAddress;

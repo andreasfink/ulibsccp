@@ -387,4 +387,13 @@ typedef enum SccpGtFileSection
 - (NSString *)webE212;
 - (NSString *)webE214;
 
+- (void) localDeliverNUnitdata:(NSData *)data
+          toUser:(id<UMSCCP_UserProtocol>)localUser
+         calling:(SccpAddress *)callingPartyAddress
+          called:(SccpAddress *)calledPartyAddress
+qualityOfService:(int)qos
+           class:(SCCP_ServiceClass)serviceClass
+        handling:(SCCP_Handling)handling
+options:(NSDictionary *)options;
+
 @end

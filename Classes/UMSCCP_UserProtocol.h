@@ -26,14 +26,18 @@
                  connection:(UMSCCPConnection *)connection
                     options:(NSDictionary *)options;
 
-- (void)sccpNUnitdata:(NSData *)data
+- (BOOL)sccpNUnitdata:(NSData *)data
          callingLayer:(UMLayerSCCP *)sccpLayer
               calling:(SccpAddress *)src
                called:(SccpAddress *)dst
      qualityOfService:(int)qos
                 class:(SCCP_ServiceClass)pclass
-             handling:(int)handling
-              options:(NSDictionary *)options;
+             handling:(SCCP_Handling)handling
+              options:(NSDictionary *)options
+     verifyAcceptance:(BOOL)verifyAcceptance;
+                /* if verifyAcceptance is set to YES, return false if you dont know anyhting about this transaction instead of rejecting it outright.
+                    That way SCCP can search for another instance which might have sent this.
+                 */
 
 - (void)sccpNNotice:(NSData *)data
        callingLayer:(UMLayerSCCP *)sccpLayer
