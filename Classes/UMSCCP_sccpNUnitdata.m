@@ -468,6 +468,30 @@ static int segmentReferenceId;
 
 - (NSArray <UMSCCP_Segment *>*)splitDataIntoSegments:(NSData *)data withSegmentSizes:(NSArray<NSNumber *>*)segmentSizes reference:(long)ref maxPdu:(NSUInteger)maxPdu
 {
+    BOOL debug =( _sccpLayer.logLevel <=UMLOG_DEBUG);
+    if(debug)
+    {
+        NSMutableString *s = [[NSMutableString alloc]init];
+        [s appendFormat:@"Entering splitDataIntoSegments: %@\n",[data hexString]];
+        [s appendFormat:@"\twithSegmentSizes: {"];
+        for(int i=0;i<segmentSizes.count;i++)
+        {
+            NSNumber *num = segmentSizes[i];
+            int n = [num intValue];
+            if(i>0)
+            {
+                [s appendFormat:@", %d",n];
+            }
+            else
+            {
+                [s appendFormat:@"%d", n];
+            }
+        }
+        [s appendFormat:@"}\n"];
+        [s appendFormat:@"\treference:%ld\n",ref];
+        [s appendFormat:@"\tmaxPdu:%ld\n",(long)maxPdu];
+        [_sccpLayer logDebug:s];
+    }
     NSMutableArray<UMSCCP_Segment *> *segments = [[NSMutableArray alloc]init];
 
     NSData *remainingData = [data copy];
@@ -530,6 +554,17 @@ static int segmentReferenceId;
         s.segmentIndex = i;
     }
 
+    if(debug)
+    {
+        NSMutableString *s = [[NSMutableString alloc]init];
+        [s appendFormat:@"returning segments:\n"];
+        for(int i=0;i<segments.count;i++)
+        {
+            UMSCCP_Segment *seg = segments[i];
+            [s appendFormat:@"\t%@\n",seg.description];
+        }
+        [_sccpLayer logDebug:s];
+    }
     return segments;
 }
 @end
