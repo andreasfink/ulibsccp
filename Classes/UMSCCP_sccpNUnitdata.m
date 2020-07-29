@@ -498,11 +498,10 @@ static int segmentReferenceId;
     
     NSUInteger remainingLength = remainingData.length;
     NSUInteger index=0;
-
     while(remainingLength > 0)
     {
         NSUInteger currentLength = maxPdu;
-        if(segmentSizes.count<index)
+        if((segmentSizes!=NULL) && (segmentSizes.count < index))
         {
             NSNumber *n = segmentSizes[index];
             currentLength = [n intValue];
@@ -511,7 +510,7 @@ static int segmentReferenceId;
                 currentLength = maxPdu;
             }
         }
-        else if(segmentSizes.count>0)
+        else if((segmentSizes!=NULL) && (segmentSizes.count>0))
         {
             NSNumber *n = segmentSizes[segmentSizes.count -1];
             currentLength = [n intValue];
@@ -540,7 +539,7 @@ static int segmentReferenceId;
         currentSegment.class1 = (_protocolClass == SCCP_CLASS_INSEQ_CL);
         currentSegment.reference = ref;
         currentSegment.data = [NSData dataWithBytes:remainingData.bytes length:currentLength];
-        [_dataSegments addObject:currentSegment];
+        [segments addObject:currentSegment];
     
         remainingData = [NSData dataWithBytes:&remainingData.bytes[currentLength] length:(remainingLength - currentLength)];
         remainingLength = remainingData.length;
