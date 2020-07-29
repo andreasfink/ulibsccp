@@ -327,18 +327,7 @@ static int segmentReferenceId;
                         packet.incomingSegment = s;
                         packet.incomingOptions = _options;
                         packet.incomingMaxHopCount = _maxHopCount;
-
-                        NSMutableData *optional_data_of_segment = [[NSMutableData alloc]init];
-                        if(optional_data.length == 0)
-                        {
-                            char b = 0;
-                            [optional_data_of_segment appendBytes:&b length:1]; /* end of optional parameters */
-                        }
-                        else
-                        {
-                            [optional_data_of_segment appendData:optional_data]; /* already includes the end of optional parameters */
-                        }
-                        packet.incomingOptionalData = optional_data_of_segment;
+                        packet.incomingOptionalData = optional_data;
                         packet.incomingServiceType = SCCP_XUDT;
                         packet.incomingFromLocal = YES;
                         _statisticsSection2 = UMSCCP_StatisticSection_XUDT_TX;
