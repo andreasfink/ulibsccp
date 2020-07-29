@@ -300,53 +300,15 @@ static int segmentReferenceId;
                         ref = segmentReferenceId;
                     }
 
-                    _dataSegments = [[NSMutableArray alloc]init];
-                    UMSCCP_Segment *segment = [[UMSCCP_Segment alloc]init];
-                    segment.first = YES;
-                    segment.class1 = (_protocolClass == SCCP_CLASS_INSEQ_CL);
-                    segmentReferenceId = ref;
-                        
-                    const uint8_t *bytes = _data.bytes;
-                    NSUInteger n = _data.length;
-                    NSUInteger p = 0;
-                    NSUInteger index;
-                    while(p < n)
-                    {
-
-                        NSUInteger m = maxPdu;
-                        if(segmentSizes.count > index)
-                        {
-                            NSNumber *mi = segmentSizes[index++];
-                            m = [mi intValue];
-                        }
-                        else
-                        {
-                            m = maxPdu;
-                        }
-                        if((n - p) < m)
-                        {
-                            m = (n-p);
-                        }
-                        segment = [[UMSCCP_Segment alloc]init];
-                        segment.first = NO;
-                        segment.class1 = (_protocolClass == SCCP_CLASS_INSEQ_CL);
-                        segment.reference = ref;
-                        segment.data = [NSData dataWithBytes:&bytes[p] length:m];
-                        [_dataSegments addObject:segment];
-                        p = p + m;
-                    }
+                    NSArray<UMSCCP_Segment *> *_dataSegments  = [self splitDataIntoSegments:_data
+                                                                            withSegmentSizes:segmentSizes
+                                                                                   reference:ref
+                                                                                      maxPdu:maxPdu];
                     NSUInteger count = _dataSegments.count;
-                    for(int i=0;i<count;i++)
-                    {
-                        UMSCCP_Segment *s = [_dataSegments objectAtIndex:(NSUInteger)i];
-                        s.remainingSegment = (int)count - i -1;
-                        s.segmentIndex = i;
-                    }
                     _data = NULL;
                     for(int i=0;i<count;i++)
                     {
-                        UMSCCP_Segment *s = [_dataSegments objectAtIndex:(NSUInteger)i];
-                        s.remainingSegment = (int)count - i -1;
+                        UMSCCP_Segment *s = _dataSegments[i];
 
                         UMSCCP_Packet *packet = [[UMSCCP_Packet alloc]init];
                         packet.sccp = _sccpLayer;
@@ -504,4 +466,70 @@ static int segmentReferenceId;
     }
 }
 
+- (NSArray <UMSCCP_Segment *>*)splitDataIntoSegments:(NSData *)data withSegmentSizes:(NSArray<NSNumber *>*)segmentSizes reference:(long)ref maxPdu:(NSUInteger)maxPdu
+{
+    NSMutableArray<UMSCCP_Segment *> *segments = [[NSMutableArray alloc]init];
+
+    NSData *remainingData = [data copy];
+    
+    NSUInteger remainingLength = remainingData.length;
+    NSUInteger index=0;
+
+    while(remainingLength > 0)
+    {
+        NSUInteger currentLength = maxPdu;
+        if(segmentSizes.count<index)
+        {
+            NSNumber *n = segmentSizes[index];
+            currentLength = [n intValue];
+            if(currentLength > maxPdu)
+            {
+                currentLength = maxPdu;
+            }
+        }
+        else if(segmentSizes.count>0)
+        {
+            NSNumber *n = segmentSizes[segmentSizes.count -1];
+            currentLength = [n intValue];
+            if(currentLength > maxPdu)
+            {
+                currentLength = maxPdu;
+            }
+        }
+        else
+        {
+            currentLength = maxPdu;
+        }
+        if(currentLength > remainingLength)
+        {
+            currentLength = remainingLength;
+        }
+        UMSCCP_Segment *currentSegment = [[UMSCCP_Segment alloc]init];
+        if(index==0)
+        {
+            currentSegment.first = YES;
+        }
+        else
+        {
+            currentSegment.first = NO;
+        }
+        currentSegment.class1 = (_protocolClass == SCCP_CLASS_INSEQ_CL);
+        currentSegment.reference = ref;
+        currentSegment.data = [NSData dataWithBytes:remainingData.bytes length:currentLength];
+        [_dataSegments addObject:currentSegment];
+    
+        remainingData = [NSData dataWithBytes:&remainingData.bytes[currentLength] length:(remainingLength - currentLength)];
+        remainingLength = remainingData.length;
+        index++;
+    }
+    
+    for(int i=0;i<segments.count;i++)
+    {
+        UMSCCP_Segment *s = segments[i];
+        s.remainingSegment = (int)segments.count - i - 1;
+        s.segmentIndex = i;
+    }
+
+    return segments;
+}
 @end

@@ -13,13 +13,13 @@
 
 @interface UMSCCP_Segment : UMObject
 {
-    int _segmentIndex;
-    BOOL first;
-    BOOL class1;
-    int remainingSegment;
-    long reference;
+    int  _segmentIndex;
+    BOOL _first;
+    BOOL _class1;
+    int  _remainingSegment;
+    long _reference;
     
-    NSData *data;
+    NSData *_data;
 }
 
 @property(readwrite,assign)    int segmentIndex;
@@ -30,6 +30,6 @@
 @property(readwrite,strong)    NSData *data;
 
 - (NSData *)segmentationHeader;
-- (UMSCCP_Segment *)initWithData:(NSData *)d;
+- (UMSCCP_Segment *)initWithHeaderData:(NSData *)d;
 
 @end

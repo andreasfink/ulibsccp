@@ -980,7 +980,7 @@
     }
     else
     {
-        UMSCCP_Segment *s = [[UMSCCP_Segment alloc]initWithData:sccp_optional];
+        UMSCCP_Segment *s = [[UMSCCP_Segment alloc]initWithHeaderData:sccp_optional];
         s.data = sccp_pdu;
         NSData *reassembled = NULL;
         NSString *key = MAKE_SEGMENT_KEY(src,dst,s.reference);

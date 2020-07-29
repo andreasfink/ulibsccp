@@ -394,6 +394,6 @@ typedef enum SccpGtFileSection
 qualityOfService:(int)qos
            class:(SCCP_ServiceClass)serviceClass
         handling:(SCCP_Handling)handling
-options:(NSDictionary *)options;
+         options:(NSDictionary *)options;
 
 @end
