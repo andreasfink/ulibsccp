@@ -300,7 +300,7 @@ static int segmentReferenceId;
                         ref = segmentReferenceId;
                     }
 
-                    NSArray<UMSCCP_Segment *> *_dataSegments  = [self splitDataIntoSegments:_data
+                    _dataSegments  = [self splitDataIntoSegments:_data
                                                                             withSegmentSizes:segmentSizes
                                                                                    reference:ref
                                                                                       maxPdu:maxPdu];

@@ -34,6 +34,7 @@
     return [NSData dataWithBytes:bytes length:4];
 }
 
+
 - (UMSCCP_Segment *)initWithHeaderData:(NSData *)d
 {
     if(d.length !=4)

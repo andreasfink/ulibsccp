@@ -21,7 +21,7 @@
     id<UMSCCP_UserProtocol> _sccpUser;
     UMLayerSCCP             *_sccpLayer;
     NSData                  *_data;
-    NSMutableArray          *_dataSegments;
+    NSArray<UMSCCP_Segment *>*_dataSegments;
     SccpAddress             *_src;
     SccpAddress             *_dst;
     NSDictionary            *_options;
