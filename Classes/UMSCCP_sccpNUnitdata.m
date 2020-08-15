@@ -227,7 +227,6 @@ static int segmentReferenceId;
                 }
                 if(optional_data.length>0)
                 {
-                    [optional_data appendByte:0x00]; /* end of parameter */
                     useXUDT = YES;
                 }
             }

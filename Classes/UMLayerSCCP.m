@@ -383,6 +383,14 @@
     NSData *srcEncoded = [src encode:_sccpVariant];
     NSData *dstEncoded = [dst encode:_sccpVariant];
 
+    NSMutableData *optionsData = NULL;
+    if(xoptionsdata.length > 0)
+    {
+        optionsData = [[NSMutableData alloc]init];
+        [optionsData appendData:xoptionsdata];
+        [optionsData appendByte:0x00]; /* end of optional parameters */
+    }
+
     NSMutableData *sccp_pdu = [[NSMutableData alloc]init];
     uint8_t header[7];
     header[0] = SCCP_XUDT;
@@ -391,7 +399,7 @@
     header[3] = 4;
     header[4] = 4 + dstEncoded.length;
     header[5] = 4 + dstEncoded.length + srcEncoded.length;
-    if(xoptionsdata.length > 0)
+    if(optionsData.length > 0)
     {
         header[6] = 4 + dstEncoded.length + srcEncoded.length + data.length;
     }
@@ -406,9 +414,9 @@
     [sccp_pdu appendData:srcEncoded];
     [sccp_pdu appendByte:data.length];
     [sccp_pdu appendData:data];
-    if(xoptionsdata.length > 0)
+    if(optionsData.length > 0)
     {
-        [sccp_pdu appendData:xoptionsdata];
+        [sccp_pdu appendData:optionsData];
     }
 
     UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc options:options routedToLinkset:outgoingLinkset];
