@@ -91,6 +91,9 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
         calledPrefix:(NSString *)calledPrefix
          gttSelector:(NSString *)selector
        sccpOperation:(SCCP_ServiceType)sccpOperation
+   incomingPointCode:(NSString *)opc
+   outgoingPointCode:(NSString *)dpc
+         destination:(NSString *)dst
 {
     @autoreleasepool
     {
@@ -102,7 +105,10 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
                   @"                         calledPrefix:%@\n"
                   @"                             selector:%@\n"
                   @"                        sccpOperation:%d\n"
-                  ,byteCount,incomingLinkset,outgoingLinkset,callingPrefix,calledPrefix,selector,sccpOperation);
+                  @"                    incomingPointCode:%@\n"
+                  @"                    outgoingPointCode:%@\n"
+                  @"                          destination:%@\n"
+                  ,byteCount,incomingLinkset,outgoingLinkset,callingPrefix,calledPrefix,selector,sccpOperation.opc,dpc,dst);
 #endif
         NSString *ymdh = [_ymdhDateFormatter stringFromDate:[NSDate date]];
         NSString *sccpOperationString = @"unknown";
@@ -138,7 +144,10 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
                                                   calledPrefix:calledPrefix
                                                    gttSelector:selector
                                                  sccpOperation:sccpOperationString
-                                                      instance:_instance];
+                                                      instance:_instance
+                                             incomingPointCode:opc
+                                             outgoingPointCode:dpc
+                                                   destination:dst];
         [_lock lock];
         UMSCCP_StatisticDbRecord *rec = _entries[key];
         if(rec == NULL)

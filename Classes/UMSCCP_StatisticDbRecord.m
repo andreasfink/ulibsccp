@@ -24,8 +24,7 @@
 - (NSString *)keystring
 {
     
-    return [NSString stringWithFormat:@"%@:%@:%@:%@:%@:%@:%@:%@",_ymdh,_incoming_linkset,_calling_prefix,_outgoing_linkset,_called_prefix,_gtt_selector,_sccp_operation,_instance];
-
+    return [NSString stringWithFormat:@"%@:%@:%@:%@:%@:%@:%@:%@:%@:%@:%@",_ymdh,_incoming_linkset,_calling_prefix,_outgoing_linkset,_called_prefix,_gtt_selector,_sccp_operation,_instance,_incoming_pc,_outgoing_pc,_destination];
 }
 
 + (NSString *)keystringFor:(NSString *)ymdh
@@ -36,8 +35,11 @@
                gttSelector:(NSString *)selector
              sccpOperation:(NSString *)sccpOperation
                   instance:(NSString *)instance
+         incomingPointCode:(NSString *)opc
+         outgoingPointCode:(NSString *)dpc
+               destination:(NSString *)dst
 {
-    return [NSString stringWithFormat:@"%@:%@:%@:%@:%@:%@:%@:%@",ymdh,incomingLinkset,callingPrefix,outgoingLinkset,calledPrefix,selector,sccpOperation,instance];
+    return [NSString stringWithFormat:@"%@:%@:%@:%@:%@:%@:%@:%@:%@:%@:%@",ymdh,incomingLinkset,callingPrefix,outgoingLinkset,calledPrefix,selector,sccpOperation,instance,opc,dpc,dst];
 }
 
 - (BOOL)insertIntoDb:(UMDbPool *)pool table:(UMDbTable *)dbt /* returns YES on success */
@@ -62,7 +64,10 @@
                                     @"gtt_selector",
                                     @"sccp_operation",
                                     @"msu_count",
-                                    @"bytes_count"];
+                                    @"bytes_count",
+                                    @"incoming_pc",
+                                    @"outgoing_pc",
+                                    @"destination"];
                 [query setType:UMDBQUERYTYPE_INSERT];
                 [query setTable:dbt];
                 [query setFields:fields];
@@ -81,6 +86,9 @@
                                 STRING_NONEMPTY(_sccp_operation),
                                 STRING_FROM_INT(_msu_count),
                                 STRING_FROM_INT(_bytes_count),
+                                STRING_NONEMPTY(_incoming_pc),
+                                STRING_NONEMPTY(_outgoing_pc),
+                                STRING_NONEMPTY(_destination),
                                 NULL];
             UMDbSession *session = [pool grabSession:FLF];
             unsigned long long affectedRows = 0;
@@ -187,6 +195,9 @@
     d[@"_instance"]         = _instance ? _instance : @"(null)";
     d[@"_incoming_linkset"] = _incoming_linkset ? _incoming_linkset : @"(null)";
     d[@"_outgoing_linkset"] = _outgoing_linkset ? _outgoing_linkset : @"(null)";
+    d[@"_incoming_pc"] = _incoming_pc ? _incoming_pc : @"(null)";
+    d[@"_outgoing_pc"] = _outgoing_pc ? _outgoing_pc : @"(null)";
+    d[@"_destination"] = _destination ? _destination : @"(null)";
     d[@"_calling_prefix"]   = _calling_prefix ? _calling_prefix : @"(null)";
     d[@"_gtt_selector"]     = _gtt_selector ? _gtt_selector : @"(null)";
     d[@"_sccp_operation"]   = _sccp_operation ? _sccp_operation : @"(null)";

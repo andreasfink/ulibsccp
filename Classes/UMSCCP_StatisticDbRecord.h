@@ -15,6 +15,11 @@
     NSString *_instance;
     NSString *_incoming_linkset;
     NSString *_outgoing_linkset;
+    
+    NSString *_incoming_pc;
+    NSString *_outgoing_pc;
+    NSString *_destination;
+
     NSString *_calling_prefix;
     NSString *_called_prefix;
     NSString *_gtt_selector;
@@ -35,17 +40,22 @@
 @property(readwrite,strong,atomic)  NSString *sccp_operation;
 @property(readwrite,assign,atomic)  int     msu_count;
 @property(readwrite,assign,atomic)  int     bytes_count;
-
+@property(readwrite,strong,atomic)  NSString *incoming_pc;
+@property(readwrite,strong,atomic)  NSString *outgoing_pc;
+@property(readwrite,strong,atomic)  NSString *destination;
 
 - (NSString *)keystring;
 + (NSString *)keystringFor:(NSString *)ymdh
-           incomingLinkset:(NSString *)incomingLinkset
-           outgoingLinkset:(NSString *)outgoingLinkset
-             callingPrefix:(NSString *)callingPrefix
-              calledPrefix:(NSString *)calledPrefix
-               gttSelector:(NSString *)selector
-             sccpOperation:(NSString *)sccpOperation
-                  instance:(NSString *)instance;
+  incomingLinkset:(NSString *)incomingLinkset
+  outgoingLinkset:(NSString *)outgoingLinkset
+    callingPrefix:(NSString *)callingPrefix
+     calledPrefix:(NSString *)calledPrefix
+      gttSelector:(NSString *)selector
+    sccpOperation:(NSString *)sccpOperation
+         instance:(NSString *)instance
+incomingPointCode:(NSString *)opc
+outgoingPointCode:(NSString *)dpc
+      destination:(NSString *)dst;
 
 - (void)increaseMsuCount:(int)msuCount byteCount:(int)byteCount;
 - (void)flushToPool:(UMDbPool *)pool table:(UMDbTable *)table;

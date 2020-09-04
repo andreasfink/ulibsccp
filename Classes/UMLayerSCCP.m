@@ -1147,6 +1147,7 @@
     else if(grp)
     {
         /* routing to */
+        packet.outgoingDestination = grp.name;
         SccpDestination *dest = [grp chooseNextHopWithRoutingTable:_mtp3RoutingTable];
         if(self.logLevel <=UMLOG_DEBUG)
         {
@@ -1154,7 +1155,6 @@
             [s appendFormat:@"[grp  chooseNextHopWithRoutingTable:_mtp3RoutingTable] returns:\n %@",dest];
             [self.logFeed debugText:s];
         }
-
 
         if(dest.overrideCalledTT)
         {

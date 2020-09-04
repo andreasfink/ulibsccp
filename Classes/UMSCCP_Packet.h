@@ -76,7 +76,8 @@
     BOOL                        _outgoingFromLocal;
     BOOL                        _outgoingToLocal;
     SCCP_ReturnCause            _outgoingReturnCause;
-
+    NSString                    *_outgoingDestination;
+    
     /* this can be used by filters: */
     UMASN1Object                *_incomingTcapAsn1;
 
@@ -161,7 +162,7 @@
 @property(readwrite,assign,atomic)  BOOL                    outgoingFromLocal;
 @property(readwrite,assign,atomic)  BOOL                    outgoingToLocal;
 @property(readwrite,assign,atomic)  SCCP_ReturnCause        outgoingReturnCause;
-
+@property(readwrite,strong,atomic)  NSString                *outgoingDestination;
 
 @property(readwrite,strong,atomic)  UMASN1Object           		*incomingTcapAsn1; /* this can be set by filters */
 @property(readwrite,strong,atomic)  UMTCAP_itu_asn1_begin		*incomingTcapBegin;

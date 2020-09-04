@@ -14,6 +14,7 @@
 #import "UMSCCP_Defs.h"
 #import "UMSCCP_ReceivedSegments.h"
 #import "UMSCCP_Packet.h"
+#import "UMSCCP_StatisticDb.h"
 
 @implementation UMSCCP_mtpTransfer
 
@@ -757,13 +758,17 @@
                     {
                         outgoingLinkset=@"local";
                     }
-                    [_sccpLayer.statisticDb addByteCount:(int)_packet.outgoingSccpData.length
-                                         incomingLinkset:incomingLinkset
-                                         outgoingLinkset:outgoingLinkset
-                                           callingPrefix:callingPrefix
-                                            calledPrefix:calledPrefix
-                                             gttSelector:gttSelector
-                                           sccpOperation:_packet.incomingServiceType];
+                    
+                    [_sccpLayer.statisticDb  addByteCount:(int)_packet.outgoingSccpData.length
+                                          incomingLinkset:incomingLinkset
+                                          outgoingLinkset:outgoingLinkset
+                                            callingPrefix:callingPrefix
+                                             calledPrefix:calledPrefix
+                                              gttSelector:gttSelector
+                                            sccpOperation:_packet.incomingServiceType
+                                        incomingPointCode:[NSString stringWithFormat:@"%d",_packet.incomingOpc.integerValue]
+                                        outgoingPointCode:[NSString stringWithFormat:@"%d",_packet.outgoingDpc.integerValue]
+                                              destination:_packet.outgoingDestination];
                 }
             }
             else
