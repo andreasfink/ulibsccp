@@ -86,8 +86,8 @@
                                 STRING_NONEMPTY(_sccp_operation),
                                 STRING_FROM_INT(_msu_count),
                                 STRING_FROM_INT(_bytes_count),
-                                STRING_NONEMPTY(_incoming_pc),
-                                STRING_NONEMPTY(_outgoing_pc),
+                                STRING_FROM_INT(_incoming_pc),
+                                STRING_FROM_INT(_outgoing_pc),
                                 STRING_NONEMPTY(_destination),
                                 NULL];
             UMDbSession *session = [pool grabSession:FLF];
