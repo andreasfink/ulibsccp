@@ -162,7 +162,7 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
             rec.sccp_operation = sccpOperationString;
             rec.instance = _instance;
             rec.incoming_pc = opc;
-            rec.outgoing_pc = UMSCCP_StatisticDbRecorddpc;
+            rec.outgoing_pc = dpc;
             rec.destination = dst;
             _entries[key] = rec;
         }
