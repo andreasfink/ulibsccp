@@ -766,8 +766,8 @@
                                              calledPrefix:calledPrefix
                                               gttSelector:gttSelector
                                             sccpOperation:_packet.incomingServiceType
-                                        incomingPointCode:[NSString stringWithFormat:@"%d",_packet.incomingOpc.integerValue]
-                                        outgoingPointCode:[NSString stringWithFormat:@"%d",_packet.outgoingDpc.integerValue]
+                                        incomingPointCode:(int)_packet.incomingOpc.integerValue
+                                        outgoingPointCode:(int)_packet.outgoingDpc.integerValue
                                               destination:_packet.outgoingDestination];
                 }
             }

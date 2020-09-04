@@ -16,8 +16,8 @@
     NSString *_incoming_linkset;
     NSString *_outgoing_linkset;
     
-    NSString *_incoming_pc;
-    NSString *_outgoing_pc;
+    int _incoming_pc;
+    int _outgoing_pc;
     NSString *_destination;
 
     NSString *_calling_prefix;
@@ -40,8 +40,8 @@
 @property(readwrite,strong,atomic)  NSString *sccp_operation;
 @property(readwrite,assign,atomic)  int     msu_count;
 @property(readwrite,assign,atomic)  int     bytes_count;
-@property(readwrite,strong,atomic)  NSString *incoming_pc;
-@property(readwrite,strong,atomic)  NSString *outgoing_pc;
+@property(readwrite,assign,atomic)  int     incoming_pc;
+@property(readwrite,assign,atomic)  int     outgoing_pc;
 @property(readwrite,strong,atomic)  NSString *destination;
 
 - (NSString *)keystring;
@@ -53,8 +53,8 @@
       gttSelector:(NSString *)selector
     sccpOperation:(NSString *)sccpOperation
          instance:(NSString *)instance
-incomingPointCode:(NSString *)opc
-outgoingPointCode:(NSString *)dpc
+incomingPointCode:(int)opc
+outgoingPointCode:(int)dpc
       destination:(NSString *)dst;
 
 - (void)increaseMsuCount:(int)msuCount byteCount:(int)byteCount;

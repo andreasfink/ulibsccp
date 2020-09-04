@@ -44,8 +44,8 @@
         calledPrefix:(NSString *)calledPrefix
          gttSelector:(NSString *)selector
        sccpOperation:(SCCP_ServiceType)sccpOperation
-   incomingPointCode:(NSString *)opc
-   outgoingPointCode:(NSString *)dpc
+   incomingPointCode:(int)opc
+   outgoingPointCode:(int)dpc
          destination:(NSString *)dst;
 
 - (void)doAutocreate;

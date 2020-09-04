@@ -434,8 +434,8 @@ static int segmentReferenceId;
                                                 calledPrefix:calledPrefix
                                                  gttSelector:gttSelector
                                                sccpOperation:packet.incomingServiceType
-                                           incomingPointCode:[NSString stringWithFormat: @"%d",[packet.incomingOpc integerValue]]
-                                           outgoingPointCode:[NSString stringWithFormat: @"%d",[packet.outgoingDpc integerValue]]
+                                           incomingPointCode:(int)packet.incomingOpc.integerValue
+                                           outgoingPointCode:(int)packet.outgoingDpc.integerValue
                                                  destination:packet.outgoingDestination];
                     }
                 }

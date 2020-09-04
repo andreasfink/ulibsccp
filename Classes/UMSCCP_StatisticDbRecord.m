@@ -24,7 +24,7 @@
 - (NSString *)keystring
 {
     
-    return [NSString stringWithFormat:@"%@:%@:%@:%@:%@:%@:%@:%@:%@:%@:%@",_ymdh,_incoming_linkset,_calling_prefix,_outgoing_linkset,_called_prefix,_gtt_selector,_sccp_operation,_instance,_incoming_pc,_outgoing_pc,_destination];
+    return [NSString stringWithFormat:@"%@:%@:%@:%@:%@:%@:%@:%@:%d:%d:%@",_ymdh,_incoming_linkset,_calling_prefix,_outgoing_linkset,_called_prefix,_gtt_selector,_sccp_operation,_instance,_incoming_pc,_outgoing_pc,_destination];
 }
 
 + (NSString *)keystringFor:(NSString *)ymdh
@@ -35,11 +35,11 @@
                gttSelector:(NSString *)selector
              sccpOperation:(NSString *)sccpOperation
                   instance:(NSString *)instance
-         incomingPointCode:(NSString *)opc
-         outgoingPointCode:(NSString *)dpc
+         incomingPointCode:(int)opc
+         outgoingPointCode:(int)dpc
                destination:(NSString *)dst
 {
-    return [NSString stringWithFormat:@"%@:%@:%@:%@:%@:%@:%@:%@:%@:%@:%@",ymdh,incomingLinkset,callingPrefix,outgoingLinkset,calledPrefix,selector,sccpOperation,instance,opc,dpc,dst];
+    return [NSString stringWithFormat:@"%@:%@:%@:%@:%@:%@:%@:%@:%d:%d:%@",ymdh,incomingLinkset,callingPrefix,outgoingLinkset,calledPrefix,selector,sccpOperation,instance,opc,dpc,dst];
 }
 
 - (BOOL)insertIntoDb:(UMDbPool *)pool table:(UMDbTable *)dbt /* returns YES on success */
@@ -195,8 +195,8 @@
     d[@"_instance"]         = _instance ? _instance : @"(null)";
     d[@"_incoming_linkset"] = _incoming_linkset ? _incoming_linkset : @"(null)";
     d[@"_outgoing_linkset"] = _outgoing_linkset ? _outgoing_linkset : @"(null)";
-    d[@"_incoming_pc"] = _incoming_pc ? _incoming_pc : @"(null)";
-    d[@"_outgoing_pc"] = _outgoing_pc ? _outgoing_pc : @"(null)";
+    d[@"_incoming_pc"] = @(_incoming_pc);
+    d[@"_outgoing_pc"] = @(_outgoing_pc);
     d[@"_destination"] = _destination ? _destination : @"(null)";
     d[@"_calling_prefix"]   = _calling_prefix ? _calling_prefix : @"(null)";
     d[@"_gtt_selector"]     = _gtt_selector ? _gtt_selector : @"(null)";

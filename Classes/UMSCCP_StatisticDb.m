@@ -26,6 +26,9 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
     {"sccp_operation",      NULL,       NO,     DB_INDEXED,         DB_FIELD_TYPE_VARCHAR,             32,    0,NULL,NULL,9},
     {"msu_count",           NULL,       NO,     DB_NOT_INDEXED,     DB_FIELD_TYPE_INTEGER,             0,     0,NULL,NULL,10},
     {"bytes_count",         NULL,       NO,     DB_NOT_INDEXED,     DB_FIELD_TYPE_INTEGER,             0,     0,NULL,NULL,11},
+    {"incoming_pc",         NULL,       NO,     DB_NOT_INDEXED,     DB_FIELD_TYPE_INTEGER,             0,     0,NULL,NULL,12},
+    {"outgoing_pc",         NULL,       NO,     DB_NOT_INDEXED,     DB_FIELD_TYPE_INTEGER,             0,     0,NULL,NULL,13},
+    {"destination",         NULL,       NO,     DB_INDEXED,         DB_FIELD_TYPE_VARCHAR,             32,    0,NULL,NULL,14},
     { "",                   NULL,       NO,     DB_NOT_INDEXED,     DB_FIELD_TYPE_END,                 0,     0,NULL,NULL,255},
 };
 
@@ -91,8 +94,8 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
         calledPrefix:(NSString *)calledPrefix
          gttSelector:(NSString *)selector
        sccpOperation:(SCCP_ServiceType)sccpOperation
-   incomingPointCode:(NSString *)opc
-   outgoingPointCode:(NSString *)dpc
+   incomingPointCode:(int)opc
+   outgoingPointCode:(int)dpc
          destination:(NSString *)dst
 {
     @autoreleasepool
@@ -105,8 +108,8 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
                   @"                         calledPrefix:%@\n"
                   @"                             selector:%@\n"
                   @"                        sccpOperation:%d\n"
-                  @"                    incomingPointCode:%@\n"
-                  @"                    outgoingPointCode:%@\n"
+                  @"                    incomingPointCode:%d\n"
+                  @"                    outgoingPointCode:%d\n"
                   @"                          destination:%@\n"
                   ,byteCount,incomingLinkset,outgoingLinkset,callingPrefix,calledPrefix,selector,sccpOperation.opc,dpc,dst);
 #endif
