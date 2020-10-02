@@ -25,6 +25,7 @@
 #import "UMSCCP_StatisticSection.h"
 #import "UMSCCP_StatisticDb.h"
 #import "UMSCCP_StatisticDbRecord.h"
+#import <ulibasn1/ulibasn1.h>
 
 @implementation UMLayerSCCP
 
@@ -553,26 +554,14 @@
     return result;
 }
 
-- (SccpDestinationGroup *)findRoutes:(SccpAddress *)called
-                               cause:(SCCP_ReturnCause *)cause
-                    newCalledAddress:(SccpAddress **)called_out
-                           localUser:(id<UMSCCP_UserProtocol> *)localUser
-                       fromLocalUser:(BOOL)fromLocalUser
-{
-   return [self findRoutes:called
-                     cause:cause
-          newCalledAddress:called_out
-                 localUser:localUser
-             fromLocalUser:fromLocalUser
-                usedSelector:NULL];
 
-}
 - (SccpDestinationGroup *)findRoutes:(SccpAddress *)called
                                cause:(SCCP_ReturnCause *)cause
                     newCalledAddress:(SccpAddress **)called_out
                            localUser:(id<UMSCCP_UserProtocol> *)localUser
                        fromLocalUser:(BOOL)fromLocalUser
                         usedSelector:(NSString **)usedSelector
+                   transactionNumber:(NSNumber *)tid
 
 {
     SccpDestinationGroup *destination = NULL;
@@ -699,7 +688,7 @@
                 {
                     [self.logFeed debugText:@"calling findNextHopForDestination:"];
                 }
-                SccpGttRoutingTableEntry *rte = [gttSelector findNextHopForDestination:called1];
+                SccpGttRoutingTableEntry *rte = [gttSelector findNextHopForDestination:called1 transactionNumber:tid];
                 if(rte.deliverLocal)
                 {
                     if(self.logLevel <=UMLOG_DEBUG)
@@ -898,6 +887,7 @@
 - (UMSynchronizedSortedDictionary *) routeTestForMSISDN:(NSString *)msisdn
                                         translationType:(int)tt
                                               fromLocal:(BOOL)fromLocal
+                                      transactionNumber:(NSNumber *)tid
 {
     UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
     int causeValue = -1;
@@ -914,12 +904,15 @@
     SccpAddress *called_out = dst;
     NSString *m3ua_as = NULL;
     NSString *usedSelector=@"";
+    
     SccpDestinationGroup *grp = [self findRoutes:dst
                                            cause:&cause
                                 newCalledAddress:&called_out
                                        localUser:&localUser
                                    fromLocalUser:fromLocal
-                                    usedSelector:&usedSelector];
+                                    usedSelector:&usedSelector
+                               transactionNumber:tid];
+    
     if(grp)
     {
         [self chooseRouteFromGroup:grp
@@ -1076,12 +1069,15 @@
     SCCP_ReturnCause causeValue = SCCP_ReturnCause_not_set;
     SccpAddress *called_out = NULL;
     NSString *usedSelector=NULL;
+    
+    NSNumber *tid = [self extractTransactionNumber:packet.incomingSccpData];
     SccpDestinationGroup *grp = [self findRoutes:dst
                                            cause:&causeValue
                                 newCalledAddress:&called_out
                                        localUser:&localUser
                                    fromLocalUser:packet.incomingFromLocal
-                                    usedSelector:&usedSelector];
+                                    usedSelector:&usedSelector
+                               transactionNumber:tid];
     packet.routingSelector = usedSelector;
     if(self.logLevel <=UMLOG_DEBUG)
     {
@@ -3473,6 +3469,48 @@
             }
         }
     }
+}
+
+- (NSNumber *) extractTransactionNumber:(NSData *)data
+{
+    UMASN1Sequence *seq = [[UMASN1Sequence alloc]initWithBerData:data];
+    switch(seq.asn1_tag.tagClass)
+    {
+        case UMASN1Class_Application:
+        {
+            switch(seq.asn1_tag.tagNumber)
+            {
+                case 4: /* END      */
+                case 5: /* CONTINUE */
+                case 7: /* ABORT    */
+                {
+                    int p=0;
+                    UMASN1Object *o = [seq getObjectAtPosition:p++];
+                    while(o)
+                    {
+                        if((o.asn1_tag.tagClass == UMASN1Class_Application) && (o.asn1_tag.tagNumber == 9))
+                        {
+                            const uint8_t *bytes = o.asn1_data.bytes;
+                            unsigned long len = o.asn1_data.length;
+                            uint64_t value = 0;
+                            for(int i=0;i<len;i++)
+                            {
+                                value = (value << 8) | bytes[i];
+                            }
+                            return @(value);
+                        }
+                        o = [seq getObjectAtPosition:p++];
+                    }
+                    break;
+                }
+                default:
+                    return NULL;
+            }
+        }
+        default:
+            return NULL;
+    }    
+    return NULL;
 }
 @end
 

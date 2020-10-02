@@ -347,7 +347,8 @@ typedef enum SccpGtFileSection
 
 - (UMSynchronizedSortedDictionary *) routeTestForMSISDN:(NSString *)msisdn
                                         translationType:(int)tt
-                                              fromLocal:(BOOL)fromLocal;
+                                              fromLocal:(BOOL)fromLocal
+                                      transactionNumber:(NSNumber *)tid;
 
 
 - (BOOL)routePacket:(UMSCCP_Packet *)packet; /* returns YES if sucessfully forwarded, NO if it wasn able to route it */

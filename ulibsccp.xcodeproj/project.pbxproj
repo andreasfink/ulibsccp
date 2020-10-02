@@ -19,6 +19,7 @@
 		A658E20221E882E600825E4A /* UMSCCP_Filter.m in Sources */ = {isa = PBXBuildFile; fileRef = A658E20021E882E600825E4A /* UMSCCP_Filter.m */; };
 		A658E20521E8863700825E4A /* UMSCCP_Packet.h in Headers */ = {isa = PBXBuildFile; fileRef = A658E20321E8863700825E4A /* UMSCCP_Packet.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A658E20621E8863700825E4A /* UMSCCP_Packet.m in Sources */ = {isa = PBXBuildFile; fileRef = A658E20421E8863700825E4A /* UMSCCP_Packet.m */; };
+		A6604A4A2527136C00D978EF /* ulibasn1.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6604A492527136C00D978EF /* ulibasn1.framework */; };
 		A6827E1A1E380FC900F3048B /* UMLayerSCCPApplicationContextProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = A6827E181E380FC900F3048B /* UMLayerSCCPApplicationContextProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A68494DA1CB320AB00211137 /* UMSCCP_mtpTransfer.h in Headers */ = {isa = PBXBuildFile; fileRef = A68494D81CB320AB00211137 /* UMSCCP_mtpTransfer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A68494DB1CB320AB00211137 /* UMSCCP_mtpTransfer.m in Sources */ = {isa = PBXBuildFile; fileRef = A68494D91CB320AB00211137 /* UMSCCP_mtpTransfer.m */; };
@@ -82,6 +83,7 @@
 		A658E20021E882E600825E4A /* UMSCCP_Filter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_Filter.m; sourceTree = "<group>"; };
 		A658E20321E8863700825E4A /* UMSCCP_Packet.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_Packet.h; sourceTree = "<group>"; };
 		A658E20421E8863700825E4A /* UMSCCP_Packet.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_Packet.m; sourceTree = "<group>"; };
+		A6604A492527136C00D978EF /* ulibasn1.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibasn1.framework; path = "/Library/Application Support/FinkTelecomServices/frameworks/ulibasn1.framework"; sourceTree = "<absolute>"; };
 		A6827E181E380FC900F3048B /* UMLayerSCCPApplicationContextProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMLayerSCCPApplicationContextProtocol.h; sourceTree = "<group>"; };
 		A68494D81CB320AB00211137 /* UMSCCP_mtpTransfer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_mtpTransfer.h; sourceTree = "<group>"; };
 		A68494D91CB320AB00211137 /* UMSCCP_mtpTransfer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_mtpTransfer.m; sourceTree = "<group>"; };
@@ -93,7 +95,7 @@
 		A68494E51CB320C800211137 /* UMSCCP_mtpStatus.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_mtpStatus.m; sourceTree = "<group>"; };
 		A6AA23C324853F09008D5A57 /* UMSCCP_StatisticDbRecord.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_StatisticDbRecord.h; sourceTree = "<group>"; };
 		A6AA23C424853F09008D5A57 /* UMSCCP_StatisticDbRecord.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_StatisticDbRecord.m; sourceTree = "<group>"; };
-		A6AA23CB248541FA008D5A57 /* ulibdb.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibdb.framework; path = "../../../../../Library/Application Support/FinkTelecomServices/frameworks/ulibdb.framework"; sourceTree = "<group>"; };
+		A6AA23CB248541FA008D5A57 /* ulibdb.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibdb.framework; path = "/Library/Application Support/FinkTelecomServices/frameworks/ulibdb.framework"; sourceTree = "<absolute>"; };
 		A6AA23CF24854F80008D5A57 /* UMSCCP_StatisticDb.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_StatisticDb.h; sourceTree = "<group>"; };
 		A6AA23D024854F80008D5A57 /* UMSCCP_StatisticDb.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_StatisticDb.m; sourceTree = "<group>"; };
 		A6ADC5C51CADB25500211137 /* UMSCCP_sccpNUnitdata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_sccpNUnitdata.h; sourceTree = "<group>"; };
@@ -135,6 +137,7 @@
 				A6E3D78F22BABDEA00D5B1B6 /* ulib.framework in Frameworks */,
 				A6AA23CC248541FA008D5A57 /* ulibdb.framework in Frameworks */,
 				A6CEB97522BABC4800B2BD9D /* ulibgt.framework in Frameworks */,
+				A6604A4A2527136C00D978EF /* ulibasn1.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -178,6 +181,7 @@
 		A604D13319B999BC0090FC94 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A6604A492527136C00D978EF /* ulibasn1.framework */,
 				A6AA23CB248541FA008D5A57 /* ulibdb.framework */,
 				A6CEB97022BABC1500B2BD9D /* ulib.framework */,
 				A6CEB97222BABC4700B2BD9D /* ulibmtp3.framework */,
@@ -587,6 +591,7 @@
 					"$(LOCAL_LIBRARY_DIR)/Application\\ Support/FinkTelecomServices/frameworks",
 					"$(LOCAL_LIBRARY_DIR)/Application\\ Support/FinkTelecomServices/frameworks",
 					"$(LOCAL_LIBRARY_DIR)/Application\\ Support/FinkTelecomServices/frameworks",
+					"$(LOCAL_LIBRARY_DIR)/Application\\ Support/FinkTelecomServices/frameworks",
 				);
 				FRAMEWORK_VERSION = A;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
@@ -608,6 +613,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+					"$(LOCAL_LIBRARY_DIR)/Application\\ Support/FinkTelecomServices/frameworks",
 					"$(LOCAL_LIBRARY_DIR)/Application\\ Support/FinkTelecomServices/frameworks",
 					"$(LOCAL_LIBRARY_DIR)/Application\\ Support/FinkTelecomServices/frameworks",
 					"$(LOCAL_LIBRARY_DIR)/Application\\ Support/FinkTelecomServices/frameworks",
