@@ -36,6 +36,21 @@ typedef enum SccpGtFileSection
 } SccpGtFileSection;
 
 
+typedef enum UMSccpScreening_result
+{
+    UMSccpScreening_undefined=0,
+    UMSccpScreening_explicitlyPermitted=1,
+    UMSccpScreening_implicitlyPermitted=2,
+    UMSccpScreening_explicitlyDenied=-1,
+    UMSccpScreening_implicitlyDenied=-2,
+    UMSccpScreening_errorResult = -99,
+} UMSccpScreening_result;
+
+@protocol UMSCCPScreeningPluginProtocol
+- (UMSccpScreening_result)screenSccpPacketInbound:(UMSCCP_Packet *)packet error:(NSError **)err;
+- (NSError *)setSccpScreeningConfig:(NSString *)conf;
+@end
+
 @interface UMLayerSCCP : UMLayer<UMLayerMTP3UserProtocol>
 {
     SccpVariant                 _sccpVariant;
@@ -86,11 +101,17 @@ typedef enum SccpGtFileSection
     id<UMSCCP_TracefileProtocol>    _unrouteablePacketsTraceDestination;
     BOOL                         _routeErrorsBackToOriginatingPointCode;
     id<UMSCCP_FilterDelegateProtocol> _filterDelegate;
-    id<UMLayerSCCPApplicationContextProtocol>_dbDelegate;
+    id<UMLayerSCCPApplicationContextProtocol>_appDelegate;
     UMTimer                     *_housekeepingTimer;
     BOOL                        _automaticAnsiItuConversion;
     NSNumber                    *_conversion_e164_tt;
     NSNumber                    *_conversion_e212_tt;
+    
+    NSString                    *_sccp_screeningPluginName;
+    NSString                    *_sccp_screeningPluginConfig;
+    UMPlugin<UMSCCPScreeningPluginProtocol>   *_sccp_screeningPlugin;
+    NSString                    *_screeningPluginPath;
+
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;

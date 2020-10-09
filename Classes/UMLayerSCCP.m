@@ -1040,6 +1040,7 @@
         packet.incomingOpc = _mtp3.opc;
     }
     packet.outgoingOpc = _mtp3.opc;
+
     if(self.logLevel <=UMLOG_DEBUG)
     {
         NSMutableString *s = [[NSMutableString alloc]init];
@@ -1059,162 +1060,77 @@
         [self.logFeed debugText:s];
     }
 
+    /* lets pass through screening first */
+    
     BOOL returnValue = NO;
     BOOL doSendStatus = NO;
-    id<UMSCCP_UserProtocol> localUser = NULL;
-    UMMTP3PointCode *pc = NULL;
-    UMLayerMTP3 *provider = _mtp3;
-    NSString *outgoingLinkset = NULL;
-    SccpAddress *dst = packet.incomingCalledPartyAddress;
     SCCP_ReturnCause causeValue = SCCP_ReturnCause_not_set;
-    SccpAddress *called_out = NULL;
-    NSString *usedSelector=NULL;
-    
-    NSNumber *tid = [self extractTransactionNumber:packet.incomingSccpData];
-    SccpDestinationGroup *grp = [self findRoutes:dst
-                                           cause:&causeValue
-                                newCalledAddress:&called_out
-                                       localUser:&localUser
-                                   fromLocalUser:packet.incomingFromLocal
-                                    usedSelector:&usedSelector
-                               transactionNumber:tid];
-    packet.routingSelector = usedSelector;
-    if(self.logLevel <=UMLOG_DEBUG)
+    NSError *err = NULL;
+    UMSccpScreening_result r = [self screenSccpPacketInbound:packet error:&err];
+    if(err)
     {
-        NSMutableString *s = [[NSMutableString alloc]init];
-        [s appendFormat:@"findRoutes(%@) returns:\n",dst];
-        [s appendString:[grp descriptionWithRt:_mtp3RoutingTable]];
-        [s appendFormat:@"    causeValue: %d\n",causeValue];
-        [s appendFormat:@"    newCalledAddress: %@\n",called_out];
-        [s appendFormat:@"    localUser: %@\n",localUser];
-        [s appendFormat:@"    fromLocal: %@\n",packet.incomingFromLocal ? @"YES" : @"NO"];
-        [self logDebug:s];
+        [self logMajorError:[NSString stringWithFormat:@"screening failed with error %@",err]];
     }
-
-    if(called_out!=NULL)
+    if((r==UMSccpScreening_explicitlyDenied)||(r==UMSccpScreening_implicitlyDenied))
     {
-        packet.outgoingCalledPartyAddress = called_out;
-    }
-    
-    if(causeValue != SCCP_ReturnCause_not_set)
-    {
-        NSString *s = [NSString stringWithFormat:@"Can not forward %@. Sending no route to destination to PC=%@. SRC=%@ DST=%@ DATA=%@",
-                       packet.incomingPacketType,
-                       packet.incomingOpc,
-                       packet.incomingCallingPartyAddress,
-                       packet.incomingCalledPartyAddress,
-                       packet.incomingSccpData];
-        [self logMinorError:s];
+        causeValue = SCCP_ReturnCause_ErrorInMessageTransport;
         if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
         {
             doSendStatus = YES;
         }
-        [_unrouteablePacketsTraceDestination logPacket:packet];
     }
-
-    else if(localUser)
+    else if(r==UMSccpScreening_errorResult)
     {
-        packet.outgoingToLocal = YES;
-        packet.outgoingLocalUser = localUser;
-        packet.outgoingLinkset = @"local";
-        if((packet.incomingServiceType == SCCP_UDTS) || (packet.incomingServiceType == SCCP_XUDTS) || (packet.incomingServiceType == SCCP_LUDTS))
+        causeValue = SCCP_ReturnCause_ErrorInLocalProcessing;
+        if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
         {
-            [localUser sccpNNotice:packet.outgoingSccpData
-                      callingLayer:self
-                           calling:packet.outgoingCallingPartyAddress
-                            called:packet.outgoingCalledPartyAddress
-                            reason:packet.outgoingReturnCause
-                           options:packet.outgoingOptions];
+            doSendStatus = YES;
         }
-        else
-        {
-            [self localDeliverNUnitdata:packet.outgoingSccpData
-                                 toUser:localUser
-                                calling:packet.outgoingCallingPartyAddress
-                                 called:packet.outgoingCalledPartyAddress
-                       qualityOfService:0
-                                  class:packet.outgoingServiceClass
-                               handling:packet.outgoingHandling
-                                options:packet.outgoingOptions];
-        }
-        returnValue = YES;
     }
-
-    else if(grp)
+    else
     {
-        /* routing to */
-        packet.outgoingDestination = grp.name;
-        SccpDestination *dest = [grp chooseNextHopWithRoutingTable:_mtp3RoutingTable];
+        id<UMSCCP_UserProtocol> localUser = NULL;
+        UMMTP3PointCode *pc = NULL;
+        UMLayerMTP3 *provider = _mtp3;
+        NSString *outgoingLinkset = NULL;
+        SccpAddress *dst = packet.incomingCalledPartyAddress;
+        SccpAddress *called_out = NULL;
+        NSString *usedSelector=NULL;
+        
+        NSNumber *tid = [self extractTransactionNumber:packet.incomingSccpData];
+        SccpDestinationGroup *grp = [self findRoutes:dst
+                                               cause:&causeValue
+                                    newCalledAddress:&called_out
+                                           localUser:&localUser
+                                       fromLocalUser:packet.incomingFromLocal
+                                        usedSelector:&usedSelector
+                                   transactionNumber:tid];
+        packet.routingSelector = usedSelector;
         if(self.logLevel <=UMLOG_DEBUG)
         {
             NSMutableString *s = [[NSMutableString alloc]init];
-            [s appendFormat:@"[grp  chooseNextHopWithRoutingTable:_mtp3RoutingTable] returns:\n %@",dest];
-            [self.logFeed debugText:s];
+            [s appendFormat:@"findRoutes(%@) returns:\n",dst];
+            [s appendString:[grp descriptionWithRt:_mtp3RoutingTable]];
+            [s appendFormat:@"    causeValue: %d\n",causeValue];
+            [s appendFormat:@"    newCalledAddress: %@\n",called_out];
+            [s appendFormat:@"    localUser: %@\n",localUser];
+            [s appendFormat:@"    fromLocal: %@\n",packet.incomingFromLocal ? @"YES" : @"NO"];
+            [self logDebug:s];
         }
 
-        if(dest.overrideCalledTT)
+        if(called_out!=NULL)
         {
-            if(self.logLevel <=UMLOG_DEBUG)
-            {
-                NSMutableString *s = [[NSMutableString alloc]init];
-                [s appendFormat:@"override-called-tt to %@",dest.overrideCalledTT];
-                [self.logFeed debugText:s];
-            }
-            packet.outgoingCalledPartyAddress.tt.tt = [dest.overrideCalledTT intValue];
+            packet.outgoingCalledPartyAddress = called_out;
         }
         
-        if(dest.overrideCallingTT)
+        if(causeValue != SCCP_ReturnCause_not_set)
         {
-            if(self.logLevel <=UMLOG_DEBUG)
-            {
-                NSMutableString *s = [[NSMutableString alloc]init];
-                [s appendFormat:@"override-calling-tt to %@",dest.overrideCallingTT];
-                [self.logFeed debugText:s];
-            }
-            packet.outgoingCallingPartyAddress.tt.tt = [dest.overrideCallingTT intValue];
-        }
-        
-        if(_overrideCalledTT)
-        {
-            if(self.logLevel <=UMLOG_DEBUG)
-            {
-                NSMutableString *s = [[NSMutableString alloc]init];
-                [s appendFormat:@"sccp-instance override-called-tt to %d",_overrideCalledTT.tt];
-                [self.logFeed debugText:s];
-            }
-            packet.outgoingCalledPartyAddress.tt.tt = _overrideCalledTT.tt;
-        }
-        
-        if(_overrideCallingTT)
-        {
-            if(self.logLevel <=UMLOG_DEBUG)
-            {
-                NSMutableString *s = [[NSMutableString alloc]init];
-                [s appendFormat:@"sccp-instance override-calling-tt to %d",_overrideCallingTT.tt];
-                [self.logFeed debugText:s];
-            }
-            packet.outgoingCallingPartyAddress.tt.tt = _overrideCallingTT.tt;
-        }
-
-        if(dest.dpc)
-        {
-            if(self.logLevel <=UMLOG_DEBUG)
-            {
-                NSString * s = [NSString stringWithFormat:@"Set DPC=%@",dest.dpc];
-                [self.logFeed debugText:s];
-            }
-            pc = dest.dpc;
-        }
-        packet.outgoingDpc = pc;
-        if(pc==NULL)
-        {
-            causeValue = SCCP_ReturnCause_NoTranslationForThisSpecificAddress;
-            NSString *s = [NSString stringWithFormat:@"Can not forward %@ (NoTranslationForThisSpecificAddress). No route to destination DPC=%@ SRC=%@ DST=%@ DATA=%@",
+            NSString *s = [NSString stringWithFormat:@"Can not forward %@. Sending no route to destination to PC=%@. SRC=%@ DST=%@ DATA=%@",
                            packet.incomingPacketType,
-                           packet.outgoingDpc,
-                           packet.outgoingCallingPartyAddress,
-                           packet.outgoingCalledPartyAddress,
-                           packet.outgoingSccpData];
+                           packet.incomingOpc,
+                           packet.incomingCallingPartyAddress,
+                           packet.incomingCalledPartyAddress,
+                           packet.incomingSccpData];
             [self logMinorError:s];
             if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
             {
@@ -1222,137 +1138,249 @@
             }
             [_unrouteablePacketsTraceDestination logPacket:packet];
         }
-        else
+
+        else if(localUser)
         {
-            UMMTP3_Error e;
-            switch(packet.outgoingServiceType)
+            packet.outgoingToLocal = YES;
+            packet.outgoingLocalUser = localUser;
+            packet.outgoingLinkset = @"local";
+            if((packet.incomingServiceType == SCCP_UDTS) || (packet.incomingServiceType == SCCP_XUDTS) || (packet.incomingServiceType == SCCP_LUDTS))
             {
-                case SCCP_UDT:
-                    e = [self sendUDT:packet.outgoingSccpData
-                              calling:packet.outgoingCallingPartyAddress
-                               called:packet.outgoingCalledPartyAddress
-                                class:packet.outgoingServiceClass
-                             handling:packet.outgoingHandling
-                                  opc:packet.outgoingOpc
-                                  dpc:packet.outgoingDpc
-                              options:packet.outgoingOptions
-                             provider:provider
-                      routedToLinkset:&outgoingLinkset];
-                    packet.outgoingLinkset = outgoingLinkset;
-                    break;
-                case SCCP_UDTS:
-                    e = [self sendUDTS:packet.outgoingSccpData
+                [localUser sccpNNotice:packet.outgoingSccpData
+                          callingLayer:self
                                calling:packet.outgoingCallingPartyAddress
                                 called:packet.outgoingCalledPartyAddress
-                                 class:packet.outgoingServiceClass
-                           returnCause:packet.outgoingReturnCause
-                                   opc:packet.outgoingOpc
-                                   dpc:packet.outgoingDpc
-                               options:packet.outgoingOptions
-                              provider:provider
-                       routedToLinkset:&outgoingLinkset];
-                       packet.outgoingLinkset = outgoingLinkset;
-                    break;
-                case SCCP_XUDT:
-                    if(packet.outgoingSegment)
-                    {                        
-                        e = [self sendXUDTsegment:packet.outgoingSegment
-                                          calling:packet.outgoingCallingPartyAddress
-                                           called:packet.outgoingCalledPartyAddress
-                                            class:packet.outgoingServiceClass
-                                         handling:packet.outgoingHandling
-                                         hopCount:packet.outgoingMaxHopCount
-                                              opc:packet.outgoingOpc
-                                              dpc:packet.outgoingDpc
-                                      optionsData:packet.outgoingOptionalData
-                                          options:packet.outgoingOptions
-                                         provider:provider
-                                  routedToLinkset:&outgoingLinkset];
-                        packet.outgoingLinkset = outgoingLinkset;
+                                reason:packet.outgoingReturnCause
+                               options:packet.outgoingOptions];
+            }
+            else
+            {
+                [self localDeliverNUnitdata:packet.outgoingSccpData
+                                     toUser:localUser
+                                    calling:packet.outgoingCallingPartyAddress
+                                     called:packet.outgoingCalledPartyAddress
+                           qualityOfService:0
+                                      class:packet.outgoingServiceClass
+                                   handling:packet.outgoingHandling
+                                    options:packet.outgoingOptions];
+            }
+            returnValue = YES;
+        }
 
-                    }
-                    else
-                    {
-                        e = [self sendXUDT:packet.outgoingSccpData
+        else if(grp)
+        {
+            /* routing to */
+            packet.outgoingDestination = grp.name;
+            SccpDestination *dest = [grp chooseNextHopWithRoutingTable:_mtp3RoutingTable];
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                NSMutableString *s = [[NSMutableString alloc]init];
+                [s appendFormat:@"[grp  chooseNextHopWithRoutingTable:_mtp3RoutingTable] returns:\n %@",dest];
+                [self.logFeed debugText:s];
+            }
+
+            if(dest.overrideCalledTT)
+            {
+                if(self.logLevel <=UMLOG_DEBUG)
+                {
+                    NSMutableString *s = [[NSMutableString alloc]init];
+                    [s appendFormat:@"override-called-tt to %@",dest.overrideCalledTT];
+                    [self.logFeed debugText:s];
+                }
+                packet.outgoingCalledPartyAddress.tt.tt = [dest.overrideCalledTT intValue];
+            }
+            
+            if(dest.overrideCallingTT)
+            {
+                if(self.logLevel <=UMLOG_DEBUG)
+                {
+                    NSMutableString *s = [[NSMutableString alloc]init];
+                    [s appendFormat:@"override-calling-tt to %@",dest.overrideCallingTT];
+                    [self.logFeed debugText:s];
+                }
+                packet.outgoingCallingPartyAddress.tt.tt = [dest.overrideCallingTT intValue];
+            }
+            
+            if(_overrideCalledTT)
+            {
+                if(self.logLevel <=UMLOG_DEBUG)
+                {
+                    NSMutableString *s = [[NSMutableString alloc]init];
+                    [s appendFormat:@"sccp-instance override-called-tt to %d",_overrideCalledTT.tt];
+                    [self.logFeed debugText:s];
+                }
+                packet.outgoingCalledPartyAddress.tt.tt = _overrideCalledTT.tt;
+            }
+            
+            if(_overrideCallingTT)
+            {
+                if(self.logLevel <=UMLOG_DEBUG)
+                {
+                    NSMutableString *s = [[NSMutableString alloc]init];
+                    [s appendFormat:@"sccp-instance override-calling-tt to %d",_overrideCallingTT.tt];
+                    [self.logFeed debugText:s];
+                }
+                packet.outgoingCallingPartyAddress.tt.tt = _overrideCallingTT.tt;
+            }
+
+            if(dest.dpc)
+            {
+                if(self.logLevel <=UMLOG_DEBUG)
+                {
+                    NSString * s = [NSString stringWithFormat:@"Set DPC=%@",dest.dpc];
+                    [self.logFeed debugText:s];
+                }
+                pc = dest.dpc;
+            }
+            packet.outgoingDpc = pc;
+            if(pc==NULL)
+            {
+                causeValue = SCCP_ReturnCause_NoTranslationForThisSpecificAddress;
+                NSString *s = [NSString stringWithFormat:@"Can not forward %@ (NoTranslationForThisSpecificAddress). No route to destination DPC=%@ SRC=%@ DST=%@ DATA=%@",
+                               packet.incomingPacketType,
+                               packet.outgoingDpc,
+                               packet.outgoingCallingPartyAddress,
+                               packet.outgoingCalledPartyAddress,
+                               packet.outgoingSccpData];
+                [self logMinorError:s];
+                if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
+                {
+                    doSendStatus = YES;
+                }
+                [_unrouteablePacketsTraceDestination logPacket:packet];
+            }
+            else
+            {
+                UMMTP3_Error e;
+                switch(packet.outgoingServiceType)
+                {
+                    case SCCP_UDT:
+                        e = [self sendUDT:packet.outgoingSccpData
+                                  calling:packet.outgoingCallingPartyAddress
+                                   called:packet.outgoingCalledPartyAddress
+                                    class:packet.outgoingServiceClass
+                                 handling:packet.outgoingHandling
+                                      opc:packet.outgoingOpc
+                                      dpc:packet.outgoingDpc
+                                  options:packet.outgoingOptions
+                                 provider:provider
+                          routedToLinkset:&outgoingLinkset];
+                        packet.outgoingLinkset = outgoingLinkset;
+                        break;
+                    case SCCP_UDTS:
+                        e = [self sendUDTS:packet.outgoingSccpData
                                    calling:packet.outgoingCallingPartyAddress
                                     called:packet.outgoingCalledPartyAddress
                                      class:packet.outgoingServiceClass
-                                  handling:packet.outgoingHandling
-                                  hopCount:packet.outgoingMaxHopCount
+                               returnCause:packet.outgoingReturnCause
                                        opc:packet.outgoingOpc
                                        dpc:packet.outgoingDpc
-                               optionsData:packet.outgoingOptionalData
                                    options:packet.outgoingOptions
                                   provider:provider
-                               routedToLinkset:&outgoingLinkset];
-                         packet.outgoingLinkset = outgoingLinkset;
-                    }
-                    break;
-                case SCCP_XUDTS:
-                    e = [self sendXUDTS:packet.outgoingSccpData
-                                calling:packet.outgoingCallingPartyAddress
-                                 called:packet.outgoingCalledPartyAddress
-                                  class:packet.outgoingServiceClass
-                               hopCount:packet.outgoingMaxHopCount
-                            returnCause:packet.outgoingReturnCause
-                                    opc:packet.outgoingOpc
-                                    dpc:packet.outgoingDpc
-                            optionsData:packet.outgoingOptionalData
-                                options:packet.outgoingOptions
-                               provider:provider
-                        routedToLinkset:&outgoingLinkset];
-                      packet.outgoingLinkset = outgoingLinkset;
-                    break;
-                case SCCP_LUDT:
-                    e = UMMTP3_error_invalid_variant;
-                    break;
-                case SCCP_LUDTS:
-                    e = UMMTP3_error_invalid_variant;
-                    break;
-            }
-            NSString *s= NULL;
-            switch(e)
-            {
-                case UMMTP3_no_error:
-                    break;
-                case UMMTP3_error_pdu_too_big:
-                    
-                    s = [NSString stringWithFormat:@"Can not forward %@. PDU too big. SRC=%@ DST=%@ DATA=%@",packet.outgoingPacketType,packet.outgoingOpc,packet.outgoingDpc,packet.outgoingSccpData];
-                    break;
-                case UMMTP3_error_no_route_to_destination:
-                    s = [NSString stringWithFormat:@"Can not forward %@. No route to destination DPC=%@ SRC=%@ DST=%@ DATA=%@",packet.outgoingPacketType,packet.outgoingDpc,packet.outgoingCallingPartyAddress,packet.outgoingCalledPartyAddress,packet.outgoingSccpData];
-                    break;
-                case UMMTP3_error_invalid_variant:
-                    s = [NSString stringWithFormat:@"Can not forward %@. Invalid variant. SRC=%@ DST=%@ DATA=%@",packet.outgoingPacketType,packet.outgoingOpc,packet.outgoingDpc,packet.outgoingSccpData];
-                    break;
-            }
-            if(s)
-            {
-                [self logMinorError:s];
-                NSLog(@"Packet:\n%@\n",packet.description);
-            }
+                           routedToLinkset:&outgoingLinkset];
+                           packet.outgoingLinkset = outgoingLinkset;
+                        break;
+                    case SCCP_XUDT:
+                        if(packet.outgoingSegment)
+                        {
+                            e = [self sendXUDTsegment:packet.outgoingSegment
+                                              calling:packet.outgoingCallingPartyAddress
+                                               called:packet.outgoingCalledPartyAddress
+                                                class:packet.outgoingServiceClass
+                                             handling:packet.outgoingHandling
+                                             hopCount:packet.outgoingMaxHopCount
+                                                  opc:packet.outgoingOpc
+                                                  dpc:packet.outgoingDpc
+                                          optionsData:packet.outgoingOptionalData
+                                              options:packet.outgoingOptions
+                                             provider:provider
+                                      routedToLinkset:&outgoingLinkset];
+                            packet.outgoingLinkset = outgoingLinkset;
 
-
-             if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
-            {
-                doSendStatus = YES;
+                        }
+                        else
+                        {
+                            e = [self sendXUDT:packet.outgoingSccpData
+                                       calling:packet.outgoingCallingPartyAddress
+                                        called:packet.outgoingCalledPartyAddress
+                                         class:packet.outgoingServiceClass
+                                      handling:packet.outgoingHandling
+                                      hopCount:packet.outgoingMaxHopCount
+                                           opc:packet.outgoingOpc
+                                           dpc:packet.outgoingDpc
+                                   optionsData:packet.outgoingOptionalData
+                                       options:packet.outgoingOptions
+                                      provider:provider
+                                   routedToLinkset:&outgoingLinkset];
+                             packet.outgoingLinkset = outgoingLinkset;
+                        }
+                        break;
+                    case SCCP_XUDTS:
+                        e = [self sendXUDTS:packet.outgoingSccpData
+                                    calling:packet.outgoingCallingPartyAddress
+                                     called:packet.outgoingCalledPartyAddress
+                                      class:packet.outgoingServiceClass
+                                   hopCount:packet.outgoingMaxHopCount
+                                returnCause:packet.outgoingReturnCause
+                                        opc:packet.outgoingOpc
+                                        dpc:packet.outgoingDpc
+                                optionsData:packet.outgoingOptionalData
+                                    options:packet.outgoingOptions
+                                   provider:provider
+                            routedToLinkset:&outgoingLinkset];
+                          packet.outgoingLinkset = outgoingLinkset;
+                        break;
+                    case SCCP_LUDT:
+                        e = UMMTP3_error_invalid_variant;
+                        break;
+                    case SCCP_LUDTS:
+                        e = UMMTP3_error_invalid_variant;
+                        break;
+                }
+                NSString *s= NULL;
                 switch(e)
                 {
-                    case UMMTP3_error_no_route_to_destination:
-                        causeValue = SCCP_ReturnCause_MTPFailure;
-                        [_unrouteablePacketsTraceDestination logPacket:packet];
+                    case UMMTP3_no_error:
                         break;
                     case UMMTP3_error_pdu_too_big:
-                        causeValue = SCCP_ReturnCause_ErrorInMessageTransport;
-                        [_problematicTraceDestination logPacket:packet];
+                        
+                        s = [NSString stringWithFormat:@"Can not forward %@. PDU too big. SRC=%@ DST=%@ DATA=%@",packet.outgoingPacketType,packet.outgoingOpc,packet.outgoingDpc,packet.outgoingSccpData];
+                        break;
+                    case UMMTP3_error_no_route_to_destination:
+                        s = [NSString stringWithFormat:@"Can not forward %@. No route to destination DPC=%@ SRC=%@ DST=%@ DATA=%@",packet.outgoingPacketType,packet.outgoingDpc,packet.outgoingCallingPartyAddress,packet.outgoingCalledPartyAddress,packet.outgoingSccpData];
                         break;
                     case UMMTP3_error_invalid_variant:
-                        causeValue = SCCP_ReturnCause_ErrorInLocalProcessing;
-                        [_problematicTraceDestination logPacket:packet];
+                        s = [NSString stringWithFormat:@"Can not forward %@. Invalid variant. SRC=%@ DST=%@ DATA=%@",packet.outgoingPacketType,packet.outgoingOpc,packet.outgoingDpc,packet.outgoingSccpData];
                         break;
-                    default:
-                        doSendStatus = NO;
-                        break;
+                }
+                if(s)
+                {
+                    [self logMinorError:s];
+                    NSLog(@"Packet:\n%@\n",packet.description);
+                }
+
+
+                 if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
+                {
+                    doSendStatus = YES;
+                    switch(e)
+                    {
+                        case UMMTP3_error_no_route_to_destination:
+                            causeValue = SCCP_ReturnCause_MTPFailure;
+                            [_unrouteablePacketsTraceDestination logPacket:packet];
+                            break;
+                        case UMMTP3_error_pdu_too_big:
+                            causeValue = SCCP_ReturnCause_ErrorInMessageTransport;
+                            [_problematicTraceDestination logPacket:packet];
+                            break;
+                        case UMMTP3_error_invalid_variant:
+                            causeValue = SCCP_ReturnCause_ErrorInLocalProcessing;
+                            [_problematicTraceDestination logPacket:packet];
+                            break;
+                        default:
+                            doSendStatus = NO;
+                            break;
+                    }
                 }
             }
         }
@@ -1846,7 +1874,7 @@
     @autoreleasepool
     {
         _filterDelegate = appContext;
-        _dbDelegate =appContext;
+        _appDelegate =appContext;
         [self readLayerConfig:cfg];
         if(cfg[@"attach-to"])
         {
@@ -2234,7 +2262,7 @@
             {
                _statisticDb = [[UMSCCP_StatisticDb alloc]initWithPoolName:_statisticDbPool
                                                                tableName:_statisticDbTable
-                                                              appContext:_dbDelegate
+                                                              appContext:_appDelegate
                                                               autocreate:_statisticDbAutoCreate.boolValue
                                                                 instance:_statisticDbInstance];
             }
@@ -3512,7 +3540,85 @@
     }    
     return NULL;
 }
+
+- (UMSccpScreening_result)screenSccpPacketInbound:(UMSCCP_Packet *)packet error:(NSError **)err
+{
+    if((_sccp_screeningPluginName.length > 0) && (_sccp_screeningPlugin == NULL))
+    {
+        /* we have a plugin but it has not been loaded yet */
+        
+        NSString *filepath = [NSString stringWithFormat:@"%@/%@",_screeningPluginPath,_sccp_screeningPlugin];
+        UMPluginHandler *ph = [[UMPluginHandler alloc]initWithFile:filepath];
+        if(ph==NULL)
+        {
+            NSLog(@"PLUGIN-ERROR: can not load plugin at %@",filepath);
+            _sccp_screeningPluginName = NULL;
+            _sccp_screeningPlugin = NULL;
+        }
+        else
+        {
+            NSMutableDictionary *open_dict = [[NSMutableDictionary alloc]init];
+            open_dict[@"app-delegate"]      = _appDelegate;
+            open_dict[@"license-directory"] = [_appDelegate licenseDictionary];
+            open_dict[@"linkset-delegate"]  = self;
+            int r = [ph openWithDictionary:open_dict];
+            if(r<0)
+            {
+                [ph close];
+                _sccp_screeningPlugin = NULL;
+                _sccp_screeningPluginName = NULL;
+                NSLog(@"LOADING-ERROR: can not open plugin at path %@. Reason %@",filepath,ph.error);
+            }
+            else
+            {
+                NSDictionary *info = ph.info;
+                NSString *type = info[@"type"];
+                if(![type isEqualToString:@"mtp3-screening"])
+                {
+                    [ph close];
+                    _sccp_screeningPlugin = NULL;
+                    _sccp_screeningPluginName = NULL;
+                    NSLog(@"LOADING-ERROR: plugin at path %@ is not of type mtp3-screening but %@",filepath,type);
+                }
+                else
+                {
+                    UMPlugin<UMSCCPScreeningPluginProtocol> *p = (UMPlugin<UMSCCPScreeningPluginProtocol> *)[ph instantiate];
+                    if(![p respondsToSelector:@selector(screenIncomingLabel:error:linkset:)])
+                    {
+                        [ph close];
+                        _sccp_screeningPlugin = NULL;
+                        _sccp_screeningPluginName = NULL;
+                        NSLog(@"LOADING-ERROR: plugin at path %@ does not implement method screenIncomingLabel:error:linkset:",filepath);
+                    }
+                    else
+                    {
+                        if(![p respondsToSelector:@selector(setSccpScreeningConfig:)])
+                        {
+                            [ph close];
+                            _sccp_screeningPlugin = NULL;
+                            _sccp_screeningPluginName = NULL;
+                            NSLog(@"LOADING-ERROR: plugin at path %@ does not implement method setScreeningConfig:",filepath);
+                        }
+                        else
+                        {
+                            [p setSccpScreeningConfig:_sccp_screeningPluginConfig];
+                            _sccp_screeningPlugin = p;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if(_sccp_screeningPlugin)
+    {
+        UMSccpScreening_result r = [_sccp_screeningPlugin screenSccpPacketInbound:packet error:err];
+        return r;
+    }
+    if(err)
+    {
+        *err = NULL;
+    }
+    return UMSccpScreening_undefined;
+}
+
 @end
-
-
-
