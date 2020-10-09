@@ -110,8 +110,6 @@ typedef enum UMSccpScreening_result
     NSString                    *_sccp_screeningPluginName;
     NSString                    *_sccp_screeningPluginConfig;
     UMPlugin<UMSCCPScreeningPluginProtocol>   *_sccp_screeningPlugin;
-    NSString                    *_screeningPluginPath;
-
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;

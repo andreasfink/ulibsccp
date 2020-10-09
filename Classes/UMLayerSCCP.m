@@ -3543,67 +3543,71 @@
 
 - (UMSccpScreening_result)screenSccpPacketInbound:(UMSCCP_Packet *)packet error:(NSError **)err
 {
-    if((_sccp_screeningPluginName.length > 0) && (_sccp_screeningPlugin == NULL))
+    NSString *filepath;
+    if(([_sccp_screeningPluginName hasPrefix:@"/"]) || (_appDelegate.filterEnginesPath.length==0))
     {
-        /* we have a plugin but it has not been loaded yet */
-        
-        NSString *filepath = [NSString stringWithFormat:@"%@/%@",_screeningPluginPath,_sccp_screeningPlugin];
-        UMPluginHandler *ph = [[UMPluginHandler alloc]initWithFile:filepath];
-        if(ph==NULL)
+        filepath = _sccp_screeningPluginName;
+    }
+    else
+    {
+        filepath = [NSString stringWithFormat:@"%@/%@",_appDelegate.filterEnginesPath,_sccp_screeningPluginName];
+    }
+    
+    UMPluginHandler *ph = [[UMPluginHandler alloc]initWithFile:filepath];
+    if(ph==NULL)
+    {
+        NSLog(@"PLUGIN-ERROR: can not load plugin at %@",filepath);
+        _sccp_screeningPluginName = NULL;
+        _sccp_screeningPlugin = NULL;
+    }
+    else
+    {
+        NSMutableDictionary *open_dict = [[NSMutableDictionary alloc]init];
+        open_dict[@"app-delegate"]      = _appDelegate;
+        open_dict[@"license-directory"] = _appDelegate.licenseDirectory;
+        open_dict[@"linkset-delegate"]  = self;
+        int r = [ph openWithDictionary:open_dict];
+        if(r<0)
         {
-            NSLog(@"PLUGIN-ERROR: can not load plugin at %@",filepath);
-            _sccp_screeningPluginName = NULL;
+            [ph close];
             _sccp_screeningPlugin = NULL;
+            _sccp_screeningPluginName = NULL;
+            NSLog(@"LOADING-ERROR: can not open sccp-screening plugin at path %@. Reason %@",filepath,ph.error);
         }
         else
         {
-            NSMutableDictionary *open_dict = [[NSMutableDictionary alloc]init];
-            open_dict[@"app-delegate"]      = _appDelegate;
-            open_dict[@"license-directory"] = [_appDelegate licenseDictionary];
-            open_dict[@"linkset-delegate"]  = self;
-            int r = [ph openWithDictionary:open_dict];
-            if(r<0)
+            NSDictionary *info = ph.info;
+            NSString *type = info[@"type"];
+            if(![type isEqualToString:@"sccp-screening"])
             {
                 [ph close];
                 _sccp_screeningPlugin = NULL;
                 _sccp_screeningPluginName = NULL;
-                NSLog(@"LOADING-ERROR: can not open plugin at path %@. Reason %@",filepath,ph.error);
+                NSLog(@"LOADING-ERROR: plugin at path %@ is not of type sccp-screening but %@",filepath,type);
             }
             else
             {
-                NSDictionary *info = ph.info;
-                NSString *type = info[@"type"];
-                if(![type isEqualToString:@"mtp3-screening"])
+                UMPlugin<UMSCCPScreeningPluginProtocol> *p = (UMPlugin<UMSCCPScreeningPluginProtocol> *)[ph instantiate];
+                if(![p respondsToSelector:@selector(screenIncomingLabel:error:linkset:)])
                 {
                     [ph close];
                     _sccp_screeningPlugin = NULL;
                     _sccp_screeningPluginName = NULL;
-                    NSLog(@"LOADING-ERROR: plugin at path %@ is not of type mtp3-screening but %@",filepath,type);
+                    NSLog(@"LOADING-ERROR: plugin at path %@ does not implement method screenIncomingLabel:error:linkset:",filepath);
                 }
                 else
                 {
-                    UMPlugin<UMSCCPScreeningPluginProtocol> *p = (UMPlugin<UMSCCPScreeningPluginProtocol> *)[ph instantiate];
-                    if(![p respondsToSelector:@selector(screenIncomingLabel:error:linkset:)])
+                    if(![p respondsToSelector:@selector(setSccpScreeningConfig:)])
                     {
                         [ph close];
                         _sccp_screeningPlugin = NULL;
                         _sccp_screeningPluginName = NULL;
-                        NSLog(@"LOADING-ERROR: plugin at path %@ does not implement method screenIncomingLabel:error:linkset:",filepath);
+                        NSLog(@"LOADING-ERROR: plugin at path %@ does not implement method setSccpScreeningConfig:",filepath);
                     }
                     else
                     {
-                        if(![p respondsToSelector:@selector(setSccpScreeningConfig:)])
-                        {
-                            [ph close];
-                            _sccp_screeningPlugin = NULL;
-                            _sccp_screeningPluginName = NULL;
-                            NSLog(@"LOADING-ERROR: plugin at path %@ does not implement method setScreeningConfig:",filepath);
-                        }
-                        else
-                        {
-                            [p setSccpScreeningConfig:_sccp_screeningPluginConfig];
-                            _sccp_screeningPlugin = p;
-                        }
+                        [p setSccpScreeningConfig:_sccp_screeningPluginConfig];
+                        _sccp_screeningPlugin = p;
                     }
                 }
             }
