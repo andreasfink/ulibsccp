@@ -3534,6 +3534,7 @@
                 default:
                     return NULL;
             }
+            break;
         }
         default:
             return NULL;
