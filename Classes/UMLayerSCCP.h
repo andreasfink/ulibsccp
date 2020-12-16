@@ -50,6 +50,7 @@ typedef enum UMSccpScreening_result
 - (UMSccpScreening_result)screenSccpPacketInbound:(UMSCCP_Packet *)packet error:(NSError **)err;
 - (void)loadConfigFromFile:(NSString *)filename;
 - (void)reloadConfig;
+- (void)close;
 @end
 
 @interface UMLayerSCCP : UMLayer<UMLayerMTP3UserProtocol>
@@ -427,6 +428,16 @@ qualityOfService:(int)qos
         handling:(SCCP_Handling)handling
          options:(NSDictionary *)options;
 
-- (UMSccpScreening_result)screenSccpPacketInbound:(UMSCCP_Packet *)packet error:(NSError **)err plugin:(UMPlugin<UMSCCPScreeningPluginProtocol>*)plugin;
+- (UMSccpScreening_result)screenSccpPacketInbound:(UMSCCP_Packet *)packet
+                                            error:(NSError **)err
+                                           plugin:(UMPlugin<UMSCCPScreeningPluginProtocol>*)plugin
+                                 traceDestination:(id)tracedest;
+
+- (void)reopenLogfiles;
+- (void)reloadPluginConfigs;
+- (void)reloadPlugins;
+
+- (void)writeSccpTrace:(NSString *)s;
+- (void)loadScreeningPlugin;
 
 @end

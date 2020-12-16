@@ -11,7 +11,6 @@
 
 @class UMLayerMTP3;
 @protocol UMLayerSCCPApplicationContextProtocol<NSObject,UMSCCP_FilterDelegateProtocol>
-
 - (UMLayerMTP3 *)getMTP3:(NSString *)name;
 - (UMLayerSCCP *)getSCCP:(NSString *)name;
 - (UMSynchronizedDictionary *)dbPools;

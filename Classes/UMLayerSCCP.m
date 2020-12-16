@@ -1062,15 +1062,41 @@
     }
 
     /* lets pass through screening first */
-    
     BOOL returnValue = NO;
     BOOL doSendStatus = NO;
     SCCP_ReturnCause causeValue = SCCP_ReturnCause_not_set;
     NSError *err = NULL;
-    UMSccpScreening_result r = [self screenSccpPacketInbound:packet error:&err plugin:_sccp_screeningPlugin];
-    if(err)
+    UMSccpScreening_result r = UMSccpScreening_undefined;
+    if(packet.incomingMtp3Layer)
     {
-        [self logMajorError:[NSString stringWithFormat:@"screening failed with error %@",err]];
+
+        UMMTP3LinkSet *ls = [packet.incomingMtp3Layer getLinkSetByName:packet.incomingLinkset];
+        if(ls)
+        {
+            r = [self screenSccpPacketInbound:packet
+                                        error:&err
+                                       plugin:(UMPlugin<UMSCCPScreeningPluginProtocol>*)ls.sccp_screeningPlugin
+                             traceDestination:ls];
+            if(err)
+            {
+                [self logMajorError:[NSString stringWithFormat:@"sccp-linkset-screening failed with error %@",err]];
+            }
+            if((r==UMSccpScreening_explicitlyDenied)||(r==UMSccpScreening_implicitlyDenied))
+            {
+                [self logMajorError:[NSString stringWithFormat:@"sccp-linkset-screening failed with error %@",err]];
+            }
+        }
+    }
+    if(_sccp_screeningPlugin)
+    {
+        r = [self screenSccpPacketInbound:packet
+                                    error:&err
+                                   plugin:_sccp_screeningPlugin
+                         traceDestination:self];
+        if(err)
+        {
+            [self logMajorError:[NSString stringWithFormat:@"sccp-instance-screening failed with error %@",err]];
+        }
     }
     if((r==UMSccpScreening_explicitlyDenied)||(r==UMSccpScreening_implicitlyDenied))
     {
@@ -2285,6 +2311,7 @@
         {
             [_statisticDb doAutocreate];
         }
+        [self loadScreeningPlugin];
     }
 }
 
@@ -3624,12 +3651,12 @@
     }
 }
 
-- (void)openScreeningTraceFile
+- (void)openSccpScreeningTraceFile
 {
     _sccp_screeningTraceFile = fopen(_sccp_screeningTraceFileName.UTF8String,"a+");
 }
 
-- (void)closeScreeningTraceFile
+- (void)closeSccpScreeningTraceFile
 {
     if(_sccp_screeningTraceFile)
     {
@@ -3638,92 +3665,109 @@
     }
 }
 
-- (void)screeningTrace:(UMSCCP_Packet *)packet result:(UMSccpScreening_result)r
+- (void)screeningTrace:(UMSCCP_Packet *)packet
+                result:(UMSccpScreening_result)r
+      traceDestination:(id)tracedest
 {
-    if((_sccp_screeningTraceFileName.length == 0) || (_sccp_screeningTraceFile == NULL))
-    {
-        return;
-    }
     if(packet==NULL)
     {
         return;
     }
-    NSMutableString *s = [[NSMutableString alloc]init];
-    [s appendFormat:@"%@",[[NSDate date]stringValue]];
+    @autoreleasepool
+    {
+        NSMutableString *s = [[NSMutableString alloc]init];
+        [s appendFormat:@"%@",[[NSDate date]stringValue]];
 
-    if(packet.incomingFromLocal)
-    {
-        [s appendFormat:@" ls=local:%@",packet.incomingLocalUser.layerName];
-    }
-    else
-    {
-        [s appendFormat:@" ls=%@",packet.incomingLinkset];
-    }
+        if(packet.incomingFromLocal)
+        {
+            [s appendFormat:@" ls=local:%@",packet.incomingLocalUser.layerName];
+        }
+        else
+        {
+            [s appendFormat:@" ls=%@",packet.incomingLinkset];
+        }
 
-    if(packet.incomingOpc)
-    {
-        [s appendFormat:@" opc=%d",packet.incomingOpc.pc];
+        if(packet.incomingOpc)
+        {
+            [s appendFormat:@" opc=%d",packet.incomingOpc.pc];
+        }
+        if(packet.incomingCallingPartyAddress)
+        {
+            [s appendFormat:@" calling={%@}",packet.incomingCallingPartyAddress.description];
+        }
+        if(packet.incomingCalledPartyAddress)
+        {
+            [s appendFormat:@" called={%@}",packet.incomingCalledPartyAddress.description];
+        }
+        switch(packet.incomingServiceType)
+        {
+            case SCCP_UDT:
+                [s appendFormat:@" service-type=UDT"];
+                break;
+            case SCCP_UDTS:
+                [s appendFormat:@" service-type=UDTS"];
+                break;
+            case SCCP_XUDT:
+                [s appendFormat:@" service-type=XUDT"];
+                break;
+            case SCCP_XUDTS:
+                [s appendFormat:@" service-type=XUDTS"];
+                break;
+            case SCCP_LUDT:
+                [s appendFormat:@" service-type=LUDT"];
+                break;
+            case SCCP_LUDTS:
+                [s appendFormat:@" service-type=LUDTS"];
+                break;
+            default:
+                [s appendFormat:@" service-type=%d",packet.incomingServiceType];
+                break;
+        }
+        switch(r)
+        {
+            case UMSccpScreening_undefined:
+                [s appendFormat:@" result=undefined"];
+                break;
+            case UMSccpScreening_explicitlyPermitted:
+                [s appendFormat:@" result=undefined"];
+                break;
+            case UMSccpScreening_implicitlyPermitted:
+                [s appendFormat:@" result=undefined"];
+                break;
+            case UMSccpScreening_explicitlyDenied:
+                [s appendFormat:@" result=undefined"];
+                break;
+            case UMSccpScreening_implicitlyDenied:
+                [s appendFormat:@" result=undefined"];
+                break;
+            case UMSccpScreening_errorResult:
+                [s appendFormat:@" result=undefined"];
+                break;
+             default:
+                [s appendFormat:@" result=%d",r];
+                break;
+        }
+        [s appendFormat:@" mtp3-pdu=%@",packet.incomingMtp3Data.hexString];
+        [tracedest writeSccpTrace:s];
     }
-    if(packet.incomingCallingPartyAddress)
-    {
-        [s appendFormat:@" calling={%@}",packet.incomingCallingPartyAddress.description];
-    }
-    if(packet.incomingCalledPartyAddress)
-    {
-        [s appendFormat:@" called={%@}",packet.incomingCalledPartyAddress.description];
-    }
-    switch(packet.incomingServiceType)
-    {
-        case SCCP_UDT:
-            [s appendFormat:@" service-type=UDT"];
-            break;
-        case SCCP_UDTS:
-            [s appendFormat:@" service-type=UDTS"];
-            break;
-        case SCCP_XUDT:
-            [s appendFormat:@" service-type=XUDT"];
-            break;
-        case SCCP_XUDTS:
-            [s appendFormat:@" service-type=XUDTS"];
-            break;
-        case SCCP_LUDT:
-            [s appendFormat:@" service-type=LUDT"];
-            break;
-        case SCCP_LUDTS:
-            [s appendFormat:@" service-type=LUDTS"];
-            break;
-        default:
-            [s appendFormat:@" service-type=%d",packet.incomingServiceType];
-            break;
-    }
-    switch(r)
-    {
-        case UMSccpScreening_undefined:
-            [s appendFormat:@" result=undefined"];
-            break;
-        case UMSccpScreening_explicitlyPermitted:
-            [s appendFormat:@" result=undefined"];
-            break;
-        case UMSccpScreening_implicitlyPermitted:
-            [s appendFormat:@" result=undefined"];
-            break;
-        case UMSccpScreening_explicitlyDenied:
-            [s appendFormat:@" result=undefined"];
-            break;
-        case UMSccpScreening_implicitlyDenied:
-            [s appendFormat:@" result=undefined"];
-            break;
-        case UMSccpScreening_errorResult:
-            [s appendFormat:@" result=undefined"];
-            break;
-         default:
-            [s appendFormat:@" result=%d",r];
-            break;
-    }
-    [s appendFormat:@" mtp3-pdu=%@",packet.incomingMtp3Data.hexString];
 }
 
-- (UMSccpScreening_result)screenSccpPacketInbound:(UMSCCP_Packet *)packet error:(NSError **)err plugin:(UMPlugin<UMSCCPScreeningPluginProtocol>*)plugin
+- (void)writeSccpTrace:(NSString *)s
+{
+    if(_sccp_screeningTraceFile)
+    {
+        [_loggingLock lock];
+        const char *str = [s UTF8String];
+        fprintf(_sccp_screeningTraceFile,"%s\n",str);
+        fflush(_sccp_screeningTraceFile);
+        [_loggingLock unlock];
+    }
+}
+
+- (UMSccpScreening_result)screenSccpPacketInbound:(UMSCCP_Packet *)packet
+                                            error:(NSError **)err
+                                           plugin:(UMPlugin<UMSCCPScreeningPluginProtocol>*)plugin
+                                traceDestination:(id)tracedest
 {
     *err = NULL;
     UMSccpScreening_result r = UMSccpScreening_undefined;
@@ -3731,8 +3775,27 @@
     {
         r = [plugin screenSccpPacketInbound:packet error:err];
     }
-    [self screeningTrace:packet result:r];
+    if(tracedest)
+    {
+        [self screeningTrace:packet result:r traceDestination:tracedest];
+    }
     return r;
+}
+
+- (void) reloadPluginConfigs
+{
+    
+}
+ -(void)reloadPlugins
+{
+    [_sccp_screeningPlugin close];
+    _sccp_screeningPlugin = NULL;
+    [self loadScreeningPlugin];
+}
+- (void)reopenLogfiles
+{
+    [self closeSccpScreeningTraceFile];
+    [self openSccpScreeningTraceFile];
 }
 
 @end
