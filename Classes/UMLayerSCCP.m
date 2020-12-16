@@ -3541,9 +3541,12 @@
     }    
     return NULL;
 }
-
-- (UMSccpScreening_result)screenSccpPacketInbound:(UMSCCP_Packet *)packet error:(NSError **)err
+- (void)loadScreeningPlugin
 {
+    if(_sccp_screeningPluginName == NULL)
+    {
+        return;
+    }
     NSString *filepath;
     if(([_sccp_screeningPluginName hasPrefix:@"/"]) || (_appDelegate.filterEnginesPath.length==0))
     {
@@ -3589,30 +3592,46 @@
             else
             {
                 UMPlugin<UMSCCPScreeningPluginProtocol> *p = (UMPlugin<UMSCCPScreeningPluginProtocol> *)[ph instantiate];
-                if(![p respondsToSelector:@selector(screenIncomingLabel:error:linkset:)])
+                if(![p respondsToSelector:@selector(screenSccpPacketInbound:error:)])
                 {
                     [ph close];
                     _sccp_screeningPlugin = NULL;
                     _sccp_screeningPluginName = NULL;
-                    NSLog(@"LOADING-ERROR: plugin at path %@ does not implement method screenIncomingLabel:error:linkset:",filepath);
+                    NSLog(@"LOADING-ERROR: plugin at path %@ does not implement method screenSccpPacketInbound:error:",filepath);
                 }
-                else
+                else if(![p respondsToSelector:@selector(loadConfigFromFile:)])
                 {
-                    if(![p respondsToSelector:@selector(setSccpScreeningConfig:)])
-                    {
-                        [ph close];
-                        _sccp_screeningPlugin = NULL;
-                        _sccp_screeningPluginName = NULL;
-                        NSLog(@"LOADING-ERROR: plugin at path %@ does not implement method setSccpScreeningConfig:",filepath);
-                    }
-                    else
-                    {
-                        [p setSccpScreeningConfig:_sccp_screeningPluginConfig];
-                        _sccp_screeningPlugin = p;
-                    }
+                    [ph close];
+                    _sccp_screeningPlugin = NULL;
+                    _sccp_screeningPluginName = NULL;
+                    NSLog(@"LOADING-ERROR: plugin at path %@ does not implement method loadConfigFromFile:",filepath);
+                }
+                else if(![p respondsToSelector:@selector(reloadConfig)])
+                {
+                    [ph close];
+                    _sccp_screeningPlugin = NULL;
+                    _sccp_screeningPluginName = NULL;
+                    NSLog(@"LOADING-ERROR: plugin at path %@ does not implement method loadConfigFromFile:",filepath);
+                 }
+                 else
+                 {
+                     [p loadConfigFromFile:_sccp_screeningPluginConfig];
+                     _sccp_screeningPlugin = p;
                 }
             }
         }
+    }
+}
+
+- (UMSccpScreening_result)screenSccpPacketInbound:(UMSCCP_Packet *)packet error:(NSError **)err
+{
+    if(_sccp_screeningPluginName == NULL)
+    {
+        return UMSccpScreening_undefined;
+    }
+    if(_sccp_screeningPlugin == NULL) /* we have a plugin name but not loaded the plugin yet */
+    {
+        [self loadScreeningPlugin];
     }
     if(_sccp_screeningPlugin)
     {

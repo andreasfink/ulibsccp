@@ -48,7 +48,8 @@ typedef enum UMSccpScreening_result
 
 @protocol UMSCCPScreeningPluginProtocol
 - (UMSccpScreening_result)screenSccpPacketInbound:(UMSCCP_Packet *)packet error:(NSError **)err;
-- (NSError *)setSccpScreeningConfig:(NSString *)conf;
+- (void)loadConfigFromFile:(NSString *)filename;
+- (void)reloadConfig;
 @end
 
 @interface UMLayerSCCP : UMLayer<UMLayerMTP3UserProtocol>
@@ -107,9 +108,12 @@ typedef enum UMSccpScreening_result
     NSNumber                    *_conversion_e164_tt;
     NSNumber                    *_conversion_e212_tt;
     
-    NSString                    *_sccp_screeningPluginName;
-    NSString                    *_sccp_screeningPluginConfig;
-    UMPlugin<UMSCCPScreeningPluginProtocol>   *_sccp_screeningPlugin;
+    NSString                                 *_sccp_screeningPluginName;
+    NSString                                 *_sccp_screeningPluginConfig;
+    NSString                                 *_sccp_screeningPluginTraceFile;
+    UMPlugin<UMSCCPScreeningPluginProtocol>  *_sccp_screeningPlugin;
+    BOOL                                     _sccp_screeningLoggin;
+    BOOL                                     _sccp_screeningActive;
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;
@@ -146,6 +150,11 @@ typedef enum UMSccpScreening_result
 @property(readwrite,strong,atomic) id<UMSCCP_TracefileProtocol>    problematicTraceDestination;
 @property(readwrite,strong,atomic) id<UMSCCP_TracefileProtocol>    unrouteablePacketsTraceDestination;
 @property(readwrite,assign,atomic) BOOL    routeErrorsBackToSource;
+
+@property(readwrite,strong,atomic) NSString                    *sccp_screeningPluginName;
+@property(readwrite,strong,atomic) NSString                    *sccp_screeningPluginConfig;
+@property(readwrite,strong,atomic) NSString                    *sccp_screeningPluginTraceFile;
+@property(readwrite,strong,atomic) UMPlugin<UMSCCPScreeningPluginProtocol>   *sccp_screeningPlugin;
 
 - (void)increaseThroughputCounter:(UMSCCP_StatisticSection)section;
 
