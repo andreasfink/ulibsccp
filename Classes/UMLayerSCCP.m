@@ -78,6 +78,7 @@
     _gttSelectorRegistry = [[SccpGttRegistry alloc]init];
     _gttSelectorRegistry.logLevel = self.logLevel;
     _gttSelectorRegistry.logFeed = self.logFeed;
+    _loggingLock = [[UMMutex alloc]initWithName:@"logging-lock"];
     
     [self runSelectorInBackground:@selector(initializeStatistics)];
     _housekeepingTimer = [[UMTimer alloc]initWithTarget:self
@@ -1066,7 +1067,7 @@
     BOOL doSendStatus = NO;
     SCCP_ReturnCause causeValue = SCCP_ReturnCause_not_set;
     NSError *err = NULL;
-    UMSccpScreening_result r = [self screenSccpPacketInbound:packet error:&err];
+    UMSccpScreening_result r = [self screenSccpPacketInbound:packet error:&err plugin:_sccp_screeningPlugin];
     if(err)
     {
         [self logMajorError:[NSString stringWithFormat:@"screening failed with error %@",err]];
@@ -3623,26 +3624,115 @@
     }
 }
 
-- (UMSccpScreening_result)screenSccpPacketInbound:(UMSCCP_Packet *)packet error:(NSError **)err
+- (void)openScreeningTraceFile
 {
-    if(_sccp_screeningPluginName == NULL)
+    _sccp_screeningTraceFile = fopen(_sccp_screeningTraceFileName.UTF8String,"a+");
+}
+
+- (void)closeScreeningTraceFile
+{
+    if(_sccp_screeningTraceFile)
     {
-        return UMSccpScreening_undefined;
+        fclose(_sccp_screeningTraceFile);
+        _sccp_screeningTraceFile = NULL;
     }
-    if(_sccp_screeningPlugin == NULL) /* we have a plugin name but not loaded the plugin yet */
+}
+
+- (void)screeningTrace:(UMSCCP_Packet *)packet result:(UMSccpScreening_result)r
+{
+    if((_sccp_screeningTraceFileName.length == 0) || (_sccp_screeningTraceFile == NULL))
     {
-        [self loadScreeningPlugin];
+        return;
     }
-    if(_sccp_screeningPlugin)
+    if(packet==NULL)
     {
-        UMSccpScreening_result r = [_sccp_screeningPlugin screenSccpPacketInbound:packet error:err];
-        return r;
+        return;
     }
-    if(err)
+    NSMutableString *s = [[NSMutableString alloc]init];
+    [s appendFormat:@"%@",[[NSDate date]stringValue]];
+
+    if(packet.incomingFromLocal)
     {
-        *err = NULL;
+        [s appendFormat:@" ls=local:%@",packet.incomingLocalUser.layerName];
     }
-    return UMSccpScreening_undefined;
+    else
+    {
+        [s appendFormat:@" ls=%@",packet.incomingLinkset];
+    }
+
+    if(packet.incomingOpc)
+    {
+        [s appendFormat:@" opc=%d",packet.incomingOpc.pc];
+    }
+    if(packet.incomingCallingPartyAddress)
+    {
+        [s appendFormat:@" calling={%@}",packet.incomingCallingPartyAddress.description];
+    }
+    if(packet.incomingCalledPartyAddress)
+    {
+        [s appendFormat:@" called={%@}",packet.incomingCalledPartyAddress.description];
+    }
+    switch(packet.incomingServiceType)
+    {
+        case SCCP_UDT:
+            [s appendFormat:@" service-type=UDT"];
+            break;
+        case SCCP_UDTS:
+            [s appendFormat:@" service-type=UDTS"];
+            break;
+        case SCCP_XUDT:
+            [s appendFormat:@" service-type=XUDT"];
+            break;
+        case SCCP_XUDTS:
+            [s appendFormat:@" service-type=XUDTS"];
+            break;
+        case SCCP_LUDT:
+            [s appendFormat:@" service-type=LUDT"];
+            break;
+        case SCCP_LUDTS:
+            [s appendFormat:@" service-type=LUDTS"];
+            break;
+        default:
+            [s appendFormat:@" service-type=%d",packet.incomingServiceType];
+            break;
+    }
+    switch(r)
+    {
+        case UMSccpScreening_undefined:
+            [s appendFormat:@" result=undefined"];
+            break;
+        case UMSccpScreening_explicitlyPermitted:
+            [s appendFormat:@" result=undefined"];
+            break;
+        case UMSccpScreening_implicitlyPermitted:
+            [s appendFormat:@" result=undefined"];
+            break;
+        case UMSccpScreening_explicitlyDenied:
+            [s appendFormat:@" result=undefined"];
+            break;
+        case UMSccpScreening_implicitlyDenied:
+            [s appendFormat:@" result=undefined"];
+            break;
+        case UMSccpScreening_errorResult:
+            [s appendFormat:@" result=undefined"];
+            break;
+         default:
+            [s appendFormat:@" result=%d",r];
+            break;
+    }
+    [s appendFormat:@" mtp3-pdu=%@",packet.incomingMtp3Data.hexString];
+}
+
+- (UMSccpScreening_result)screenSccpPacketInbound:(UMSCCP_Packet *)packet error:(NSError **)err plugin:(UMPlugin<UMSCCPScreeningPluginProtocol>*)plugin
+{
+    *err = NULL;
+    UMSccpScreening_result r = UMSccpScreening_undefined;
+    if(plugin)
+    {
+        r = [plugin screenSccpPacketInbound:packet error:err];
+    }
+    [self screeningTrace:packet result:r];
+    return r;
 }
 
 @end

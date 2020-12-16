@@ -110,10 +110,12 @@ typedef enum UMSccpScreening_result
     
     NSString                                 *_sccp_screeningPluginName;
     NSString                                 *_sccp_screeningPluginConfig;
-    NSString                                 *_sccp_screeningPluginTraceFile;
+    NSString                                 *_sccp_screeningTraceFileName;
+    FILE                                     *_sccp_screeningTraceFile;
     UMPlugin<UMSCCPScreeningPluginProtocol>  *_sccp_screeningPlugin;
     BOOL                                     _sccp_screeningLoggin;
     BOOL                                     _sccp_screeningActive;
+    UMMutex                                  *_loggingLock;
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;
@@ -424,5 +426,7 @@ qualityOfService:(int)qos
            class:(SCCP_ServiceClass)serviceClass
         handling:(SCCP_Handling)handling
          options:(NSDictionary *)options;
+
+- (UMSccpScreening_result)screenSccpPacketInbound:(UMSCCP_Packet *)packet error:(NSError **)err plugin:(UMPlugin<UMSCCPScreeningPluginProtocol>*)plugin;
 
 @end
