@@ -3774,10 +3774,10 @@
     if(plugin)
     {
         r = [plugin screenSccpPacketInbound:packet error:err];
-    }
-    if(tracedest)
-    {
-        [self screeningTrace:packet result:r traceDestination:tracedest];
+        if(tracedest)
+        {
+            [self screeningTrace:packet result:r traceDestination:tracedest];
+        }
     }
     return r;
 }
