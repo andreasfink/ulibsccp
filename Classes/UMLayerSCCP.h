@@ -431,7 +431,7 @@ qualityOfService:(int)qos
 - (UMSccpScreening_result)screenSccpPacketInbound:(UMSCCP_Packet *)packet
                                             error:(NSError **)err
                                            plugin:(UMPlugin<UMSCCPScreeningPluginProtocol>*)plugin
-                                 traceDestination:(id)tracedest;
+                                 traceDestination:(UMMTP3LinkSet *)tracedest;
 
 - (void)reopenLogfiles;
 - (void)reloadPluginConfigs;

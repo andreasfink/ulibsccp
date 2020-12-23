@@ -3667,14 +3667,26 @@
 
 - (void)screeningTrace:(UMSCCP_Packet *)packet
                 result:(UMSccpScreening_result)r
-      traceDestination:(id)tracedest
+      traceDestination:(UMMTP3LinkSet *)ls
 {
-    if(packet==NULL)
-    {
-        return;
-    }
+    
     @autoreleasepool
     {
+
+        if((packet==NULL) || (ls==NULL))
+        {
+            return;
+        }
+        if(ls.sccpScreeningTraceLevel == UMMTP3ScreeningTraceLevel_none)
+        {
+            return;
+        }
+        if((ls.sccpScreeningTraceLevel == UMMTP3ScreeningTraceLevel_rejected_only)
+            && (r>=UMSccpScreening_undefined))
+        {
+            return;
+        }
+        
         NSMutableString *s = [[NSMutableString alloc]init];
         [s appendFormat:@"%@",[[NSDate date]stringValue]];
 
@@ -3689,7 +3701,7 @@
 
         if(packet.incomingOpc)
         {
-            [s appendFormat:@" opc=%d",packet.incomingOpc.pc];
+            [s appendFormat:@" opc=%d",(int)packet.incomingOpc.pc];
         }
         if(packet.incomingCallingPartyAddress)
         {
@@ -3729,54 +3741,42 @@
                 [s appendFormat:@" result=undefined"];
                 break;
             case UMSccpScreening_explicitlyPermitted:
-                [s appendFormat:@" result=undefined"];
+                [s appendFormat:@" result=explicitlyPermitted"];
                 break;
             case UMSccpScreening_implicitlyPermitted:
-                [s appendFormat:@" result=undefined"];
+                [s appendFormat:@" result=implicitlyPermitted"];
                 break;
             case UMSccpScreening_explicitlyDenied:
-                [s appendFormat:@" result=undefined"];
+                [s appendFormat:@" result=explicitlyDenied"];
                 break;
             case UMSccpScreening_implicitlyDenied:
-                [s appendFormat:@" result=undefined"];
+                [s appendFormat:@" result=implicitlyDenied"];
                 break;
             case UMSccpScreening_errorResult:
-                [s appendFormat:@" result=undefined"];
+                [s appendFormat:@" result=error"];
                 break;
              default:
                 [s appendFormat:@" result=%d",r];
                 break;
         }
         [s appendFormat:@" mtp3-pdu=%@",packet.incomingMtp3Data.hexString];
-        [tracedest writeSccpTrace:s];
-    }
-}
-
-- (void)writeSccpTrace:(NSString *)s
-{
-    if(_sccp_screeningTraceFile)
-    {
-        [_loggingLock lock];
-        const char *str = [s UTF8String];
-        fprintf(_sccp_screeningTraceFile,"%s\n",str);
-        fflush(_sccp_screeningTraceFile);
-        [_loggingLock unlock];
+        [ls writeSccpScreeningTraceFile:s];
     }
 }
 
 - (UMSccpScreening_result)screenSccpPacketInbound:(UMSCCP_Packet *)packet
                                             error:(NSError **)err
                                            plugin:(UMPlugin<UMSCCPScreeningPluginProtocol>*)plugin
-                                traceDestination:(id)tracedest
+                                traceDestination:(UMMTP3LinkSet *)ls
 {
     *err = NULL;
     UMSccpScreening_result r = UMSccpScreening_undefined;
     if(plugin)
     {
         r = [plugin screenSccpPacketInbound:packet error:err];
-        if(tracedest)
+        if(ls)
         {
-            [self screeningTrace:packet result:r traceDestination:tracedest];
+            [self screeningTrace:packet result:r traceDestination:ls];
         }
     }
     return r;
