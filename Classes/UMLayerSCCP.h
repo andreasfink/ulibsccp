@@ -436,8 +436,6 @@ qualityOfService:(int)qos
 - (void)reopenLogfiles;
 - (void)reloadPluginConfigs;
 - (void)reloadPlugins;
-
-- (void)writeSccpTrace:(NSString *)s;
 - (void)loadScreeningPlugin;
 
 @end

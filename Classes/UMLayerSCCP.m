@@ -1067,10 +1067,10 @@
     SCCP_ReturnCause causeValue = SCCP_ReturnCause_not_set;
     NSError *err = NULL;
     UMSccpScreening_result r = UMSccpScreening_undefined;
+    UMMTP3LinkSet *ls = [packet.incomingMtp3Layer getLinkSetByName:packet.incomingLinkset];
     if(packet.incomingMtp3Layer)
     {
 
-        UMMTP3LinkSet *ls = [packet.incomingMtp3Layer getLinkSetByName:packet.incomingLinkset];
         if(ls)
         {
             r = [self screenSccpPacketInbound:packet
@@ -1092,7 +1092,7 @@
         r = [self screenSccpPacketInbound:packet
                                     error:&err
                                    plugin:_sccp_screeningPlugin
-                         traceDestination:self];
+                         traceDestination:ls];
         if(err)
         {
             [self logMajorError:[NSString stringWithFormat:@"sccp-instance-screening failed with error %@",err]];
