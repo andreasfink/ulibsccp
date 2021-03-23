@@ -3769,7 +3769,10 @@
                                            plugin:(UMPlugin<UMSCCPScreeningPluginProtocol>*)plugin
                                 traceDestination:(UMMTP3LinkSet *)ls
 {
-    *err = NULL;
+    if(err != NULL)
+    {
+        *err = NULL;
+    }
     UMSccpScreening_result r = UMSccpScreening_undefined;
     if(plugin)
     {
