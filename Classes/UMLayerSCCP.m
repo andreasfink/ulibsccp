@@ -26,6 +26,7 @@
 #import "UMSCCP_StatisticDb.h"
 #import "UMSCCP_StatisticDbRecord.h"
 #import <ulibasn1/ulibasn1.h>
+#import "UMSCCP_PrometheusData.h"
 
 @implementation UMLayerSCCP
 
@@ -2056,6 +2057,9 @@
             _conversion_e212_tt = @([cfg[@"ansi-tt-e212"] intValue]);
         }
     }
+    _prometheusData = [[UMSCCP_PrometheusData alloc]initWithPrometheus:appContext];
+    [_prometheusData setSubname1:@"sccp" value:_layerName];
+    [_prometheusData registerMetrics];
 }
 
 - (NSDictionary *)config
@@ -2682,6 +2686,56 @@
 - (void)increaseThroughputCounter:(UMSCCP_StatisticSection)section
 {
     [_throughputCounters[section] increase];
+    [_prometheusData.throughput  increaseBy:1];
+    switch(section)
+    {
+        case UMSCCP_StatisticSection_RX:
+            [_prometheusData.rxCounter  increaseBy:1];
+            break;
+        case UMSCCP_StatisticSection_TX:
+            [_prometheusData.txCounter  increaseBy:1];
+            break;
+        case UMSCCP_StatisticSection_TRANSIT:
+            [_prometheusData.transitCounter  increaseBy:1];
+            break;
+        case UMSCCP_StatisticSection_UDT_RX:
+            [_prometheusData.udtRxCounter  increaseBy:1];
+            break;
+        case UMSCCP_StatisticSection_UDTS_RX:
+            [_prometheusData.udtsRxCounter  increaseBy:1];
+            break;
+        case UMSCCP_StatisticSection_XUDT_RX:
+            [_prometheusData.xudtRxCounter  increaseBy:1];
+            break;
+        case UMSCCP_StatisticSection_XUDTS_RX:
+            [_prometheusData.xudtsRxCounter  increaseBy:1];
+            break;
+        case UMSCCP_StatisticSection_UDT_TX:
+            [_prometheusData.udtTxCounter  increaseBy:1];
+            break;
+        case UMSCCP_StatisticSection_UDTS_TX:
+            [_prometheusData.udtsTxCounter  increaseBy:1];
+            break;
+        case UMSCCP_StatisticSection_XUDT_TX:
+            [_prometheusData.xudtTxCounter  increaseBy:1];
+            break;
+        case UMSCCP_StatisticSection_XUDTS_TX:
+            [_prometheusData.xudtsTxCounter  increaseBy:1];
+            break;
+        case UMSCCP_StatisticSection_UDT_TRANSIT:
+            [_prometheusData.udtTransitCounter  increaseBy:1];
+            break;
+        case UMSCCP_StatisticSection_UDTS_TRANSIT:
+            [_prometheusData.udtsTransitCounter  increaseBy:1];
+            break;
+        case UMSCCP_StatisticSection_XUDT_TRANSIT:
+            [_prometheusData.xudtTransitCounter  increaseBy:1];
+            break;
+        case UMSCCP_StatisticSection_XUDTS_TRANSIT:
+            [_prometheusData.xudtsTransitCounter  increaseBy:1];
+            break;
+    }
+    
 }
 
 - (UMSynchronizedSortedDictionary *)statisticalInfo

@@ -26,6 +26,7 @@
 #import "UMSCCP_TracefileProtocol.h"
 #import "UMSCCP_StatisticDb.h"
 @class UMSCCP_Statistics;
+@class UMSCCP_PrometheusData;
 
 typedef enum SccpGtFileSection
 {
@@ -119,6 +120,7 @@ typedef enum UMSccpScreening_result
     BOOL                                     _sccp_screeningLoggin;
     BOOL                                     _sccp_screeningActive;
     UMMutex                                  *_loggingLock;
+    UMSCCP_PrometheusData                    *_prometheusData;
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;
@@ -160,6 +162,8 @@ typedef enum UMSccpScreening_result
 @property(readwrite,strong,atomic) NSString                    *sccp_screeningPluginConfig;
 @property(readwrite,strong,atomic) NSString                    *sccp_screeningPluginTraceFile;
 @property(readwrite,strong,atomic) UMPlugin<UMSCCPScreeningPluginProtocol>   *sccp_screeningPlugin;
+@property(readwrite,strong,atomic) UMSCCP_PrometheusData    *prometheusData;
+
 
 - (void)increaseThroughputCounter:(UMSCCP_StatisticSection)section;
 

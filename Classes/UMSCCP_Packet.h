@@ -89,7 +89,7 @@
     int                         _incomingTcapCommand; /* UMTCAP_Command */
     NSString                    *_incomingApplicationContext;
     UMASN1Object                *_incomingGsmMapAsn1;
-    int                         _incomingGsmMapOperation;
+    NSArray                     *_incomingGsmMapOperations;
     int                         _incomingCategory;
     NSString                    *_incomingLocalTransactionId;
     NSString                    *_incomingRemoteTransactionId;
@@ -174,7 +174,7 @@
 
 @property(readwrite,strong,atomic)  UMASN1Object            *incomingGsmMapAsn1;/* this can be set by filters */
 @property(readwrite,strong,atomic)  NSString                *incomingApplicationContext;
-@property(readwrite,assign,atomic)  int                     incomingGsmMapOperation;
+@property(readwrite,strong,atomic)  NSArray                 *incomingGsmMapOperations;
 @property(readwrite,assign,atomic)  int                     incomingCategory;
 @property(readwrite,strong,atomic)  NSString                *incomingLocalTransactionId;
 @property(readwrite,strong,atomic)  NSString                *incomingRemoteTransactionId;

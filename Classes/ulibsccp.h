@@ -25,3 +25,4 @@
 #import "UMSCCP_Filter.h"
 #import "UMSCCP_StatisticDb.h"
 #import "UMSCCP_StatisticDbRecord.h"
+#import "UMSCCP_PrometheusData.h"

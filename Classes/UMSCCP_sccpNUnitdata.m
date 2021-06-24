@@ -15,6 +15,7 @@
 #import "UMLayerSCCP.h"
 #import "UMSCCP_StatisticSection.h"
 #import "UMSCCP_Packet.h"
+#import "UMSCCP_PrometheusData.h"
 
 static int segmentReferenceId;
 
@@ -100,7 +101,6 @@ static int segmentReferenceId;
 {
     @autoreleasepool
     {
-            
         @try
         {
             /* int cls =0;*/
@@ -437,6 +437,7 @@ static int segmentReferenceId;
                                            incomingPointCode:(int)packet.incomingOpc.integerValue
                                            outgoingPointCode:(int)packet.outgoingDpc.integerValue
                                                  destination:packet.outgoingDestination];
+                        [_sccpLayer.prometheusData increaseMapCounter:UMSCCP_StatisticSection_TX operations:packet.incomingGsmMapOperations];
                     }
                 }
             }

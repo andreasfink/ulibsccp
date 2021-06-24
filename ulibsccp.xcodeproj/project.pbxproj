@@ -15,6 +15,8 @@
 		A61571EF1CD4891200211137 /* UMSCCP_Segment.m in Sources */ = {isa = PBXBuildFile; fileRef = A61571ED1CD4891200211137 /* UMSCCP_Segment.m */; };
 		A61571F61CD4AADF00211137 /* UMSCCP_ReceivedSegments.h in Headers */ = {isa = PBXBuildFile; fileRef = A61571F41CD4AADF00211137 /* UMSCCP_ReceivedSegments.h */; };
 		A61571F71CD4AADF00211137 /* UMSCCP_ReceivedSegments.m in Sources */ = {isa = PBXBuildFile; fileRef = A61571F51CD4AADF00211137 /* UMSCCP_ReceivedSegments.m */; };
+		A64D452D2684893C00540708 /* UMSCCP_PrometheusData.h in Headers */ = {isa = PBXBuildFile; fileRef = A64D452B2684893C00540708 /* UMSCCP_PrometheusData.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A64D452E2684893C00540708 /* UMSCCP_PrometheusData.m in Sources */ = {isa = PBXBuildFile; fileRef = A64D452C2684893C00540708 /* UMSCCP_PrometheusData.m */; };
 		A64FAAF022EB9DF9001964F4 /* UMSCCP_TracefileProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = A64FAAEE22EB9DF9001964F4 /* UMSCCP_TracefileProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A658E20221E882E600825E4A /* UMSCCP_Filter.m in Sources */ = {isa = PBXBuildFile; fileRef = A658E20021E882E600825E4A /* UMSCCP_Filter.m */; };
 		A658E20521E8863700825E4A /* UMSCCP_Packet.h in Headers */ = {isa = PBXBuildFile; fileRef = A658E20321E8863700825E4A /* UMSCCP_Packet.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -78,6 +80,8 @@
 		A61571ED1CD4891200211137 /* UMSCCP_Segment.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_Segment.m; sourceTree = "<group>"; };
 		A61571F41CD4AADF00211137 /* UMSCCP_ReceivedSegments.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_ReceivedSegments.h; sourceTree = "<group>"; };
 		A61571F51CD4AADF00211137 /* UMSCCP_ReceivedSegments.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_ReceivedSegments.m; sourceTree = "<group>"; };
+		A64D452B2684893C00540708 /* UMSCCP_PrometheusData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_PrometheusData.h; sourceTree = "<group>"; };
+		A64D452C2684893C00540708 /* UMSCCP_PrometheusData.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_PrometheusData.m; sourceTree = "<group>"; };
 		A64FAAEE22EB9DF9001964F4 /* UMSCCP_TracefileProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_TracefileProtocol.h; sourceTree = "<group>"; };
 		A658E1FF21E882E600825E4A /* UMSCCP_Filter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_Filter.h; sourceTree = "<group>"; };
 		A658E20021E882E600825E4A /* UMSCCP_Filter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_Filter.m; sourceTree = "<group>"; };
@@ -205,6 +209,8 @@
 				A658E20421E8863700825E4A /* UMSCCP_Packet.m */,
 				A6ED5C6B1B435A8A00854472 /* UMLayerSCCP.h */,
 				A6ED5C6C1B435A8A00854472 /* UMLayerSCCP.m */,
+				A64D452B2684893C00540708 /* UMSCCP_PrometheusData.h */,
+				A64D452C2684893C00540708 /* UMSCCP_PrometheusData.m */,
 				A61571EC1CD4891200211137 /* UMSCCP_Segment.h */,
 				A61571ED1CD4891200211137 /* UMSCCP_Segment.m */,
 				A68494D81CB320AB00211137 /* UMSCCP_mtpTransfer.h */,
@@ -298,6 +304,7 @@
 				A68494DA1CB320AB00211137 /* UMSCCP_mtpTransfer.h in Headers */,
 				A6ADC5E51CAE8C7600211137 /* UMSCCP_Defs.h in Headers */,
 				A6AA23C524853F09008D5A57 /* UMSCCP_StatisticDbRecord.h in Headers */,
+				A64D452D2684893C00540708 /* UMSCCP_PrometheusData.h in Headers */,
 				A61571EE1CD4891200211137 /* UMSCCP_Segment.h in Headers */,
 				A658E20521E8863700825E4A /* UMSCCP_Packet.h in Headers */,
 				A6CF1ABD2185A41C00F09659 /* UMSCCP_StatisticData.h in Headers */,
@@ -410,6 +417,7 @@
 			files = (
 				A6F442B31CB2595000C2B472 /* UMSCCPConnection.m in Sources */,
 				A61571EF1CD4891200211137 /* UMSCCP_Segment.m in Sources */,
+				A64D452E2684893C00540708 /* UMSCCP_PrometheusData.m in Sources */,
 				A658E20221E882E600825E4A /* UMSCCP_Filter.m in Sources */,
 				A68494E31CB320BF00211137 /* UMSCCP_mtpResume.m in Sources */,
 				A6AA23C624853F09008D5A57 /* UMSCCP_StatisticDbRecord.m in Sources */,

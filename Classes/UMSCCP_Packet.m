@@ -443,7 +443,7 @@ typedef enum UMTCAP_Command
     {
         [s appendFormat:@"\t_incomingGsmMapAsn1: NULL\n"];
     }
-    [s appendFormat:@"\t_incomingGsmMapOperation: %d\n",_incomingGsmMapOperation];
+    [s appendFormat:@"\t_incomingGsmMapOperation: %@\n",_incomingGsmMapOperations];
     [s appendFormat:@"\t_incomingCategory: %d\n",_incomingCategory];
 
     [s appendFormat:@"\t_incomingLocalTransactionId: %@\n",_incomingLocalTransactionId ? _incomingLocalTransactionId : @"NULL"];

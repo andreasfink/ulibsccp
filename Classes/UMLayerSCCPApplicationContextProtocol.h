@@ -16,5 +16,6 @@
 - (UMSynchronizedDictionary *)dbPools;
 - (NSString *)filterEnginesPath;
 - (id)licenseDirectory;
+- (UMPrometheus *)prometheus;
 @end
 

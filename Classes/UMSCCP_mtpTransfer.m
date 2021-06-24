@@ -15,6 +15,7 @@
 #import "UMSCCP_ReceivedSegments.h"
 #import "UMSCCP_Packet.h"
 #import "UMSCCP_StatisticDb.h"
+#import "UMSCCP_PrometheusData.h"
 
 @implementation UMSCCP_mtpTransfer
 
@@ -802,6 +803,15 @@
                           processingDelay:[_endOfProcessing timeIntervalSinceDate:_startOfProcessing]];
         [_sccpLayer increaseThroughputCounter:_statsSection];
         [_sccpLayer increaseThroughputCounter:_statsSection2];
+        
+        if(_packet.outgoingToLocal)
+        {
+            [_sccpLayer.prometheusData increaseMapCounter:UMSCCP_StatisticSection_RX operations:_packet.incomingGsmMapOperations];
+        }
+        else
+        {
+            [_sccpLayer.prometheusData increaseMapCounter:UMSCCP_StatisticSection_TRANSIT operations:_packet.incomingGsmMapOperations];
+        }
     }
 }
 
