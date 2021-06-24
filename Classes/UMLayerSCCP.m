@@ -2057,7 +2057,7 @@
             _conversion_e212_tt = @([cfg[@"ansi-tt-e212"] intValue]);
         }
     }
-    _prometheusData = [[UMSCCP_PrometheusData alloc]initWithPrometheus:appContext];
+    _prometheusData = [[UMSCCP_PrometheusData alloc]initWithPrometheus:appContext.prometheus];
     [_prometheusData setSubname1:@"sccp" value:_layerName];
     [_prometheusData registerMetrics];
 }
