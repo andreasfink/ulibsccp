@@ -120,14 +120,14 @@
                                                                              subvalue1:NULL];
         for(int i=0;i<256;i++)
         {
-            NSString *s = [NSString stringWithFormat:@"sccp-transit-gsm-%d",i];
+            NSString *s = @"sccp-transit-gsm";
             UMPrometheusMetric *m =  [[UMPrometheusMetric alloc]initWithMetricName:s subname1:NULL subvalue1:NULL type:UMPrometheusMetricType_counter];
             m.subname2 = @"mapop";
             m.subvalue2 = [NSString stringWithFormat:@"%d",i];
             m.help = [NSString stringWithFormat:@"counter of GSM-MAP operation %d transiting the system",i];
             _transitCounterPerMapOperation[i] = m;
             
-            s = [NSString stringWithFormat:@"sccp-rx-gsmp-%d",i];
+            s = @"sccp-rx-gsmp";
             m =  [[UMPrometheusMetric alloc]initWithMetricName:s subname1:NULL subvalue1:NULL type:UMPrometheusMetricType_counter];
             m.subname2 = @"mapop";
             m.subvalue2 = [NSString stringWithFormat:@"%d",i];
@@ -135,7 +135,7 @@
             _rxCounterPerMapOperation[i] = m;
 
 
-            s = [NSString stringWithFormat:@"sccp-tx-gsm-%d",i];
+            s = @"sccp-tx-gsm";
             m =  [[UMPrometheusMetric alloc]initWithMetricName:s subname1:NULL subvalue1:NULL type:UMPrometheusMetricType_counter];
             m.subname2 = @"mapop";
             m.subvalue2 = [NSString stringWithFormat:@"%d",i];
