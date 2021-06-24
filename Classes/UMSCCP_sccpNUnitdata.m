@@ -329,6 +329,7 @@ static int segmentReferenceId;
                         packet.incomingOptionalData = optional_data;
                         packet.incomingServiceType = SCCP_XUDT;
                         packet.incomingFromLocal = YES;
+                        [_sccpLayer.filterDelegate sccpDecodeTcapGsmmap:packet];
                         _statisticsSection2 = UMSCCP_StatisticSection_XUDT_TX;
                         [packet copyIncomingToOutgoing];
                         UMSCCP_FilterResult r = UMSCCP_FILTER_RESULT_UNMODIFIED;
