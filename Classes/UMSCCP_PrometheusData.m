@@ -127,7 +127,7 @@
             m.help = @"counter of GSM_MAP operations transiting the system";
             _transitCounterPerMapOperation[i] = m;
             
-            s = @"sccp_rx_gsmp";
+            s = @"sccp_rx_gsm_op";
             m =  [[UMPrometheusMetric alloc]initWithMetricName:s subname1:NULL subvalue1:NULL type:UMPrometheusMetricType_counter];
             m.subname2 = @"mapop";
             m.subvalue2 = [NSString stringWithFormat:@"%d",i];
@@ -135,7 +135,7 @@
             _rxCounterPerMapOperation[i] = m;
 
 
-            s = @"sccp_tx_gsm";
+            s = @"sccp_tx_gsm_op";
             m =  [[UMPrometheusMetric alloc]initWithMetricName:s subname1:NULL subvalue1:NULL type:UMPrometheusMetricType_counter];
             m.subname2 = @"mapop";
             m.subvalue2 = [NSString stringWithFormat:@"%d",i];
