@@ -20,33 +20,33 @@
         _prometheus = prometheus;
         _lock = [[UMMutex alloc]initWithName:@"UMSCCP_PrometheusData"];
         
-        _rxCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp-rx"
+        _rxCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp_rx"
                                                             subname1:NULL
                                                            subvalue1:NULL
                                                                 type:UMPrometheusMetricType_counter];
-        _txCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp-tx"
+        _txCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp_tx"
                                                             subname1:NULL
                                                            subvalue1:NULL
                                                                 type:UMPrometheusMetricType_counter];
-        _transitCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp-transit"
+        _transitCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp_transit"
                                                             subname1:NULL
                                                            subvalue1:NULL
                                                                 type:UMPrometheusMetricType_counter];
 
         /* UDT */
-        _udtRxCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp-rx-udt"
+        _udtRxCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp_rx_udt"
                                                             subname1:NULL
                                                            subvalue1:NULL
                                                                 type:UMPrometheusMetricType_counter];
         _udtRxCounter.help = @"count of received UDT packets";
 
-        _udtTxCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp-tx-udt"
+        _udtTxCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp_tx_udt"
                                                             subname1:NULL
                                                            subvalue1:NULL
                                                                 type:UMPrometheusMetricType_counter];
         _udtTxCounter.help = @"count of sent UDT packets";
         
-        _udtTransitCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp-transit-udt"
+        _udtTransitCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp_transit_udt"
                                                             subname1:NULL
                                                            subvalue1:NULL
                                                                 type:UMPrometheusMetricType_counter];
@@ -54,19 +54,19 @@
 
         /* UDTS */
 
-        _udtsRxCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp-rx-udts"
+        _udtsRxCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp_rx_udts"
                                                             subname1:NULL
                                                            subvalue1:NULL
                                                                 type:UMPrometheusMetricType_counter];
         _udtsRxCounter.help = @"count of received UDT packets";
 
-        _udtsTxCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp-tx-udts"
+        _udtsTxCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp_tx_udts"
                                                             subname1:NULL
                                                            subvalue1:NULL
                                                                 type:UMPrometheusMetricType_counter];
         _udtsTxCounter.help = @"count of sent UDT packets";
         
-        _udtsTransitCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp-transit-udts"
+        _udtsTransitCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp_transit_udts"
                                                             subname1:NULL
                                                            subvalue1:NULL
                                                                 type:UMPrometheusMetricType_counter];
@@ -74,19 +74,19 @@
 
         /* XUDTS */
 
-        _xudtRxCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp-rx-xudt"
+        _xudtRxCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp_rx_xudt"
                                                             subname1:NULL
                                                            subvalue1:NULL
                                                                 type:UMPrometheusMetricType_counter];
         _xudtRxCounter.help = @"count of received UDT packets";
 
-        _xudtTxCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp-tx-xudt"
+        _xudtTxCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp_tx_xudt"
                                                             subname1:NULL
                                                            subvalue1:NULL
                                                                 type:UMPrometheusMetricType_counter];
         _xudtTxCounter.help = @"count of sent UDT packets";
         
-        _xudtTransitCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp-transit-xudt"
+        _xudtTransitCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp_transit_xudt"
                                                             subname1:NULL
                                                            subvalue1:NULL
                                                                 type:UMPrometheusMetricType_counter];
@@ -94,19 +94,19 @@
 
         /* XUDTS */
 
-        _xudtsRxCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp-rx-xudts"
+        _xudtsRxCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp_rx_xudts"
                                                             subname1:NULL
                                                            subvalue1:NULL
                                                                 type:UMPrometheusMetricType_counter];
         _xudtsRxCounter.help = @"count of received UDT packets";
 
-        _xudtsTxCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp-tx-xudts"
+        _xudtsTxCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp_tx_xudts"
                                                             subname1:NULL
                                                            subvalue1:NULL
                                                                 type:UMPrometheusMetricType_counter];
         _xudtsTxCounter.help = @"count of sent UDT packets";
         
-        _xudtsTransitCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp-transit-xudts"
+        _xudtsTransitCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp_transit_xudts"
                                                             subname1:NULL
                                                            subvalue1:NULL
                                                                 type:UMPrometheusMetricType_counter];
@@ -115,31 +115,31 @@
 
         _throughput = [[UMPrometheusThroughputMetric alloc]initWithResolutionInSeconds:0.1
                                                                         reportDuration:10.0
-                                                                                  name:@"sccp-throughput"
+                                                                                  name:@"sccp_throughput"
                                                                               subname1:NULL
                                                                              subvalue1:NULL];
         for(int i=0;i<256;i++)
         {
-            NSString *s = @"sccp-transit-gsm";
+            NSString *s = @"sccp_transit_gsm";
             UMPrometheusMetric *m =  [[UMPrometheusMetric alloc]initWithMetricName:s subname1:NULL subvalue1:NULL type:UMPrometheusMetricType_counter];
             m.subname2 = @"mapop";
             m.subvalue2 = [NSString stringWithFormat:@"%d",i];
-            m.help = @"counter of GSM-MAP operations transiting the system";
+            m.help = @"counter of GSM_MAP operations transiting the system";
             _transitCounterPerMapOperation[i] = m;
             
-            s = @"sccp-rx-gsmp";
+            s = @"sccp_rx_gsmp";
             m =  [[UMPrometheusMetric alloc]initWithMetricName:s subname1:NULL subvalue1:NULL type:UMPrometheusMetricType_counter];
             m.subname2 = @"mapop";
             m.subvalue2 = [NSString stringWithFormat:@"%d",i];
-            m.help = @"counter of GSM-MAP operations received on the system";
+            m.help = @"counter of GSM_MAP operations received on the system";
             _rxCounterPerMapOperation[i] = m;
 
 
-            s = @"sccp-tx-gsm";
+            s = @"sccp_tx_gsm";
             m =  [[UMPrometheusMetric alloc]initWithMetricName:s subname1:NULL subvalue1:NULL type:UMPrometheusMetricType_counter];
             m.subname2 = @"mapop";
             m.subvalue2 = [NSString stringWithFormat:@"%d",i];
-            m.help = @"counter of GSM-MAP operations transiting the system";
+            m.help = @"counter of GSM_MAP operations transiting the system";
             _txCounterPerMapOperation[i] = m;
         }
 
@@ -147,7 +147,7 @@
     return self;
 }
 
-- (void)setSubname1:(NSString *)a value:(NSString *)b
+_ (void)setSubname1:(NSString *)a value:(NSString *)b
 {
     [_rxCounter setSubname1:a value:b];
     [_txCounter setSubname1:a value:b];
