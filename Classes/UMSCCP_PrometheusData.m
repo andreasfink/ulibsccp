@@ -147,7 +147,7 @@
     return self;
 }
 
-_ (void)setSubname1:(NSString *)a value:(NSString *)b
+- (void)setSubname1:(NSString *)a value:(NSString *)b
 {
     [_rxCounter setSubname1:a value:b];
     [_txCounter setSubname1:a value:b];
