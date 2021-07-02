@@ -40,24 +40,10 @@
     return _mtp3;
 }
 
-- (UMLayerSCCP *)init
-{
-    self = [super init];
-    if(self)
-    {
-        [self genericInitialisation];
-    }
-    return self;
-}
-
-- (UMLayerSCCP *)initWithTaskQueueMulti:(UMTaskQueueMulti *)tq
-{
-    return [self initWithTaskQueueMulti:tq name:@""];
-}
-
 - (UMLayerSCCP *)initWithTaskQueueMulti:(UMTaskQueueMulti *)tq name:(NSString *)name
 {
-    self = [super initWithTaskQueueMulti:tq name:name];
+    NSString *s = [NSString stringWithFormat:@"sccp/%@",name];
+    self = [super initWithTaskQueueMulti:tq name:s];
     if(self)
     {
         [self genericInitialisation];
