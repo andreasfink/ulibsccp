@@ -550,7 +550,8 @@
                        fromLocalUser:(BOOL)fromLocalUser
                         usedSelector:(NSString **)usedSelector
                    transactionNumber:(NSNumber *)tid
-
+                           operation:(NSNumber *)op
+                  applicationContext:(NSString *)ac
 {
     SccpDestinationGroup *destination = NULL;
     SccpAddress *called1 = [called copy];
@@ -662,7 +663,6 @@
                 {
                     *usedSelector = gttSelector.name;
                 }
-
                 if(gttSelector.preTranslation)
                 {
                     called1 = [gttSelector.preTranslation translateAddress:called1];
@@ -671,12 +671,16 @@
                         [self.logFeed debugText:[NSString stringWithFormat:@"pre-translation: ->%@",called1]];
                     }
                 }
-                
                 if(self.logLevel <=UMLOG_DEBUG)
                 {
                     [self.logFeed debugText:@"calling findNextHopForDestination:"];
                 }
-                SccpGttRoutingTableEntry *rte = [gttSelector findNextHopForDestination:called1 transactionNumber:tid];
+                
+                SccpGttRoutingTableEntry *rte = [gttSelector findNextHopForDestination:called1
+                                                                     transactionNumber:tid
+                                                                                   ssn:@(called1.ssn.ssn)
+                                                                             operation:op
+                                                                            appContext:ac];
                 if(rte.deliverLocal)
                 {
                     if(self.logLevel <=UMLOG_DEBUG)
@@ -876,6 +880,8 @@
                                         translationType:(int)tt
                                               fromLocal:(BOOL)fromLocal
                                       transactionNumber:(NSNumber *)tid
+                                              operation:(NSNumber *)op
+                                     applicationContext:(NSString *)ac
 {
     UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
     int causeValue = -1;
@@ -899,8 +905,9 @@
                                        localUser:&localUser
                                    fromLocalUser:fromLocal
                                     usedSelector:&usedSelector
-                               transactionNumber:tid];
-    
+                               transactionNumber:tid
+                                       operation:op
+                              applicationContext:ac];
     if(grp)
     {
         [self chooseRouteFromGroup:grp
@@ -1110,15 +1117,18 @@
         SccpAddress *dst = packet.incomingCalledPartyAddress;
         SccpAddress *called_out = NULL;
         NSString *usedSelector=NULL;
-        
         NSNumber *tid = [self extractTransactionNumber:packet.incomingSccpData];
+        NSString *ac = NULL;
+        NSNumber *op = [self extractOperation:packet.incomingSccpData applicationContext:&ac];
         SccpDestinationGroup *grp = [self findRoutes:dst
                                                cause:&causeValue
                                     newCalledAddress:&called_out
                                            localUser:&localUser
                                        fromLocalUser:packet.incomingFromLocal
                                         usedSelector:&usedSelector
-                                   transactionNumber:tid];
+                                   transactionNumber:tid
+                                     operation:op
+                                  applicationContext:ac];
         packet.routingSelector = usedSelector;
         if(self.logLevel <=UMLOG_DEBUG)
         {
@@ -3576,6 +3586,27 @@
         {
             switch(seq.asn1_tag.tagNumber)
             {
+                case 2: /* BEGIN */
+                {
+                    int p=0;
+                    UMASN1Object *o = [seq getObjectAtPosition:p++];
+                    while(o)
+                    {
+                        if((o.asn1_tag.tagClass == UMASN1Class_Application) && (o.asn1_tag.tagNumber == 8)) /* orig transaction ID */
+                        {
+                            const uint8_t *bytes = o.asn1_data.bytes;
+                            unsigned long len = o.asn1_data.length;
+                            uint64_t value = 0;
+                            for(int i=0;i<len;i++)
+                            {
+                                value = (value << 8) | bytes[i];
+                            }
+                            return @(value);
+                        }
+                        o = [seq getObjectAtPosition:p++];
+                    }
+                    break;
+                }
                 case 4: /* END      */
                 case 5: /* CONTINUE */
                 case 7: /* ABORT    */
@@ -3609,6 +3640,71 @@
     }    
     return NULL;
 }
+
+- (NSNumber *) extractOperation:(NSData *)data applicationContext:(NSString **)acptr
+{
+    UMASN1Sequence *seq = [[UMASN1Sequence alloc]initWithBerData:data];
+    UMASN1Object *componentPortion = NULL;
+    UMASN1Object *dialogPortion = NULL;
+    switch(seq.asn1_tag.tagClass)
+    {
+        case UMASN1Class_Application:
+        {
+            switch(seq.asn1_tag.tagNumber)
+            {
+                case 2: /* BEGIN */
+                case 4: /* END      */
+                case 5: /* CONTINUE */
+                case 7: /* ABORT    */
+                {
+                    int p=0;
+                    UMASN1Object *o = [seq getObjectAtPosition:p++];
+                    while(o)
+                    {
+                        if((o.asn1_tag.tagClass == UMASN1Class_Application) && (o.asn1_tag.tagNumber == 12))
+                        {
+                            componentPortion = o;
+                        }
+                        else if((o.asn1_tag.tagClass == UMASN1Class_Application) && (o.asn1_tag.tagNumber == 11))
+                        {
+                            dialogPortion = o;
+                        }
+                        o = [seq getObjectAtPosition:p++];
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    if((dialogPortion) && (_tcapDecodeDelegate))
+    {
+        if ([_tcapDecodeDelegate respondsToSelector:@selector(getAppContextFromDialogPortion:)])
+        {
+            NSString *ac = [_tcapDecodeDelegate getAppContextFromDialogPortion:dialogPortion];
+            if(acptr)
+            {
+                *acptr = ac;
+            }
+        }
+    }
+    NSNumber *op = NULL;
+    if((componentPortion) && (_tcapDecodeDelegate))
+    {
+        if ([_tcapDecodeDelegate respondsToSelector:@selector(getOperationFromComponentPortion:)])
+        {
+            op = [_tcapDecodeDelegate getOperationFromComponentPortion:componentPortion];
+        }
+    }
+    return op;
+}
+
+
+
 - (void)loadScreeningPlugin
 {
     if(_sccp_screeningPluginName == NULL)

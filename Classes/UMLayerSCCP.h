@@ -56,6 +56,11 @@ typedef enum UMSccpScreening_result
 - (void)close;
 @end
 
+@protocol sccp_tcapDecoder<NSObject>
+- (NSString *) getAppContextFromDialogPortion:(UMASN1Object *)o;
+- (NSNumber *) getOperationFromComponentPortion:(UMASN1Object *)o;
+@end
+
 @interface UMLayerSCCP : UMLayer<UMLayerMTP3UserProtocol>
 {
     SccpVariant                 _sccpVariant;
@@ -121,6 +126,7 @@ typedef enum UMSccpScreening_result
     BOOL                                     _sccp_screeningActive;
     UMMutex                                  *_loggingLock;
     UMSCCP_PrometheusData                    *_prometheusData;
+    id<sccp_tcapDecoder>                     _tcapDecodeDelegate; /* a delegate which decodes opcode and appcontext for us */
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;
@@ -141,6 +147,7 @@ typedef enum UMSccpScreening_result
 @property(readwrite,assign,atomic)  BOOL                        automaticAnsiItuConversion;
 @property(readwrite,strong,atomic)  NSNumber                    *conversion_e164_tt;
 @property(readwrite,strong,atomic)  NSNumber                    *conversion_e212_tt;
+@property(readwrite,strong,atomic) id<sccp_tcapDecoder>         tcapDecoder;
 
 /*
 @property(readwrite,strong,atomic) id<UMSCCP_FilterProtocol>   inboundFilter;
@@ -382,10 +389,13 @@ typedef enum UMSccpScreening_result
                  provider:(UMLayerMTP3 *)provider
           routedToLinkset:(NSString **)outgoingLinkset;
 
+
 - (UMSynchronizedSortedDictionary *) routeTestForMSISDN:(NSString *)msisdn
                                         translationType:(int)tt
                                               fromLocal:(BOOL)fromLocal
-                                      transactionNumber:(NSNumber *)tid;
+                                      transactionNumber:(NSNumber *)tid
+                                              operation:(NSNumber *)op
+                                     applicationContext:(NSString *)ac;
 
 
 - (BOOL)routePacket:(UMSCCP_Packet *)packet; /* returns YES if sucessfully forwarded, NO if it wasn able to route it */
