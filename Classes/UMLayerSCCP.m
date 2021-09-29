@@ -1117,7 +1117,19 @@
         SccpAddress *dst = packet.incomingCalledPartyAddress;
         SccpAddress *called_out = NULL;
         NSString *usedSelector=NULL;
-        NSNumber *tid = [self extractTransactionNumber:packet.incomingSccpData];
+        NSNumber *tid = NULL;
+        /* we can not extract transaction id number from a single segment so we skip that part if segments are present */
+        if(packet.incomingSegment == NULL)
+        {
+            @try
+            {
+                tid = [self extractTransactionNumber:packet.incomingSccpData];
+            }
+            @catch(NSException *e)
+            {
+                NSLog(@"Exception:%@",e);
+            }
+        }
         NSString *ac = NULL;
         NSNumber *op = [self extractOperation:packet.incomingSccpData applicationContext:&ac];
         SccpDestinationGroup *grp = [self findRoutes:dst
@@ -3579,7 +3591,15 @@
 
 - (NSNumber *) extractTransactionNumber:(NSData *)data
 {
-    UMASN1Sequence *seq = [[UMASN1Sequence alloc]initWithBerData:data];
+    UMASN1Sequence *seq;
+    @try
+    {
+        seq = [[UMASN1Sequence alloc]initWithBerData:data];
+    }
+    @catch(NSException *e)
+    {
+        NSLog(@"can not extract transaction number. Exception %@",e);
+    }
     switch(seq.asn1_tag.tagClass)
     {
         case UMASN1Class_Application:
