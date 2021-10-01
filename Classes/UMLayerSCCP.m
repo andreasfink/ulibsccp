@@ -893,6 +893,7 @@
 
     SccpAddress *dst = [[SccpAddress alloc]initWithHumanReadableString:msisdn variant:_mtp3.variant];
     dst.tt.tt = tt;
+    dst.ssn.ssn = SCCP_SSN_HLR;
 
     SCCP_ReturnCause cause = SCCP_ReturnCause_not_set;
     SccpAddress *called_out = dst;
