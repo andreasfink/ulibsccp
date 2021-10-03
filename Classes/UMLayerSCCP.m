@@ -1121,18 +1121,15 @@
         NSNumber *tid = NULL;
         NSNumber *oid = NULL;
         NSString *ac = NULL;
-        /* we can not extract transaction id number from a single segment so we skip that part if segments are present */
-        if(packet.incomingSegment == NULL)
+        @try
         {
-            @try
-            {
-                tid = [self extractTransactionNumber:packet.incomingSccpData];
-                op = [self extractOperation:packet.incomingSccpData applicationContext:&ac];
-            }
-            @catch(NSException *e)
-            {
-                NSLog(@"Exception:%@",e);
-            }
+            /* we might not be able to extract tid/opcode/ac number from a single segment */
+            tid = [self extractTransactionNumber:packet.incomingSccpData];
+            op = [self extractOperation:packet.incomingSccpData applicationContext:&ac];
+        }
+        @catch(NSException *e)
+        {
+            NSLog(@"Exception:%@",e);
         }
         SccpDestinationGroup *grp = [self findRoutes:dst
                                                cause:&causeValue
