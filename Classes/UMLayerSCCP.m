@@ -1119,20 +1119,21 @@
         SccpAddress *called_out = NULL;
         NSString *usedSelector=NULL;
         NSNumber *tid = NULL;
+        NSNumber *oid = NULL;
+        NSString *ac = NULL;
         /* we can not extract transaction id number from a single segment so we skip that part if segments are present */
         if(packet.incomingSegment == NULL)
         {
             @try
             {
                 tid = [self extractTransactionNumber:packet.incomingSccpData];
+                op = [self extractOperation:packet.incomingSccpData applicationContext:&ac];
             }
             @catch(NSException *e)
             {
                 NSLog(@"Exception:%@",e);
             }
         }
-        NSString *ac = NULL;
-        NSNumber *op = [self extractOperation:packet.incomingSccpData applicationContext:&ac];
         SccpDestinationGroup *grp = [self findRoutes:dst
                                                cause:&causeValue
                                     newCalledAddress:&called_out
@@ -1140,8 +1141,8 @@
                                        fromLocalUser:packet.incomingFromLocal
                                         usedSelector:&usedSelector
                                    transactionNumber:tid
-                                     operation:op
-                                  applicationContext:ac];
+                                           operation:op
+                                    applicationContext:ac];
         packet.routingSelector = usedSelector;
         if(self.logLevel <=UMLOG_DEBUG)
         {
