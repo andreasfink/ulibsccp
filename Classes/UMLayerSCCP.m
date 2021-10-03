@@ -1119,8 +1119,8 @@
         SccpAddress *called_out = NULL;
         NSString *usedSelector=NULL;
         NSNumber *tid = NULL;
-        NSNumber *oid = NULL;
         NSString *ac = NULL;
+        NSNumber *op = NULL;
         @try
         {
             /* we might not be able to extract tid/opcode/ac number from a single segment */
