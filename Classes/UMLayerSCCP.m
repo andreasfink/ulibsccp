@@ -743,9 +743,9 @@
                     {
                         if(self.logLevel <=UMLOG_DEBUG)
                         {
-                            [self.logFeed debugText:@"setting cause to NoTranslationForThisSpecificAddress"];
+                            [self.logFeed debugText:@"setting cause to MTP Failure"];
                         }
-                        *cause = SCCP_ReturnCause_NoTranslationForThisSpecificAddress;
+                        *cause = SCCP_ReturnCause_MTPFailure; /* we do have a route but the next hop is not available */
                     }
                     if(gttSelector.postTranslation)
                     {
