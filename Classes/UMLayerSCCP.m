@@ -1270,7 +1270,16 @@
             packet.outgoingDpc = pc;
             if(pc==NULL)
             {
-                causeValue = SCCP_ReturnCause_NoTranslationForThisSpecificAddress;
+                if(grp == NULL)
+                {
+                    /* if we have no destination defined in the routing table, we return no translaction */
+                    causeValue = SCCP_ReturnCause_NoTranslationForThisSpecificAddress;
+                }
+                else
+                {
+                    /* if we have a group defined but the MTP3 point code is not available we return MTP failure */
+                    causeValue = SCCP_ReturnCause_MTPFailure;
+                }
                 NSString *s = [NSString stringWithFormat:@"Can not forward %@ (NoTranslationForThisSpecificAddress). No route to destination DPC=%@ SRC=%@ DST=%@ DATA=%@",
                                packet.incomingPacketType,
                                packet.outgoingDpc,
