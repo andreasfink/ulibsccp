@@ -1402,9 +1402,7 @@
                     [self logMinorError:s];
                     NSLog(@"Packet:\n%@\n",packet.description);
                 }
-
-
-                 if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
+                if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
                 {
                     doSendStatus = YES;
                     switch(e)
