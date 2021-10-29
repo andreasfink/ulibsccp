@@ -2410,7 +2410,7 @@
         int param_data;
         int param_segment;
 
-       dict = [[UMSynchronizedSortedDictionary alloc]init];
+        dict = [[UMSynchronizedSortedDictionary alloc]init];
         @try
         {
             NSUInteger len = data.length;
@@ -2549,45 +2549,48 @@
         {
             dict[@"decoding-error"] = e.name;
         }
-        if(dst)
-        {
-            dict[@"called-address"] = [dst objectValue];
-
-        }
-        if(src)
-        {
-            dict[@"calling-address"] = [src objectValue];
-        }
-        if(m_protocol_class != -1)
-        {
-            dict[@"protocol-class"] = @(m_protocol_class);
-        }
-        if(m_return_cause != -1)
-        {
-            dict[@"return-cause"] = @(m_return_cause);
-        }
-        if(m_handling != -1)
-        {
-            dict[@"handling"] = @(m_handling);
-        }
-        if(m_type != -1)
-        {
-            dict[@"type"] = @(m_type);
-        }
-        if(m_hopcounter != -1)
-        {
-            dict[@"hop-counter"] = @(m_hopcounter);
-        }
-        if(sccp_pdu)
-        {
-            dict[@"pdu"] = [sccp_pdu hexString];
-        }
-        if(segment)
-        {
-            dict[@"segment"] = [segment hexString];
+        @finally
+            {
+            if(dst)
+            {
+                dict[@"called-address"] = [dst objectValue];
+            }
+            if(src)
+            {
+                dict[@"calling-address"] = [src objectValue];
+            }
+            if(m_protocol_class != -1)
+            {
+                dict[@"protocol-class"] = @(m_protocol_class);
+            }
+            if(m_return_cause != -1)
+            {
+                dict[@"return-cause"] = @(m_return_cause);
+            }
+            if(m_handling != -1)
+            {
+                dict[@"handling"] = @(m_handling);
+            }
+            if(m_type != -1)
+            {
+                dict[@"type"] = @(m_type);
+            }
+            if(m_hopcounter != -1)
+            {
+                dict[@"hop-counter"] = @(m_hopcounter);
+            }
+            if(sccp_pdu)
+            {
+                dict[@"pdu"] = [sccp_pdu hexString];
+            }
+            if(segment)
+            {
+                dict[@"segment"] = [segment hexString];
+            }
         }
     }
     return dict;
+
 }
 
 - (NSString *)status
