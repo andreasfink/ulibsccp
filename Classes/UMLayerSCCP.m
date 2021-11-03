@@ -1384,6 +1384,9 @@
                 NSString *s= NULL;
                 switch(e)
                 {
+                    case UMMTP3_error_internal_error:
+                        s = [NSString stringWithFormat:@"Can not forward %@. internal error SRC=%@ DST=%@ DATA=%@",packet.outgoingPacketType,packet.outgoingOpc,packet.outgoingDpc,packet.outgoingSccpData];
+                        break;
                     case UMMTP3_no_error:
                         break;
                     case UMMTP3_error_pdu_too_big:
