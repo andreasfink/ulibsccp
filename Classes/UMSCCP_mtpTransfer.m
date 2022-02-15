@@ -16,6 +16,7 @@
 #import "UMSCCP_Packet.h"
 #import "UMSCCP_StatisticDb.h"
 #import "UMSCCP_PrometheusData.h"
+#import "UMSCCP_Segment.h"
 
 @implementation UMSCCP_mtpTransfer
 
@@ -117,6 +118,7 @@
         _options[@"mtp3-pdu"] = rawMtp3;
         _options[@"sccp-pdu"] = [_data hexString];
         _packet.incomingSccpData = _data;
+        
         BOOL decodeOnly = [_options[@"decode-only"] boolValue];
         if(decodeOnly)
         {
@@ -413,7 +415,11 @@
                                     _optional_dict[@"data"] = param;
                                     break;
                                 case 0x10:
+                                {
                                     _optional_dict[@"segmentation"] = param;
+                                    _packet.incomingSegment = [[UMSCCP_Segment alloc]initWithHeaderData:param];
+                                    _packet.incomingSegment.data = _packet.incomingSccpData;
+                                }
                                     break;
                                 case 0x11:
                                     _optional_dict[@"hop-counter"] = param;
@@ -424,6 +430,8 @@
                                 case 0x13:
                                     _optional_dict[@"long-data"] = param;
                                     break;
+                                    
+                                
                             }
                         }
                     }

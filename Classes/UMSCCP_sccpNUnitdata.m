@@ -300,9 +300,9 @@ static int segmentReferenceId;
                     }
 
                     _dataSegments  = [self splitDataIntoSegments:_data
-                                                                            withSegmentSizes:segmentSizes
-                                                                                   reference:ref
-                                                                                      maxPdu:maxPdu];
+                                                withSegmentSizes:segmentSizes
+                                                       reference:ref
+                                                          maxPdu:maxPdu];
                     NSUInteger count = _dataSegments.count;
                     _data = NULL;
                     for(int i=0;i<count;i++)
