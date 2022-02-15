@@ -348,6 +348,7 @@
             if(param_optional > 0)
             {
                 _sccp_optional = [NSData dataWithBytes:&d[param_optional] length:len-param_optional];
+                _packet.incomingOptionalData = _sccp_optional;
                 _decodedJson[@"sccp-optional-raw"] = _sccp_optional.hexString;
                 const uint8_t *bytes = _sccp_optional.bytes;
                 NSUInteger m = _sccp_optional.length;
@@ -417,8 +418,8 @@
                                 case 0x10:
                                 {
                                     _optional_dict[@"segmentation"] = param;
-                                    _packet.incomingSegment = [[UMSCCP_Segment alloc]initWithHeaderData:param];
-                                    _packet.incomingSegment.data = _packet.incomingSccpData;
+                                    //_packet.incomingSegment = [[UMSCCP_Segment alloc]initWithHeaderData:param];
+                                    // _packet.incomingSegment.data = _packet.incomingSccpData;
                                 }
                                     break;
                                 case 0x11:

@@ -1340,7 +1340,6 @@
                                              provider:provider
                                       routedToLinkset:&outgoingLinkset];
                             packet.outgoingLinkset = outgoingLinkset;
-
                         }
                         else
                         {
