@@ -296,7 +296,7 @@
     [optionsData appendData:[segment segmentationHeader]];
     if(xoptionsdata.length > 0)
     {
-        [optionsData appendData:xoptionsdata]; /* optional parameters including end */
+        [optionsData appendData:xoptionsdata];
     }
     return [self sendXUDT:segment.data
                   calling:src
@@ -366,8 +366,6 @@
 {
     NSData *srcEncoded = [src encode:_sccpVariant];
     NSData *dstEncoded = [dst encode:_sccpVariant];
-
-    
 
     NSMutableData *sccp_pdu = [[NSMutableData alloc]init];
     uint8_t header[7];
