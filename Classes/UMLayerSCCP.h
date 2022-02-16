@@ -25,8 +25,10 @@
 #import "UMSCCP_Packet.h"
 #import "UMSCCP_TracefileProtocol.h"
 #import "UMSCCP_StatisticDb.h"
+
 @class UMSCCP_Statistics;
 @class UMSCCP_PrometheusData;
+@class UMSCCP_PendingSegmentsStorage;
 
 typedef enum SccpGtFileSection
 {
@@ -71,8 +73,6 @@ typedef enum UMSccpScreening_result
     NSString                    *_mtp3_name;
     UMLayerMTP3                 *_mtp3;
     UMSynchronizedDictionary    *_dpcAvailability;
-    NSMutableDictionary         *_pendingSegments;
-
     UMSynchronizedArray         *_traceSendDestinations;
     UMSynchronizedArray         *_traceReceiveDestinations;
     UMSynchronizedArray         *_traceDroppedDestinations;
@@ -127,6 +127,7 @@ typedef enum UMSccpScreening_result
     UMMutex                                  *_loggingLock;
     UMSCCP_PrometheusData                    *_prometheusData;
     id<sccp_tcapDecoder>                     _tcapDecodeDelegate; /* a delegate which decodes opcode and appcontext for us */
+    UMSCCP_PendingSegmentsStorage   *_pendingSegmentsStorage;
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;
@@ -258,16 +259,17 @@ typedef enum UMSccpScreening_result
                 dpc:(UMMTP3PointCode *)dpc
                  si:(int)si
                  ni:(int)ni
+                sls:(int)sls
         linksetName:(NSString *)linksetName
             options:(NSDictionary *)options
               ttmap:(UMMTP3TranslationTableMap *)map;
-
 
 - (void)mtpPause:(NSData *)data
     callingLayer:(id)mtp3Layer
       affectedPc:(UMMTP3PointCode *)opc
               si:(int)si
               ni:(int)ni
+             sls:(int)sls
          options:(NSDictionary *)options;
 
 - (void)mtpResume:(NSData *)data
@@ -275,13 +277,15 @@ typedef enum UMSccpScreening_result
        affectedPc:(UMMTP3PointCode *)opc
                si:(int)si
                ni:(int)ni
-          options:(NSDictionary *)options;
+              sls:(int)sls
+         options:(NSDictionary *)options;
 
 - (void)mtpStatus:(NSData *)data
      callingLayer:(id)mtp3Layer
        affectedPc:(UMMTP3PointCode *)opc
                si:(int)si
                ni:(int)ni
+              sls:(int)sls
            status:(int)status
           options:(NSDictionary *)options;
 
@@ -303,7 +307,8 @@ typedef enum UMSccpScreening_result
                     dpc:(UMMTP3PointCode *)dpc
                 options:(NSDictionary *)options
                provider:(UMLayerMTP3 *)provider
-        routedToLinkset:(NSString **)outgoingLinkset;
+        routedToLinkset:(NSString **)outgoingLinkset
+                    sls:(int)sls;
 
     /* this is for transiting UDTS */
 - (UMMTP3_Error) sendUDTS:(NSData *)data
@@ -315,7 +320,9 @@ typedef enum UMSccpScreening_result
                       dpc:(UMMTP3PointCode *)dpc
                   options:(NSDictionary *)options
                  provider:(UMLayerMTP3 *)provider
-          routedToLinkset:(NSString **)outgoingLinkset;
+          routedToLinkset:(NSString **)outgoingLinkset
+                      sls:(int)sls;
+
 
 
     /* this is for UDTS generated locally */
@@ -327,7 +334,8 @@ typedef enum UMSccpScreening_result
                           opc:(UMMTP3PointCode *)opc
                           dpc:(UMMTP3PointCode *)dpc
                       options:(NSDictionary *)options
-                     provider:(UMLayerMTP3 *)provider;
+                     provider:(UMLayerMTP3 *)provider
+                          sls:(int)sls;
 
 - (UMMTP3_Error) generateXUDTS:(NSData *)data
                        calling:(SccpAddress *)src
@@ -337,7 +345,8 @@ typedef enum UMSccpScreening_result
                            opc:(UMMTP3PointCode *)opc
                            dpc:(UMMTP3PointCode *)dpc
                        options:(NSDictionary *)options
-                      provider:(UMLayerMTP3 *)provider;
+                      provider:(UMLayerMTP3 *)provider
+                           sls:(int)sls;
 
 - (UMMTP3_Error) generateLUDTS:(NSData *)data
                        calling:(SccpAddress *)src
@@ -347,7 +356,9 @@ typedef enum UMSccpScreening_result
                            opc:(UMMTP3PointCode *)opc
                            dpc:(UMMTP3PointCode *)dpc
                        options:(NSDictionary *)options
-                      provider:(UMLayerMTP3 *)provider;
+                      provider:(UMLayerMTP3 *)provider
+sls:(int)sls;
+
 
 -(UMMTP3_Error) sendXUDT:(NSData *)pdu
                  calling:(SccpAddress *)src
@@ -360,13 +371,32 @@ typedef enum UMSccpScreening_result
              optionsData:(NSData *)xoptionsdata
                  options:(NSDictionary *)options
                 provider:(UMLayerMTP3 *)provider
-         routedToLinkset:(NSString **)outgoingLinkset;
+         routedToLinkset:(NSString **)outgoingLinkset
+                     sls:(int)sls;
+
+
+
+-(UMMTP3_Error) processXUDTsegment:(UMSCCP_Segment *)pdu
+                           calling:(SccpAddress *)src
+                            called:(SccpAddress *)dst
+                      serviceClass:(SCCP_ServiceClass)pclass
+                          handling:(SCCP_Handling)handling
+                          hopCount:(int)hopCount
+                               opc:(UMMTP3PointCode *)opc
+                               dpc:(UMMTP3PointCode *)dpc
+                       optionsData:(NSData *)xoptionsdata
+                           options:(NSDictionary *)options
+                          provider:(UMLayerMTP3 *)provider
+                   routedToLinkset:(NSString **)outgoingLinkset
+                               sls:(int)sls
+                            packet:(UMSCCP_Packet *)pkt;
+
 
 
 -(UMMTP3_Error) sendXUDTsegment:(UMSCCP_Segment *)pdu
                         calling:(SccpAddress *)src
                          called:(SccpAddress *)dst
-                          class:(SCCP_ServiceClass)pclass
+                   serviceClass:(SCCP_ServiceClass)pclass
                        handling:(SCCP_Handling)handling
                        hopCount:(int)hopCount
                             opc:(UMMTP3PointCode *)opc
@@ -374,7 +404,8 @@ typedef enum UMSccpScreening_result
                     optionsData:(NSData *)xoptionsdata
                         options:(NSDictionary *)options
                        provider:(UMLayerMTP3 *)provider
-                routedToLinkset:(NSString **)outgoingLinkset;
+                routedToLinkset:(NSString **)outgoingLinkset
+                            sls:(int)sls;
 
 -(UMMTP3_Error) sendXUDTS:(NSData *)data
                   calling:(SccpAddress *)src
@@ -387,7 +418,8 @@ typedef enum UMSccpScreening_result
               optionsData:(NSData *)xoptionsdata
                   options:(NSDictionary *)options
                  provider:(UMLayerMTP3 *)provider
-          routedToLinkset:(NSString **)outgoingLinkset;
+          routedToLinkset:(NSString **)outgoingLinkset
+                      sls:(int)sls;
 
 
 - (UMSynchronizedSortedDictionary *) routeTestForMSISDN:(NSString *)msisdn

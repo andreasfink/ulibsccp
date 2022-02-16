@@ -56,8 +56,8 @@
 - (NSString *)description
 {
     NSMutableString *s = [[NSMutableString alloc]init];
-    [s appendFormat:@"{ index:%d reference:%ld remainingSegment:%d first:%@ class1:%@ data:%@ }",
-     _segmentIndex,_reference,_remainingSegment,(_first ? @"YES" :@"NO" ),(_class1 ? @"YES" :@"NO" ),
+    [s appendFormat:@"{ reference:%ld remainingSegment:%d first:%@ class1:%@ data:%@ }",
+     _reference,_remainingSegment,(_first ? @"YES" :@"NO" ),(_class1 ? @"YES" :@"NO" ),
      _data.hexString];
     return s;
 }

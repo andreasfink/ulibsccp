@@ -329,6 +329,7 @@ static int segmentReferenceId;
                         packet.incomingOptionalData = optional_data;
                         packet.incomingServiceType = SCCP_XUDT;
                         packet.incomingFromLocal = YES;
+                        packet.sls = -1;
                         [_sccpLayer.filterDelegate sccpDecodeTcapGsmmap:packet];
                         _statisticsSection2 = UMSCCP_StatisticSection_XUDT_TX;
                         [packet copyIncomingToOutgoing];
@@ -363,6 +364,7 @@ static int segmentReferenceId;
                     packet.incomingMaxHopCount = _maxHopCount;
                     packet.incomingOptionalData = optional_data;
                     packet.incomingFromLocal = YES;
+                    packet.sls = -1;
                     if(useXUDT)
                     {
                         packet.incomingServiceType = SCCP_XUDT;
@@ -543,7 +545,6 @@ static int segmentReferenceId;
     {
         UMSCCP_Segment *s = segments[i];
         s.remainingSegment = (int)segments.count - i - 1;
-        s.segmentIndex = i;
     }
 
     if(debug)

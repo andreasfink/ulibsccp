@@ -109,6 +109,7 @@
     UMSMS                       *_sms;
     NSString                    *_partsInfo;
     NSString                    *_routingSelector;
+    int                         _sls;
 }
 
 
@@ -195,6 +196,7 @@
 @property(readwrite,strong,atomic) UMSMS                       *sms;
 @property(readwrite,strong,atomic) NSString                    *partsInfo;
 @property(readwrite,strong,atomic) NSString                    *routingSelector;
+@property(readwrite,assign,atomic) int                         sls;
 
 - (NSString *) incomingPacketType;
 - (NSString *) outgoingPacketType;

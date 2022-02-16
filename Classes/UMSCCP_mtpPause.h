@@ -19,6 +19,7 @@
     UMMTP3PointCode *_affectedPointCode;
     int _si;
     int _ni;
+    int _sls;
     NSDictionary *_options;
     UMLayerSCCP *_sccp;
 }
@@ -28,6 +29,7 @@
                affectedPointCode:(UMMTP3PointCode *)affPC
                               si:(int)si
                               ni:(int)ni
+                            sls:(int)sls
                          options:(NSDictionary *)options;
 
 @end

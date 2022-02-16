@@ -20,6 +20,7 @@
                            status:(int)s
                                si:(int)xsi
                                ni:(int)xni
+                              sls:(int)xsls
                           options:(NSDictionary *)xoptions
 
 {
@@ -30,6 +31,7 @@
         _status = s;
         _si = xsi;
         _ni = xni;
+        _sls = xsls;
         _options = xoptions;
         _sccp = layer;
     }

@@ -27,6 +27,7 @@
                                 dpc:(UMMTP3PointCode *)xdpc
                                  si:(int)xsi
                                  ni:(int)xni
+                                sls:(int)sls
                                data:(NSData *)xdata
                             options:(NSDictionary *)xoptions
 {
@@ -36,10 +37,10 @@
                          dpc:xdpc
                           si:xsi
                           ni:xni
+                         sls:sls
                         data:xdata
                      options:xoptions
                          map:NULL];
-
 }
 
 - (UMSCCP_mtpTransfer *)initForSccp:(UMLayerSCCP *)layer
@@ -48,10 +49,10 @@
                                 dpc:(UMMTP3PointCode *)xdpc
                                  si:(int)xsi
                                  ni:(int)xni
+                                sls:(int)sls
                                data:(NSData *)xdata
                             options:(NSDictionary *)xoptions
-                                map:(UMMTP3TranslationTableMap *)ttmap;
-
+                                map:(UMMTP3TranslationTableMap *)ttmap
 {
     self = [super initWithName:@"UMSCCP_mtpTransfer" receiver:layer sender:mtp3 requiresSynchronisation:NO];
     if(self)
@@ -66,6 +67,8 @@
         _packet.logLevel = layer.logLevel;
 		_packet.incomingOpc = xopc;
 		_packet.incomingDpc = xdpc;
+        _packet.sls = sls;
+
         _map = ttmap;
         _data = xdata;
 
@@ -571,7 +574,8 @@
                                                      dpc:_packet.incomingOpc
                                                  options:@{}
                                                 provider:_sccpLayer.mtp3
-                                         routedToLinkset:&outgoingLinkset];
+                                         routedToLinkset:&outgoingLinkset
+                                                     sls:_packet.sls];
                                 _packet.outgoingLinkset = outgoingLinkset;
                             }
                             else
@@ -584,7 +588,8 @@
                                                      opc:_sccpLayer.mtp3.opc /* errors are always sent from this instance */
                                                      dpc:_packet.incomingOpc
                                                  options:@{}
-                                                provider:_sccpLayer.mtp3];
+                                                provider:_sccpLayer.mtp3
+                                                     sls:_packet.sls];
                             }
                             break;
                         case SCCP_XUDTS:
@@ -601,7 +606,8 @@
                                           optionsData:_packet.incomingOptionalData
                                               options:@{}
                                              provider:_sccpLayer.mtp3
-                                      routedToLinkset:&outgoingLinkset];
+                                      routedToLinkset:&outgoingLinkset
+                                                  sls:_packet.sls];
                                 _packet.outgoingLinkset = outgoingLinkset;
                             }
                             else
@@ -614,7 +620,8 @@
                                                       opc:_sccpLayer.mtp3.opc /* errors are always sent from this instance */
                                                       dpc:_packet.incomingOpc
                                                   options:@{}
-                                                 provider:_sccpLayer.mtp3];
+                                                 provider:_sccpLayer.mtp3
+                                                      sls:_packet.sls];
                             }
                             break;
                         case SCCP_LUDTS:
@@ -629,8 +636,8 @@
                                                   opc:_sccpLayer.mtp3.opc
                                                   dpc:_packet.incomingOpc
                                               options:@{}
-                                             provider:_sccpLayer.mtp3];
-
+                                             provider:_sccpLayer.mtp3
+                                                  sls:_packet.sls];
                             }
                             else
     #endif
@@ -643,7 +650,8 @@
                                                       opc:_sccpLayer.mtp3.opc /* errors are always sent from this instance */
                                                       dpc:_packet.incomingOpc
                                                   options:@{}
-                                                 provider:_sccpLayer.mtp3];
+                                                 provider:_sccpLayer.mtp3
+                                                      sls:_packet.sls];
                             }
                             break;
                         default:
@@ -930,7 +938,8 @@
                                                   dpc:_dpc
                                               options:@{}
                                              provider:_sccpLayer.mtp3
-                                       routedToLinkset:&outgoingLinkset];
+                                       routedToLinkset:&outgoingLinkset
+                                                   sls:_packet.sls];
             _packet.outgoingLinkset = outgoingLinkset;
             break;
         }
@@ -942,133 +951,5 @@
     }
     return YES;
 }
-
-#if 0
-- (BOOL)processUDT /* returns true if processed locally */
-{
-    return [sccpLayer routeUDT:sccp_pdu
-                       calling:src
-                        called:dst
-                         class:m_protocol_class
-                      handling:m_handling
-                           opc:opc
-                           dpc:dpc
-                       options:options
-                      provider:sccpLayer.mtp3
-                     fromLocal:NO];
-}
-
-- (BOOL)processUDTS
-{
-    NSDate *ts = [NSDate new];
-    options[@"sccp-timestamp-udt"] = ts;
-
-    return [sccpLayer routeUDTS:sccp_pdu
-                        calling:src
-                         called:dst
-                         reason:m_return_cause
-                            opc:opc
-                            dpc:dpc
-                        options:options
-                       provider:sccpLayer.mtp3
-                      fromLocal:NO];
-}
-
-- (BOOL)processXUDT /* returns true if processed locally */
-{
-    BOOL returnValue = NO;
-    NSDate *ts = [NSDate new];
-    options[@"sccp-timestamp-udt"] = ts;
-    returnValue = [sccpLayer routeXUDT:sccp_pdu
-                               calling:src
-                                called:dst
-                                 class:m_protocol_class
-                                handling:m_handling
-                              hopCount:m_hopcounter
-                                   opc:opc
-                                   dpc:dpc
-                           optionsData:sccp_optional
-                               options:options
-                              provider:sccpLayer.mtp3
-                             fromLocal:NO];
-
-    id<UMSCCP_UserProtocol> upperLayer = [sccpLayer getUserForSubsystem:dst.ssn number:dst];
-    options[@"sccp-timestamp-udt"] = ts;
-
-    if((optional_dict == NULL) ||
-        (      (optional_dict[@"segmenting-reassembling"]==NULL)
-            && (optional_dict[@"sequencing-segmenting"]==NULL)
-            && (optional_dict[@"segmentation"]==NULL)))
-    {
-        [upperLayer sccpNUnitdata:sccp_pdu
-                     callingLayer:sccpLayer
-                          calling:src
-                           called:dst
-                 qualityOfService:0
-                            class:m_protocol_class
-                         handling:m_handling
-                          options:options];
-    }
-    else
-    {
-        UMSCCP_Segment *s = [[UMSCCP_Segment alloc]initWithHeaderData:sccp_optional];
-        s.data = sccp_pdu;
-        NSData *reassembled = NULL;
-        NSString *key = MAKE_SEGMENT_KEY(src,dst,s.reference);
-        @synchronized(sccpLayer.pendingSegments)
-        {
-            UMSCCP_ReceivedSegments *rs = sccpLayer.pendingSegments[key];
-            if(rs == NULL)
-            {
-                rs = [[UMSCCP_ReceivedSegments alloc]init];
-                rs.src = src;
-                rs.dst = dst;
-                rs.ref = s.reference;
-            }
-            [rs addSegment:s];
-            reassembled = [rs reassembledData];
-            if(reassembled)
-            {
-                [sccpLayer.pendingSegments removeObjectForKey:key];
-            }
-            else
-            {
-                sccpLayer.pendingSegments[key] = rs;
-            }
-        }
-        if(reassembled)
-        {
-            [upperLayer sccpNUnitdata:reassembled
-                         callingLayer:sccpLayer
-                              calling:src
-                               called:dst
-                     qualityOfService:0
-                                class:m_protocol_class
-                             handling:m_handling
-                              options:options];
-        }
-        
-    }
-    return returnValue;
-}
-
-- (BOOL)processXUDTS
-{
-    NSDate *ts = [NSDate new];
-    options[@"sccp-timestamp-udt"] = ts;
-
-    return [sccpLayer routeXUDTS:sccp_pdu
-                         calling:src
-                          called:dst
-                          reason:m_return_cause
-                        hopCount:m_hopcounter
-                             opc:opc
-                             dpc:dpc
-                     optionsData:sccp_optional
-                         options:options
-                        provider:sccpLayer.mtp3
-                       fromLocal:NO];
-}
-#endif
 
 @end

@@ -19,6 +19,7 @@
                 affectedPointCode:(UMMTP3PointCode *)affPC
                                si:(int)xsi
                                ni:(int)xni
+                               sls:(int)xsls
                           options:(NSDictionary *)xoptions
 {
     self = [super initWithName:@"UMSCCP_mtpResume" receiver:layer sender:mtp3 requiresSynchronisation:NO];
@@ -27,6 +28,7 @@
         _affectedPointCode = affPC;
         _si = xsi;
         _ni = xni;
+        _sls = xsls;
         _options = xoptions;
         _sccp = layer;
     }

@@ -24,6 +24,7 @@
     NSData          *_data;
     int             _si;
     int             _ni;
+    int             _sls;
     UMMTP3PointCode *_opc;
     UMMTP3PointCode *_dpc;
     NSMutableDictionary *_options;
@@ -64,6 +65,7 @@
                                 dpc:(UMMTP3PointCode *)dpc
                                  si:(int)si
                                  ni:(int)ni
+                                sls:(int)sls
                                data:(NSData *)data
                             options:(NSDictionary *)options
                                 map:(UMMTP3TranslationTableMap *)map;
@@ -74,7 +76,9 @@
                                 dpc:(UMMTP3PointCode *)dpc
                                  si:(int)si
                                  ni:(int)ni
+                                sls:(int)sls
                                data:(NSData *)data
                             options:(NSDictionary *)options;
+
 
 @end

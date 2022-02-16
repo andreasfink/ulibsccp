@@ -27,6 +27,9 @@
 #import "UMSCCP_StatisticDbRecord.h"
 #import <ulibasn1/ulibasn1.h>
 #import "UMSCCP_PrometheusData.h"
+#import "UMSCCP_ReceivedSegment.h"
+#import "UMSCCP_ReceivedSegments.h"
+#import "UMSCCP_PendingSegmentsStorage.h"
 
 @implementation UMLayerSCCP
 
@@ -55,7 +58,6 @@
 {
     _subsystemUsers = [[UMSynchronizedDictionary alloc]init];
     _dpcAvailability = [[UMSynchronizedDictionary alloc]init];
-    _pendingSegments  = [[NSMutableDictionary alloc]init];
     _traceSendDestinations =[[UMSynchronizedArray alloc]init];
     _traceReceiveDestinations =[[UMSynchronizedArray alloc]init];
     _traceDroppedDestinations =[[UMSynchronizedArray alloc]init];
@@ -66,7 +68,7 @@
     _gttSelectorRegistry.logLevel = self.logLevel;
     _gttSelectorRegistry.logFeed = self.logFeed;
     _loggingLock = [[UMMutex alloc]initWithName:@"logging-lock"];
-    
+    _pendingSegmentsStorage = [[UMSCCP_PendingSegmentsStorage alloc]init];
     [self runSelectorInBackground:@selector(initializeStatistics)];
     _housekeepingTimer = [[UMTimer alloc]initWithTarget:self
                                                selector:@selector(housekeeping)
@@ -120,6 +122,7 @@
                 dpc:(UMMTP3PointCode *)dpc
                  si:(int)si
                  ni:(int)ni
+                sls:(int)sls
         linksetName:(NSString *)linksetName
             options:(NSDictionary *)xoptions
               ttmap:(UMMTP3TranslationTableMap *)map
@@ -137,7 +140,7 @@
         }
         options[@"mtp3-incoming-linkset"] = linksetName;
 
-        UMSCCP_mtpTransfer *task = [[UMSCCP_mtpTransfer alloc]initForSccp:self mtp3:mtp3Layer opc:opc dpc:dpc si:si ni:ni data:data options:options map:map];
+        UMSCCP_mtpTransfer *task = [[UMSCCP_mtpTransfer alloc]initForSccp:self mtp3:mtp3Layer opc:opc dpc:dpc si:si ni:ni sls:sls data:data options:options map:map ];
         [self queueFromLower:task];
     }
 }
@@ -147,6 +150,7 @@
       affectedPc:(UMMTP3PointCode *)affPC
               si:(int)si
               ni:(int)ni
+             sls:(int)sls
          options:(NSDictionary *)options
 {
     @autoreleasepool
@@ -156,6 +160,7 @@
                                                   affectedPointCode:affPC
                                                                  si:si
                                                                  ni:ni
+                                                                sls:sls
                                                             options:options];
         @autoreleasepool
         {
@@ -171,6 +176,7 @@
        affectedPc:(UMMTP3PointCode *)affPC
                si:(int)si
                ni:(int)ni
+              sls:(int)sls
           options:(NSDictionary *)options
 {
     @autoreleasepool
@@ -180,6 +186,7 @@
                                                     affectedPointCode:affPC
                                                                    si:si
                                                                    ni:ni
+                                                                  sls:sls
                                                               options:options];
         [task main];
   //    [self queueFromLowerWithPriority:task];
@@ -191,6 +198,7 @@
        affectedPc:(UMMTP3PointCode *)affPC
                si:(int)si
                ni:(int)ni
+              sls:(int)sls
            status:(int)status
           options:(NSDictionary *)options
 {
@@ -202,6 +210,7 @@
                                                                status:status
                                                                    si:si
                                                                    ni:ni
+                                                                  sls:sls
                                                               options:options];
             [task main];
       //    [self queueFromLowerWithPriority:task];
@@ -275,11 +284,127 @@
     [self setUser:usr forSubsystem:ssn number:addr];
 }
 
+-(UMMTP3_Error) processXUDTsegment:(UMSCCP_Segment *)pdu
+                           calling:(SccpAddress *)src
+                            called:(SccpAddress *)dst
+                      serviceClass:(SCCP_ServiceClass)pclass
+                          handling:(SCCP_Handling)handling
+                          hopCount:(int)hopCount
+                               opc:(UMMTP3PointCode *)opc
+                               dpc:(UMMTP3PointCode *)dpc
+                       optionsData:(NSData *)xoptionsdata
+                           options:(NSDictionary *)options
+                          provider:(UMLayerMTP3 *)provider
+                   routedToLinkset:(NSString **)outgoingLinkset
+                               sls:(int)sls
+                            packet:(UMSCCP_Packet *)pkt
+{
+    UMSCCP_ReceivedSegment *s = [[UMSCCP_ReceivedSegment alloc]init];
+    s.src = src;
+    s.dst = dst;
+    s.pclass = pclass;
+    s.handling = handling;
+    s.hopCount = hopCount;
+    s.opc = opc;
+    s.dpc = dpc;
+    s.optionsData = xoptionsdata;
+    s.options = options;
+    s.provider = provider;
+    
+    
+    NSArray <UMSCCP_ReceivedSegment *> *segs = [ _pendingSegmentsStorage processReceivedSegment:s];
+    for(UMSCCP_ReceivedSegment *seg in segs)
+    {
+        UMMTP3_Error e =  [self sendXUDTsegment:seg.segment
+                                        calling:seg.src
+                                         called:seg.dst
+                                    serviceClass:seg.pclass
+                                       handling:seg.handling
+                                       hopCount:seg.hopCount
+                                            opc:seg.opc
+                                            dpc:seg.dpc
+                                    optionsData:seg.optionsData
+                                        options:seg.options
+                                       provider:seg.provider
+                                routedToLinkset:outgoingLinkset
+                                            sls:seg.sls];
+        NSString *s = NULL;
+        switch(e)
+        {
+            case UMMTP3_error_internal_error:
+                s = [NSString stringWithFormat:@"Can not forward XUDT segment. internal error OPC=%@ DPC=%@ SRC=%@ DST=%@ DATA=%@",
+                     seg.opc,seg.dpc,seg.src,seg.dst,pkt.incomingSccpData];
+                break;
+            case UMMTP3_error_pdu_too_big:
+                
+                s = [NSString stringWithFormat:@"Can not forward XUDT segment. PDU too big. OPC=%@ DPC=%@ SRC=%@ DST=%@ DATA=%@",
+                     seg.opc,seg.dpc,seg.src,seg.dst,pkt.incomingSccpData];
+                break;
+            case UMMTP3_error_no_route_to_destination:
+                s = [NSString stringWithFormat:@"Can not forward XUDT segment. No route to destination OPC=%@ DPC=%@ SRC=%@ DST=%@ DATA=%@",
+                     seg.opc,seg.dpc,seg.src,seg.dst,pkt.incomingSccpData];
+                break;
+            case UMMTP3_error_invalid_variant:
+                s = [NSString stringWithFormat:@"Can not forward XUDT segment. Invalid variant.OPC=%@ DPC=%@ SRC=%@ DST=%@ DATA=%@",
+                     seg.opc,seg.dpc,seg.src,seg.dst,pkt.incomingSccpData];
+                break;
+            case UMMTP3_no_error:
+                break;
+        }
+        if(s)
+        {
+            [self logMinorError:s];
+            NSLog(@"%@",s);
+        }
+            
+        if(seg.handling == SCCP_HANDLING_RETURN_ON_ERROR)
+        {
+            SCCP_ReturnCause causeValue = SCCP_ReturnCause_not_set;
+            switch(e)
+            {
+                case UMMTP3_error_no_route_to_destination:
+                    causeValue = SCCP_ReturnCause_MTPFailure;
+                    [_unrouteablePacketsTraceDestination logPacket:pkt];
+                    break;
+                case UMMTP3_error_pdu_too_big:
+                    causeValue = SCCP_ReturnCause_ErrorInMessageTransport;
+                    [_problematicTraceDestination logPacket:pkt];
+                    break;
+                case UMMTP3_error_invalid_variant:
+                    causeValue = SCCP_ReturnCause_ErrorInMessageTransport;
+                    [_problematicTraceDestination logPacket:pkt];
+                    break;
+                case UMMTP3_error_internal_error:
+                    causeValue = SCCP_ReturnCause_ErrorInLocalProcessing;
+                    [_problematicTraceDestination logPacket:pkt];
+                    break;
+                case UMMTP3_no_error:
+                    causeValue = SCCP_ReturnCause_not_set;
+                    break;
+            }
+
+           if(causeValue != SCCP_ReturnCause_not_set)
+           {
+               [self generateXUDTS:pkt.incomingSccpData
+                           calling:seg.src
+                            called:seg.dst
+                             class:seg.pclass
+                       returnCause:causeValue
+                               opc:_mtp3.opc /* errors are always sent from this instance */
+                               dpc:seg.opc
+                           options:@{}
+                          provider:seg.provider
+                               sls:pkt.sls];
+           }
+        }
+    }
+    return UMMTP3_no_error; /* we already did error processing ourselves */
+}
 
 -(UMMTP3_Error) sendXUDTsegment:(UMSCCP_Segment *)segment
                         calling:(SccpAddress *)src
                          called:(SccpAddress *)dst
-                          class:(SCCP_ServiceClass)pclass
+                   serviceClass:(SCCP_ServiceClass)pclass
                        handling:(SCCP_Handling)handling
                        hopCount:(int)hopCount
                             opc:(UMMTP3PointCode *)opc
@@ -288,6 +413,7 @@
                         options:(NSDictionary *)options
                        provider:(UMLayerMTP3 *)provider
                 routedToLinkset:(NSString **)outgoingLinkset
+                            sls:(int)sls
 {
     /* we assume here the segmentation header is not included. So we add it here*/
     NSMutableData *optionsData = [[NSMutableData alloc]init];
@@ -298,6 +424,14 @@
     {
         [optionsData appendData:xoptionsdata];
     }
+    
+    /* The standard says
+        – The SCCP shall place each segment of user data into separate XUDT messages, each with the same Called Party Address and identical MTP routing information (DPC, SLS).
+       
+        which means we need to collect all segments first, do a routing
+        decision and then send all the segments down the same pipe with the same SLC.
+     */
+    
     return [self sendXUDT:segment.data
                   calling:src
                    called:dst
@@ -309,30 +443,17 @@
               optionsData:optionsData
                   options:options
                  provider:provider
-          routedToLinkset:outgoingLinkset];
+          routedToLinkset:outgoingLinkset
+                      sls:sls];
 }
 
-
-#if DEPRECIATED
-
--(UMMTP3_Error) sendPDU:(NSData *)pdu
-                    opc:(UMMTP3PointCode *)opc
-                    dpc:(UMMTP3PointCode *)dpc
-                options:(NSDictionary *)options
-{
-        return [self sendPDU: pdu
-                         opc:opc
-                         dpc:dpc
-                     options:options
-             outgoingLinkset:NULL];
-}
-#endif
 
 -(UMMTP3_Error) sendPDU:(NSData *)pdu
                     opc:(UMMTP3PointCode *)opc
                     dpc:(UMMTP3PointCode *)dpc
                 options:(NSDictionary *)options
         routedToLinkset:(NSString **)outgoingLinkset
+                    sls:(int)sls
 {
     if(_mtp3==NULL)
     {
@@ -348,7 +469,8 @@
                        si:MTP3_SERVICE_INDICATOR_SCCP
                        mp:0
                   options:options
-          routedToLinkset:outgoingLinkset];
+          routedToLinkset:outgoingLinkset
+                      sls:sls];
 }
 
 -(UMMTP3_Error) sendXUDT:(NSData *)data
@@ -363,6 +485,7 @@
                  options:(NSDictionary *)options
                 provider:(UMLayerMTP3 *)provider
          routedToLinkset:(NSString **)outgoingLinkset
+                     sls:(int)sls
 {
     NSData *srcEncoded = [src encode:_sccpVariant];
     NSData *dstEncoded = [dst encode:_sccpVariant];
@@ -395,7 +518,7 @@
         [sccp_pdu appendData:xoptionsdata];
         [sccp_pdu appendByte:0x00]; /* end of optional parameters */
     }
-    UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc options:options routedToLinkset:outgoingLinkset];
+    UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc options:options routedToLinkset:outgoingLinkset sls:sls];
 
     NSString *s;
     switch(result)
@@ -453,6 +576,7 @@
                   options:(NSDictionary *)options
                  provider:(UMLayerMTP3 *)provider
           routedToLinkset:(NSString **)outgoingLinkset
+                      sls:(int)sls
 {
     NSData *srcEncoded = [src encode:_sccpVariant];
     NSData *dstEncoded = [dst encode:_sccpVariant];
@@ -489,7 +613,7 @@
     }
     
 
-    UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc options:options routedToLinkset:outgoingLinkset];
+    UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc options:options routedToLinkset:outgoingLinkset sls:sls];
     NSString *s;
     NSString *action = @"drop";
     switch(result)
@@ -1299,7 +1423,8 @@
                                       dpc:packet.outgoingDpc
                                   options:packet.outgoingOptions
                                  provider:provider
-                          routedToLinkset:&outgoingLinkset];
+                          routedToLinkset:&outgoingLinkset
+                                      sls:packet.sls];
                         packet.outgoingLinkset = outgoingLinkset;
                         break;
                     case SCCP_UDTS:
@@ -1312,24 +1437,27 @@
                                        dpc:packet.outgoingDpc
                                    options:packet.outgoingOptions
                                   provider:provider
-                           routedToLinkset:&outgoingLinkset];
+                           routedToLinkset:&outgoingLinkset
+                                       sls:packet.sls];
                            packet.outgoingLinkset = outgoingLinkset;
                         break;
                     case SCCP_XUDT:
                         if(packet.outgoingSegment)
                         {
-                            e = [self sendXUDTsegment:packet.outgoingSegment
-                                              calling:packet.outgoingCallingPartyAddress
-                                               called:packet.outgoingCalledPartyAddress
-                                                class:packet.outgoingServiceClass
-                                             handling:packet.outgoingHandling
-                                             hopCount:packet.outgoingMaxHopCount
-                                                  opc:packet.outgoingOpc
-                                                  dpc:packet.outgoingDpc
-                                          optionsData:packet.outgoingOptionalData
-                                              options:packet.outgoingOptions
-                                             provider:provider
-                                      routedToLinkset:&outgoingLinkset];
+                            e = [self processXUDTsegment:packet.outgoingSegment
+                                                 calling:packet.outgoingCallingPartyAddress
+                                                  called:packet.outgoingCalledPartyAddress
+                                                    serviceClass:packet.outgoingServiceClass
+                                                handling:packet.outgoingHandling
+                                                hopCount:packet.outgoingMaxHopCount
+                                                     opc:packet.outgoingOpc
+                                                     dpc:packet.outgoingDpc
+                                             optionsData:packet.outgoingOptionalData
+                                                 options:packet.outgoingOptions
+                                                provider:provider
+                                         routedToLinkset:&outgoingLinkset
+                                                     sls:packet.sls
+                                                  packet:packet];
                             packet.outgoingLinkset = outgoingLinkset;
                         }
                         else
@@ -1345,7 +1473,8 @@
                                    optionsData:packet.outgoingOptionalData
                                        options:packet.outgoingOptions
                                       provider:provider
-                                   routedToLinkset:&outgoingLinkset];
+                                   routedToLinkset:&outgoingLinkset
+                                           sls:packet.sls];
                              packet.outgoingLinkset = outgoingLinkset;
                         }
                         break;
@@ -1361,7 +1490,8 @@
                                 optionsData:packet.outgoingOptionalData
                                     options:packet.outgoingOptions
                                    provider:provider
-                            routedToLinkset:&outgoingLinkset];
+                            routedToLinkset:&outgoingLinkset
+                                        sls:packet.sls];
                           packet.outgoingLinkset = outgoingLinkset;
                         break;
                     case SCCP_LUDT:
@@ -1435,7 +1565,8 @@
                                opc:_mtp3.opc /* errors are always sent from this instance */
                                dpc:packet.incomingOpc
                            options:@{}
-                          provider:_mtp3];
+                          provider:_mtp3
+                               sls:packet.sls];
             }
             else if(packet.incomingServiceType==SCCP_XUDT)
             {
@@ -1447,7 +1578,8 @@
                                 opc:_mtp3.opc /* errors are always sent from this instance */
                                 dpc:packet.incomingOpc
                             options:@{}
-                           provider:_mtp3];
+                           provider:_mtp3
+                                sls:packet.sls];
             }
             else if(packet.incomingServiceType==SCCP_LUDT)
             {
@@ -1459,7 +1591,8 @@
                                 opc:_mtp3.opc /* errors are always sent from this instance */
                                 dpc:packet.incomingOpc
                             options:@{}
-                           provider:_mtp3];
+                           provider:_mtp3
+                                sls:packet.sls];
             }
             else
             {
@@ -1471,7 +1604,8 @@
                                opc:_mtp3.opc /* errors are always sent from this instance */
                                dpc:packet.incomingOpc
                            options:@{}
-                          provider:_mtp3];
+                          provider:_mtp3
+                               sls:packet.sls];
             }
             [_unrouteablePacketsTraceDestination logPacket:packet];
             
@@ -1492,6 +1626,7 @@
                  options:(NSDictionary *)options
                 provider:(UMLayerMTP3 *)provider
          routedToLinkset:(NSString **)outgoingLinkset
+                     sls:(int)sls
 {
     if(_automaticAnsiItuConversion==YES)
     {
@@ -1621,7 +1756,7 @@
     [sccp_pdu appendByte:data.length];
     [sccp_pdu appendData:data];
 
-    UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc options:options routedToLinkset:outgoingLinkset];
+    UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc options:options routedToLinkset:outgoingLinkset sls:sls];
     NSString *s;
     NSString *action = @"drop";
     switch(result)
@@ -1697,6 +1832,7 @@
                      options:(NSDictionary *)options
                     provider:(UMLayerMTP3 *)provider
              routedToLinkset:(NSString **)outgoingLinkset
+                         sls:(int)sls
 {
     NSData *srcEncoded = [src encode:_sccpVariant];
     NSData *dstEncoded = [dst encode:_sccpVariant];
@@ -1716,7 +1852,7 @@
     [sccp_pdu appendByte:data.length];
     [sccp_pdu appendData:data];
 
-    UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc options:options routedToLinkset:outgoingLinkset];
+    UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc options:options routedToLinkset:outgoingLinkset sls:sls];
     NSString *s;
     NSString *action = @"drop";
     switch(result)
@@ -1771,11 +1907,11 @@
         case UMMTP3_no_error:
             if(self.logLevel <= UMLOG_DEBUG)
             {
-                [self.logFeed debugText:[NSString stringWithFormat:@"sendPDU to %@: %@->%@ success",_mtp3.layerName, opc,dpc]];
+                [self.logFeed debugText:[NSString stringWithFormat:@"sendPDU to %@: %@->%@ sls=%d success",_mtp3.layerName, opc,dpc,sls]];
             }
             break;
         default:
-            [self.logFeed majorErrorText:[NSString stringWithFormat:@"sendPDU %@: %@->%@ returns unknown error %d",_mtp3.layerName,opc,dpc,result]];
+            [self.logFeed majorErrorText:[NSString stringWithFormat:@"sendPDU %@: %@->%@ sls=%d returns unknown error %d",_mtp3.layerName,opc,dpc,sls,result]];
 
     }
     return result;
@@ -1790,6 +1926,7 @@
                           dpc:(UMMTP3PointCode *)dpc
                       options:(NSDictionary *)options
                      provider:(UMLayerMTP3 *)provider
+                          sls:(int)sls
 {
     return [self generateUDTS:data
                       calling:src
@@ -1799,7 +1936,8 @@
                           opc:opc
                           dpc:dpc
                       options:options
-                     provider:provider];
+                     provider:provider
+                          sls:sls];
 }
 
 - (UMMTP3_Error) generateLUDTS:(NSData *)data
@@ -1811,6 +1949,7 @@
                            dpc:(UMMTP3PointCode *)dpc
                        options:(NSDictionary *)options
                       provider:(UMLayerMTP3 *)provider
+                           sls:(int)sls
 {
     return [self generateUDTS:data
                       calling:src
@@ -1820,7 +1959,8 @@
                           opc:opc
                           dpc:dpc
                       options:options
-                     provider:provider];
+                     provider:provider
+                          sls:sls];
 }
 
 - (UMMTP3_Error) generateUDTS:(NSData *)data
@@ -1832,11 +1972,11 @@
                           dpc:(UMMTP3PointCode *)dpc
                       options:(NSDictionary *)options
                      provider:(UMLayerMTP3 *)provider
+                          sls:(int)sls
 {
 
     UMSCCP_Packet *packet = [[UMSCCP_Packet alloc]init];
 
-    
     packet.incomingOpc = opc;
     packet.incomingDpc = dpc;
     packet.incomingCallingPartyAddress = src;
@@ -1850,6 +1990,7 @@
     packet.incomingMtp3Layer = provider;
     packet.incomingSccpData = data;
     packet.incomingLinkset = @"internal";
+    packet.sls = sls;
     NSString *outgoingLinkset;
     if(_routeErrorsBackToOriginatingPointCode || /* DISABLES CODE */ (1)) /* if this flag is set, we send the packet back to the original OPC, no matter what. We dont use local routing table to send the UDTS backt to the calling address */
     {
@@ -1862,7 +2003,8 @@
                                     dpc:dpc
                                 options:options
                                provider:provider
-                        routedToLinkset:&outgoingLinkset];
+                        routedToLinkset:&outgoingLinkset
+                                    sls:sls];
         packet.outgoingLinkset = outgoingLinkset;
         return e;
     }

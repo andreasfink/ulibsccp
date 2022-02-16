@@ -14,29 +14,40 @@
 #import <ulibgt/ulibgt.h>
 #import "UMSCCP_Segment.h"
 
-#define MAX_SEGMENTS 16
+#define MAX_SEGMENTS 16 /* the first + 0...15 remaining ones */
 
 #define MAKE_SEGMENT_KEY(src,dst,ref)  [NSString stringWithFormat:@"%@:%@:%06lx", src.encoded.hexString, dst.encoded.hexString, ref]
 
+@class UMSCCP_ReceivedSegment;
 
 @interface UMSCCP_ReceivedSegments : UMObject
 {
-    NSDate *created;
-    SccpAddress *src;
-    SccpAddress *dst;
-    long          ref;
-    UMSCCP_Segment *segments[MAX_SEGMENTS]; /* this is populated from the last to the first */
-    int max;
-    int current;
+    NSDate                  *_created;
+    SccpAddress             *_src;
+    SccpAddress             *_dst;
+    long                    _reference;
+    UMSCCP_Segment          *_segments[MAX_SEGMENTS];       /* this is populated from the last to the first */
+    UMSCCP_ReceivedSegment  *_rxSegments[MAX_SEGMENTS];
+    int                     _max;
+    int                     _current;
+    BOOL                    _isComplete;
+    NSDate                  *_firstPacket;
+    UMMutex                 *_lock;
+    NSString                *_key;
 }
 
+@property(readwrite,strong) NSDate      *create;
 @property(readwrite,strong) SccpAddress *src;
 @property(readwrite,strong) SccpAddress *dst;
-@property(readwrite,assign) long          ref;
+@property(readwrite,assign) long        reference;
+@property(readwrite,assign) int         max;
+@property(readwrite,strong) NSDate      *firstPacket;
 
-- (NSString *) key;
+- (NSString *)key;
 - (NSData *) reassembledData; /* returns NULL if not all segments have been received yet */
 - (void) addSegment:(UMSCCP_Segment *)s;
-
+- (BOOL)processReceivedSegment:(UMSCCP_ReceivedSegment *)s; /* returns YES in case of segmentation error */
+- (NSArray<UMSCCP_ReceivedSegment *> *)allSegments;
+- (BOOL)isComplete;
 
 @end
