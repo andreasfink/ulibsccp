@@ -32,16 +32,15 @@
     SccpAddress     *_src;
     SccpAddress     *_dst;
     NSData          *_sccp_pdu;
-    NSData          *_sccp_optional;
-    SCCP_ServiceClass  _m_protocol_class;
-    SCCP_Handling      _m_handling;
-    int             _m_hopcounter;
+    SCCP_ServiceClass   _m_protocol_class;
+    SCCP_Handling       _m_handling;
+    int                 _m_hopcounter;
     NSMutableDictionary *_optional_dict;
-    int             _importance;
-    int             _end_of_optional_parameters;
-    int             _m_return_cause;
+    int                 _importance;
+    int                 _end_of_optional_parameters;
+    int                 _m_return_cause;
     UMSynchronizedSortedDictionary *_decodedJson;
-    NSData *_decodedPdu;
+    NSData              *_decodedPdu;
     int _m_type;
 
     NSDate                  *_created;

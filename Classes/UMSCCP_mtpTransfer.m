@@ -347,16 +347,20 @@
             }
             if(param_optional > 0)
             {
-                _sccp_optional = [NSData dataWithBytes:&d[param_optional] length:len-param_optional];
-                _packet.incomingOptionalData = _sccp_optional;
-                _decodedJson[@"sccp-optional-raw"] = _sccp_optional.hexString;
-                const uint8_t *bytes = _sccp_optional.bytes;
-                NSUInteger m = _sccp_optional.length;
+                NSData *sccp_optional = [NSData dataWithBytes:&d[param_optional] length:len-param_optional];
+                _decodedJson[@"sccp-optional-raw"] = sccp_optional.hexString;
+                const uint8_t *bytes = sccp_optional.bytes;
+                NSUInteger m = sccp_optional.length;
                 NSUInteger j=0;
                 NSMutableData *optionalData =[[NSMutableData alloc]init];
                 while(j<m)
                 {
                     int paramType = bytes[j++];
+                    if(paramType==0x00)
+                    {
+                        break; /*end of optional parameters */
+                    }
+
                     if(j<m)
                     {
                         int len = bytes[j++];
@@ -366,10 +370,6 @@
                             NSData *param = [NSData dataWithBytes:&bytes[j] length:len];
                     
                             j = j+len;
-                            if(paramType==0x00)
-                            {
-                                break; /*end of optional parameters */
-                            }
                             if((paramType != 0x10) && (paramType != 0x00)) /* not end of data and not segmentation header */
                             {
                                 [optionalData appendData:param];

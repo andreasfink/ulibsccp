@@ -289,18 +289,15 @@
                        provider:(UMLayerMTP3 *)provider
                 routedToLinkset:(NSString **)outgoingLinkset
 {
-    /* we assume here the segmentation header is alread included */
+    /* we assume here the segmentation header is not included. So we add it here*/
     NSMutableData *optionsData = [[NSMutableData alloc]init];
     [optionsData appendByte:0x10]; /* optional parameter "segmentation" */
     [optionsData appendByte:0x04]; /* length of optional parameter */
     [optionsData appendData:[segment segmentationHeader]];
-    NSInteger len = xoptionsdata.length;
-    if(len>0)
+    if(xoptionsdata.length > 0)
     {
         [optionsData appendData:xoptionsdata]; /* optional parameters including end */
     }
-    [optionsData appendByte:0x00]; /* end of optional parameters */
-
     return [self sendXUDT:segment.data
                   calling:src
                    called:dst
