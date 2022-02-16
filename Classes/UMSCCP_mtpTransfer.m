@@ -353,6 +353,7 @@
                 const uint8_t *bytes = _sccp_optional.bytes;
                 NSUInteger m = _sccp_optional.length;
                 NSUInteger j=0;
+                NSMutableData *optionalData =[[NSMutableData alloc]init];
                 while(j<m)
                 {
                     int paramType = bytes[j++];
@@ -363,10 +364,15 @@
                         {
                             _optional_dict = [[NSMutableDictionary alloc]init];
                             NSData *param = [NSData dataWithBytes:&bytes[j] length:len];
+                    
                             j = j+len;
                             if(paramType==0x00)
                             {
                                 break; /*end of optional parameters */
+                            }
+                            if((paramType != 0x10) && (paramType != 0x00)) /* not end of data and not segmentation header */
+                            {
+                                [optionalData appendData:param];
                             }
                             switch(paramType)
                             {
@@ -418,8 +424,8 @@
                                 case 0x10:
                                 {
                                     _optional_dict[@"segmentation"] = param;
-                                    //_packet.incomingSegment = [[UMSCCP_Segment alloc]initWithHeaderData:param];
-                                    // _packet.incomingSegment.data = _packet.incomingSccpData;
+                                    _packet.incomingSegment = [[UMSCCP_Segment alloc]initWithHeaderData:param];
+                                    _packet.incomingSegment.data = _packet.incomingSccpData;
                                 }
                                     break;
                                 case 0x11:
@@ -431,12 +437,13 @@
                                 case 0x13:
                                     _optional_dict[@"long-data"] = param;
                                     break;
-                                    
-                                
+                                case 0x00: /* END OF OPTIONS */
+                                    break;
                             }
                         }
                     }
                 }
+                _packet.incomingOptionalData = optionalData;
                 _decodedJson[@"sccp-optional"] = _optional_dict;
             }
             
