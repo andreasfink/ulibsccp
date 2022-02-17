@@ -118,8 +118,12 @@
 @property(readwrite,strong,atomic)    NSDate                    *routed;
 @property(readwrite,strong,atomic)    NSDate                    *segmented;
 @property(readwrite,strong,atomic)    NSDate                    *queuedForDelivery;
+@property(readwrite,strong,atomic)    NSDate                    *afterFilter1;
+@property(readwrite,strong,atomic)    NSDate                    *afterFilter2;
+@property(readwrite,strong,atomic)    NSDate                    *afterFilter3;
+@property(readwrite,strong,atomic)    NSDate                    *afterFilter4;
 
-@property(readwrite,assign,atomic)  SCCP_State              state;
+@property(readwrite,assign,atomic)    SCCP_State              state;
 
 @property(readwrite,strong,atomic)    id<UMSCCP_UserProtocol>    incomingLocalUser;
 @property(readwrite,strong,atomic)    UMLayerMTP3                *incomingMtp3Layer;

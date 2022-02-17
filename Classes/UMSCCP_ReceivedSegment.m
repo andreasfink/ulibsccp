@@ -7,6 +7,7 @@
 //
 
 #import "UMSCCP_ReceivedSegment.h"
+#import "UMSCCP_Packet.h"
 
 @implementation UMSCCP_ReceivedSegment
 

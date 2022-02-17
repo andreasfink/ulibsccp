@@ -11,6 +11,7 @@
 #import <ulibgt/ulibgt.h>
 #import "UMSCCP_Segment.h"
 #import "UMSCCP_Defs.h"
+@class UMSCCP_Packet;
 
 @interface UMSCCP_ReceivedSegment : UMObject
 {

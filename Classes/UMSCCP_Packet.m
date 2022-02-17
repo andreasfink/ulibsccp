@@ -155,6 +155,92 @@ typedef enum UMTCAP_Command
     _outgoingSegment                = _incomingSegment;
 }
 
+- (UMSCCP_Packet *)copyWithZone:(NSZone *)zone
+{
+    UMSCCP_Packet *cpy = [[UMSCCP_Packet alloc]init];
+    cpy.sccp = _sccp;
+    cpy.created = _created;
+    cpy.afterFilter1 = _afterFilter1;
+    cpy.afterFilter2 = _afterFilter2;
+    cpy.afterFilter3 = _afterFilter3;
+    cpy.afterFilter4 = _afterFilter4;
+    cpy.reassembled = _reassembled;
+    cpy.routed = _routed;
+    cpy.segmented = _segmented;
+    cpy.queuedForDelivery = _queuedForDelivery;
+    cpy.state = _state;
+    cpy.incomingSegment = [_incomingSegment copy];
+    cpy.incomingLocalUser = _incomingLocalUser;
+    cpy.incomingMtp3Layer = _incomingMtp3Layer;
+    cpy.incomingLinkset = _incomingLinkset;
+    cpy.incomingOptions = _incomingOptions;
+    cpy.incomingOpc = _incomingOpc;
+    cpy.incomingDpc = _incomingDpc;
+    cpy.incomingServiceClass = _incomingServiceClass;
+    cpy.incomingServiceType = _incomingServiceType;
+    cpy.incomingHandling = _incomingHandling;
+    cpy.incomingMaxHopCount = _incomingMaxHopCount;
+    cpy.incomingFromLocal = _incomingFromLocal;
+    cpy.incomingToLocal = _incomingToLocal;
+    cpy.incomingCallingPartyAddress = [_incomingCallingPartyAddress copy];
+    cpy.incomingCallingPartyCountry = [_incomingCallingPartyCountry copy];
+    cpy.incomingCalledPartyAddress = [_incomingCalledPartyAddress copy];
+    cpy.incomingCalledPartyCountry = [_incomingCalledPartyCountry copy];
+    cpy.incomingMtp3Data = [_incomingMtp3Data copy];
+    cpy.incomingSccpData = [_incomingSccpData copy];
+    cpy.incomingOptionalData = [_incomingOptionalData copy];
+    cpy.incomingReturnCause = _incomingReturnCause;
+    cpy.outgoingLocalUser = _outgoingLocalUser;
+    cpy.outgoingMtp3Layer = _outgoingMtp3Layer;
+    cpy.outgoingLinkset = _outgoingLinkset;
+    cpy.outgoingOptions = _outgoingOptions;
+    cpy.outgoingOpc = _outgoingOpc;
+    cpy.outgoingDpc = _outgoingDpc;
+    cpy.outgoingServiceClass = _outgoingServiceClass;
+    cpy.outgoingServiceType = _outgoingServiceType;
+    cpy.outgoingHandling = _outgoingHandling;
+    cpy.outgoingCallingPartyAddress = [_outgoingCallingPartyAddress copy];
+    cpy.outgoingCalledPartyAddress = [_outgoingCalledPartyAddress copy];
+    cpy.outgoingMtp3Data = _outgoingMtp3Data;
+    cpy.outgoingSccpData = _outgoingSccpData;
+    cpy.outgoingSegment = [_outgoingSegment copy];
+    cpy.outgoingOptionalData = _outgoingOptionalData;
+    cpy.outgoingMaxHopCount = _outgoingMaxHopCount;
+    cpy.outgoingFromLocal = _outgoingFromLocal;
+    cpy.outgoingToLocal = _outgoingToLocal;
+    cpy.outgoingReturnCause = _outgoingReturnCause;
+    cpy.outgoingDestination = _outgoingDestination;
+    cpy.incomingTcapAsn1            = _incomingTcapAsn1;
+    cpy.incomingTcapBegin           = _incomingTcapBegin;
+    cpy.incomingTcapContinue        = _incomingTcapContinue;
+    cpy.incomingTcapEnd             = _incomingTcapEnd;
+    cpy.incomingTcapAbort           = _incomingTcapAbort;
+    cpy.incomingTcapUnidirectional  = _incomingTcapUnidirectional;
+    cpy.incomingTcapCommand         = _incomingTcapCommand;
+    cpy.incomingApplicationContext = _incomingApplicationContext;
+    cpy.incomingGsmMapAsn1 = _incomingGsmMapAsn1;
+    cpy.incomingGsmMapOperations = _incomingGsmMapOperations;
+    cpy.incomingCategory = _incomingCategory;
+    cpy.incomingLocalTransactionId = _incomingLocalTransactionId;
+    cpy.incomingRemoteTransactionId = _incomingRemoteTransactionId;
+    cpy.canNotDecode = _canNotDecode;
+    cpy.tags = [_tags copy];
+    cpy.vars = [_vars copy];
+    cpy.rerouteDestinationGroup = _rerouteDestinationGroup;
+    cpy.logLevel =     _logLevel;
+    cpy.incoming_tcap_otid = _incoming_tcap_otid;
+    cpy.incoming_tcap_dtid = _incoming_tcap_dtid;
+    cpy.msisdn = _msisdn;
+    cpy.imsi = _imsi;
+    cpy.smsc = _smsc;
+    cpy.hlr = _hlr;
+    cpy.msc = _msc;
+    cpy.sms = _sms;
+    cpy.partsInfo = _partsInfo;
+    cpy.routingSelector = _routingSelector;
+    cpy.sls = _sls;
+    return cpy;
+}
 
 - (void)addTag:(NSString *)tag
 {
