@@ -128,5 +128,34 @@
     return a;
 }
 
+- (UMSynchronizedSortedDictionary *)jsonObject
+{
+    
+    UMSynchronizedSortedDictionary *r = [[UMSynchronizedSortedDictionary alloc]init];
+    if(_created)
+    {
+        r[@"created"] = _created;
+    }
+    if(_src)
+    {
+        r[@"src"] = _src;
+    }
+   if(_dst)
+    {
+        r[@"dst"] = _dst;
+    }
+    r[@"reference"] = @(_reference);
+    r[@"max"] = @(_max);
+    r[@"is-complete"] = @(_isComplete);
+    if(_firstPacket)
+    {
+        r[@"first-packet"] = _firstPacket;
+    }
+    if(_key)
+    {
+        r[@"key"] = _key;
+    }
+    return r;
+}
 
 @end

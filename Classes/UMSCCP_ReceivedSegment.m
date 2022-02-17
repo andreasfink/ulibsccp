@@ -15,5 +15,43 @@
 {
     return [[NSMutableString alloc]initWithFormat:@"%@->%@(%06X:%02x",_src,_dst,_reference,_sls];
 }
+
+- (UMSynchronizedSortedDictionary *)jsonObject
+{
+    UMSynchronizedSortedDictionary *r = [[UMSynchronizedSortedDictionary alloc]init];
+    if(_src)
+    {
+        r[@"src"] = _src;
+    }
+    if(_dst)
+    {
+        r[@"dst"] = _dst;
+    }
+    if(_opc)
+    {
+        r[@"opc"] = _opc;
+    }
+    if(_dpc)
+    {
+        r[@"dpc"] = _dpc;
+    }
+    r[@"reference"] = @(_reference);
+    r[@"sls"] = @(_sls);
+    r[@"max"] = @(_max);
+    r[@"service-class"] = @(_pclass);
+    r[@"handling"] = @(_handling);
+    r[@"hop-count"] = @(_hopCount);
+    if(_optionsData)
+    {
+        r[@"options-data"] = _optionsData;
+    }
+    if(_options)
+    {
+        r[@"options"] = _options;
+    }
+    return r;
+}
+
+
 @end
 

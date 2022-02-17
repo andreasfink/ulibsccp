@@ -3543,6 +3543,7 @@
 - (void)housekeeping
 {
     [_statisticDb flush];
+    [_pendingSegmentsStorage purge];
 }
 
 
@@ -3595,6 +3596,10 @@
             if([path isEqualToString:@"/sccp/list-e214"])
             {
                 [req setResponsePlainText:[self webE214]];
+            }
+            if([path isEqualToString:@"/sccp/segmentation"])
+            {
+                [req setResponsePlainText:[self webSegmentation]];
             }
             if([path isEqualToString:@"/sccp"])
             {
@@ -3676,6 +3681,12 @@
     return s;
 }
 
+- (NSString *)webSegmentation
+{
+    UMSynchronizedSortedDictionary *d  = [_pendingSegmentsStorage jsonObject];
+    NSString *s = [d jsonString];
+    return s;
+}
 - (void) localDeliverNUnitdata:(NSData *)data
                         toUser:(id<UMSCCP_UserProtocol>)localUser
                        calling:(SccpAddress *)callingPartyAddress

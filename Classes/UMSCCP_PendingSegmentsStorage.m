@@ -45,4 +45,40 @@
     return segments;
 }
 
+- (void)purge
+{
+    UMMUTEX_LOCK(_lock);
+    NSMutableArray *keysToDelete = [[NSMutableArray alloc]init];
+    NSDate *now = [NSDate date];
+    for(NSString *key in [_receivedSegmentsByKey allKeys])
+    {
+        UMSCCP_ReceivedSegments *seg = _receivedSegmentsByKey[key];
+        NSDate *start = seg.firstPacket;
+        NSTimeInterval delay = [now timeIntervalSinceDate:start];
+        if(fabs(delay) > 30.0)
+        {
+            [keysToDelete addObject:key];
+        }
+    }
+    for(NSString *key in keysToDelete)
+    {
+        [_receivedSegmentsByKey removeObjectForKey:key];
+    }
+    UMMUTEX_UNLOCK(_lock);
+}
+
+
+- (UMSynchronizedSortedDictionary *)jsonObject
+{
+    UMSynchronizedSortedDictionary *r = [[UMSynchronizedSortedDictionary alloc]init];
+    UMMUTEX_LOCK(_lock);
+    for(NSString *key in [_receivedSegmentsByKey allKeys])
+    {
+        UMSCCP_ReceivedSegments *seg = _receivedSegmentsByKey[key];
+        r[key] = [seg jsonObject];
+    }
+    UMMUTEX_UNLOCK(_lock);
+    return r;
+}
+
 @end

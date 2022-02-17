@@ -19,6 +19,8 @@
 
 - (NSArray <UMSCCP_ReceivedSegment *>*)processReceivedSegment:(UMSCCP_ReceivedSegment *)s;
 
+- (void)purge;
+- (UMSynchronizedSortedDictionary *)jsonObject;
 
 @end
 

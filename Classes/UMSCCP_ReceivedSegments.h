@@ -49,5 +49,6 @@
 - (BOOL)processReceivedSegment:(UMSCCP_ReceivedSegment *)s; /* returns YES in case of segmentation error */
 - (NSArray<UMSCCP_ReceivedSegment *> *)allSegments;
 - (BOOL)isComplete;
+- (UMSynchronizedSortedDictionary *)jsonObject;
 
 @end
