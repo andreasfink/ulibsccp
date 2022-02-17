@@ -100,7 +100,6 @@
     UMLogLevel                  _logLevel;
     NSString                    *_incoming_tcap_otid;
     NSString                    *_incoming_tcap_dtid;
-
     NSString                    *_msisdn;
     NSString                    *_imsi;
     NSString                    *_smsc;
@@ -109,7 +108,7 @@
     UMSMS                       *_sms;
     NSString                    *_partsInfo;
     NSString                    *_routingSelector;
-    int                         _sls;
+    NSInteger                   _sls;
 }
 
 
@@ -196,7 +195,7 @@
 @property(readwrite,strong,atomic) UMSMS                       *sms;
 @property(readwrite,strong,atomic) NSString                    *partsInfo;
 @property(readwrite,strong,atomic) NSString                    *routingSelector;
-@property(readwrite,assign,atomic) int                         sls;
+@property(readwrite,assign,atomic) NSInteger                   sls;
 
 - (NSString *) incomingPacketType;
 - (NSString *) outgoingPacketType;
