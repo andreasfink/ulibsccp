@@ -21,7 +21,7 @@
     UMMTP3PointCode     *_dpc;
     UMSCCP_Segment      *_segment;
     unsigned int        _reference;
-    unsigned int        _sls;
+    int                _sls;
     unsigned int        _max;
     SCCP_ServiceClass   _pclass;
     SCCP_Handling       _handling;
@@ -29,6 +29,7 @@
     NSData              *_optionsData;
     NSDictionary        *_options;
     UMLayerMTP3         *_provider;
+    UMSCCP_Packet       *_combinedPacket;
 }
 
 @property(readwrite,strong,atomic)  NSData              *data;
@@ -38,7 +39,7 @@
 @property(readwrite,strong,atomic)  UMMTP3PointCode     *dpc;
 @property(readwrite,strong,atomic)  UMSCCP_Segment      *segment;
 @property(readwrite,assign,atomic)  unsigned int        reference;
-@property(readwrite,assign,atomic)  unsigned int        sls;
+@property(readwrite,assign,atomic)  int                 sls;
 @property(readwrite,assign,atomic)  unsigned int        max;
 @property(readwrite,assign,atomic)  SCCP_ServiceClass   pclass;
 @property(readwrite,assign,atomic)  SCCP_Handling       handling;
@@ -46,6 +47,7 @@
 @property(readwrite,strong,atomic)  NSData              *optionsData;
 @property(readwrite,strong,atomic)  NSDictionary        *options;
 @property(readwrite,strong,atomic)  UMLayerMTP3         *provider;
+@property(readwrite,strong,atomic)  UMSCCP_Packet       *combinedPacket;
 
 - (NSString *)key;
 

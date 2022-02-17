@@ -127,7 +127,7 @@ typedef enum UMSccpScreening_result
     UMMutex                                  *_loggingLock;
     UMSCCP_PrometheusData                    *_prometheusData;
     id<sccp_tcapDecoder>                     _tcapDecodeDelegate; /* a delegate which decodes opcode and appcontext for us */
-    UMSCCP_PendingSegmentsStorage   *_pendingSegmentsStorage;
+    UMSCCP_PendingSegmentsStorage            *_pendingSegmentsStorage;
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;
