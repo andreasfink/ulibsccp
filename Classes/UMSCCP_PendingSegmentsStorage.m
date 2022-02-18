@@ -53,11 +53,18 @@
     for(NSString *key in [_receivedSegmentsByKey allKeys])
     {
         UMSCCP_ReceivedSegments *seg = _receivedSegmentsByKey[key];
-        NSDate *start = seg.firstPacket;
-        NSTimeInterval delay = [now timeIntervalSinceDate:start];
-        if(fabs(delay) > 30.0)
+        NSDate *start = seg.create;
+        if(start)
         {
-            [keysToDelete addObject:key];
+            NSTimeInterval delay = [now timeIntervalSinceDate:start];
+            if(fabs(delay) > 30.0)
+            {
+                [keysToDelete addObject:key];
+            }
+        }
+        else
+        {
+            seg.create = now;
         }
     }
     for(NSString *key in keysToDelete)
