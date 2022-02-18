@@ -1272,6 +1272,49 @@
             processScreening = YES;
             processRouting = YES;
             processSegmentedDelivery = YES;
+            
+            /* filtering of combined packets */
+            UMSCCP_FilterResult r =  UMSCCP_FILTER_RESULT_UNMODIFIED;
+            r = [_filterDelegate filterInbound:firstSegment.combinedPacket];
+            if(r & UMSCCP_FILTER_RESULT_DROP)
+            {
+                [_logFeed debugText:@"Filter returns DROP for combined packet"];
+                return NO;
+            }
+            if(r & UMSCCP_FILTER_RESULT_STATUS)
+            {
+                NSString *outgoingLinkset;
+                if(_routeErrorsBackToSource)
+                {
+                    [self sendXUDTS:firstSegment.combinedPacket.incomingSccpData
+                            calling:firstSegment.combinedPacket.incomingCalledPartyAddress
+                             called:firstSegment.combinedPacket.incomingCallingPartyAddress
+                              class:firstSegment.combinedPacket.incomingServiceClass
+                           hopCount:0x0F
+                        returnCause:firstSegment.combinedPacket.outgoingReturnCause
+                                opc:_mtp3.opc /* errors are always sent from this instance */
+                                dpc:firstSegment.combinedPacket.incomingOpc
+                        optionsData:firstSegment.combinedPacket.incomingOptionalData
+                            options:@{}
+                           provider:_mtp3
+                    routedToLinkset:&outgoingLinkset
+                                sls:firstSegment.combinedPacket.sls];
+                }
+                else
+                {
+                    [self generateXUDTS:firstSegment.combinedPacket.incomingSccpData
+                                      calling:firstSegment.combinedPacket.incomingCalledPartyAddress
+                                       called:firstSegment.combinedPacket.incomingCallingPartyAddress
+                                        class:firstSegment.combinedPacket.incomingServiceClass
+                                  returnCause:firstSegment.combinedPacket.outgoingReturnCause
+                                          opc:_mtp3.opc /* errors are always sent from this instance */
+                                          dpc:firstSegment.combinedPacket.incomingOpc
+                                      options:@{}
+                                     provider:_mtp3
+                                          sls:firstSegment.combinedPacket.sls];
+                }
+                return NO;
+            }
         }
         else
         {

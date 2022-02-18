@@ -515,10 +515,9 @@
                 _packet.incomingOptions = _options;
 
                 UMSCCP_FilterResult r =  UMSCCP_FILTER_RESULT_UNMODIFIED;
-                
-            
-                if(_sccpLayer.filterDelegate)
+                if((_sccpLayer.filterDelegate) && (!_packet.incomingSegment))
                 {
+                    /* segments are filtered once reassembled */
                     r = [_sccpLayer.filterDelegate filterInbound:_packet];
                 }
                 if(r & UMSCCP_FILTER_RESULT_DROP)
