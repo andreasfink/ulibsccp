@@ -1205,7 +1205,8 @@
     BOOL processRouting = NO;
     BOOL processSingleDelivery = NO;
     BOOL processSegmentedDelivery = NO;
-
+    NSMutableData *combined = NULL;
+    UMSCCP_ReceivedSegment *firstSegment = NULL;
     if(packet.incomingSegment)
     {
         processSinglePdu = NO;
@@ -1236,6 +1237,41 @@
             processRouting = YES;
             processSingleDelivery = NO;
             processSegmentedDelivery = YES;
+            /* lets reassemble */
+            
+           NSData *data[16];
+            int max = 0;
+
+            /* find the number of segments. The first segment has a number of remaining semgnets so we know the max is + 1 */
+            for(UMSCCP_ReceivedSegment *s in segs)
+            {
+                if(s.segment.first)
+                {
+                    firstSegment = s;
+                    max = s.segment.remainingSegment + 1 ;
+                }
+            }
+            /* assign the individual segments to the array */
+            for(UMSCCP_ReceivedSegment *s in segs)
+            {
+                int index = max - s.segment.remainingSegment - 1;
+                data[index] = s.segment.data;
+            }
+            /* combine the segments */
+            combined = [[NSMutableData alloc]init];
+            for(int i=0;i<16;i++)
+            {
+                if(data[i])
+                {
+                    [combined appendData:data[i]];
+                }
+            }
+            /* at this point "combined" should have the reassembled PDU */
+            firstSegment.combinedPacket.incomingSccpData = combined;
+            firstSegment.combinedPacket.outgoingSccpData = combined;
+            processScreening = YES;
+            processRouting = YES;
+            processSegmentedDelivery = YES;
         }
         else
         {
@@ -1255,41 +1291,6 @@
         processSegmentedDelivery = NO;
     }
 
-    NSMutableData *combined = NULL;
-    UMSCCP_ReceivedSegment *firstSegment = NULL;
-    if(processMultipleSegments)
-    {
-        NSData *data[16];
-        int max = 0;
-
-        /* find the number of segments. The first segment has a number of remaining semgnets so we know the max is + 1 */
-        for(UMSCCP_ReceivedSegment *s in segs)
-        {
-            if(s.segment.first)
-            {
-                max = s.segment.remainingSegment + 1 ;
-            }
-        }
-        /* assign the individual segments to the array */
-        for(UMSCCP_ReceivedSegment *s in segs)
-        {
-            int index = max - s.segment.remainingSegment - 1;
-            data[index] = s.segment.data;
-        }
-        /* combine the segments */
-        combined = [[NSMutableData alloc]init];
-        for(int i=0;i<16;i++)
-        {
-            if(data[i])
-            {
-                [combined appendData:data[i]];
-            }
-        }
-        /* at this point "combined" should have the reassembled PDU */
-        processScreening = YES;
-        processRouting = YES;
-        processSegmentedDelivery = YES;
-    }
     if(processScreening)
     {
         if(_sccp_screeningPlugin)

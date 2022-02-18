@@ -15,7 +15,6 @@
 
 @interface UMSCCP_ReceivedSegment : UMObject
 {
-    NSData              *_data;
     SccpAddress         *_src;
     SccpAddress         *_dst;
     UMMTP3PointCode     *_opc;
@@ -33,7 +32,6 @@
     UMSCCP_Packet       *_combinedPacket;
 }
 
-@property(readwrite,strong,atomic)  NSData              *data;
 @property(readwrite,strong,atomic)  SccpAddress         *src;
 @property(readwrite,strong,atomic)  SccpAddress         *dst;
 @property(readwrite,strong,atomic)  UMMTP3PointCode     *opc;
