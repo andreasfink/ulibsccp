@@ -1239,7 +1239,7 @@
             processSegmentedDelivery = YES;
             /* lets reassemble */
             
-           NSData *data[16];
+            NSData *data[16];
             int max = 0;
 
             /* find the number of segments. The first segment has a number of remaining semgnets so we know the max is + 1 */

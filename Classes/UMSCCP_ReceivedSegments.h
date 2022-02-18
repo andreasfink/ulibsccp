@@ -26,11 +26,10 @@
     SccpAddress             *_src;
     SccpAddress             *_dst;
     long                    _reference;
-    UMSCCP_Segment          *_segments[MAX_SEGMENTS];       /* this is populated from the last to the first */
+   // UMSCCP_Segment          *_segments[MAX_SEGMENTS];       /* this is populated from the last to the first */
     UMSCCP_ReceivedSegment  *_rxSegments[MAX_SEGMENTS];
     int                     _max;
     int                     _current;
-    BOOL                    _isComplete;
     NSDate                  *_firstPacket;
     UMMutex                 *_lock;
     NSString                *_key;
@@ -45,7 +44,6 @@
 
 - (NSString *)key;
 - (NSData *) reassembledData; /* returns NULL if not all segments have been received yet */
-- (void) addSegment:(UMSCCP_Segment *)s;
 - (BOOL)processReceivedSegment:(UMSCCP_ReceivedSegment *)s; /* returns YES in case of segmentation error */
 - (NSArray<UMSCCP_ReceivedSegment *> *)allSegments;
 - (BOOL)isComplete;

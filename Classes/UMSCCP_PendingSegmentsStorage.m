@@ -36,7 +36,7 @@
 
     _receivedSegmentsByKey[key] = segs;
     NSArray<UMSCCP_ReceivedSegment *> *segments = NULL;
-    if(segs.isComplete)
+    if([segs isComplete])
     {
         segments = [segs allSegments];
         [_receivedSegmentsByKey removeObjectForKey:key];

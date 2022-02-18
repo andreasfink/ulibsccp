@@ -36,28 +36,20 @@
 {
     UMMUTEX_LOCK(_lock);
     NSMutableData *d = [[NSMutableData alloc]init];
-    int i = MAX_SEGMENTS;
-    while(i>0)
+    for(int i=0;i<_max;i++)
     {
-        i--;
-        UMSCCP_Segment *s = _segments[i];
-        if(s==NULL)
+        NSMutableData *d2 = [_rxSegments[i].segment.data mutableCopy];
+        if(d2==NULL)
         {
             return NULL;
         }
-        NSMutableData *d2 = [s.data mutableCopy];
-        [d2 appendData:d];
-        d = d2;
-        if(s.first)
-        {
-            UMMUTEX_UNLOCK(_lock);
-            return d;
-        }
+        [d appendData:d2];
     }
     UMMUTEX_UNLOCK(_lock);
-    return NULL;
+    return d;
 }
 
+/*
 - (void)addSegment:(UMSCCP_Segment *)s
 {
     UMMUTEX_LOCK(_lock);
@@ -68,6 +60,7 @@
     }
     UMMUTEX_UNLOCK(_lock);
 }
+*/
 
 - (BOOL)processReceivedSegment:(UMSCCP_ReceivedSegment *)s
 {
@@ -82,10 +75,11 @@
         _src = s.src;
         _dst = s.dst;
         _reference = s.reference;
+        current = 0;
     }
     else
     {
-        current = s.max - 1 - s.segment.remainingSegment;
+        current = s.max - s.segment.remainingSegment -1;
         if((current < 0) || (current >15))
         {
             /* somethings odd here */
@@ -94,7 +88,7 @@
         }
     }
     _rxSegments[current] = s;
-    _segments[current] = s.segment;
+//    _segments[current] = s.segment;
     UMMUTEX_UNLOCK(_lock);
     return NO;
 }
@@ -146,7 +140,7 @@
     }
     r[@"reference"] = @(_reference);
     r[@"max"] = @(_max);
-    r[@"is-complete"] = @(_isComplete);
+    r[@"is-complete"] = @(self.isComplete);
     if(_firstPacket)
     {
         r[@"first-packet"] = _firstPacket;
