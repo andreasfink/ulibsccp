@@ -25,7 +25,7 @@
     NSDate                  *_created;
     SccpAddress             *_src;
     SccpAddress             *_dst;
-    long                    _reference;
+    int                     _reference;
     UMSCCP_ReceivedSegment  *_rxSegments[MAX_SEGMENTS];
     int                     _max;
     int                     _current;
@@ -37,7 +37,7 @@
 @property(readwrite,strong) NSDate      *create;
 @property(readwrite,strong) SccpAddress *src;
 @property(readwrite,strong) SccpAddress *dst;
-@property(readwrite,assign) long        reference;
+@property(readwrite,assign) int         reference;
 @property(readwrite,assign) int         max;
 @property(readwrite,strong) NSDate      *firstPacket;
 
