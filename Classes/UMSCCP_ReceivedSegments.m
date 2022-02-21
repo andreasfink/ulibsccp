@@ -12,6 +12,8 @@
 #import "UMSCCP_ReceivedSegments.h"
 #import "UMSCCP_ReceivedSegment.h"
 
+#define SEGMENTATION_DEBUG  1
+
 @implementation UMSCCP_ReceivedSegments
 
 - (UMSCCP_ReceivedSegments *) init
@@ -95,17 +97,36 @@
 
 - (BOOL) isComplete
 {
+    
+#ifdef SEGMENTATION_DEBUG
+    NSLog(@"isComplete is called. max = %d",_max);
+    for(int i=0;i<16;i++)
+    {
+        NSLog(@" seg[%d] = %@",i,_rxSegments[i]);
+    }
+#endif
+    
     if(_max < 0)
     {
+#ifdef SEGMENTATION_DEBUG
+        NSLog(@" returning NO (max<0)");
+#endif
         return NO;
     }
     for(int i=0;i<_max;i++)
     {
+
         if(_rxSegments[i] == NULL)
         {
+#ifdef SEGMENTATION_DEBUG
+            NSLog(@" returning NO");
+#endif
             return NO;
         }
     }
+#ifdef SEGMENTATION_DEBUG
+    NSLog(@" returning YES");
+#endif
     return YES;
 }
 

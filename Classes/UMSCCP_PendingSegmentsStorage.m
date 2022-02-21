@@ -10,6 +10,9 @@
 #import "UMSCCP_ReceivedSegments.h"
 #import "UMSCCP_ReceivedSegment.h"
 
+
+#define PENDING_SEGMENTS_DEBUG   1
+
 @implementation UMSCCP_PendingSegmentsStorage
 
 - (UMSCCP_PendingSegmentsStorage *)init
@@ -27,6 +30,10 @@
 {
     UMMUTEX_LOCK(_lock);
     NSString *key = [s key];
+#ifdef  PENDING_SEGMENTS_DEBUG
+    NSLog(@"Key: %@",key);
+#endif
+
     UMSCCP_ReceivedSegments *segs =  _receivedSegmentsByKey[key];
     if(segs == NULL)
     {
@@ -35,11 +42,25 @@
     [segs processReceivedSegment:s];
 
     _receivedSegmentsByKey[key] = segs;
+    
     NSArray<UMSCCP_ReceivedSegment *> *segments = NULL;
     if([segs isComplete])
     {
+#ifdef  PENDING_SEGMENTS_DEBUG
+    NSLog(@"complete = NO");
+#endif
+
         segments = [segs allSegments];
+#ifdef  PENDING_SEGMENTS_DEBUG
+        NSLog(@"removing key=%@",key);
+#endif
         [_receivedSegmentsByKey removeObjectForKey:key];
+    }
+    else
+    {
+#ifdef  PENDING_SEGMENTS_DEBUG
+        NSLog(@"complete = YES");
+#endif
     }
     UMMUTEX_UNLOCK(_lock);
     return segments;
