@@ -375,7 +375,7 @@ sls:(int)sls;
                      sls:(int)sls;
 
 
-
+/*
 -(UMMTP3_Error) processXUDTsegment:(UMSCCP_Segment *)pdu
                            calling:(SccpAddress *)src
                             called:(SccpAddress *)dst
@@ -391,7 +391,7 @@ sls:(int)sls;
                                sls:(int)sls
                             packet:(UMSCCP_Packet *)pkt;
 
-
+*/
 
 -(UMMTP3_Error) sendXUDTsegment:(UMSCCP_Segment *)pdu
                         calling:(SccpAddress *)src

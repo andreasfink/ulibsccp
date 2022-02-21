@@ -284,6 +284,8 @@
     [self setUser:usr forSubsystem:ssn number:addr];
 }
 
+#ifdef 0
+
 -(UMMTP3_Error) processXUDTsegment:(UMSCCP_Segment *)segment
                            calling:(SccpAddress *)src
                             called:(SccpAddress *)dst
@@ -400,6 +402,7 @@
     }
     return UMMTP3_no_error; /* we already did error processing ourselves */
 }
+#endif
 
 -(UMMTP3_Error) sendXUDTsegment:(UMSCCP_Segment *)segment
                         calling:(SccpAddress *)src
@@ -1228,6 +1231,8 @@
         s.options = packet.outgoingOptions;
         s.provider = _mtp3;
         s.sls = packet.sls;
+        s.segment = packet.incomingSegment;
+        
         if(s.segment.first)
         {
             s.combinedPacket = [packet copy];
