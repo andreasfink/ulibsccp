@@ -173,7 +173,6 @@
 
 - (UMSynchronizedSortedDictionary *)jsonObject
 {
-    
     UMSynchronizedSortedDictionary *r = [[UMSynchronizedSortedDictionary alloc]init];
     if(_created)
     {
