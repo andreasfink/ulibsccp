@@ -194,10 +194,7 @@
     {
         r[@"first-packet"] = _firstPacket;
     }
-    if(_key)
-    {
-        r[@"key"] = _key;
-    }
+    r[@"key"] = self.key;
     return r;
 }
 
