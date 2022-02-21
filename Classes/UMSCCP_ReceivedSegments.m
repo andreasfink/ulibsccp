@@ -31,7 +31,7 @@
 
 - (NSString *)key
 {
-    return [NSString stringWithFormat:@"%@/%@/%06lx", src.stringValueE164, dst.stringValueE164,ref];
+    return [NSString stringWithFormat:@"%@/%@/%06lx", _src.stringValueE164, _dst.stringValueE164,_reference];
 }
 
 - (NSData *)reassembledData
