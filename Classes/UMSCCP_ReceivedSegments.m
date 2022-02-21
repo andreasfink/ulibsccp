@@ -12,7 +12,7 @@
 #import "UMSCCP_ReceivedSegments.h"
 #import "UMSCCP_ReceivedSegment.h"
 
-#define SEGMENTATION_DEBUG  1
+//#define SEGMENTATION_DEBUG  1
 
 @implementation UMSCCP_ReceivedSegments
 

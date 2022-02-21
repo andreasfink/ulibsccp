@@ -11,7 +11,7 @@
 #import "UMSCCP_ReceivedSegment.h"
 
 
-#define PENDING_SEGMENTS_DEBUG   1
+//#define PENDING_SEGMENTS_DEBUG   1
 
 @implementation UMSCCP_PendingSegmentsStorage
 
