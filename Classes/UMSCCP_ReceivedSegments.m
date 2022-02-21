@@ -69,7 +69,14 @@
     UMMUTEX_LOCK(_lock);
     int current = 0; /* value from 0...15 */
 
-    if(s.segment.first)
+#ifdef SEGMENTATION_DEBUG
+    if(s.segment == NULL)
+    {
+        NSLog(@"s.segment = NULL");
+    }
+#endif
+
+    if(s.segment.first == YES)
     {
 #ifdef SEGMENTATION_DEBUG
         NSLog(@"first packet = YES");

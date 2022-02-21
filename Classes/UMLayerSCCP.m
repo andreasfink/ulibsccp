@@ -284,7 +284,7 @@
     [self setUser:usr forSubsystem:ssn number:addr];
 }
 
--(UMMTP3_Error) processXUDTsegment:(UMSCCP_Segment *)pdu
+-(UMMTP3_Error) processXUDTsegment:(UMSCCP_Segment *)segment
                            calling:(SccpAddress *)src
                             called:(SccpAddress *)dst
                       serviceClass:(SCCP_ServiceClass)pclass
@@ -310,7 +310,7 @@
     s.optionsData = xoptionsdata;
     s.options = options;
     s.provider = provider;
-    
+    s.segment = segment;
     
     NSArray <UMSCCP_ReceivedSegment *> *segs = [ _pendingSegmentsStorage processReceivedSegment:s];
     for(UMSCCP_ReceivedSegment *seg in segs)
