@@ -90,18 +90,23 @@
         _reference = s.reference;
         current = 0;
         _rxSegments[current] = s;
+        
+        NSLog(@"s.segment.remainingSegment = %d",s.segment.remainingSegment);
+        NSLog(@"current = %d,s.max=%d, _max=%d",current,s.max,_max);
+
     }
     else
     {
 #ifdef SEGMENTATION_DEBUG
         NSLog(@"first packet = NO");
 #endif
-        current = s.max - s.segment.remainingSegment -1;
+        s.max = _max;
+        current = _max - s.segment.remainingSegment - 1;
 
 #ifdef SEGMENTATION_DEBUG
-        NSLog(@"current = %d,max=%d",current,_max);
+        NSLog(@"s.segment.remainingSegment = %d",s.segment.remainingSegment);
+        NSLog(@"current = %d,s.max=%d, _max=%d",current,s.max,_max);
 #endif
-
         if((current < 0) || (current >15))
         {
 #ifdef SEGMENTATION_DEBUG

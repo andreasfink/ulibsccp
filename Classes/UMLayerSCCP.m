@@ -1515,23 +1515,24 @@
             [s appendFormat:@"    causeValue: %d\n",causeValue];
             [s appendFormat:@"    newCalledAddress: %@\n",called_out];
             [s appendFormat:@"    localUser: %@\n",localUser];
-            [s appendFormat:@"    fromLocal: %@\n",packet.incomingFromLocal ? @"YES" : @"NO"];
+            [s appendFormat:@"    fromLocal: %@\n",routingPacket.incomingFromLocal ? @"YES" : @"NO"];
             [self logDebug:s];
         }
 
         if(called_out!=NULL)
         {
-            packet.outgoingCalledPartyAddress = called_out;
+            routingPacket.outgoingCalledPartyAddress = called_out;
         }
         
         if(causeValue != SCCP_ReturnCause_not_set)
         {
-            NSString *s = [NSString stringWithFormat:@"Can not forward %@. Sending no route to destination to PC=%@. SRC=%@ DST=%@ DATA=%@",
+            NSString *s = [NSString stringWithFormat:@"Can not forward %@. Sending no route to destination to PC=%@. SRC=%@ DST=%@ DATA=%@ cause=%d",
                            routingPacket.incomingPacketType,
-                           routingPacket.incomingOpc,
+                           routingPacket.outgoingDpc,
                            routingPacket.incomingCallingPartyAddress,
                            routingPacket.incomingCalledPartyAddress,
-                           routingPacket.incomingSccpData];
+                           routingPacket.incomingSccpData,
+                           causeValue];
             [self logMinorError:s];
             if(routingPacket.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
             {
@@ -1633,6 +1634,7 @@
                 }
                 pc = dest.dpc;
             }
+            routingPacket.outgoingOpc = _mtp3.opc;
             routingPacket.outgoingDpc = pc;
             if(pc==NULL)
             {
@@ -1697,6 +1699,13 @@
                         {
                             for(UMSCCP_ReceivedSegment *seg in segs)
                             {
+                                seg.opc = routingPacket.outgoingMtp3Layer.opc;
+                                seg.dpc = routingPacket.outgoingDpc;
+                                seg.src = routingPacket.outgoingCallingPartyAddress;
+                                seg.dst = routingPacket.outgoingCalledPartyAddress;
+                                seg.sls = routingPacket.sls;
+                                seg.provider = routingPacket.outgoingMtp3Layer;
+                                seg.options = routingPacket.outgoingOptions;
                                 e =  [self sendXUDTsegment:seg.segment
                                                    calling:seg.src
                                                     called:seg.dst

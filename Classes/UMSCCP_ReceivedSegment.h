@@ -22,7 +22,7 @@
     UMSCCP_Segment      *_segment;
     unsigned int        _reference;
     int                _sls;
-    unsigned int        _max;
+    int                 _max;
     SCCP_ServiceClass   _pclass;
     SCCP_Handling       _handling;
     int                 _hopCount;
@@ -39,7 +39,7 @@
 @property(readwrite,strong,atomic)  UMSCCP_Segment      *segment;
 @property(readwrite,assign,atomic)  unsigned int        reference;
 @property(readwrite,assign,atomic)  int                 sls;
-@property(readwrite,assign,atomic)  unsigned int        max;
+@property(readwrite,assign,atomic)  int                 max;
 @property(readwrite,assign,atomic)  SCCP_ServiceClass   pclass;
 @property(readwrite,assign,atomic)  SCCP_Handling       handling;
 @property(readwrite,assign,atomic)  int                 hopCount;
