@@ -16,7 +16,7 @@
 
 #define MAX_SEGMENTS 16 /* the first + 0...15 remaining ones */
 
-#define MAKE_SEGMENT_KEY(src,dst,ref)  [NSString stringWithFormat:@"%@:%@:%06lx", src.encoded.hexString, dst.encoded.hexString, ref]
+#define MAKE_SEGMENT_KEY(src,dst,ref)  [NSString stringWithFormat:@"src=%@ dst=%@ ref=%06lx", src.stringValueE164, dst.stringValueE164,ref]
 
 @class UMSCCP_ReceivedSegment;
 

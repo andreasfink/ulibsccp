@@ -31,7 +31,7 @@
 
 - (NSString *)key
 {
-    return MAKE_SEGMENT_KEY(_src,_dst,_reference);
+    return [NSString stringWithFormat:@"%@/%@/%06lx", src.stringValueE164, dst.stringValueE164,ref];
 }
 
 - (NSData *)reassembledData

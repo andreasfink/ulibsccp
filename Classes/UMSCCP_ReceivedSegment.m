@@ -14,7 +14,7 @@
 
 - (NSString *)key
 {
-    return [[NSMutableString alloc]initWithFormat:@"%@->%@(%06X:%02x",_src,_dst,_reference,_sls];
+    return [NSString stringWithFormat:@"%@/%@/%06lx", src.stringValueE164, dst.stringValueE164,ref];
 }
 
 - (UMSynchronizedSortedDictionary *)jsonObject
