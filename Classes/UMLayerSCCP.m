@@ -284,7 +284,7 @@
     [self setUser:usr forSubsystem:ssn number:addr];
 }
 
-#ifdef 0
+#if 0
 
 -(UMMTP3_Error) processXUDTsegment:(UMSCCP_Segment *)segment
                            calling:(SccpAddress *)src
