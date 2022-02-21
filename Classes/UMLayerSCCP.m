@@ -1168,6 +1168,9 @@
         [s appendFormat:@"  DPC: %@\n",packet.incomingDpc];
         [s appendFormat:@"  CgPA: %@\n",packet.incomingCallingPartyAddress];
         [s appendFormat:@"  CdPA: %@\n",packet.incomingCalledPartyAddress];
+        [s appendFormat:@"  DataLen: %d\n",(int)packet.incomingSccpData.length];
+        [s appendFormat:@"  Data: %@\n",packet.incomingSccpData];
+        [s appendFormat:@"  Segment: %@\n",packet.incomingSegment];
         [self.logFeed debugText:s];
     }
 
@@ -1180,7 +1183,6 @@
     UMMTP3LinkSet *ls = [packet.incomingMtp3Layer getLinkSetByName:packet.incomingLinkset];
     if(packet.incomingMtp3Layer)
     {
-
         if(ls)
         {
             r = [self screenSccpPacketInbound:packet
@@ -1230,9 +1232,18 @@
         {
             s.combinedPacket = [packet copy];
         }
+        if(self.logLevel <=UMLOG_DEBUG)
+        {
+            [self.logFeed debugText:[NSString stringWithFormat:@"calling processReceivedSegment:%@",s]];
+        }
+
         segs = [ _pendingSegmentsStorage processReceivedSegment:s];
         if(segs)
         {
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                [self.logFeed debugText:[NSString stringWithFormat:@"calling processReceivedSegment returns %@",segs]];
+            }
             processMultipleSegments = YES;
             processRouting = YES;
             processSingleDelivery = NO;
@@ -1318,6 +1329,10 @@
         }
         else
         {
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                [self.logFeed debugText:[NSString stringWithFormat:@"calling processReceivedSegment returns NULL"]];
+            }
             processMultipleSegments = NO;
             processRouting = NO;
             processSingleDelivery = NO;
@@ -1334,8 +1349,21 @@
         processSegmentedDelivery = NO;
     }
 
+    if(self.logLevel <=UMLOG_DEBUG)
+    {
+        [self.logFeed debugText:[NSString stringWithFormat:@" processSinglePdu %@",processSinglePdu ? @"YES":@"NO"]];
+        [self.logFeed debugText:[NSString stringWithFormat:@" processMultipleSegments %@",processMultipleSegments ? @"YES":@"NO"]];
+        [self.logFeed debugText:[NSString stringWithFormat:@" processScreening %@",processScreening ? @"YES":@"NO"]];
+        [self.logFeed debugText:[NSString stringWithFormat:@" processRouting %@",processRouting ? @"YES":@"NO"]];
+        [self.logFeed debugText:[NSString stringWithFormat:@" processSingleDelivery %@",processSingleDelivery ? @"YES":@"NO"]];
+        [self.logFeed debugText:[NSString stringWithFormat:@" processSegmentedDelivery %@",processSegmentedDelivery ? @"YES":@"NO"]];
+    }
     if(processScreening)
     {
+        if(self.logLevel <=UMLOG_DEBUG)
+        {
+            [self.logFeed debugText:@"processing screening"];
+        }
         if(_sccp_screeningPlugin)
         {
             if(combined!=NULL)
@@ -1363,6 +1391,10 @@
         }
         if((r==UMSccpScreening_explicitlyDenied)||(r==UMSccpScreening_implicitlyDenied))
         {
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                [self.logFeed debugText:@"screening denied"];
+            }
             causeValue = SCCP_ReturnCause_ErrorInMessageTransport;
             if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
             {
@@ -1371,6 +1403,10 @@
         }
         else if(r==UMSccpScreening_errorResult)
         {
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                [self.logFeed debugText:@"screening error result"];
+            }
             causeValue = SCCP_ReturnCause_ErrorInLocalProcessing;
             if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
             {
@@ -1381,6 +1417,11 @@
     
     if(processRouting)
     {
+        if(self.logLevel <=UMLOG_DEBUG)
+        {
+            [self.logFeed debugText:@"processRouting"];
+        }
+
         id<UMSCCP_UserProtocol> localUser = NULL;
         UMMTP3PointCode *pc = NULL;
         UMLayerMTP3 *provider = _mtp3;
@@ -1397,17 +1438,42 @@
         {
             if(combined)
             {
+                if(self.logLevel <=UMLOG_DEBUG)
+                {
+                    [self.logFeed debugText:@" combined YES"];
+                }
+
                 tid = [self extractTransactionNumber:combined];
                 op = [self extractOperation:combined applicationContext:&ac];
                 routingPacket = firstSegment.combinedPacket;
             }
             else
             {
+                if(self.logLevel <=UMLOG_DEBUG)
+                {
+                    [self.logFeed debugText:@" combined NO"];
+                }
                 /* we might not be able to extract tid/opcode/ac number from a single segment */
                 tid = [self extractTransactionNumber:packet.incomingSccpData];
                 op = [self extractOperation:packet.incomingSccpData applicationContext:&ac];
                 routingPacket = packet;
             }
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                if(tid)
+                {
+                    [self.logFeed debugText:[NSString stringWithFormat:@" extracted TID %@",tid]];
+                }
+                if(op)
+                {
+                    [self.logFeed debugText:[NSString stringWithFormat:@" extracted op %@",op]];
+                }
+                if(ac)
+                {
+                    [self.logFeed debugText:[NSString stringWithFormat:@" extracted ac %@",ac]];
+                }
+            }
+
         }
         @catch(NSException *e)
         {
@@ -1416,6 +1482,11 @@
         
         
         
+        if(self.logLevel <=UMLOG_DEBUG)
+        {
+            [self.logFeed debugText:@" calling find routes"];
+        }
+
         SccpDestinationGroup *grp = [self findRoutes:dst
                                                cause:&causeValue
                                     newCalledAddress:&called_out
@@ -1425,6 +1496,11 @@
                                    transactionNumber:tid
                                            operation:op
                                     applicationContext:ac];
+        if(self.logLevel <=UMLOG_DEBUG)
+        {
+            [self.logFeed debugText:[NSString stringWithFormat:@" returns %@",grp]];
+        }
+
         routingPacket.routingSelector = usedSelector;
         if(self.logLevel <=UMLOG_DEBUG)
         {

@@ -47,10 +47,11 @@
 
 - (void)purge
 {
+    NSDate *now = [NSDate date];
     UMMUTEX_LOCK(_lock);
     NSMutableArray *keysToDelete = [[NSMutableArray alloc]init];
-    NSDate *now = [NSDate date];
-    for(NSString *key in [_receivedSegmentsByKey allKeys])
+    NSArray *allKeys = [_receivedSegmentsByKey allKeys];
+    for(NSString *key in allKeys)
     {
         UMSCCP_ReceivedSegments *seg = _receivedSegmentsByKey[key];
         NSDate *start = seg.create;
@@ -67,9 +68,13 @@
             seg.create = now;
         }
     }
-    for(NSString *key in keysToDelete)
+    if(keysToDelete.count > 0)
     {
-        [_receivedSegmentsByKey removeObjectForKey:key];
+        NSLog(@"SCCP Multipart Keys to delete: %@",keysToDelete);
+        for(NSString *key in keysToDelete)
+        {
+            [_receivedSegmentsByKey removeObjectForKey:key];
+        }
     }
     UMMUTEX_UNLOCK(_lock);
 }
