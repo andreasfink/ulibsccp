@@ -38,9 +38,9 @@
     if(segs == NULL)
     {
         segs = [[UMSCCP_ReceivedSegments alloc]init];
+        _receivedSegmentsByKey[key] = segs;
     }
     [segs processReceivedSegment:s];
-
     _receivedSegmentsByKey[key] = segs;
     
     NSArray<UMSCCP_ReceivedSegment *> *segments = NULL;

@@ -68,8 +68,12 @@
 {
     UMMUTEX_LOCK(_lock);
     int current = 0; /* value from 0...15 */
+
     if(s.segment.first)
     {
+#ifdef SEGMENTATION_DEBUG
+        NSLog(@"first packet = YES");
+#endif
         _firstPacket = [NSDate date];
         /* max is 1 ... 16 */
         s.max = s.segment.remainingSegment + 1;
@@ -78,12 +82,24 @@
         _dst = s.dst;
         _reference = s.reference;
         current = 0;
+        _rxSegments[current] = s;
     }
     else
     {
+#ifdef SEGMENTATION_DEBUG
+        NSLog(@"first packet = NO");
+#endif
         current = s.max - s.segment.remainingSegment -1;
+
+#ifdef SEGMENTATION_DEBUG
+        NSLog(@"current = %d,max=%d",current,_max);
+#endif
+
         if((current < 0) || (current >15))
         {
+#ifdef SEGMENTATION_DEBUG
+            NSLog(@"current is out of bounds");
+#endif
             /* somethings odd here */
             UMMUTEX_UNLOCK(_lock);
             return YES;
@@ -102,7 +118,7 @@
     NSLog(@"isComplete is called. max = %d",_max);
     for(int i=0;i<16;i++)
     {
-        NSLog(@" seg[%d] = %@",i,_rxSegments[i]);
+        NSLog(@" _rxSegments[%d] = %@",i,_rxSegments[i]);
     }
 #endif
     

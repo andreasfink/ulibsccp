@@ -26,7 +26,6 @@
     SccpAddress             *_src;
     SccpAddress             *_dst;
     long                    _reference;
-   // UMSCCP_Segment          *_segments[MAX_SEGMENTS];       /* this is populated from the last to the first */
     UMSCCP_ReceivedSegment  *_rxSegments[MAX_SEGMENTS];
     int                     _max;
     int                     _current;
