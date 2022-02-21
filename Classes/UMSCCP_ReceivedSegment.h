@@ -20,8 +20,8 @@
     UMMTP3PointCode     *_opc;
     UMMTP3PointCode     *_dpc;
     UMSCCP_Segment      *_segment;
-    unsigned int        _reference;
-    int                _sls;
+    int                 _reference;
+    int                 _sls;
     int                 _max;
     SCCP_ServiceClass   _pclass;
     SCCP_Handling       _handling;
@@ -37,7 +37,7 @@
 @property(readwrite,strong,atomic)  UMMTP3PointCode     *opc;
 @property(readwrite,strong,atomic)  UMMTP3PointCode     *dpc;
 @property(readwrite,strong,atomic)  UMSCCP_Segment      *segment;
-@property(readwrite,assign,atomic)  unsigned int        reference;
+@property(readwrite,assign,atomic)  int                 reference;
 @property(readwrite,assign,atomic)  int                 sls;
 @property(readwrite,assign,atomic)  int                 max;
 @property(readwrite,assign,atomic)  SCCP_ServiceClass   pclass;
