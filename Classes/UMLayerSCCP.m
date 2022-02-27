@@ -823,7 +823,22 @@
                             called1 = [gttSelector.postTranslation translateAddress:called1];
                             if(self.logLevel <= UMLOG_DEBUG)
                             {
-                                [self.logFeed debugText:[NSString stringWithFormat:@"post-translation: ->%@",called1]];
+                                [self.logFeed debugText:[NSString stringWithFormat:@"post-translation(gtt-table): ->%@",called1]];
+                            }
+                        }
+                        if(rte.postTranslationName.length > 0)
+                        {
+                            if(rte.postTranslation==NULL)
+                            {
+                                rte.postTranslation = [_gttSelectorRegistry numberTranslationByName:rte.postTranslationName];
+                            }
+                            if(rte.postTranslation)
+                            {
+                                called1 = [gttSelector.postTranslation translateAddress:called1];
+                                if(self.logLevel <= UMLOG_DEBUG)
+                                {
+                                    [self.logFeed debugText:[NSString stringWithFormat:@"post-translation(gtt-table-entry): ->%@",called1]];
+                                }
                             }
                         }
                         if(called_out)
@@ -870,7 +885,7 @@
                         called1 = [gttSelector.postTranslation translateAddress:called1];
                         if(self.logLevel <= UMLOG_DEBUG)
                         {
-                            [self.logFeed debugText:[NSString stringWithFormat:@"post-translation: ->%@",called1]];
+                            [self.logFeed debugText:[NSString stringWithFormat:@"post-translation(gtt-table): ->%@",called1]];
                         }
                     }
                     if(called_out)
