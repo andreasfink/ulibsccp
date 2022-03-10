@@ -677,8 +677,8 @@
     if(self.logLevel <=UMLOG_DEBUG)
     {
         [self.logFeed debugText:
-         [NSString stringWithFormat:@"entering findRoutes:(called=%@) cause:newCalledAddress:localUser:fromLocalUser:(%@)",
-          called.description,(fromLocalUser ? @"YES":@"NO")]];
+         [NSString stringWithFormat:@"entering findRoutes:(called=%@,tid=%@) cause:newCalledAddress:localUser:fromLocalUser:(%@)",
+          called.description,tid,(fromLocalUser ? @"YES":@"NO")]];
     }
 
     if(_stpMode==NO)
@@ -2344,6 +2344,7 @@
             }
             [_mtp3 setUserPart:MTP3_SERVICE_INDICATOR_SCCP user:self];
         }
+        _stpMode = YES;
         if(cfg[@"mode"])
         {
             NSString *v = [cfg[@"mode"] stringValue];
