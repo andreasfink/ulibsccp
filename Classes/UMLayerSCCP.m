@@ -3355,7 +3355,6 @@
             entry.routeToName = appGrpName;
             entry.table = currentSel.name;
             entry.enabled=YES;
-            entry.name =  [SccpGttRoutingTableEntry entryNameForGta:entry.digits tableName:entry.table];
             [currentSel.routingTable addEntry:entry];
         }
         else if([destType isEqualToString:@"asname"])
