@@ -3098,6 +3098,12 @@
     return d;
 }
 
+- (UMSynchronizedSortedDictionary *)mtp3routeStatus
+{
+    UMSynchronizedSortedDictionary *d = [_mtp3RoutingTable status];
+    return d;
+}
+
 - (void)stopDetachAndDestroy
 {
     /* FIXME: do something here */
