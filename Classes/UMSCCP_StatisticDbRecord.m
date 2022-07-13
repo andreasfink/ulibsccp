@@ -51,7 +51,7 @@
         {
             [_lock lock];
             UMDbQuery *query = [UMDbQuery queryForFile:__FILE__ line: __LINE__];
-            if(![query isInCache])
+            if(!query.isInCache)
             {
                 NSArray *fields = @[
                                     @"dbkey",
@@ -121,7 +121,7 @@
         {
             [_lock lock];
             UMDbQuery *query = [UMDbQuery queryForFile:__FILE__ line: __LINE__];
-            if(![query isInCache])
+            if(!query.isInCache)
             {
                 [query setType:UMDBQUERYTYPE_INCREASE_BY_KEY];
                 [query setTable:dbt];
