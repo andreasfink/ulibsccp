@@ -718,7 +718,7 @@
             destination = [[SccpDestinationGroup alloc]init];
             for(UMMTP3PointCode *pc in _next_pcs)
             {
-                SccpDestination *e = [[SccpDestination alloc]init];
+                SccpDestinationEntry *e = [[SccpDestinationEntry alloc]init];
                 e.dpc = pc;
                 [destination addEntry:e];
             }
@@ -961,7 +961,7 @@
         }
         return;
     }
-    SccpDestination *dst = [grp chooseNextHopWithRoutingTable:_mtp3RoutingTable];
+    SccpDestinationEntry *dst = [grp chooseNextHopWithRoutingTable:_mtp3RoutingTable];
     if(dst==NULL)
     {
         if(cause)
@@ -1588,7 +1588,7 @@
         {
             /* routing to */
             routingPacket.outgoingDestination = grp.name;
-            SccpDestination *dest = [grp chooseNextHopWithRoutingTable:_mtp3RoutingTable];
+            SccpDestinationEntry *dest = [grp chooseNextHopWithRoutingTable:_mtp3RoutingTable];
             if(self.logLevel <=UMLOG_DEBUG)
             {
                 NSMutableString *s = [[NSMutableString alloc]init];
@@ -2412,7 +2412,7 @@
                 {
                     [a addObject:pc];
 
-                    SccpDestination *e = [[SccpDestination alloc]init];
+                    SccpDestinationEntry *e = [[SccpDestinationEntry alloc]init];
                     e.dpc = pc;
                     if(_overrideCallingTT)
                     {
@@ -3495,7 +3495,7 @@
             i++;
         }
 
-        SccpDestination *e = [[SccpDestination alloc]init];
+        SccpDestinationEntry *e = [[SccpDestinationEntry alloc]init];
 
         e.dpc = [[UMMTP3PointCode alloc]initWithString:pcString variant:_mtp3.variant];
         if(cost)

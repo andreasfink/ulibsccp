@@ -27,7 +27,7 @@
     NSDictionary            *_options;
     int                     _qos;
     /* internal */
-    SccpDestination         *_nextHop;
+    SccpDestinationEntry    *_nextHop;
     NSMutableData           *_sccp_pdu;
     UMASN1Object            *_tcap_asn1;
     int                     _maxHopCount;
@@ -54,7 +54,7 @@
 @property(readwrite,strong) SccpAddress *dst;
 @property(readwrite,strong) NSDictionary *options;
 @property(readwrite,assign) int qos;
-@property(readwrite,strong) SccpDestination *nextHop;
+@property(readwrite,strong) SccpDestinationEntry *nextHop;
 @property(readwrite,strong) UMASN1Object *tcap_asn1;
 @property(readwrite,assign) int maxHopCount;
 @property(readwrite,assign) SCCP_ServiceClass   protocolClass;
