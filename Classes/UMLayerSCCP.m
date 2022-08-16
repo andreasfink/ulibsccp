@@ -4389,10 +4389,12 @@
     _sccp_screeningPlugin = NULL;
     [self loadScreeningPlugin];
 }
+
 - (void)reopenLogfiles
 {
     [self closeSccpScreeningTraceFile];
     [self openSccpScreeningTraceFile];
 }
+
 
 @end
