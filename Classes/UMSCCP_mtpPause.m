@@ -45,6 +45,7 @@
             NSString *s =  [NSString stringWithFormat:@"mtpPause AffectedPointCode: %@",_affectedPointCode];
             [_sccp logDebug:s];
         }
+        NSLog@(@"mtpPause: AffectedPointCode: %@ is now unavailable",_affectedPointCode);
         [_sccp.mtp3RoutingTable setStatus:SccpL3RouteStatus_unavailable
                              forPointCode:_affectedPointCode];
     }

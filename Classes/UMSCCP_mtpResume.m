@@ -44,7 +44,7 @@
             NSString *s =  [NSString stringWithFormat:@"mtpResume: AffectedPointCode: %@",_affectedPointCode];
             [_sccp logDebug:s];
         }
-
+        NSLog@(@"mtpResume: AffectedPointCode: %@",_affectedPointCode);
         [_sccp.mtp3RoutingTable setStatus:SccpL3RouteStatus_available
                          forPointCode:_affectedPointCode];
     }
