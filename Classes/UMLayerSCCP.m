@@ -2369,7 +2369,7 @@
                 _sccpVariant = SCCP_VARIANT_ITU;
                 NSLog(@"SCCP_VARIANT_ITU");
             }
-            if([v isEqualToString:@"ansi"])
+            else if([v isEqualToString:@"ansi"])
             {
                 _sccpVariant = SCCP_VARIANT_ANSI;
                 NSLog(@"SCCP_VARIANT_ANSI");
