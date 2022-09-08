@@ -13,7 +13,7 @@
 
 @interface UMSCCP_PendingSegmentsStorage : UMObject
 {
-    UMMutex                                             *_lock;
+    UMMutex                                             *_pendingSegmentsLock;
     NSMutableDictionary<NSString *,UMSCCP_ReceivedSegments *>    *_receivedSegmentsByKey;
 }
 

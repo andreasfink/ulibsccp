@@ -19,7 +19,7 @@
     NSTimeInterval  _maxProcessing;
     NSTimeInterval  _minWaiting;
     NSTimeInterval  _minProcessing;
-    UMMutex         *_lock;
+    UMMutex         *_sccpStatisticsDataLock;
 }
 
 @property(readwrite,assign,atomic)   NSUInteger      count;

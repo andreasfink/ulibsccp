@@ -17,7 +17,7 @@
 
 @interface UMSCCP_Statistics : UMObject
 {
-    UMMutex               *_lock;
+    UMMutex               *_statisticsLock;
     UMSCCP_StatisticData  *_fiveSeconds[UMSCCP_STATISTICS_TIMESPAN_5SEC_COUNT];
     UMSCCP_StatisticData  *_oneMinute[UMSCCP_STATISTICS_TIMESPAN_ONEMIN_COUNT];
     UMSCCP_StatisticData  *_tenMinutes[UMSCCP_STATISTICS_TIMESPAN_TENMIN_COUNT];

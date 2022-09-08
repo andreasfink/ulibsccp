@@ -26,7 +26,7 @@
     NSString *_sccp_operation;
     int     _msu_count;
     int     _bytes_count;
-    UMMutex *_lock;
+    UMMutex *_statisticDbRecordLock;
 }
 
 

@@ -12,7 +12,7 @@
 
 @interface UMSCCP_PrometheusData : UMObject
 {
-    UMMutex                       *_lock;
+    UMMutex                       *_prometheusLock;;
     UMPrometheus                  *_prometheus;
     /* generic */
     UMPrometheusMetric            *_rxCounter;

@@ -20,7 +20,7 @@
     self = [super init];
     if(self)
     {
-        _lock = [[UMMutex alloc]initWithName:@"pending-segments-storage"];
+        _pendingSegmentsLock = [[UMMutex alloc]initWithName:@"pending-segments-storage"];
         _receivedSegmentsByKey = [[NSMutableDictionary alloc]init];
     }
     return self;
@@ -28,7 +28,7 @@
 
 - (NSArray <UMSCCP_ReceivedSegment *> *)processReceivedSegment:(UMSCCP_ReceivedSegment *)s
 {
-    UMMUTEX_LOCK(_lock);
+    UMMUTEX_LOCK(_pendingSegmentsLock);
     NSString *key = [s key];
 #ifdef  PENDING_SEGMENTS_DEBUG
     NSLog(@"Key: %@",key);
@@ -62,14 +62,14 @@
         NSLog(@"complete = YES");
 #endif
     }
-    UMMUTEX_UNLOCK(_lock);
+    UMMUTEX_UNLOCK(_pendingSegmentsLock);
     return segments;
 }
 
 - (void)purge
 {
     NSDate *now = [NSDate date];
-    UMMUTEX_LOCK(_lock);
+    UMMUTEX_LOCK(_pendingSegmentsLock);
     NSMutableArray *keysToDelete = [[NSMutableArray alloc]init];
     NSArray *allKeys = [_receivedSegmentsByKey allKeys];
     for(NSString *key in allKeys)
@@ -97,20 +97,20 @@
             [_receivedSegmentsByKey removeObjectForKey:key];
         }
     }
-    UMMUTEX_UNLOCK(_lock);
+    UMMUTEX_UNLOCK(_pendingSegmentsLock);
 }
 
 
 - (UMSynchronizedSortedDictionary *)jsonObject
 {
     UMSynchronizedSortedDictionary *r = [[UMSynchronizedSortedDictionary alloc]init];
-    UMMUTEX_LOCK(_lock);
+    UMMUTEX_LOCK(_pendingSegmentsLock);
     for(NSString *key in [_receivedSegmentsByKey allKeys])
     {
         UMSCCP_ReceivedSegments *seg = _receivedSegmentsByKey[key];
         r[key] = [seg jsonObject];
     }
-    UMMUTEX_UNLOCK(_lock);
+    UMMUTEX_UNLOCK(_pendingSegmentsLock);
     return r;
 }
 

@@ -30,7 +30,7 @@
     int                     _max;
     int                     _current;
     NSDate                  *_firstPacket;
-    UMMutex                 *_lock;
+    UMMutex                 *_segmentsLock;
     NSString                *_key;
 }
 

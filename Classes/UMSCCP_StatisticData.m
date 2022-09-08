@@ -16,14 +16,14 @@
     self = [super init];
     if(self)
     {
-        _lock = [[UMMutex alloc]initWithName:@"UMSCCP_StatisticData"];
+        _sccpStatisticsDataLock = [[UMMutex alloc]initWithName:@"UMSCCP_StatisticData"];
     }
     return self;
 }
 
 - (void) addWaitingDelay:(NSTimeInterval)waitingDelay processingDelay:(NSTimeInterval)processingDelay
 {
-    [_lock lock];
+    [_sccpStatisticsDataLock lock];
     _count++;
     _sumOfWaitingDelays     += waitingDelay;
     _sumOfProcessingDelays  += processingDelay;
@@ -44,7 +44,7 @@
     {
         _minProcessing = processingDelay;
     }
-    [_lock unlock];
+    [_sccpStatisticsDataLock unlock];
 }
 
 
