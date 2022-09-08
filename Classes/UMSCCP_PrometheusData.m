@@ -18,7 +18,7 @@
     if(self)
     {
         _prometheus = prometheus;
-        _prometheusLock; = [[UMMutex alloc]initWithName:@"UMSCCP_PrometheusData"];
+        _prometheusLock = [[UMMutex alloc]initWithName:@"UMSCCP_PrometheusData"];
         
         _rxCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp_rx"
                                                             subname1:NULL
