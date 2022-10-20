@@ -928,7 +928,7 @@
     }
     if(self.logLevel <=UMLOG_DEBUG)
     {
-        [self.logFeed debugText:[NSString stringWithFormat:@" returning destination=%@",destination.description]];
+        [self.logFeed debugText:[NSString stringWithFormat:@"findRoutes returning destination=%@",destination.description]];
     }
     return destination;
 }
