@@ -51,8 +51,9 @@ typedef enum UMSccpScreening_result
 
 @protocol UMSCCPScreeningPluginProtocol
 - (UMSccpScreening_result)screenSccpPacketInbound:(UMSCCP_Packet *)packet error:(NSError **)err;
-- (UMSccpScreening_result)screenSccpPacketInboundTcap:(UMSCCP_Packet *)packet error:(NSError **)err;
+/*- (UMSccpScreening_result)screenSccpPacketInboundTcap:(UMSCCP_Packet *)packet error:(NSError **)err;
 - (UMSccpScreening_result)screenSccpPacketInboundGsmmap:(UMSCCP_Packet *)packet error:(NSError **)err;
+*/
 - (void)loadConfigFromFile:(NSString *)filename;
 - (void)reloadConfig;
 - (void)close;
