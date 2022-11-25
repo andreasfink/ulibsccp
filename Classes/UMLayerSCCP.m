@@ -1203,6 +1203,10 @@
     {
         if(ls)
         {
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                [self logDebug:[NSString stringWithFormat:@"SCCP-SCREENING: calling screenSccpPacketInbound(packet,error,plugin=%@(%@),traceDestination=%@",ls.sccp_screeningPlugin,ls.sccp_screeningPluginName,ls.name]];
+            }
             r = [self screenSccpPacketInbound:packet
                                         error:&err
                                        plugin:(UMPlugin<UMSCCPScreeningPluginProtocol>*)ls.sccp_screeningPlugin
@@ -1216,8 +1220,19 @@
                 [self logMajorError:[NSString stringWithFormat:@"sccp-linkset-screening failed with error %@",err]];
             }
         }
+        else
+        {
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                [self logDebug:[NSString stringWithFormat:@"SCCP-SCREENING: packet.incomingLinkset=%@, but ls=NULL",packet.incomingLinkset]];
+            }
+        }
     }
-    
+    if(self.logLevel <=UMLOG_DEBUG)
+    {
+        [self logDebug:@"SCCP-SCREENING: packet.incomingMtp3Layer is not set"];
+    }
+
     NSArray <UMSCCP_ReceivedSegment *> *segs =  NULL;
     BOOL processSinglePdu = NO;
     BOOL processMultipleSegments = NO;
@@ -4261,20 +4276,36 @@
       traceDestination:(UMMTP3LinkSet *)ls
 {
     
+    if(self.logLevel <=UMLOG_DEBUG)
+    {
+        [self logDebug:[NSString stringWithFormat:@"SCCP-SCREENING: screeningTrace:packet result:%d traceDestination:%@",r,ls.name]];
+    }
     @autoreleasepool
     {
 
         if((packet==NULL) || (ls==NULL))
         {
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                [self logDebug:@"SCCP-SCREENING: packet or ls are NULL"];
+            }
             return;
         }
         if(ls.sccpScreeningTraceLevel == UMMTP3ScreeningTraceLevel_none)
         {
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                [self logDebug:@"SCCP-SCREENING: UMMTP3ScreeningTraceLevel_none"];
+            }
             return;
         }
         if((ls.sccpScreeningTraceLevel == UMMTP3ScreeningTraceLevel_rejected_only)
             && (r>=UMSccpScreening_undefined))
         {
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                [self logDebug:@"SCCP-SCREENING: UMMTP3ScreeningTraceLevel_rejected_only or >= UMSccpScreening_undefined"];
+            }
             return;
         }
         
@@ -4351,6 +4382,10 @@
                 break;
         }
         [s appendFormat:@" mtp3-pdu=%@",packet.incomingMtp3Data.hexString];
+        if(self.logLevel <=UMLOG_DEBUG)
+        {
+            [self logDebug:[NSString stringWithFormat:@"SCCP-SCREENING: TraceFileAppend \n%@\n",s]];
+        }
         [ls writeSccpScreeningTraceFile:s];
     }
 }
@@ -4367,7 +4402,39 @@
     UMSccpScreening_result r = UMSccpScreening_undefined;
     if(plugin)
     {
+        if(self.logLevel <=UMLOG_DEBUG)
+        {
+            [self logDebug:@"SCCP-SCREENING: calling screenSccpPacketInbound:"];
+        }
         r = [plugin screenSccpPacketInbound:packet error:err];
+        if(self.logLevel <=UMLOG_DEBUG)
+        {
+            switch(r)
+            {
+                case UMSccpScreening_undefined:
+                    [self logDebug:@"SCCP-SCREENING: calling screenSccpPacketInbound: returns UMSccpScreening_undefined"];
+                    break;
+                case UMSccpScreening_explicitlyPermitted:
+                    [self logDebug:@"SCCP-SCREENING: calling screenSccpPacketInbound: returns UMSccpScreening_explicitlyPermitted"];
+                    break;
+                case UMSccpScreening_implicitlyPermitted:
+                    [self logDebug:@"SCCP-SCREENING: calling screenSccpPacketInbound: returns UMSccpScreening_explicitlyPermitted"];
+                    break;
+                case UMSccpScreening_explicitlyDenied:
+                    [self logDebug:@"SCCP-SCREENING: calling screenSccpPacketInbound: returns UMSccpScreening_explicitlyPermitted"];
+                    break;
+                case UMSccpScreening_implicitlyDenied:
+                    [self logDebug:@"SCCP-SCREENING: calling screenSccpPacketInbound: returns UMSccpScreening_explicitlyPermitted"];
+                    break;
+                case UMSccpScreening_errorResult:
+                    [self logDebug:@"SCCP-SCREENING: calling screenSccpPacketInbound: returns UMSccpScreening_explicitlyPermitted"];
+                    break;
+                default:
+                    [self logDebug:[NSString stringWithFormat:@"SCCP-SCREENING: calling screenSccpPacketInbound: returns %d",r]];
+                    break;
+            }
+        }
+
         if(ls)
         {
             [self screeningTrace:packet result:r traceDestination:ls];
