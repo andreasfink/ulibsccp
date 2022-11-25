@@ -58,7 +58,9 @@
 @property(readwrite,strong,atomic)  SccpAddress *decodedCalling;
 @property(readwrite,strong,atomic)  SccpAddress *decodedCalled;
 @property(readwrite,strong,atomic)  NSData *decodedData;
+@property(readwrite,strong,atomic)  UMSCCP_Packet *packet;
 @property(readwrite,strong,atomic)  UMMTP3TranslationTableMap *map;
+@property(readwrite,strong,atomic)  NSString *incomingLinksetName;
 
 - (UMSCCP_mtpTransfer *)initForSccp:(UMLayerSCCP *)layer
                                mtp3:(UMLayerMTP3 *)mtp3
