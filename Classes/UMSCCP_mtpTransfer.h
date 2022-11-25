@@ -51,6 +51,7 @@
     UMSCCP_StatisticSection _statsSection2;
 	UMSCCP_Packet		    *_packet;
     UMMTP3TranslationTableMap *_map;
+    NSString                *_incomingLinksetName;
 }
 
 @property(readwrite,strong,atomic)  UMSynchronizedSortedDictionary *decodedJson;
@@ -68,17 +69,9 @@
                                 sls:(int)sls
                                data:(NSData *)data
                             options:(NSDictionary *)options
-                                map:(UMMTP3TranslationTableMap *)map;
+                                map:(UMMTP3TranslationTableMap *)map
+                incomingLinksetName:(NSString *)linksetName;
 
-- (UMSCCP_mtpTransfer *)initForSccp:(UMLayerSCCP *)layer
-                               mtp3:(UMLayerMTP3 *)mtp3
-                                opc:(UMMTP3PointCode *)opc
-                                dpc:(UMMTP3PointCode *)dpc
-                                 si:(int)si
-                                 ni:(int)ni
-                                sls:(int)sls
-                               data:(NSData *)data
-                            options:(NSDictionary *)options;
 
 
 @end

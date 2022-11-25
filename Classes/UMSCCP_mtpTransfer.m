@@ -21,27 +21,6 @@
 @implementation UMSCCP_mtpTransfer
 
 
-- (UMSCCP_mtpTransfer *)initForSccp:(UMLayerSCCP *)layer
-                               mtp3:(UMLayerMTP3 *)mtp3
-                                opc:(UMMTP3PointCode *)xopc
-                                dpc:(UMMTP3PointCode *)xdpc
-                                 si:(int)xsi
-                                 ni:(int)xni
-                                sls:(int)sls
-                               data:(NSData *)xdata
-                            options:(NSDictionary *)xoptions
-{
-    return [self initForSccp:layer
-                        mtp3:mtp3
-                         opc:xopc
-                         dpc:xdpc
-                          si:xsi
-                          ni:xni
-                         sls:sls
-                        data:xdata
-                     options:xoptions
-                         map:NULL];
-}
 
 - (UMSCCP_mtpTransfer *)initForSccp:(UMLayerSCCP *)layer
                                mtp3:(UMLayerMTP3 *)mtp3
@@ -53,6 +32,7 @@
                                data:(NSData *)xdata
                             options:(NSDictionary *)xoptions
                                 map:(UMMTP3TranslationTableMap *)ttmap
+                incomingLinksetName:(NSString *)linksetName;
 {
     self = [super initWithName:@"UMSCCP_mtpTransfer" receiver:layer sender:mtp3 requiresSynchronisation:NO];
     if(self)
@@ -83,7 +63,7 @@
         _options[@"mtp3-opc"] = xopc;
         _options[@"mtp3-dpc"] = xdpc;
 		_packet.incomingMtp3Layer = mtp3;
-        _packet.incomingLinkset = xoptions[@"mtp3-incoming-linkset"];
+        _packet.incomingLinkset = _incomingLinksetName;
 		_created = [NSDate date];
         _statsSection = UMSCCP_StatisticSection_TRANSIT;
         _opc = xopc;

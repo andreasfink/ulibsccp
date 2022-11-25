@@ -140,7 +140,7 @@
         }
         options[@"mtp3-incoming-linkset"] = linksetName;
 
-        UMSCCP_mtpTransfer *task = [[UMSCCP_mtpTransfer alloc]initForSccp:self mtp3:mtp3Layer opc:opc dpc:dpc si:si ni:ni sls:sls data:data options:options map:map ];
+        UMSCCP_mtpTransfer *task = [[UMSCCP_mtpTransfer alloc]initForSccp:self mtp3:mtp3Layer opc:opc dpc:dpc si:si ni:ni sls:sls data:data options:options map:map incomingLinksetName:linksetName];
         [self queueFromLower:task];
     }
 }
