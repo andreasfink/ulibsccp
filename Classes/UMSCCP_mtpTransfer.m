@@ -63,7 +63,7 @@
         _options[@"mtp3-opc"] = xopc;
         _options[@"mtp3-dpc"] = xdpc;
 		_packet.incomingMtp3Layer = mtp3;
-        _packet.incomingLinkset = _incomingLinksetName;
+        _packet.incomingLinksetName = _incomingLinksetName;
 		_created = [NSDate date];
         _statsSection = UMSCCP_StatisticSection_TRANSIT;
         _opc = xopc;
@@ -469,7 +469,7 @@
                     }
                     else
                     {
-                        [s appendFormat:@"MsgType %@   LS: %@\n",_packet.incomingPacketType,_packet.incomingLinkset];
+                        [s appendFormat:@"MsgType %@   LS: %@\n",_packet.incomingPacketType,_packet.incomingLinksetName];
                     }
                     [s appendFormat:@"OPC: %@\tCgPA: %@\n",_packet.incomingOpc,_packet.incomingCallingPartyAddress];
                     [s appendFormat:@"DPC: %@\tCdPA: %@\n",_packet.incomingDpc,_packet.incomingCalledPartyAddress];
@@ -555,7 +555,7 @@
                                                 provider:_sccpLayer.mtp3
                                          routedToLinkset:&outgoingLinkset
                                                      sls:_packet.sls];
-                                _packet.outgoingLinkset = outgoingLinkset;
+                                _packet.outgoingLinksetName = outgoingLinkset;
                             }
                             else
                             {
@@ -587,7 +587,7 @@
                                              provider:_sccpLayer.mtp3
                                       routedToLinkset:&outgoingLinkset
                                                   sls:_packet.sls];
-                                _packet.outgoingLinkset = outgoingLinkset;
+                                _packet.outgoingLinksetName = outgoingLinkset;
                             }
                             else
                             {
@@ -752,20 +752,21 @@
                     }
 
                     NSString *gttSelector=_packet.routingSelector;
-                    NSString *incomingLinkset = _packet.incomingLinkset;
-                    NSString *outgoingLinkset = _packet.outgoingLinkset;
+                    NSString *incomingLinksetName = _packet.incomingLinksetName;
+                    NSString *outgoingLinksetName = _packet.outgoingLinksetName;
+                        
                     if(_packet.incomingFromLocal)
                     {
-                        incomingLinkset=@"local";
+                        incomingLinksetName=@"local";
                     }
                     if(_packet.outgoingToLocal)
                     {
-                        outgoingLinkset=@"local";
+                        outgoingLinksetName=@"local";
                     }
                     
                     [_sccpLayer.statisticDb  addByteCount:(int)_packet.outgoingSccpData.length
-                                          incomingLinkset:incomingLinkset
-                                          outgoingLinkset:outgoingLinkset
+                                          incomingLinkset:incomingLinksetName
+                                          outgoingLinkset:outgoingLinksetName
                                             callingPrefix:callingPrefix
                                              calledPrefix:calledPrefix
                                               gttSelector:gttSelector
@@ -919,7 +920,7 @@
                                              provider:_sccpLayer.mtp3
                                        routedToLinkset:&outgoingLinkset
                                                    sls:_packet.sls];
-            _packet.outgoingLinkset = outgoingLinkset;
+            _packet.outgoingLinksetName = outgoingLinkset;
             break;
         }
         case 0x04: /* SOR subsystem-out-of-service-request */

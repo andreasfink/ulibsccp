@@ -1190,7 +1190,7 @@
         }
         else
         {
-            [s appendFormat:@"  SCCP %@   from linksetLS: %@\n",packet.incomingPacketType,packet.incomingLinkset];
+            [s appendFormat:@"  SCCP %@   from linksetLS: %@\n",packet.incomingPacketType,packet.incomingLinksetName];
         }
         [s appendFormat:@"  OPC: %@\n",packet.incomingOpc];
         [s appendFormat:@"  DPC: %@\n",packet.incomingDpc];
@@ -1208,7 +1208,7 @@
     SCCP_ReturnCause causeValue = SCCP_ReturnCause_not_set;
     NSError *err = NULL;
     UMSccpScreening_result r = UMSccpScreening_undefined;
-    UMMTP3LinkSet *ls = [packet.incomingMtp3Layer getLinkSetByName:packet.incomingLinkset];
+    UMMTP3LinkSet *ls = [packet.incomingMtp3Layer getLinkSetByName:packet.incomingLinksetName];
     if(packet.incomingMtp3Layer)
     {
         if(ls)
@@ -1234,7 +1234,7 @@
         {
             if(self.logLevel <=UMLOG_DEBUG)
             {
-                [self logDebug:[NSString stringWithFormat:@"SCCP-SCREENING: packet.incomingLinkset=%@, but ls=NULL",packet.incomingLinkset]];
+                [self logDebug:[NSString stringWithFormat:@"SCCP-SCREENING: packet.incomingLinkset=%@, but ls=NULL",packet.incomingLinksetName]];
             }
         }
     }
@@ -1585,7 +1585,7 @@
         {
             routingPacket.outgoingToLocal = YES;
             routingPacket.outgoingLocalUser = localUser;
-            routingPacket.outgoingLinkset = @"local";
+            routingPacket.outgoingLinksetName = @"local";
             if((routingPacket.incomingServiceType == SCCP_UDTS) || (routingPacket.incomingServiceType == SCCP_XUDTS) || (routingPacket.incomingServiceType == SCCP_LUDTS))
             {
                 [localUser sccpNNotice:routingPacket.outgoingSccpData
@@ -1718,7 +1718,7 @@
                                  provider:provider
                           routedToLinkset:&outgoingLinkset
                                       sls:routingPacket.sls];
-                        packet.outgoingLinkset = outgoingLinkset;
+                        packet.outgoingLinksetName = outgoingLinkset;
                         break;
                     case SCCP_UDTS:
                         e = [self sendUDTS:routingPacket.outgoingSccpData
@@ -1732,7 +1732,7 @@
                                   provider:provider
                            routedToLinkset:&outgoingLinkset
                                        sls:routingPacket.sls];
-                           packet.outgoingLinkset = outgoingLinkset;
+                           packet.outgoingLinksetName = outgoingLinkset;
                         break;
                     case SCCP_XUDT:
                         if(processSegmentedDelivery)
@@ -1776,7 +1776,7 @@
                                       provider:provider
                                    routedToLinkset:&outgoingLinkset
                                            sls:packet.sls];
-                             packet.outgoingLinkset = outgoingLinkset;
+                             packet.outgoingLinksetName = outgoingLinkset;
                         }
                         else
                         {
@@ -1797,7 +1797,7 @@
                                    provider:provider
                             routedToLinkset:&outgoingLinkset
                                         sls:packet.sls];
-                          packet.outgoingLinkset = outgoingLinkset;
+                          packet.outgoingLinksetName = outgoingLinkset;
                         break;
                     case SCCP_LUDT:
                         e = UMMTP3_error_invalid_variant;
@@ -2292,7 +2292,7 @@
     packet.incomingServiceClass = pclass;
     packet.incomingMtp3Layer = provider;
     packet.incomingSccpData = data;
-    packet.incomingLinkset = @"internal";
+    packet.incomingLinksetName = @"internal";
     packet.sls = sls;
     NSString *outgoingLinkset;
     if(_routeErrorsBackToOriginatingPointCode || /* DISABLES CODE */ (1)) /* if this flag is set, we send the packet back to the original OPC, no matter what. We dont use local routing table to send the UDTS backt to the calling address */
@@ -2308,7 +2308,7 @@
                                provider:provider
                         routedToLinkset:&outgoingLinkset
                                     sls:sls];
-        packet.outgoingLinkset = outgoingLinkset;
+        packet.outgoingLinksetName = outgoingLinkset;
         return e;
     }
     else
@@ -4328,7 +4328,7 @@
         }
         else
         {
-            [s appendFormat:@" ls=%@",packet.incomingLinkset];
+            [s appendFormat:@" ls=%@",packet.incomingLinksetName];
         }
 
         if(packet.incomingOpc)

@@ -314,7 +314,7 @@ static int segmentReferenceId;
                         packet.logFeed = _sccpLayer.logFeed;
                         packet.logLevel = _sccpLayer.logLevel;
                         packet.incomingMtp3Layer = _sccpLayer.mtp3;
-                        packet.incomingLinkset = @"local";
+                        packet.incomingLinksetName = @"local";
                         packet.incomingOpc=xopc;
                         packet.incomingDpc=xdpc;
                         packet.incomingCallingPartyAddress = _src;
@@ -356,7 +356,7 @@ static int segmentReferenceId;
                     packet.logFeed = _sccpLayer.logFeed;
                     packet.logLevel = _sccpLayer.logLevel;
                     packet.incomingMtp3Layer = _sccpLayer.mtp3;
-                    packet.incomingLinkset = @"local";
+                    packet.incomingLinksetName = @"local";
                     packet.incomingOpc=xopc;
                     packet.incomingDpc=xdpc;
                     packet.incomingCallingPartyAddress = _src;
@@ -431,7 +431,7 @@ static int segmentReferenceId;
 
                         NSString *gttSelector=packet.routingSelector;
                         NSString *incomingLinkset = @"local";
-                        NSString *outgoingLinkset = packet.outgoingLinkset;
+                        NSString *outgoingLinkset = packet.outgoingLinksetName;
                         if(packet.outgoingToLocal)
                         {
                             outgoingLinkset=@"local";

@@ -37,7 +37,7 @@
     
     id<UMSCCP_UserProtocol>     _incomingLocalUser;
     UMLayerMTP3                 *_incomingMtp3Layer;
-    NSString                    *_incomingLinkset;
+    NSString                    *_incomingLinksetName;
     NSDictionary                *_incomingOptions;
     UMMTP3PointCode             *_incomingOpc;
     UMMTP3PointCode             *_incomingDpc;
@@ -58,7 +58,7 @@
 
     id<UMSCCP_UserProtocol>     _outgoingLocalUser;
     UMLayerMTP3                 *_outgoingMtp3Layer;
-    NSString                    *_outgoingLinkset;
+    NSString                    *_outgoingLinksetName;
     NSDictionary                *_outgoingOptions;
     UMMTP3PointCode             *_outgoingOpc;
     UMMTP3PointCode             *_outgoingDpc;
@@ -127,7 +127,7 @@
 
 @property(readwrite,strong,atomic)    id<UMSCCP_UserProtocol>    incomingLocalUser;
 @property(readwrite,strong,atomic)    UMLayerMTP3                *incomingMtp3Layer;
-@property(readwrite,strong,atomic)    NSString                *incomingLinkset;
+@property(readwrite,strong,atomic)    NSString                *incomingLinksetName;
 @property(readwrite,strong,atomic)    NSDictionary             *incomingOptions;
 @property(readwrite,strong,atomic)    UMMTP3PointCode            *incomingOpc;
 @property(readwrite,strong,atomic)    UMMTP3PointCode         *incomingDpc;
@@ -149,7 +149,7 @@
 
 @property(readwrite,strong,atomic)    id<UMSCCP_UserProtocol>    outgoingLocalUser;
 @property(readwrite,strong,atomic)    UMLayerMTP3                *outgoingMtp3Layer;
-@property(readwrite,strong,atomic)    NSString                *outgoingLinkset;
+@property(readwrite,strong,atomic)    NSString                *outgoingLinksetName;
 @property(readwrite,strong,atomic)    NSDictionary             *outgoingOptions;
 @property(readwrite,strong,atomic)    UMMTP3PointCode            *outgoingOpc;
 @property(readwrite,strong,atomic)    UMMTP3PointCode         *outgoingDpc;

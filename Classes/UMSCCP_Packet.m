@@ -136,7 +136,7 @@ typedef enum UMTCAP_Command
 {
     _outgoingLocalUser              = _incomingLocalUser;
     _outgoingMtp3Layer              = _incomingMtp3Layer;
-    _outgoingLinkset                = _incomingLinkset;
+    _outgoingLinksetName                = _incomingLinksetName;
     _outgoingOptions                = _incomingOptions;
     _outgoingOpc                    = _incomingOpc;
     _outgoingDpc                    = _incomingDpc;
@@ -172,7 +172,7 @@ typedef enum UMTCAP_Command
     cpy.incomingSegment = [_incomingSegment copy];
     cpy.incomingLocalUser = _incomingLocalUser;
     cpy.incomingMtp3Layer = _incomingMtp3Layer;
-    cpy.incomingLinkset = _incomingLinkset;
+    cpy.incomingLinksetName = _incomingLinksetName;
     cpy.incomingOptions = _incomingOptions;
     cpy.incomingOpc = _incomingOpc;
     cpy.incomingDpc = _incomingDpc;
@@ -192,7 +192,7 @@ typedef enum UMTCAP_Command
     cpy.incomingReturnCause = _incomingReturnCause;
     cpy.outgoingLocalUser = _outgoingLocalUser;
     cpy.outgoingMtp3Layer = _outgoingMtp3Layer;
-    cpy.outgoingLinkset = _outgoingLinkset;
+    cpy.outgoingLinksetName = _outgoingLinksetName;
     cpy.outgoingOptions = _outgoingOptions;
     cpy.outgoingOpc = _outgoingOpc;
     cpy.outgoingDpc = _outgoingDpc;
@@ -560,7 +560,7 @@ typedef enum UMTCAP_Command
     DICT_SET_STRING(dict, @"imsi",_imsi);
     dict[@"transparent"] = @"1";
     DICT_SET_STRING(dict, @"mtp_inbound_instance",[_incomingMtp3Layer layerName]);
-    DICT_SET_STRING(dict, @"mtp_inbound_linkset",_incomingLinkset);
+    DICT_SET_STRING(dict, @"mtp_inbound_linkset",_incomingLinksetName);
     DICT_SET_STRING(dict, @"mtp_inbound_localuser",[_incomingLocalUser layerName]);
     DICT_SET_INTEGER(dict,@"mtp_srism_opc",_incomingOpc.integerValue);
     DICT_SET_INTEGER(dict,@"mtp_srism_dpc",_incomingDpc.integerValue);
@@ -573,9 +573,9 @@ typedef enum UMTCAP_Command
     DICT_SET_INTEGER(dict,@"mtp_inbound_si",3); /* we are in SCCP so there's nothing else possible */
 
     DICT_SET_STRING(dict, @"mtp_outbound_instance",[_outgoingMtp3Layer layerName]);
-    DICT_SET_STRING(dict, @"mtp_outbound_linkset",_outgoingLinkset);
+    DICT_SET_STRING(dict, @"mtp_outbound_linkset",_outgoingLinksetName);
     DICT_SET_STRING(dict, @"mtp_outound_localuser",[_outgoingLocalUser layerName]);
-    DICT_SET_STRING(dict, @"mtp_outbound_linkset",_outgoingLinkset);
+    DICT_SET_STRING(dict, @"mtp_outbound_linkset",_outgoingLinksetName);
     DICT_SET_INTEGER(dict,@"mtp_outbound_opc",_outgoingOpc.integerValue);
     DICT_SET_INTEGER(dict,@"mtp_outbound_dpc",_outgoingDpc.integerValue);
     DICT_SET_INTEGER(dict,@"mtp_outbound_si",3); /* we are in SCCP so there's nothing else possible */
