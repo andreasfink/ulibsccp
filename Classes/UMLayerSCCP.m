@@ -1234,7 +1234,7 @@
         {
             if(self.logLevel <=UMLOG_DEBUG)
             {
-                [self logDebug:[NSString stringWithFormat:@"SCCP-SCREENING: packet.incomingLinkset=%@, but ls=NULL",packet.incomingLinksetName]];
+                [self logDebug:[NSString stringWithFormat:@"SCCP-SCREENING: packet.incomingLinksetName=%@, but ls=NULL",packet.incomingLinksetName]];
             }
         }
     }
