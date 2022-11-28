@@ -63,7 +63,8 @@
         _options[@"mtp3-opc"] = xopc;
         _options[@"mtp3-dpc"] = xdpc;
 		_packet.incomingMtp3Layer = mtp3;
-        _packet.incomingLinksetName = _incomingLinksetName;
+        _incomingLinksetName = linksetName;
+        _packet.incomingLinksetName = linksetName;
 		_created = [NSDate date];
         _statsSection = UMSCCP_StatisticSection_TRANSIT;
         _opc = xopc;

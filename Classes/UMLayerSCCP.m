@@ -116,6 +116,7 @@
 }
 
 /* if MTP3 has a packet for us it will send us a mtpTransfer message */
+
 - (void)mtpTransfer:(NSData *)data
        callingLayer:(id)mtp3Layer
                 opc:(UMMTP3PointCode *)opc
@@ -125,7 +126,8 @@
                 sls:(int)sls
         linksetName:(NSString *)linksetName
             options:(NSDictionary *)xoptions
-              ttmap:(UMMTP3TranslationTableMap *)map
+              ttmap:(UMMTP3TranslationTableMap *)map;
+
 {
     @autoreleasepool
     {
