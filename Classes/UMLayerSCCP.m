@@ -1210,7 +1210,6 @@
     SCCP_ReturnCause causeValue = SCCP_ReturnCause_not_set;
     NSError *err = NULL;
     UMSccpScreening_result r = UMSccpScreening_undefined;
-    UMSccpScreening_result r2 = UMSccpScreening_undefined;
     UMMTP3LinkSet *ls = [packet.incomingMtp3Layer getLinkSetByName:packet.incomingLinksetName];
     if(packet.incomingMtp3Layer)
     {

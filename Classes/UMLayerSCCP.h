@@ -479,6 +479,5 @@ qualityOfService:(int)qos
 - (void)reopenLogfiles;
 - (void)reloadPluginConfigs;
 - (void)reloadPlugins;
-- (void)loadScreeningPlugin;
 
 @end
