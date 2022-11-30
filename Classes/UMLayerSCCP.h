@@ -49,12 +49,6 @@ typedef enum UMSccpScreening_result
     UMSccpScreening_errorResult = -99,
 } UMSccpScreening_result;
 
-@protocol UMSCCPScreeningPluginProtocol
-- (UMSccpScreening_result)screenSccpPacketInbound:(UMSCCP_Packet *)packet error:(NSError **)err;
-- (void)loadConfigFromFile:(NSString *)filename;
-- (void)reloadConfig;
-- (void)close;
-@end
 
 @protocol sccp_tcapDecoder<NSObject>
 - (NSString *) getAppContextFromDialogPortion:(UMASN1Object *)o;
@@ -115,11 +109,13 @@ typedef enum UMSccpScreening_result
     NSNumber                    *_conversion_e164_tt;
     NSNumber                    *_conversion_e212_tt;
     
-    NSString                                 *_sccp_screeningPluginName;
-    NSString                                 *_sccp_screeningPluginConfig;
-    NSString                                 *_sccp_screeningTraceFileName;
+    NSString                                *_sccp_screeningPluginName;
+    NSString                                *_sccp_screeningPluginConfigFileName;
+    NSString                                *_sccp_screeningPluginTraceFileName;
+    UMMTP3ScreeningTraceLevel               _sccpScreeningTraceLevel;
+
     FILE                                     *_sccp_screeningTraceFile;
-    UMPlugin<UMSCCPScreeningPluginProtocol>  *_sccp_screeningPlugin;
+    UMPlugin<UMMTP3SCCPScreeningPluginProtocol>  *_sccp_screeningPlugin;
     BOOL                                     _sccp_screeningLoggin;
     BOOL                                     _sccp_screeningActive;
     UMMutex                                  *_loggingLock;
@@ -167,7 +163,7 @@ typedef enum UMSccpScreening_result
 @property(readwrite,strong,atomic) NSString                    *sccp_screeningPluginName;
 @property(readwrite,strong,atomic) NSString                    *sccp_screeningPluginConfig;
 @property(readwrite,strong,atomic) NSString                    *sccp_screeningPluginTraceFile;
-@property(readwrite,strong,atomic) UMPlugin<UMSCCPScreeningPluginProtocol>   *sccp_screeningPlugin;
+@property(readwrite,strong,atomic) UMPlugin<UMMTP3SCCPScreeningPluginProtocol>   *sccp_screeningPlugin;
 @property(readwrite,strong,atomic) UMSCCP_PrometheusData    *prometheusData;
 
 
@@ -477,7 +473,7 @@ qualityOfService:(int)qos
 
 - (UMSccpScreening_result)screenSccpPacketInbound:(UMSCCP_Packet *)packet
                                             error:(NSError **)err
-                                           plugin:(UMPlugin<UMSCCPScreeningPluginProtocol>*)plugin
+                                           plugin:(UMPlugin<UMMTP3SCCPScreeningPluginProtocol>*)plugin
                                  traceDestination:(UMMTP3LinkSet *)tracedest;
 
 - (void)reopenLogfiles;
