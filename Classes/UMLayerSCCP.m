@@ -4527,6 +4527,7 @@
 {
     
 }
+
  -(void)reloadPlugins
 {
     [_sccp_screeningPlugin close];
