@@ -61,7 +61,7 @@
     _traceSendDestinations =[[UMSynchronizedArray alloc]init];
     _traceReceiveDestinations =[[UMSynchronizedArray alloc]init];
     _traceDroppedDestinations =[[UMSynchronizedArray alloc]init];
-    _mtp3RoutingTable = [[SccpL3RoutingTable alloc]init];
+    _sccpL3RoutingTable = [[SccpL3RoutingTable alloc]init];
     _xudt_max_hop_count = 16;
     _xudts_max_hop_count = 16;
     _gttSelectorRegistry = [[SccpGttRegistry alloc]init];
@@ -973,7 +973,7 @@
         }
         return;
     }
-    SccpDestinationEntry *dst = [grp chooseNextHopWithRoutingTable:_mtp3RoutingTable];
+    SccpDestinationEntry *dst = [grp chooseNextHopWithRoutingTable:_sccpL3RoutingTable];
     if(dst==NULL)
     {
         if(cause)
@@ -1146,7 +1146,7 @@
     }
     dict[@"new-number"] = called_out.stringValueE164;
     dict[@"new-tt"] = @(called_out.tt.tt);
-    dict[@"destination-group"] = [grp statusForL3RoutingTable:_mtp3RoutingTable];
+    dict[@"destination-group"] = [grp statusForL3RoutingTable:_sccpL3RoutingTable];
     if(m3ua_as)
     {
         dict[@"routed-to-m3ua-as"] = m3ua_as;
@@ -1569,7 +1569,7 @@
         {
             NSMutableString *s = [[NSMutableString alloc]init];
             [s appendFormat:@"findRoutes(%@) returns:\n",dst];
-            [s appendString:[grp descriptionWithRt:_mtp3RoutingTable]];
+            [s appendString:[grp descriptionWithRt:_sccpL3RoutingTable]];
             [s appendFormat:@"    causeValue: %d\n",causeValue];
             [s appendFormat:@"    newCalledAddress: %@\n",called_out];
             [s appendFormat:@"    localUser: %@\n",localUser];
@@ -1631,7 +1631,7 @@
         {
             /* routing to */
             routingPacket.outgoingDestination = grp.name;
-            SccpDestinationEntry *dest = [grp chooseNextHopWithRoutingTable:_mtp3RoutingTable];
+            SccpDestinationEntry *dest = [grp chooseNextHopWithRoutingTable:_sccpL3RoutingTable];
             if(self.logLevel <=UMLOG_DEBUG)
             {
                 NSMutableString *s = [[NSMutableString alloc]init];
@@ -3173,13 +3173,17 @@
 
 - (UMSynchronizedSortedDictionary *)routeStatus
 {
-    UMSynchronizedSortedDictionary *d = [_mtp3RoutingTable status];
+    UMSynchronizedSortedDictionary *d = [_sccpL3RoutingTable status];
+    if(d==NULL)
+    {
+        return [[UMSynchronizedSortedDictionary alloc]init];
+    }
     return d;
 }
 
 - (UMSynchronizedSortedDictionary *)mtp3routeStatus
 {
-    UMSynchronizedSortedDictionary *d = [_mtp3RoutingTable status];
+    UMSynchronizedSortedDictionary *d = [_sccpL3RoutingTable status];
     return d;
 }
 

@@ -45,7 +45,7 @@
             [_sccp logDebug:s];
         }
         NSLog(@"mtpResume: AffectedPointCode: %@",_affectedPointCode);
-        [_sccp.mtp3RoutingTable setStatus:SccpL3RouteStatus_available
+        [_sccp.sccpL3RoutingTable setStatus:SccpL3RouteStatus_available
                          forPointCode:_affectedPointCode];
     }
 }

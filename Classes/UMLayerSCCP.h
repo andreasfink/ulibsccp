@@ -69,7 +69,7 @@ typedef enum UMSccpScreening_result
     UMSynchronizedArray         *_traceReceiveDestinations;
     UMSynchronizedArray         *_traceDroppedDestinations;
 
-    SccpL3RoutingTable          *_mtp3RoutingTable;
+    SccpL3RoutingTable          *_sccpL3RoutingTable;
     int                         _xudt_max_hop_count;
     int                         _xudts_max_hop_count;
     BOOL                        _stpMode;
@@ -128,7 +128,7 @@ typedef enum UMSccpScreening_result
 @property(readwrite,strong) SccpDestinationGroup *defaultNextHop;
 @property(readwrite,strong) SccpGttRegistry *gttSelectorRegistry;
 @property(readwrite,strong) NSMutableDictionary *pendingSegments;
-@property(readwrite,strong) SccpL3RoutingTable *mtp3RoutingTable;
+@property(readwrite,strong) SccpL3RoutingTable *sccpL3RoutingTable;
 @property(readwrite,assign) int xudt_max_hop_count;
 @property(readwrite,assign) int xudts_max_hop_count;
 @property(readwrite,assign) BOOL stpMode;
