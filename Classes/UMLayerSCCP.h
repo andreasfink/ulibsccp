@@ -421,7 +421,9 @@ sls:(int)sls;
                                               fromLocal:(BOOL)fromLocal
                                       transactionNumber:(NSNumber *)tid
                                               operation:(NSNumber *)op
-                                     applicationContext:(NSString *)ac;
+                                     applicationContext:(NSString *)ac
+                                        incomingLinkset:(NSString *)linkset
+                                          sourceAddress:(NSString *)source;
 
 
 - (BOOL)routePacket:(UMSCCP_Packet *)packet; /* returns YES if sucessfully forwarded, NO if it wasn able to route it */

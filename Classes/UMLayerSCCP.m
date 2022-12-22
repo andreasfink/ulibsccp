@@ -1027,24 +1027,132 @@
                                       transactionNumber:(NSNumber *)tid
                                               operation:(NSNumber *)op
                                      applicationContext:(NSString *)ac
+                                        incomingLinkset:(NSString *)linkset
+                                          sourceAddress:(NSString *)source
 {
     UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
     int causeValue = -1;
     id<UMSCCP_UserProtocol> localUser = NULL;
     UMMTP3PointCode *pc = NULL;
-
+    
     dict[@"original-number"] = msisdn;
     dict[@"original-tt"]     = @(tt);
-
+    
     SccpAddress *dst = [[SccpAddress alloc]initWithHumanReadableString:msisdn variant:_mtp3.variant];
     dst.tt.tt = tt;
     dst.ssn.ssn = SCCP_SSN_HLR;
-
+    
     SCCP_ReturnCause cause = SCCP_ReturnCause_not_set;
     SccpAddress *called_out = dst;
     NSString *m3ua_as = NULL;
     NSString *usedSelector=@"";
     
+    UMSCCP_Packet *packet;
+    packet.incomingLinksetName = linkset;
+    packet.incomingCallingPartyAddress = [[SccpAddress alloc]initWithHumanReadableString:source sccpVariant:_sccpVariant mtp3Variant:_mtp3.variant];
+    packet.incomingCalledPartyAddress = [[SccpAddress alloc]initWithHumanReadableString:msisdn sccpVariant:_sccpVariant mtp3Variant:_mtp3.variant];
+    packet.incomingCalledPartyAddress.tt.tt = tt;
+    if(linkset.length > 0)
+    {
+        UMMTP3LinkSet *ls = [_mtp3 getLinkSetByName:linkset];
+        if(ls.sccp_screeningPluginName)
+        {
+            if(ls.sccp_screeningPlugin==NULL)
+            {
+                [ls loadSccpScreeningPlugin];
+            }
+            if(ls.sccp_screeningPlugin==NULL)
+            {
+                dict[@"linkset-sccp-screening-error"] = @"plugin-load-error";
+            }
+            else
+            {
+                NSError *err = NULL;
+                UMSccpScreening_result r = [self screenSccpPacketInbound:packet
+                                                                   error:&err
+                                                                  plugin:ls.sccp_screeningPlugin
+                                                        traceDestination:ls];
+                switch(r)
+                {
+                    case UMSccpScreening_undefined:
+                        dict[@"linkset-sccp-screening-result"] = @"undefined";
+                        break;
+                    case UMSccpScreening_explicitlyPermitted:
+                        dict[@"linkset-sccp-screening-result"] = @"expicitly-permitted";
+                        break;
+                    case UMSccpScreening_implicitlyPermitted:
+                        dict[@"linkset-sccp-screening-result"] = @"impicitly-permitted";
+                        break;
+                    case UMSccpScreening_explicitlyDenied:
+                        dict[@"linkset-sccp-screening-result"] = @"expicitly-denied";
+                        break;
+                    case UMSccpScreening_implicitlyDenied:
+                        dict[@"linkset-sccp-screening-result"] = @"impicitly-denied";
+                        break;
+                    case UMSccpScreening_errorResult:
+                        dict[@"linkset-sccp-screening-result"] = @"error";
+                        break;
+                    default:
+                        dict[@"linkset-sccp-screening-result"] = @"unknown";
+                        break;
+                }
+                if(err)
+                {
+                    dict[@"linkset-sccp-screening-error"] = err.description;
+                }
+            }
+        }
+    }
+    /* SCCP level plugin */
+    if(_sccp_screeningPluginName)
+    {
+        if(_sccp_screeningPlugin==NULL)
+        {
+            [self loadSccpScreeningPlugin];
+        }
+        if(_sccp_screeningPlugin==NULL)
+        {
+            dict[@"sccp-screening-error"] = @"plugin-load-error";
+        }
+        else
+        {
+            NSError *err = NULL;
+            UMSccpScreening_result r = [self screenSccpPacketInbound:packet
+                                                               error:&err
+                                                              plugin:_sccp_screeningPlugin
+                                                    traceDestination:NULL];
+            switch(r)
+            {
+                case UMSccpScreening_undefined:
+                    dict[@"sccp-screening-result"] = @"undefined";
+                    break;
+                case UMSccpScreening_explicitlyPermitted:
+                    dict[@"sccp-screening-result"] = @"expicitly-permitted";
+                    break;
+                case UMSccpScreening_implicitlyPermitted:
+                    dict[@"sccp-screening-result"] = @"impicitly-permitted";
+                    break;
+                case UMSccpScreening_explicitlyDenied:
+                    dict[@"sccp-screening-result"] = @"expicitly-denied";
+                    break;
+                case UMSccpScreening_implicitlyDenied:
+                    dict[@"sccp-screening-result"] = @"impicitly-denied";
+                    break;
+                case UMSccpScreening_errorResult:
+                    dict[@"sccp-screening-result"] = @"error";
+                    break;
+                default:
+                    dict[@"sccp-screening-result"] = @"unknown";
+                    break;
+            }
+            if(err)
+            {
+                dict[@"sccp-screening-error"] = err.description;
+            }
+        }
+    }
+
+    /****/
     SccpDestinationGroup *grp = [self findRoutes:dst
                                            cause:&cause
                                 newCalledAddress:&called_out
@@ -1559,6 +1667,7 @@
                                    transactionNumber:tid
                                            operation:op
                                     applicationContext:ac];
+
         if(self.logLevel <=UMLOG_DEBUG)
         {
             [self.logFeed debugText:[NSString stringWithFormat:@" returns %@",grp]];
