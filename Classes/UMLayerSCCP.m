@@ -1035,8 +1035,14 @@
     id<UMSCCP_UserProtocol> localUser = NULL;
     UMMTP3PointCode *pc = NULL;
     
-    dict[@"original-number"] = msisdn;
-    dict[@"original-tt"]     = @(tt);
+    dict[@"original-number"]        = msisdn;
+    dict[@"original-tt"]            = @(tt);
+    dict[@"from-local"]             = fromLocal ? @"YES" : @"NO";
+    dict[@"transaction-id"]         = tid ? tid : @"<null>";
+    dict[@"operation"]              = op ? op : @"<null>";
+    dict[@"application-context"]    = ac  ? ac : @"<null>";
+    dict[@"incoming-linkset"]       = linkset ? linkset : @"<null>";
+    dict[@"source-address"]         = source ? source : @"<null>";
     
     SccpAddress *dst = [[SccpAddress alloc]initWithHumanReadableString:msisdn variant:_mtp3.variant];
     dst.tt.tt = tt;
@@ -1055,6 +1061,10 @@
     if(linkset.length > 0)
     {
         UMMTP3LinkSet *ls = [_mtp3 getLinkSetByName:linkset];
+        if(ls == NULL)
+        {
+            dict[@"incoming-linkset-error"]   = [NSString stringWithFormat:@"linkset %@ not found in mtp3 %@",linkset, _mtp3.layerName];
+        }
         if(ls.sccp_screeningPluginName)
         {
             if(ls.sccp_screeningPlugin==NULL)
