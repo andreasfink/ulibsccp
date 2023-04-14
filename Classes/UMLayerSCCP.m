@@ -1840,7 +1840,7 @@
             }
             else
             {
-                UMMTP3_Error e;
+                UMMTP3_Error e = UMMTP3_error_internal_error;
                 switch(routingPacket.outgoingServiceType)
                 {
                     case SCCP_UDT:

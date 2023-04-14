@@ -139,7 +139,7 @@ static int segmentReferenceId;
             {
                 optional_data = [[NSMutableData alloc]init];
                 NSArray *keys = [sccp_options allKeys];
-                int paramType;
+                int paramType = 0;
                 for(NSString *key in keys)
                 {
                     if([key isEqualToString:@"destination-local-reference"])
