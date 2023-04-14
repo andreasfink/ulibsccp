@@ -26,6 +26,7 @@
     self = [super initWithName:@"UMSCCP_mtpPause" receiver:layer sender:mtp3 requiresSynchronisation:NO];
     if(self)
     {
+        _mtp3 = mtp3;
         _affectedPointCode = affPC;
         _si = xsi;
         _ni = xni;
@@ -46,6 +47,11 @@
             [_sccp logDebug:s];
         }
         NSLog(@"mtpPause: AffectedPointCode: %@ is now unavailable",_affectedPointCode);
+        [_mtp3.routingUpdateDb logInboundLinkset:@"sccp"
+                                 outboundLinkset:@""
+                                             dpc:_affectedPointCode
+                                          status:@"unavailable"
+                                          reason:@"mtpPause"];
         [_sccp.sccpL3RoutingTable setStatus:SccpL3RouteStatus_unavailable
                              forPointCode:_affectedPointCode];
     }

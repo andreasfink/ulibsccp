@@ -34,6 +34,7 @@
         _sls = xsls;
         _options = xoptions;
         _sccp = layer;
+        _mtp3 = mtp3;
     }
     return self;
 }
@@ -48,6 +49,11 @@
             [_sccp logDebug:s];
         }
         NSLog(@"mtpStatus: AffectedPointCode: %@ is now restricted",_affectedPointCode);
+        [_mtp3.routingUpdateDb logInboundLinkset:@"sccp"
+                                 outboundLinkset:@""
+                                             dpc:_affectedPointCode
+                                          status:@"restricted"
+                                          reason:@"mtpStatus"];
         [_sccp.sccpL3RoutingTable setStatus:SccpL3RouteStatus_restricted
                              forPointCode:_affectedPointCode];
     }

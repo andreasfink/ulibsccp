@@ -31,6 +31,7 @@
         _sls = xsls;
         _options = xoptions;
         _sccp = layer;
+        _mtp3 = mtp3;
     }
     return self;
 }
@@ -45,6 +46,11 @@
             [_sccp logDebug:s];
         }
         NSLog(@"mtpResume: AffectedPointCode: %@",_affectedPointCode);
+        [_mtp3.routingUpdateDb logInboundLinkset:@"sccp"
+                                 outboundLinkset:@""
+                                             dpc:_affectedPointCode
+                                          status:@"available"
+                                          reason:@"mtpResume"];
         [_sccp.sccpL3RoutingTable setStatus:SccpL3RouteStatus_available
                          forPointCode:_affectedPointCode];
     }
