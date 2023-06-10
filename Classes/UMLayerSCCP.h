@@ -87,10 +87,6 @@ typedef enum UMSccpScreening_result
     UMSCCP_StatisticDb          *_statisticDb;
     NSString                    *_statisticDbInstance;
 
-    NSString                    *_translationTablesDbPool;
-    NSString                    *_translationTablesDbTable;
-    NSNumber                    *_translationTablesDbAutoCreate;
-    
     /* this is now done in appDelegate
     NSString *_inboundFilterName;
     NSString *_outboundFilterName;
