@@ -11,10 +11,10 @@
 
 #import <ulib/ulib.h>
 #import <ulibgt/ulibgt.h>
-#import "UMSCCP_UserProtocol.h"
-#import "UMLayerSCCP.h"
-
-#import "UMSCCP_StatisticSection.h"
+#import <ulibsccp/UMSCCP_UserProtocol.h>
+#import <ulibsccp/UMLayerSCCP.h>
+#import <ulibsccp/UMSCCP_StatisticSection.h>
+#import <ulibsccp/UMSCCP_Segment.h>
 
 @interface UMSCCP_sccpNUnitdata : UMLayerTask
 {

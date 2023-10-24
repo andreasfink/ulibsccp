@@ -173,7 +173,7 @@
 				A6F694011B4E84120090FC94 /* Makefile.osx.in */,
 				A6F694021B4E84120090FC94 /* ulibsccp.pc.in */,
 				A6F694031B4E84120090FC94 /* VERSION */,
-				A604D13A19B999BC0090FC94 /* Classes */,
+				A604D13A19B999BC0090FC94 /* ulibsccp */,
 				A604D13B19B999BC0090FC94 /* SupportingFiles */,
 				A604D14F19B999BD0090FC94 /* ulibsccpTests */,
 				A604D13219B999BC0090FC94 /* Products */,
@@ -202,7 +202,7 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		A604D13A19B999BC0090FC94 /* Classes */ = {
+		A604D13A19B999BC0090FC94 /* ulibsccp */ = {
 			isa = PBXGroup;
 			children = (
 				A604D14119B999BC0090FC94 /* ulibsccp.h */,
@@ -249,7 +249,7 @@
 				A658E1FF21E882E600825E4A /* UMSCCP_Filter.h */,
 				A658E20021E882E600825E4A /* UMSCCP_Filter.m */,
 			);
-			path = Classes;
+			path = ulibsccp;
 			sourceTree = "<group>";
 		};
 		A604D13B19B999BC0090FC94 /* SupportingFiles */ = {

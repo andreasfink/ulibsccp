@@ -8,8 +8,8 @@
 
 #import <ulib/ulib.h>
 #import <ulibdb/ulibdb.h>
-#import "UMLayerSCCPApplicationContextProtocol.h"
-#import "UMSCCP_Defs.h"
+#import <ulibsccp/UMLayerSCCPApplicationContextProtocol.h>
+#import <ulibsccp/UMSCCP_Defs.h>
 
 @class UMDigitTree;
 

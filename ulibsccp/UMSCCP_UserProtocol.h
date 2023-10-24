@@ -11,9 +11,9 @@
 
 #import <ulibgt/ulibgt.h>
 
-#import "UMSCCP_UserProtocol.h"
-#import "UMSCCPConnection.h"
-#import "UMSCCP_Defs.h"
+#import <ulibsccp/UMSCCP_UserProtocol.h>
+#import <ulibsccp/UMSCCPConnection.h>
+#import <ulibsccp/UMSCCP_Defs.h>
 
 @class UMLayerSCCP;
 @class UMSCCP_Packet;

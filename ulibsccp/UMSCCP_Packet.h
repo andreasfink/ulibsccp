@@ -9,8 +9,8 @@
 #import <ulib/ulib.h>
 #import <ulibgt/ulibgt.h>
 
-#import "UMSCCP_Defs.h"
-#import "UMSCCP_UserProtocol.h"
+#import <ulibsccp/UMSCCP_Defs.h>
+#import <ulibsccp/UMSCCP_UserProtocol.h>
 
 @class UMTCAP_itu_asn1_begin;
 @class UMTCAP_itu_asn1_continue;

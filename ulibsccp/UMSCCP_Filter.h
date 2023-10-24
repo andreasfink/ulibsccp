@@ -8,8 +8,8 @@
 
 #import <ulib/ulib.h>
 #import <ulibgt/ulibgt.h>
-#import "UMSCCP_Packet.h"
-#import "UMSCCP_FilterProtocol.h"
+#import <ulibsccp/UMSCCP_Packet.h>
+#import <ulibsccp/UMSCCP_FilterProtocol.h>
 
 @class UMSCCP_Packet;
 

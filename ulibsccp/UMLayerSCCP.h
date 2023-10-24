@@ -9,22 +9,22 @@
 // Version 3 from 29 June 2007 and other commercial licenses available by
 // the author.
 
-#import <ulibsctp/ulibsctp.h>
+#import <ulibsccp/ulibsccp.h>
 #import <ulibm2pa/ulibm2pa.h>
 #import <ulibmtp3/ulibmtp3.h>
 #import <ulibgt/ulibgt.h>
 
-#import "UMSCCP_UserProtocol.h"
-#import "UMSCCPConnection.h"
-#import "UMSCCP_Defs.h"
-#import "UMSCCP_Segment.h"
-#import "UMLayerSCCPApplicationContextProtocol.h"
-#import "UMSCCP_Statistics.h"
-#import "UMSCCP_FilterProtocol.h"
-#import "UMSCCP_StatisticSection.h"
-#import "UMSCCP_Packet.h"
-#import "UMSCCP_TracefileProtocol.h"
-#import "UMSCCP_StatisticDb.h"
+#import <ulibsccp/UMSCCP_UserProtocol.h>
+#import <ulibsccp/UMSCCPConnection.h>
+#import <ulibsccp/UMSCCP_Defs.h>
+#import <ulibsccp/UMSCCP_Segment.h>
+#import <ulibsccp/UMLayerSCCPApplicationContextProtocol.h>
+#import <ulibsccp/UMSCCP_Statistics.h>
+#import <ulibsccp/UMSCCP_FilterProtocol.h>
+#import <ulibsccp/UMSCCP_StatisticSection.h>
+#import <ulibsccp/UMSCCP_Packet.h>
+#import <ulibsccp/UMSCCP_TracefileProtocol.h>
+#import <ulibsccp/UMSCCP_StatisticDb.h>
 
 @class UMSCCP_Statistics;
 @class UMSCCP_PrometheusData;

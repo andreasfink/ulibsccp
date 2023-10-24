@@ -9,8 +9,8 @@
 #import <ulib/ulib.h>
 #import <ulibmtp3/ulibmtp3.h>
 #import <ulibgt/ulibgt.h>
-#import "UMSCCP_Segment.h"
-#import "UMSCCP_Defs.h"
+#import <ulibsccp/UMSCCP_Segment.h>
+#import <ulibsccp/UMSCCP_Defs.h>
 @class UMSCCP_Packet;
 
 @interface UMSCCP_ReceivedSegment : UMObject

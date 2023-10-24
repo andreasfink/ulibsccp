@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "UMSCCP_FilterProtocol.h"
+#import <ulibsccp/UMSCCP_FilterProtocol.h>
 
 @class UMLayerMTP3;
 @protocol UMLayerSCCPApplicationContextProtocol<NSObject,UMSCCP_FilterDelegateProtocol>

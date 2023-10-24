@@ -8,7 +8,7 @@
 
 #import <ulib/ulib.h>
 
-#import "UMSCCP_StatisticSection.h"
+#import <ulibsccp/UMSCCP_StatisticSection.h>
 
 @interface UMSCCP_PrometheusData : UMObject
 {

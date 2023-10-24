@@ -13,8 +13,8 @@
 #import <ulibmtp3/ulibmtp3.h>
 #import <ulibgt/ulibgt.h>
 
-#import "UMSCCP_Defs.h"
-#import "UMSCCP_StatisticSection.h"
+#import <ulibsccp/UMSCCP_Defs.h>
+#import <ulibsccp/UMSCCP_StatisticSection.h>
 
 @class UMLayerSCCP;
 @class UMSCCP_Packet;

@@ -7,7 +7,7 @@
 //
 
 #import <ulib/ulib.h>
-#import "UMSCCP_StatisticData.h"
+#import <ulibsccp/UMSCCP_StatisticData.h>
 
 #define UMSCCP_STATISTICS_TIMESPAN_5SEC_COUNT       12
 #define UMSCCP_STATISTICS_TIMESPAN_ONEMIN_COUNT     10
