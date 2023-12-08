@@ -47,8 +47,10 @@
     int                         _incomingMaxHopCount;
     BOOL                        _incomingFromLocal;
     BOOL                        _incomingToLocal;
+    SccpAddress                 *_incomingCallingPartyAddressBeforeTranslation;
     SccpAddress                 *_incomingCallingPartyAddress;
     NSString                    *_incomingCallingPartyCountry;
+    SccpAddress                 *_incomingCalledPartyAddressBeforeTranslation;
     SccpAddress                 *_incomingCalledPartyAddress;
     NSString                    *_incomingCalledPartyCountry;
     NSData                      *_incomingMtp3Data;
@@ -135,6 +137,8 @@
 @property(readwrite,assign,atomic)  SCCP_ServiceType        incomingServiceType;
 @property(readwrite,assign,atomic)  SCCP_Handling           incomingHandling;
 @property(readwrite,assign,atomic)  int                     incomingMaxHopCount;
+@property(readwrite,strong,atomic)  SccpAddress             *incomingCallingPartyAddressBeforeTranslation;
+@property(readwrite,strong,atomic)  SccpAddress             *incomingCalledPartyAddressBeforeTranslation;
 @property(readwrite,strong,atomic)  SccpAddress             *incomingCallingPartyAddress;
 @property(readwrite,strong,atomic)  NSString                *incomingCallingPartyCountry;
 @property(readwrite,strong,atomic)  SccpAddress             *incomingCalledPartyAddress;

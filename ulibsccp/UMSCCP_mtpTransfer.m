@@ -21,6 +21,32 @@
 @implementation UMSCCP_mtpTransfer
 
 
+- (UMSCCP_mtpTransfer *)initForSccp:(UMLayerSCCP *)layer
+                               mtp3:(UMLayerMTP3 *)mtp3
+                                opc:(UMMTP3PointCode *)xopc
+                                dpc:(UMMTP3PointCode *)xdpc
+                                 si:(int)xsi
+                                 ni:(int)xni
+                                sls:(int)sls
+                               data:(NSData *)xdata
+                            options:(NSDictionary *)xoptions
+                                map:(UMMTP3TranslationTableMap *)ttmap
+                incomingLinksetName:(NSString *)linksetName
+{
+    return [self initForSccp:layer
+                        mtp3:mtp3
+                         opc:xopc
+                         dpc:xdpc
+                          si:xsi
+                          ni:xni
+                         sls:sls
+                        data:xdata
+                     options:xoptions
+                         map:ttmap
+         incomingLinksetName:linksetName
+            cgaTranslationIn:NULL
+            cdaTranslationIn:NULL];
+}
 
 - (UMSCCP_mtpTransfer *)initForSccp:(UMLayerSCCP *)layer
                                mtp3:(UMLayerMTP3 *)mtp3
@@ -32,7 +58,9 @@
                                data:(NSData *)xdata
                             options:(NSDictionary *)xoptions
                                 map:(UMMTP3TranslationTableMap *)ttmap
-                incomingLinksetName:(NSString *)linksetName;
+                incomingLinksetName:(NSString *)linksetName
+                   cgaTranslationIn:(SccpNumberTranslation *)cga_number_translation_in
+                   cdaTranslationIn:(SccpNumberTranslation *)cda_number_translation_in
 {
     self = [super initWithName:@"UMSCCP_mtpTransfer" receiver:layer sender:mtp3 requiresSynchronisation:NO];
     if(self)
@@ -48,7 +76,8 @@
 		_packet.incomingOpc = xopc;
 		_packet.incomingDpc = xdpc;
         _packet.sls = sls;
-
+        _cga_number_translation_in = cga_number_translation_in;
+        _cda_number_translation_in = cda_number_translation_in;
         _map = ttmap;
         _data = xdata;
 
@@ -94,7 +123,17 @@
         [label appendToMutableData:rawMtp3];
         [rawMtp3 appendData:_data];
         _packet.incomingMtp3Data = rawMtp3;
-
+        _packet.incomingCallingPartyAddressBeforeTranslation = _packet.incomingCallingPartyAddress;
+        _packet.incomingCalledPartyAddressBeforeTranslation = _packet.incomingCalledPartyAddress;
+        
+        if(_cga_number_translation_in)
+        {
+            _packet.incomingCallingPartyAddress = [_cga_number_translation_in translateAddress:_packet.incomingCallingPartyAddressBeforeTranslation];
+        }
+        if(_cda_number_translation_in)
+        {
+            _packet.incomingCalledPartyAddress = [_cda_number_translation_in translateAddress:_packet.incomingCalledPartyAddressBeforeTranslation];
+        }
         if(_options==NULL)
         {
             _options = [[NSMutableDictionary alloc]init];

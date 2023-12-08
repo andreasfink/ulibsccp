@@ -182,6 +182,8 @@ typedef enum UMTCAP_Command
     cpy.incomingMaxHopCount = _incomingMaxHopCount;
     cpy.incomingFromLocal = _incomingFromLocal;
     cpy.incomingToLocal = _incomingToLocal;
+    cpy.incomingCallingPartyAddressBeforeTranslation = [_incomingCallingPartyAddressBeforeTranslation copy];
+    cpy.incomingCalledPartyAddressBeforeTranslation = [_incomingCalledPartyAddressBeforeTranslation copy];
     cpy.incomingCallingPartyAddress = [_incomingCallingPartyAddress copy];
     cpy.incomingCallingPartyCountry = [_incomingCallingPartyCountry copy];
     cpy.incomingCalledPartyAddress = [_incomingCalledPartyAddress copy];

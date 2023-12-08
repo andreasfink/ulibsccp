@@ -126,8 +126,34 @@
                 sls:(int)sls
         linksetName:(NSString *)linksetName
             options:(NSDictionary *)xoptions
-              ttmap:(UMMTP3TranslationTableMap *)map;
+              ttmap:(UMMTP3TranslationTableMap *)map
+{
+    [self mtpTransfer:data
+         callingLayer:mtp3Layer
+                  opc:opc
+                  dpc:dpc
+                   si:si
+                   ni:ni
+                  sls:sls
+          linksetName:linksetName
+              options:xoptions
+                ttmap:map
+     cgaTranslationIn:NULL
+     cdaTranslationIn:NULL];
+}
 
+- (void)mtpTransfer:(NSData *)data
+       callingLayer:(id)mtp3Layer
+                opc:(UMMTP3PointCode *)opc
+                dpc:(UMMTP3PointCode *)dpc
+                 si:(int)si
+                 ni:(int)ni
+                sls:(int)sls
+        linksetName:(NSString *)linksetName
+            options:(NSDictionary *)xoptions
+              ttmap:(UMMTP3TranslationTableMap *)map
+   cgaTranslationIn:(SccpNumberTranslation *)cga_number_translation_in
+   cdaTranslationIn:(SccpNumberTranslation *)cda_number_translation_in
 {
     @autoreleasepool
     {
@@ -152,7 +178,9 @@
                                                                      data:data
                                                                   options:options
                                                                       map:map
-                                                      incomingLinksetName:linksetName];
+                                                      incomingLinksetName:linksetName
+                                                         cgaTranslationIn:cga_number_translation_in
+                                                        cdaTranslationIn:cda_number_translation_in];
         [self queueFromLower:task];
     }
 }
@@ -502,9 +530,36 @@
          routedToLinkset:(NSString **)outgoingLinkset
                      sls:(int)sls
 {
+    SccpNumberTranslation *cga_number_translation_out = NULL;
+    SccpNumberTranslation *cda_number_translation_out = NULL;
+    
+    if((*outgoingLinkset).length > 0)
+    {
+        UMMTP3InstanceRoute *route = [_mtp3 findRouteForDestination:dpc];
+        *outgoingLinkset = route.linksetName;
+        cga_number_translation_out = route.cga_number_translation_out;
+        cda_number_translation_out = route.cda_number_translation_out;
+    }
+    else
+    {
+        cga_number_translation_out = [_mtp3 callingPartyAddressTranslationOutForLinkset:*outgoingLinkset];
+        cda_number_translation_out = [_mtp3 calledPartyAddressTranslationOutForLinkset:*outgoingLinkset];
+
+    }
+    if(cga_number_translation_out)
+    {
+        src = [cga_number_translation_out translateAddress:src];
+    }
+    if(cda_number_translation_out)
+    {
+        dst = [cda_number_translation_out translateAddress:dst];
+
+    }
+    
     NSData *srcEncoded = [src encode:_sccpVariant];
     NSData *dstEncoded = [dst encode:_sccpVariant];
 
+    
     NSMutableData *sccp_pdu = [[NSMutableData alloc]init];
     uint8_t header[7];
     header[0] = SCCP_XUDT;
@@ -593,6 +648,33 @@
           routedToLinkset:(NSString **)outgoingLinkset
                       sls:(int)sls
 {
+    
+    SccpNumberTranslation *cga_number_translation_out = NULL;
+    SccpNumberTranslation *cda_number_translation_out = NULL;
+    
+    if((*outgoingLinkset).length > 0)
+    {
+        UMMTP3InstanceRoute *route = [_mtp3 findRouteForDestination:dpc];
+        *outgoingLinkset = route.linksetName;
+        cga_number_translation_out = route.cga_number_translation_out;
+        cda_number_translation_out = route.cda_number_translation_out;
+    }
+    else
+    {
+        cga_number_translation_out = [_mtp3 callingPartyAddressTranslationOutForLinkset:*outgoingLinkset];
+        cda_number_translation_out = [_mtp3 calledPartyAddressTranslationOutForLinkset:*outgoingLinkset];
+
+    }
+    if(cga_number_translation_out)
+    {
+        src = [cga_number_translation_out translateAddress:src];
+    }
+    if(cda_number_translation_out)
+    {
+        dst = [cda_number_translation_out translateAddress:dst];
+
+    }
+    
     NSData *srcEncoded = [src encode:_sccpVariant];
     NSData *dstEncoded = [dst encode:_sccpVariant];
 
@@ -2174,6 +2256,33 @@
             }
         }
     }
+    
+    SccpNumberTranslation *cga_number_translation_out = NULL;
+    SccpNumberTranslation *cda_number_translation_out = NULL;
+    
+    if((*outgoingLinkset).length > 0)
+    {
+        UMMTP3InstanceRoute *route = [_mtp3 findRouteForDestination:dpc];
+        *outgoingLinkset = route.linksetName;
+        cga_number_translation_out = route.cga_number_translation_out;
+        cda_number_translation_out = route.cda_number_translation_out;
+    }
+    else
+    {
+        cga_number_translation_out = [_mtp3 callingPartyAddressTranslationOutForLinkset:*outgoingLinkset];
+        cda_number_translation_out = [_mtp3 calledPartyAddressTranslationOutForLinkset:*outgoingLinkset];
+
+    }
+    if(cga_number_translation_out)
+    {
+        src = [cga_number_translation_out translateAddress:src];
+    }
+    if(cda_number_translation_out)
+    {
+        dst = [cda_number_translation_out translateAddress:dst];
+
+    }
+    
     NSData *srcEncoded = [src encode:_sccpVariant];
     NSData *dstEncoded = [dst encode:_sccpVariant];
 
@@ -2274,6 +2383,32 @@
              routedToLinkset:(NSString **)outgoingLinkset
                          sls:(int)sls
 {
+
+    SccpNumberTranslation *cga_number_translation_out = NULL;
+    SccpNumberTranslation *cda_number_translation_out = NULL;
+    
+    if((*outgoingLinkset).length > 0)
+    {
+        UMMTP3InstanceRoute *route = [_mtp3 findRouteForDestination:dpc];
+        *outgoingLinkset = route.linksetName;
+        cga_number_translation_out = route.cga_number_translation_out;
+        cda_number_translation_out = route.cda_number_translation_out;
+    }
+    else
+    {
+        cga_number_translation_out = [_mtp3 callingPartyAddressTranslationOutForLinkset:*outgoingLinkset];
+        cda_number_translation_out = [_mtp3 calledPartyAddressTranslationOutForLinkset:*outgoingLinkset];
+
+    }
+    if(cga_number_translation_out)
+    {
+        src = [cga_number_translation_out translateAddress:src];
+    }
+    if(cda_number_translation_out)
+    {
+        dst = [cda_number_translation_out translateAddress:dst];
+    }
+    
     NSData *srcEncoded = [src encode:_sccpVariant];
     NSData *dstEncoded = [dst encode:_sccpVariant];
 
@@ -3763,6 +3898,7 @@
         NSString *outAddress = NULL;
         NSNumber *np = NULL;
         NSNumber *nai = NULL;
+        NSNumber *tt = NULL;
         NSNumber *remove = NULL;
 
         while(i<k)
@@ -3789,6 +3925,13 @@
                 nai = @( [s integerValue]);
                 i = i+1;
             }
+            else if(([words[i] isEqualToString:@"tt"]) && ((i+1) <k ))
+            {
+                NSString *s  = words[i+1];
+                tt = @( [s integerValue]);
+                i = i+1;
+            }
+
             else if(([words[i] isEqualToString:@"remove"]) && ((i+1) <k ))
             {
                 NSString *s  = words[i+1];
@@ -3810,6 +3953,7 @@
             e.outAddress = outAddress;
             e.replacementNP = np;
             e.replacementNAI =nai;
+            e.replacementTT =tt;
             e.removeDigits = remove;
             [currentAddrConv addEntry:e];
         }

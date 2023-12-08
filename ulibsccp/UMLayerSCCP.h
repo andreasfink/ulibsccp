@@ -246,6 +246,18 @@ typedef enum UMSccpScreening_result
               called:(SccpAddress *)dst
              options:(NSDictionary *)options;
 
+
+- (void)mtpTransfer:(NSData *)data
+       callingLayer:(id)mtp3Layer
+                opc:(UMMTP3PointCode *)opc
+                dpc:(UMMTP3PointCode *)dpc
+                 si:(int)si
+                 ni:(int)ni
+                sls:(int)sls
+        linksetName:(NSString *)linksetName
+            options:(NSDictionary *)xoptions
+              ttmap:(UMMTP3TranslationTableMap *)map;
+
 - (void)mtpTransfer:(NSData *)data
        callingLayer:(id)mtp3Layer
                 opc:(UMMTP3PointCode *)opc
@@ -255,7 +267,9 @@ typedef enum UMSccpScreening_result
                 sls:(int)sls
         linksetName:(NSString *)linksetName
             options:(NSDictionary *)options
-              ttmap:(UMMTP3TranslationTableMap *)map;
+              ttmap:(UMMTP3TranslationTableMap *)map
+   cgaTranslationIn:(SccpNumberTranslation *)cga_number_translation_in
+   cdaTranslationIn:(SccpNumberTranslation *)cda_number_translation_in;
 
 
 - (void)mtpPause:(NSData *)data
