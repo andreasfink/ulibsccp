@@ -134,6 +134,38 @@
         {
             _packet.incomingCalledPartyAddress = [_cda_number_translation_in translateAddress:_packet.incomingCalledPartyAddressBeforeTranslation];
         }
+        if(_cga_number_translation_in)
+        {
+            NSNumber *newCallingTT = NULL;
+            NSNumber *newCalledTT = NULL;
+            _packet.incomingCallingPartyAddress = [_cga_number_translation_in translateAddress:_packet.incomingCallingPartyAddressBeforeTranslation
+                                                                                  newCallingTT:&newCallingTT
+                                                                                   newCalledTT:&newCalledTT];
+            if(newCalledTT)
+            {
+                _packet.incomingCalledPartyAddress.tt.tt = newCalledTT.intValue;
+            }
+            if(newCallingTT)
+            {
+                _packet.incomingCallingPartyAddress.tt.tt = newCallingTT.intValue;
+            }
+        }
+        if(_cda_number_translation_in)
+        {
+            NSNumber *newCallingTT = NULL;
+            NSNumber *newCalledTT = NULL;
+            _packet.incomingCalledPartyAddress = [_cda_number_translation_in translateAddress:_packet.incomingCalledPartyAddressBeforeTranslation
+                                                                                 newCallingTT:&newCallingTT
+                                                                                  newCalledTT:&newCalledTT];
+            if(newCalledTT)
+            {
+                _packet.incomingCalledPartyAddress.tt.tt = newCalledTT.intValue;
+            }
+            if(newCallingTT)
+            {
+                _packet.incomingCallingPartyAddress.tt.tt = newCallingTT.intValue;
+            }
+        }
         if(_options==NULL)
         {
             _options = [[NSMutableDictionary alloc]init];

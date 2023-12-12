@@ -548,12 +548,31 @@
     }
     if(cga_number_translation_out)
     {
-        src = [cga_number_translation_out translateAddress:src];
+        NSNumber *newCallingTT = NULL;
+        NSNumber *newCalledTT = NULL;
+        src = [cga_number_translation_out translateAddress:src newCallingTT:&newCallingTT newCalledTT:&newCalledTT];
+        if(newCalledTT)
+        {
+            dst.tt.tt = newCalledTT.intValue;
+        }
+        if(newCallingTT)
+        {
+            src.tt.tt = newCallingTT.intValue;
+        }
     }
     if(cda_number_translation_out)
     {
-        dst = [cda_number_translation_out translateAddress:dst];
-
+        NSNumber *newCallingTT = NULL;
+        NSNumber *newCalledTT = NULL;
+        src = [cda_number_translation_out translateAddress:src newCallingTT:&newCallingTT newCalledTT:&newCalledTT];
+        if(newCalledTT)
+        {
+            dst.tt.tt = newCalledTT.intValue;
+        }
+        if(newCallingTT)
+        {
+            src.tt.tt = newCallingTT.intValue;
+        }
     }
     
     NSData *srcEncoded = [src encode:_sccpVariant];
@@ -667,12 +686,31 @@
     }
     if(cga_number_translation_out)
     {
-        src = [cga_number_translation_out translateAddress:src];
+        NSNumber *newCallingTT = NULL;
+        NSNumber *newCalledTT = NULL;
+        src = [cga_number_translation_out translateAddress:src newCallingTT:&newCallingTT newCalledTT:&newCalledTT];
+        if(newCalledTT)
+        {
+            dst.tt.tt = newCalledTT.intValue;
+        }
+        if(newCallingTT)
+        {
+            src.tt.tt = newCallingTT.intValue;
+        }
     }
     if(cda_number_translation_out)
     {
-        dst = [cda_number_translation_out translateAddress:dst];
-
+        NSNumber *newCallingTT = NULL;
+        NSNumber *newCalledTT = NULL;
+        src = [cda_number_translation_out translateAddress:src newCallingTT:&newCallingTT newCalledTT:&newCalledTT];
+        if(newCalledTT)
+        {
+            dst.tt.tt = newCalledTT.intValue;
+        }
+        if(newCallingTT)
+        {
+            src.tt.tt = newCallingTT.intValue;
+        }
     }
     
     NSData *srcEncoded = [src encode:_sccpVariant];
@@ -767,7 +805,7 @@
 {
     SccpDestinationGroup *destination = NULL;
     SccpAddress *called1 = [called copy];
-    
+
     if(self.logLevel <=UMLOG_DEBUG)
     {
         [self.logFeed debugText:
@@ -877,7 +915,14 @@
                 }
                 if(gttSelector.preTranslation)
                 {
-                    called1 = [gttSelector.preTranslation translateAddress:called1];
+                    NSNumber *newCallingTT = NULL;
+                    NSNumber *newCalledTT = NULL;
+
+                    called1 = [gttSelector.preTranslation translateAddress:called1 newCallingTT:&newCallingTT newCalledTT:&newCalledTT];
+                    if(newCalledTT)
+                    {
+                        called1.tt.tt = newCalledTT.intValue;
+                    }
                     if(self.logLevel <= UMLOG_DEBUG)
                     {
                         [self.logFeed debugText:[NSString stringWithFormat:@"pre-translation: ->%@",called1]];
@@ -914,10 +959,16 @@
                         }
                         if(gttSelector.postTranslation)
                         {
-                            called1 = [gttSelector.postTranslation translateAddress:called1];
+                            NSNumber *newCallingTT = NULL;
+                            NSNumber *newCalledTT = NULL;
+                            called1 = [gttSelector.postTranslation translateAddress:called1 newCallingTT:&newCallingTT newCalledTT:&newCalledTT];
                             if(self.logLevel <= UMLOG_DEBUG)
                             {
                                 [self.logFeed debugText:[NSString stringWithFormat:@"post-translation(gtt-table): ->%@",called1]];
+                            }
+                            if(newCalledTT)
+                            {
+                                called1.tt.tt = newCalledTT.intValue;
                             }
                         }
                         if(rte.postTranslationName.length > 0)
@@ -928,10 +979,17 @@
                             }
                             if(rte.postTranslation)
                             {
-                                called1 = [gttSelector.postTranslation translateAddress:called1];
+                            
+                                NSNumber *newCallingTT = NULL;
+                                NSNumber *newCalledTT = NULL;
+                                called1 = [gttSelector.postTranslation translateAddress:called1 newCallingTT:&newCallingTT newCalledTT:&newCalledTT];
                                 if(self.logLevel <= UMLOG_DEBUG)
                                 {
-                                    [self.logFeed debugText:[NSString stringWithFormat:@"post-translation(gtt-table-entry): ->%@",called1]];
+                                    [self.logFeed debugText:[NSString stringWithFormat:@"post-translation(gtt-table): ->%@",called1]];
+                                }
+                                if(newCalledTT)
+                                {
+                                    called1.tt.tt = newCalledTT.intValue;
                                 }
                             }
                         }
@@ -976,10 +1034,16 @@
                     }
                     if(gttSelector.postTranslation)
                     {
-                        called1 = [gttSelector.postTranslation translateAddress:called1];
+                        NSNumber *newCallingTT = NULL;
+                        NSNumber *newCalledTT = NULL;
+                        called1 = [gttSelector.postTranslation translateAddress:called1 newCallingTT:&newCallingTT newCalledTT:&newCalledTT];
                         if(self.logLevel <= UMLOG_DEBUG)
                         {
                             [self.logFeed debugText:[NSString stringWithFormat:@"post-translation(gtt-table): ->%@",called1]];
+                        }
+                        if(newCalledTT)
+                        {
+                            called1.tt.tt = newCalledTT.intValue;
                         }
                     }
                     if(called_out)
@@ -2275,12 +2339,31 @@
     }
     if(cga_number_translation_out)
     {
-        src = [cga_number_translation_out translateAddress:src];
+        NSNumber *newCallingTT = NULL;
+        NSNumber *newCalledTT = NULL;
+        src = [cga_number_translation_out translateAddress:src newCallingTT:&newCallingTT newCalledTT:&newCalledTT];
+        if(newCalledTT)
+        {
+            dst.tt.tt = newCalledTT.intValue;
+        }
+        if(newCallingTT)
+        {
+            src.tt.tt = newCallingTT.intValue;
+        }
     }
     if(cda_number_translation_out)
     {
-        dst = [cda_number_translation_out translateAddress:dst];
-
+        NSNumber *newCallingTT = NULL;
+        NSNumber *newCalledTT = NULL;
+        src = [cda_number_translation_out translateAddress:src newCallingTT:&newCallingTT newCalledTT:&newCalledTT];
+        if(newCalledTT)
+        {
+            dst.tt.tt = newCalledTT.intValue;
+        }
+        if(newCallingTT)
+        {
+            src.tt.tt = newCallingTT.intValue;
+        }
     }
     
     NSData *srcEncoded = [src encode:_sccpVariant];
@@ -2402,11 +2485,31 @@
     }
     if(cga_number_translation_out)
     {
-        src = [cga_number_translation_out translateAddress:src];
+        NSNumber *newCallingTT = NULL;
+        NSNumber *newCalledTT = NULL;
+        src = [cga_number_translation_out translateAddress:src newCallingTT:&newCallingTT newCalledTT:&newCalledTT];
+        if(newCalledTT)
+        {
+            dst.tt.tt = newCalledTT.intValue;
+        }
+        if(newCallingTT)
+        {
+            src.tt.tt = newCallingTT.intValue;
+        }
     }
     if(cda_number_translation_out)
     {
-        dst = [cda_number_translation_out translateAddress:dst];
+        NSNumber *newCallingTT = NULL;
+        NSNumber *newCalledTT = NULL;
+        src = [cda_number_translation_out translateAddress:src newCallingTT:&newCallingTT newCalledTT:&newCalledTT];
+        if(newCalledTT)
+        {
+            dst.tt.tt = newCalledTT.intValue;
+        }
+        if(newCallingTT)
+        {
+            src.tt.tt = newCallingTT.intValue;
+        }
     }
     
     NSData *srcEncoded = [src encode:_sccpVariant];
