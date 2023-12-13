@@ -1207,9 +1207,78 @@
     if(linkset.length > 0)
     {
         UMMTP3LinkSet *ls = [_mtp3 getLinkSetByName:linkset];
+        
+    
         if(ls == NULL)
         {
             dict[@"incoming-linkset-error"]   = [NSString stringWithFormat:@"linkset %@ not found in mtp3 %@",linkset, _mtp3.layerName];
+        }
+        else
+        {
+            if(ls.cga_number_translation_in_name)
+            {
+                dict[@"incoming-linkset-cga-translation-in"] = ls.cga_number_translation_in_name;
+                if(ls.cga_number_translation_in==NULL)
+                {
+                    ls.cga_number_translation_in = [_mtp3.appContext getSccpNumberTransationByName:ls.cga_number_translation_in_name];
+                }
+            }
+            if(ls.cda_number_translation_in_name)
+            {
+                dict[@"incoming-linkset-cda-translation-in"] = ls.cda_number_translation_in_name;
+                if(ls.cda_number_translation_in==NULL)
+                {
+                    ls.cda_number_translation_in = [_mtp3.appContext getSccpNumberTransationByName:ls.cda_number_translation_in_name];
+                }
+
+            }
+            if(ls.cga_number_translation_out_name)
+            {
+                dict[@"incoming-linkset-cga-translation-out"] = ls.cga_number_translation_out_name;
+                if(ls.cga_number_translation_out ==NULL)
+                {
+                    ls.cga_number_translation_out = [_mtp3.appContext getSccpNumberTransationByName:ls.cga_number_translation_out_name];
+                }
+            }
+            if(ls.cda_number_translation_out_name)
+            {
+                dict[@"incoming-linkset-cda-translation-out"] = ls.cda_number_translation_out_name;
+                if(ls.cda_number_translation_in==NULL)
+                {
+                    ls.cda_number_translation_out = [_mtp3.appContext getSccpNumberTransationByName:ls.cda_number_translation_out_name];
+                }
+            }
+            packet.incomingCallingPartyAddressBeforeTranslation = [packet.incomingCallingPartyAddress copy];
+            packet.incomingCalledPartyAddressBeforeTranslation = [packet.incomingCalledPartyAddress copy];
+            if(ls.cga_number_translation_in)
+            {
+                NSNumber *newCallingTT = NULL;
+                NSNumber *newCalledTT = NULL;
+                packet.incomingCallingPartyAddress = [ls.cga_number_translation_in translateAddress:packet.incomingCallingPartyAddressBeforeTranslation newCallingTT:&newCallingTT newCalledTT:&newCalledTT];
+                if(newCallingTT)
+                {
+                    packet.incomingCallingPartyAddress.tt.tt = newCallingTT.intValue;
+                }
+                if(newCalledTT)
+                {
+                    packet.incomingCalledPartyAddress.tt.tt = newCalledTT.intValue;
+                }
+            }
+
+            if(ls.cda_number_translation_in)
+            {
+                NSNumber *newCallingTT = NULL;
+                NSNumber *newCalledTT = NULL;
+                packet.incomingCalledPartyAddress = [ls.cda_number_translation_in translateAddress:packet.incomingCalledPartyAddressBeforeTranslation newCallingTT:&newCallingTT newCalledTT:&newCalledTT];
+                if(newCallingTT)
+                {
+                    packet.incomingCallingPartyAddress.tt.tt = newCallingTT.intValue;
+                }
+                if(newCalledTT)
+                {
+                    packet.incomingCalledPartyAddress.tt.tt = newCalledTT.intValue;
+                }
+            }
         }
         if(ls.sccp_screeningPluginName)
         {
