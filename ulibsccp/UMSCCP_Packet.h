@@ -67,6 +67,8 @@
     SCCP_ServiceClass           _outgoingServiceClass;
     SCCP_ServiceType            _outgoingServiceType;
     SCCP_Handling               _outgoingHandling;
+    SccpAddress                 *_outgoingCallingPartyAddressBeforeTranslation;
+    SccpAddress                 *_outgoingCalledPartyAddressBeforeTranslation;
     SccpAddress                 *_outgoingCallingPartyAddress;
     SccpAddress                 *_outgoingCalledPartyAddress;
     NSData                      *_outgoingMtp3Data;
@@ -111,6 +113,11 @@
     NSString                    *_partsInfo;
     NSString                    *_routingSelector;
     int                         _sls;
+    
+    SccpNumberTranslation       *_cga_number_translation_in;
+    SccpNumberTranslation       *_cda_number_translation_in;
+    SccpNumberTranslation       *_cga_number_translation_out;
+    SccpNumberTranslation       *_cda_number_translation_out;
 }
 
 
@@ -163,6 +170,9 @@
 @property(readwrite,assign,atomic)  int                     outgoingMaxHopCount;
 @property(readwrite,strong,atomic)  SccpAddress             *outgoingCallingPartyAddress;
 @property(readwrite,strong,atomic)  SccpAddress             *outgoingCalledPartyAddress;
+@property(readwrite,strong,atomic)  SccpAddress             *outgoingCallingPartyAddressBeforeTranslation;
+@property(readwrite,strong,atomic)  SccpAddress             *outgoingCalledPartyAddressBeforeTranslation;
+
 @property(readwrite,strong,atomic)  NSData                  *outgoingMtp3Data;
 @property(readwrite,strong,atomic)  NSData                  *outgoingSccpData;
 @property(readwrite,strong,atomic)  UMSCCP_Segment          *outgoingSegment;
@@ -204,6 +214,11 @@
 @property(readwrite,strong,atomic) NSString                    *partsInfo;
 @property(readwrite,strong,atomic) NSString                    *routingSelector;
 @property(readwrite,assign,atomic) int                         sls;
+@property(readwrite,strong,atomic)  SccpNumberTranslation      *cga_number_translation_in;
+@property(readwrite,strong,atomic)  SccpNumberTranslation      *cda_number_translation_in;
+@property(readwrite,strong,atomic)  SccpNumberTranslation      *cga_number_translation_out;
+@property(readwrite,strong,atomic)  SccpNumberTranslation      *cda_number_translation_out;
+
 
 - (NSString *) incomingPacketType;
 - (NSString *) outgoingPacketType;
@@ -218,5 +233,7 @@
 - (UMSynchronizedSortedDictionary *)dictionaryValue;
 - (UMSynchronizedSortedDictionary *)dictionaryValueForwardSM;
 
+- (void)applyIncomingNumberTranslation;
+- (void)applyOutgoingNumberTranslation;
 @end
 

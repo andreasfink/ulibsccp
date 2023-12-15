@@ -76,8 +76,10 @@
 		_packet.incomingOpc = xopc;
 		_packet.incomingDpc = xdpc;
         _packet.sls = sls;
-        _cga_number_translation_in = cga_number_translation_in;
-        _cda_number_translation_in = cda_number_translation_in;
+        _packet.cga_number_translation_in = cga_number_translation_in;
+        _packet.cda_number_translation_in = cda_number_translation_in;
+        _packet.cga_number_translation_out = NULL;
+        _packet.cda_number_translation_out = NULL;
         _map = ttmap;
         _data = xdata;
 
@@ -123,49 +125,8 @@
         [label appendToMutableData:rawMtp3];
         [rawMtp3 appendData:_data];
         _packet.incomingMtp3Data = rawMtp3;
-        _packet.incomingCallingPartyAddressBeforeTranslation = _packet.incomingCallingPartyAddress;
-        _packet.incomingCalledPartyAddressBeforeTranslation = _packet.incomingCalledPartyAddress;
-        
-        if(_cga_number_translation_in)
-        {
-            _packet.incomingCallingPartyAddress = [_cga_number_translation_in translateAddress:_packet.incomingCallingPartyAddressBeforeTranslation];
-        }
-        if(_cda_number_translation_in)
-        {
-            _packet.incomingCalledPartyAddress = [_cda_number_translation_in translateAddress:_packet.incomingCalledPartyAddressBeforeTranslation];
-        }
-        if(_cga_number_translation_in)
-        {
-            NSNumber *newCallingTT = NULL;
-            NSNumber *newCalledTT = NULL;
-            _packet.incomingCallingPartyAddress = [_cga_number_translation_in translateAddress:_packet.incomingCallingPartyAddressBeforeTranslation
-                                                                                  newCallingTT:&newCallingTT
-                                                                                   newCalledTT:&newCalledTT];
-            if(newCalledTT)
-            {
-                _packet.incomingCalledPartyAddress.tt.tt = newCalledTT.intValue;
-            }
-            if(newCallingTT)
-            {
-                _packet.incomingCallingPartyAddress.tt.tt = newCallingTT.intValue;
-            }
-        }
-        if(_cda_number_translation_in)
-        {
-            NSNumber *newCallingTT = NULL;
-            NSNumber *newCalledTT = NULL;
-            _packet.incomingCalledPartyAddress = [_cda_number_translation_in translateAddress:_packet.incomingCalledPartyAddressBeforeTranslation
-                                                                                 newCallingTT:&newCallingTT
-                                                                                  newCalledTT:&newCalledTT];
-            if(newCalledTT)
-            {
-                _packet.incomingCalledPartyAddress.tt.tt = newCalledTT.intValue;
-            }
-            if(newCallingTT)
-            {
-                _packet.incomingCallingPartyAddress.tt.tt = newCallingTT.intValue;
-            }
-        }
+
+
         if(_options==NULL)
         {
             _options = [[NSMutableDictionary alloc]init];
@@ -525,10 +486,10 @@
             _options[@"sccp-called-address"] = _dst;
             _packet.incomingCallingPartyAddress = _src;
             _packet.incomingCalledPartyAddress = _dst;
-
             _packet.incomingCallingPartyCountry = [_packet.incomingCallingPartyAddress country];
             _packet.incomingCalledPartyCountry = [_packet.incomingCalledPartyAddress country];
-
+            [_packet applyIncomingNumberTranslation];
+            
             if(!decodeOnly)
             {
                 [_packet copyIncomingToOutgoing];

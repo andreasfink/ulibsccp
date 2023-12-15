@@ -791,4 +791,83 @@ typedef enum UMTCAP_Command
 
     return dict;
 }
+
+- (void)applyIncomingNumberTranslation
+{
+    _incomingCallingPartyAddressBeforeTranslation = [_incomingCallingPartyAddress copy];
+    _incomingCalledPartyAddressBeforeTranslation = [_incomingCalledPartyAddress copy];
+    
+    if(_cga_number_translation_in)
+    {
+        NSNumber *newCallingTT = NULL;
+        NSNumber *newCalledTT = NULL;
+        _incomingCallingPartyAddress = [_cga_number_translation_in translateAddress:_incomingCallingPartyAddressBeforeTranslation
+                                                                       newCallingTT:&newCallingTT
+                                                                        newCalledTT:&newCalledTT];
+        if(newCalledTT)
+        {
+            _incomingCalledPartyAddress.tt.tt = newCalledTT.intValue;
+        }
+        if(newCallingTT)
+        {
+            _incomingCallingPartyAddress.tt.tt = newCallingTT.intValue;
+        }
+    }
+    if(_cda_number_translation_in)
+    {
+        NSNumber *newCallingTT = NULL;
+        NSNumber *newCalledTT = NULL;
+        _incomingCalledPartyAddress = [_cda_number_translation_in translateAddress:_incomingCalledPartyAddressBeforeTranslation
+                                                                      newCallingTT:&newCallingTT
+                                                                       newCalledTT:&newCalledTT];
+        if(newCalledTT)
+        {
+            _incomingCalledPartyAddress.tt.tt = newCalledTT.intValue;
+        }
+        if(newCallingTT)
+        {
+            _incomingCallingPartyAddress.tt.tt = newCallingTT.intValue;
+        }
+    }
+}
+
+- (void)applyOutgoingNumberTranslation
+{
+    _outgoingCallingPartyAddressBeforeTranslation = [_outgoingCallingPartyAddress copy];
+    _outgoingCalledPartyAddressBeforeTranslation = [_outgoingCalledPartyAddress copy];
+    
+    if(_cga_number_translation_out)
+    {
+        NSNumber *newCallingTT = NULL;
+        NSNumber *newCalledTT = NULL;
+        _outgoingCallingPartyAddress = [_cga_number_translation_out translateAddress:_outgoingCallingPartyAddressBeforeTranslation
+                                                                        newCallingTT:&newCallingTT
+                                                                         newCalledTT:&newCalledTT];
+        if(newCalledTT)
+        {
+            _outgoingCalledPartyAddress.tt.tt = newCalledTT.intValue;
+        }
+        if(newCallingTT)
+        {
+            _outgoingCallingPartyAddress.tt.tt = newCallingTT.intValue;
+        }
+    }
+    if(_cda_number_translation_out)
+    {
+        NSNumber *newCallingTT = NULL;
+        NSNumber *newCalledTT = NULL;
+        _outgoingCalledPartyAddress = [_cda_number_translation_out translateAddress:_outgoingCalledPartyAddressBeforeTranslation
+                                                                      newCallingTT:&newCallingTT
+                                                                       newCalledTT:&newCalledTT];
+        if(newCalledTT)
+        {
+            _outgoingCalledPartyAddress.tt.tt = newCalledTT.intValue;
+        }
+        if(newCallingTT)
+        {
+            _outgoingCallingPartyAddress.tt.tt = newCallingTT.intValue;
+        }
+    }
+}
+
 @end
