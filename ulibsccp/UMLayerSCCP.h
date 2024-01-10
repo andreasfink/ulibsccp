@@ -87,18 +87,6 @@ typedef enum UMSccpScreening_result
     UMSCCP_StatisticDb          *_statisticDb;
     NSString                    *_statisticDbInstance;
 
-    /* this is now done in appDelegate
-    NSString *_inboundFilterName;
-    NSString *_outboundFilterName;
-    NSString *_fromLocalFilterName;
-    NSString *_toLocalFilterName;
-
-	id<UMSCCP_FilterProtocol>   _inboundFilter;
-	id<UMSCCP_FilterProtocol>   _outboundFilter;
-    id<UMSCCP_FilterProtocol>   _fromLocalFilter;
-    id<UMSCCP_FilterProtocol>   _toLocalFilter;
-     */
-
     id<UMSCCP_TracefileProtocol>    _problematicTraceDestination;
     id<UMSCCP_TracefileProtocol>    _unrouteablePacketsTraceDestination;
     BOOL                         _routeErrorsBackToOriginatingPointCode;
@@ -143,18 +131,6 @@ typedef enum UMSccpScreening_result
 @property(readwrite,strong,atomic)  NSNumber                    *conversion_e164_tt;
 @property(readwrite,strong,atomic)  NSNumber                    *conversion_e212_tt;
 @property(readwrite,strong,atomic) id<sccp_tcapDecoder>         tcapDecoder;
-
-/*
-@property(readwrite,strong,atomic) id<UMSCCP_FilterProtocol>   inboundFilter;
-@property(readwrite,strong,atomic) id<UMSCCP_FilterProtocol>   outboundFilter;
-@property(readwrite,strong,atomic) id<UMSCCP_FilterProtocol>   fromLocalFilter;
-@property(readwrite,strong,atomic) id<UMSCCP_FilterProtocol>   toLocalFilter;
-@property(readwrite,strong,atomic) NSString *  inboundFilterName;
-@property(readwrite,strong,atomic) NSString *   outboundFilterName;
-@property(readwrite,strong,atomic) NSString *   fromLocalFilterName;
-@property(readwrite,strong,atomic) NSString *   toLocalFilterName;
-*/
-
 
 @property(readwrite,strong,atomic) id<UMSCCP_TracefileProtocol>    problematicTraceDestination;
 @property(readwrite,strong,atomic) id<UMSCCP_TracefileProtocol>    unrouteablePacketsTraceDestination;

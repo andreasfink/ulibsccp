@@ -58,6 +58,6 @@ typedef int UMSCCP_FilterResult; /* bitmask */
 - (void) sccpDecodeTcapGsmmap:(UMSCCP_Packet *)packet;
 - (UMSCCP_FilterResult) filterInbound:(UMSCCP_Packet *)packet; /* from MTP3 link */
 - (UMSCCP_FilterResult) filterOutbound:(UMSCCP_Packet *)packet; /* to MTP3 link */
-- (UMSCCP_FilterResult) filterFromLocalSubsystem:(UMSCCP_Packet *)packet; /* from local MTP3 user */
-- (UMSCCP_FilterResult) filterToLocalSubsystem:(UMSCCP_Packet *)packet; /* to local MTP3 user */
+- (UMSCCP_FilterResult) filterFromLocalSubsystem:(UMSCCP_Packet *)packet; /* from local SCCP user */
+- (UMSCCP_FilterResult) filterToLocalSubsystem:(UMSCCP_Packet *)packet; /* to local SCCP user */
 @end
