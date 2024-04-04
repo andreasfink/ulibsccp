@@ -18,7 +18,6 @@
 #import <ulibsccp/UMSCCP_UserProtocol.h>
 #import <ulibsccp/UMSCCP_sccpNUnitdata.h>
 #import <ulibsccp/UMSCCP_Defs.h>
-#import <ulibsccp/UMSCCP_mtpTransfer.h>
 #import <ulibsccp/UMSCCP_FilterProtocol.h>
 #import <ulibsccp/UMLayerSCCPApplicationContextProtocol.h>
 #import <ulibsccp/UMSCCP_TracefileProtocol.h>
@@ -26,3 +25,7 @@
 #import <ulibsccp/UMSCCP_StatisticDb.h>
 #import <ulibsccp/UMSCCP_StatisticDbRecord.h>
 #import <ulibsccp/UMSCCP_PrometheusData.h>
+#import <ulibsccp/UMSCCP_mtpTransfer.h>
+#import <ulibsccp/UMSCCP_mtpPause.h>
+#import <ulibsccp/UMSCCP_mtpResume.h>
+#import <ulibsccp/UMSCCP_mtpStatus.h>
