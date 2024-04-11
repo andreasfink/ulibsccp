@@ -8,6 +8,7 @@
 
 #import <ulib/ulib.h>
 #import <ulibgt/ulibgt.h>
+#import <ulibasn1/ulibasn1.h>
 
 #import <ulibsccp/UMSCCP_Defs.h>
 #import <ulibsccp/UMSCCP_UserProtocol.h>
@@ -20,8 +21,103 @@
 @class UMSMS;
 @class UMSCCP_Segment;
 
-@interface UMSCCP_Packet : UMObject
+typedef enum UMSCCP_Packet_Tag_enum
 {
+    UMSCCP_Packet_Tag_instance                                      = 1,
+    UMSCCP_Packet_Tag_layer                                         = 2,
+    UMSCCP_Packet_Tag_created                                       = 3,
+    UMSCCP_Packet_Tag_afterFilter1                                  = 4,
+    UMSCCP_Packet_Tag_reassembled                                   = 5,
+    UMSCCP_Packet_Tag_afterFilter2                                  = 6,
+    UMSCCP_Packet_Tag_routed                                        = 7,
+    UMSCCP_Packet_Tag_afterFilter3                                  = 8,
+    UMSCCP_Packet_Tag_segmented                                     = 9,
+    UMSCCP_Packet_Tag_afterFilter4                                  = 10,
+    UMSCCP_Packet_Tag_queuedForDelivery                             = 11,
+    UMSCCP_Packet_Tag_state                                         = 12,
+    UMSCCP_Packet_Tag_incomingSegment                               = 13,
+    UMSCCP_Packet_Tag_incomingLocalUser                             = 14,
+    UMSCCP_Packet_Tag_incomingMtp3Layer                             = 15,
+    UMSCCP_Packet_Tag_incomingLinksetName                           = 16,
+    UMSCCP_Packet_Tag_incomingOptions                               = 17,
+    UMSCCP_Packet_Tag_incomingOpc                                   = 18,
+    UMSCCP_Packet_Tag_incomingDpc                                   = 19,
+    UMSCCP_Packet_Tag_incomingServiceClass                          = 20,
+    UMSCCP_Packet_Tag_incomingServiceType                           = 21,
+    UMSCCP_Packet_Tag_incomingHandling                              = 22,
+    UMSCCP_Packet_Tag_incomingMaxHopCount                           = 23,
+    UMSCCP_Packet_Tag_incomingFromLocal                             = 24,
+    UMSCCP_Packet_Tag_incomingToLocal                               = 25,
+    UMSCCP_Packet_Tag_incomingCallingPartyAddressBeforeTranslation  = 26,
+    UMSCCP_Packet_Tag_incomingCallingPartyAddress                   = 27,
+    UMSCCP_Packet_Tag_incomingCallingPartyCountry                   = 28,
+    UMSCCP_Packet_Tag_incomingCalledPartyAddressBeforeTranslation   = 29,
+    UMSCCP_Packet_Tag_incomingCalledPartyAddress                    = 30,
+    UMSCCP_Packet_Tag_incomingCalledPartyCountry                    = 31,
+    UMSCCP_Packet_Tag_incomingMtp3Data                              = 32,
+    UMSCCP_Packet_Tag_ncomingSccpData                               = 33,
+    UMSCCP_Packet_Tag_incomingOptionalData                          = 34,
+    UMSCCP_Packet_Tag_incomingReturnCause                           = 35,
+    UMSCCP_Packet_Tag_outgoingLocalUser                             = 36,
+    UMSCCP_Packet_Tag_outgoingMtp3Layer                             = 37,
+    UMSCCP_Packet_Tag_outgoingLinksetName                           = 38,
+    UMSCCP_Packet_Tag_outgoingOptions                               = 39,
+    UMSCCP_Packet_Tag_outgoingOpc                                   = 40,
+    UMSCCP_Packet_Tag_outgoingDpc                                   = 41,
+    UMSCCP_Packet_Tag_outgoingServiceClass                          = 42,
+    UMSCCP_Packet_Tag_outgoingServiceType                           = 43,
+    UMSCCP_Packet_Tag_outgoingHandling                              = 44,
+    UMSCCP_Packet_Tag_outgoingCallingPartyAddressBeforeTranslation  = 45,
+    UMSCCP_Packet_Tag_outgoingCalledPartyAddressBeforeTranslation   = 46,
+    UMSCCP_Packet_Tag_outgoingCallingPartyAddress                   = 47,
+    UMSCCP_Packet_Tag_outgoingCalledPartyAddress                    = 48,
+    UMSCCP_Packet_Tag_outgoingMtp3Data                              = 49,
+    UMSCCP_Packet_Tag_outgoingSccpData                              = 50,
+    UMSCCP_Packet_Tag_outgoingSegment                               = 51,
+    UMSCCP_Packet_Tag_outgoingOptionalData                          = 52,
+    UMSCCP_Packet_Tag_outgoingMaxHopCount                           = 53,
+    UMSCCP_Packet_Tag_outgoingFromLocal                             = 54,
+    UMSCCP_Packet_Tag_outgoingToLocal                               = 55,
+    UMSCCP_Packet_Tag_outgoingReturnCause                           = 56,
+    UMSCCP_Packet_Tag_outgoingDestination                           = 57,
+    UMSCCP_Packet_Tag_incomingTcapAsn1                              = 58,
+    UMSCCP_Packet_Tag_incomingTcapBegin                             = 59,
+    UMSCCP_Packet_Tag_incomingTcapContinue                          = 60,
+    UMSCCP_Packet_Tag_incomingTcapEnd                               = 61,
+    UMSCCP_Packet_Tag_incomingTcapAbort                             = 62,
+    UMSCCP_Packet_Tag_incomingTcapUnidirectional                    = 63,
+    UMSCCP_Packet_Tag_incomingTcapCommand                           = 64,
+    UMSCCP_Packet_Tag_incomingApplicationContext                    = 65,
+    UMSCCP_Packet_Tag_incomingGsmMapAsn1                            = 66,
+    UMSCCP_Packet_Tag_incomingGsmMapOperations                      = 67,
+    UMSCCP_Packet_Tag_incomingCategory                              = 68,
+    UMSCCP_Packet_Tag_incomingLocalTransactionId                    = 69,
+    UMSCCP_Packet_Tag_incomingRemoteTransactionId                   = 70,
+    UMSCCP_Packet_Tag_canNotDecode                                  = 71,
+    UMSCCP_Packet_Tag_tags                                          = 72,
+    UMSCCP_Packet_Tag_vars                                          = 73,
+    UMSCCP_Packet_Tag_rerouteDestinationGroup                       = 74,
+    UMSCCP_Packet_Tag_logLevel                                      = 75,
+    UMSCCP_Packet_Tag_incoming_tcap_otid                            = 76,
+    UMSCCP_Packet_Tag_incoming_tcap_dtid                            = 77,
+    UMSCCP_Packet_Tag_msisdn                                        = 78,
+    UMSCCP_Packet_Tag_imsi                                          = 79,
+    UMSCCP_Packet_Tag_smsc                                          = 80,
+    UMSCCP_Packet_Tag_hlr                                           = 81,
+    UMSCCP_Packet_Tag_msc                                           = 82,
+    UMSCCP_Packet_Tag_sms                                           = 83,
+    UMSCCP_Packet_Tag_partsInfo                                     = 84,
+    UMSCCP_Packet_Tag_routingSelector                               = 85,
+    UMSCCP_Packet_Tag_sls                                           = 86,
+    UMSCCP_Packet_Tag_cga_number_translation_in                     = 87,
+    UMSCCP_Packet_Tag_cda_number_translation_in                     = 88,
+    UMSCCP_Packet_Tag_cga_number_translation_out                    = 89,
+    UMSCCP_Packet_Tag_cda_number_translation_out                    = 90,
+} UMSCCP_Packet_Tag_enum;
+
+@interface UMSCCP_Packet : UMASN1Sequence
+{
+    NSString                    *_instance;
     UMLayerSCCP                 *_sccp;
     NSDate                      *_created;
     NSDate                      *_afterFilter1;

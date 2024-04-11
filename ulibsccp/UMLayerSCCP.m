@@ -1200,6 +1200,7 @@
     NSString *usedSelector=@"";
     
     UMSCCP_Packet *packet = [[UMSCCP_Packet alloc]init];
+    packet.instance = _appDelegate.instanceName;
     packet.incomingLinksetName = linkset;
     packet.incomingCallingPartyAddress = [[SccpAddress alloc]initWithHumanReadableString:source sccpVariant:_sccpVariant mtp3Variant:_mtp3.variant];
     packet.incomingCalledPartyAddress = [[SccpAddress alloc]initWithHumanReadableString:msisdn sccpVariant:_sccpVariant mtp3Variant:_mtp3.variant];

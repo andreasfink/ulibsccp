@@ -17,5 +17,6 @@
 - (NSString *)filterEnginesPath;
 - (id)licenseDirectory;
 - (UMPrometheus *)prometheus;
+- (NSString *)instanceName;
 @end
 

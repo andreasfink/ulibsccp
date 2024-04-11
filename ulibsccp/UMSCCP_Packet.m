@@ -158,6 +158,7 @@ typedef enum UMTCAP_Command
 - (UMSCCP_Packet *)copyWithZone:(NSZone *)zone
 {
     UMSCCP_Packet *cpy = [[UMSCCP_Packet alloc]init];
+    cpy.instance = _instance;
     cpy.sccp = _sccp;
     cpy.created = _created;
     cpy.afterFilter1 = _afterFilter1;
