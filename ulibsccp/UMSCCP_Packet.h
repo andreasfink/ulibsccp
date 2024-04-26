@@ -216,7 +216,7 @@ typedef enum UMSCCP_Packet_Tag_enum
     SccpNumberTranslation       *_cda_number_translation_out;
 }
 
-
+@property(readwrite,strong,atomic) NSString                    *instance;
 @property(readwrite,strong,atomic)    UMLayerSCCP           *sccp;
 @property(readwrite,strong,atomic)    NSDate                *created;
 @property(readwrite,strong,atomic)    NSDate                    *reassembled;

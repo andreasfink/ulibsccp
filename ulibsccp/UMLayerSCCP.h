@@ -124,6 +124,7 @@ typedef enum UMSccpScreening_result
 @property(readwrite,strong) UMMTP3PointCode *next_pc;
 
 @property(readwrite,strong,atomic)  id<UMSCCP_FilterDelegateProtocol> filterDelegate;
+@property(readwrite,strong,atomic) id<UMLayerSCCPApplicationContextProtocol>appDelegate;
 
 @property(readwrite,strong,atomic)  UMSCCP_StatisticDb          *statisticDb;
 
