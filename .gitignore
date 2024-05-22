@@ -3,6 +3,11 @@
 # gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
 
 *.o
+*.d
+install
+libulibsccp.a
+libulibsccp.so
+version.h
 Makefile
 Makefile.linux
 Makefile.osx
@@ -18,7 +23,6 @@ buildnumber.c
 buildnumber.h
 ulibsccp/ulibsccp_config.h
 ulibsccp.pc
-*.m.d
 
 #########################
 # .gitignore file for Xcode4 and Xcode5 Source projects
