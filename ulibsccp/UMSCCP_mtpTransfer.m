@@ -152,10 +152,10 @@
             const uint8_t *d = _data.bytes;
             int i = 0;
             int m_type = d[i++];
-            int param_called_party_address;
-            int param_calling_party_address;
-            int param_data;
-            int param_optional;
+            int param_called_party_address = 0;
+            int param_calling_party_address = 0;
+            int param_data = 0;
+            int param_optional = 0;
             int param_hop_counter = 0;
             NSString *type;
 
