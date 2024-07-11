@@ -88,19 +88,20 @@
 
 - (void) addWaitingDelay:(NSTimeInterval)waitingDelay processingDelay:(NSTimeInterval)processingDelay
 {
-    [_statisticsLock lock];
+    UMMUTEX_LOCK(_statisticsLock);
+
     [self timeShiftToDate:[NSDate date]];
     [_fiveSeconds[_indexFiveSec % UMSCCP_STATISTICS_TIMESPAN_5SEC_COUNT] addWaitingDelay:waitingDelay processingDelay:processingDelay];
     [_oneMinute[_indexOneMin % UMSCCP_STATISTICS_TIMESPAN_ONEMIN_COUNT] addWaitingDelay:waitingDelay processingDelay:processingDelay];
     [_tenMinutes[_indexTenMin % UMSCCP_STATISTICS_TIMESPAN_TENMIN_COUNT] addWaitingDelay:waitingDelay processingDelay:processingDelay];
     [_twoHours[_indexTwoHours % UMSCCP_STATISTICS_TIMESPAN_TWOHOURS_COUNT] addWaitingDelay:waitingDelay processingDelay:processingDelay];
     [_oneDay[_indexOneDay % UMSCCP_STATISTICS_TIMESPAN_DAY_COUNT] addWaitingDelay:waitingDelay processingDelay:processingDelay];
-    [_statisticsLock unlock];
+    UMMUTEX_UNLOCK(_statisticsLock);
 }
 
 - (UMSynchronizedSortedDictionary *)getStatDict
 {
-    [_statisticsLock lock];
+    UMMUTEX_LOCK(_statisticsLock);
     [self timeShiftToDate:[NSDate date]];
 
     UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
@@ -144,7 +145,7 @@
         dict1d[is] = [sd getStatDict];
 
     }
-    [_statisticsLock unlock];
+    UMMUTEX_UNLOCK(_statisticsLock);
     dict[@"5s"] = dict5sec;
     dict[@"1m"] = dict1min;
     dict[@"10m"] = dict10min;

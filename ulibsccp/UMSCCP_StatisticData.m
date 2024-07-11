@@ -23,7 +23,7 @@
 
 - (void) addWaitingDelay:(NSTimeInterval)waitingDelay processingDelay:(NSTimeInterval)processingDelay
 {
-    [_sccpStatisticsDataLock lock];
+    UMMUTEX_LOCK(_sccpStatisticsDataLock);
     _count++;
     _sumOfWaitingDelays     += waitingDelay;
     _sumOfProcessingDelays  += processingDelay;
@@ -44,7 +44,7 @@
     {
         _minProcessing = processingDelay;
     }
-    [_sccpStatisticsDataLock unlock];
+    UMMUTEX_UNLOCK(_sccpStatisticsDataLock);
 }
 
 

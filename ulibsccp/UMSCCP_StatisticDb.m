@@ -151,7 +151,7 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
                                              incomingPointCode:opc
                                              outgoingPointCode:dpc
                                                    destination:dst];
-        [_statisticDbLock lock];
+        UMMUTEX_LOCK(_statisticDbLock);
         UMSCCP_StatisticDbRecord *rec = _entries[key];
         if(rec == NULL)
         {
@@ -169,7 +169,7 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
             rec.destination = dst;
             _entries[key] = rec;
         }
-        [_statisticDbLock unlock];
+        UMMUTEX_UNLOCK(_statisticDbLock);
         [rec increaseMsuCount:1 byteCount:byteCount];
     }
 }
@@ -178,10 +178,10 @@ static dbFieldDef UMSCCP_StatisticDb_fields[] =
 {
     @autoreleasepool
     {
-        [_statisticDbLock lock];
+        UMMUTEX_LOCK(_statisticDbLock);
         UMSynchronizedDictionary *tmp = _entries;
         _entries = [[UMSynchronizedDictionary alloc]init];
-        [_statisticDbLock unlock];
+        UMMUTEX_UNLOCK(_statisticDbLock);
         
         NSArray *keys = [tmp allKeys];
         for(NSString *key in keys)
