@@ -49,7 +49,7 @@
     {
         @try
         {
-            UMMUTEX_LOCK(_statisticDbRecordLock);
+            ummutex_lock(_statisticDbRecordLock);
             UMDbQuery *query = [UMDbQuery queryForFile:__FILE__ line: __LINE__];
             if(!query.isInCache)
             {
@@ -106,7 +106,7 @@
         }
         @finally
         {
-            UMMUTEX_UNLOCK(_statisticDbRecordLock);
+            ummutex_unlock(_statisticDbRecordLock);
         }
     }
     return success;
@@ -119,7 +119,7 @@
     {
         @try
         {
-            UMMUTEX_LOCK(_statisticDbRecordLock);
+            ummutex_lock(_statisticDbRecordLock);
             UMDbQuery *query = [UMDbQuery queryForFile:__FILE__ line: __LINE__];
             if(!query.isInCache)
             {
@@ -153,7 +153,7 @@
         }
         @finally
         {
-            UMMUTEX_UNLOCK(_statisticDbRecordLock);
+            ummutex_unlock(_statisticDbRecordLock);
         }
     }
     return success;
@@ -161,15 +161,15 @@
 
 - (void)increaseMsuCount:(int)msuCount byteCount:(int)byteCount
 {
-    UMMUTEX_LOCK(_statisticDbRecordLock);
+    ummutex_lock(_statisticDbRecordLock);
     _msu_count   += msuCount;
     _bytes_count += byteCount;
-    UMMUTEX_UNLOCK(_statisticDbRecordLock);
+    ummutex_unlock(_statisticDbRecordLock);
 }
 
 - (void)flushToPool:(UMDbPool *)pool table:(UMDbTable *)table
 {
-    UMMUTEX_LOCK(_statisticDbRecordLock);
+    ummutex_lock(_statisticDbRecordLock);
     BOOL success = [self updateDb:pool table:table];
     if(success == NO)
     {
@@ -184,7 +184,7 @@
             NSLog(@"SCCP Statistics: insert into DB failed");
         }
     }
-    UMMUTEX_UNLOCK(_statisticDbRecordLock);
+    ummutex_unlock(_statisticDbRecordLock);
 }
 
 

@@ -36,7 +36,7 @@
 
 - (NSData *)reassembledData
 {
-    UMMUTEX_LOCK(_segmentsLock);
+    ummutex_lock(_segmentsLock);
     NSMutableData *d = [[NSMutableData alloc]init];
     for(int i=0;i<_max;i++)
     {
@@ -47,26 +47,26 @@
         }
         [d appendData:d2];
     }
-    UMMUTEX_UNLOCK(_segmentsLock);
+    ummutex_unlock(_segmentsLock);
     return d;
 }
 
 /*
 - (void)addSegment:(UMSCCP_Segment *)s
 {
-    UMMUTEX_LOCK(_lock);
+    ummutex_lock(_lock);
     int index = MAX_SEGMENTS - s.remainingSegment -1;
     if(index>=0)
     {
         _segments[index] = s;
     }
-    UMMUTEX_UNLOCK(_lock);
+    ummutex_unlock(_lock);
 }
 */
 
 - (BOOL)processReceivedSegment:(UMSCCP_ReceivedSegment *)s
 {
-    UMMUTEX_LOCK(_segmentsLock);
+    ummutex_lock(_segmentsLock);
     int current = 0; /* value from 0...15 */
 
 #ifdef SEGMENTATION_DEBUG
@@ -113,13 +113,13 @@
             NSLog(@"current is out of bounds");
 #endif
             /* somethings odd here */
-            UMMUTEX_UNLOCK(_segmentsLock);
+            ummutex_unlock(_segmentsLock);
             return YES;
         }
     }
     _rxSegments[current] = s;
 //    _segments[current] = s.segment;
-    UMMUTEX_UNLOCK(_segmentsLock);
+    ummutex_unlock(_segmentsLock);
     return NO;
 }
 
@@ -161,13 +161,13 @@
 
 - (NSArray<UMSCCP_ReceivedSegment *> *)allSegments
 {
-    UMMUTEX_LOCK(_segmentsLock);
+    ummutex_lock(_segmentsLock);
     NSMutableArray *a = [[NSMutableArray alloc]init];
     for(int i=0;i<_max;i++)
     {
         [a addObject:_rxSegments[i]];
     }
-    UMMUTEX_UNLOCK(_segmentsLock);
+    ummutex_unlock(_segmentsLock);
     return a;
 }
 
