@@ -4537,48 +4537,77 @@
                       handling:(SCCP_Handling)handling
                        options:(NSDictionary *)options
 {
-    BOOL accepted = [localUser sccpNUnitdata:data
-                                callingLayer:self
-                                     calling:callingPartyAddress
-                                      called:calledPartyAddress
-                            qualityOfService:qos
-                                       class:serviceClass
-                                    handling:handling
-                                     options:options
-                            verifyAcceptance:YES];
-    if(accepted==NO)
+    NSArray *allKeys = [_subsystemUsers allKeys];
+    if([allKeys count] == 1)
     {
-        /* this session belongs to some other task. lets try to find it. */
-        NSArray *allKeys = [_subsystemUsers allKeys];
-        for (NSNumber *key in allKeys)
+        /* we only have one subsystem. So we forward to it*/
+        BOOL accepted = [localUser sccpNUnitdata:data
+                                    callingLayer:self
+                                         calling:callingPartyAddress
+                                          called:calledPartyAddress
+                                qualityOfService:qos
+                                           class:serviceClass
+                                        handling:handling
+                                         options:options
+                                verifyAcceptance:NO];
+    }
+    else
+    {
+        /* we have multiple subsystem. So we forward to the designated one
+         if not we try the others if they have a pending transactotn
+         */
+        BOOL accepted = [localUser sccpNUnitdata:data
+                                    callingLayer:self
+                                         calling:callingPartyAddress
+                                          called:calledPartyAddress
+                                qualityOfService:qos
+                                           class:serviceClass
+                                        handling:handling
+                                         options:options
+                                verifyAcceptance:YES];
+        if(accepted==NO)
         {
-            NSMutableDictionary *a = _subsystemUsers[key];
-            if(a)
+            /* this session belongs to some other task. lets try to find it. */
+            NSArray *allKeys = [_subsystemUsers allKeys];
+            NSMutableArray *otherSubsystemsToTry = [[NSMutableArray alloc]init];
+            for (NSNumber *key in allKeys)
             {
-                NSArray *allNumbers = [a allKeys];
-                for(NSString *number in allNumbers)
+                NSMutableDictionary *a = _subsystemUsers[key];
+                if(a)
                 {
-                    id<UMSCCP_UserProtocol> user = a[number];
-                    if(user == localUser)
+                    NSArray *allNumbers = [a allKeys];
+                    for(NSString *number in allNumbers)
                     {
-                        continue; /* we already tried that one*/
-                    }
-                    else
-                    {
-                        accepted = [localUser sccpNUnitdata:data
-                                               callingLayer:self
-                                                    calling:callingPartyAddress
-                                                     called:calledPartyAddress
-                                           qualityOfService:qos
-                                                      class:serviceClass
-                                                   handling:handling
-                                                    options:options
-                                           verifyAcceptance:YES];
-                        if(accepted==YES)
+                        id<UMSCCP_UserProtocol> user = a[number];
+                        if((user==NULL) || (user == localUser))
                         {
-                            break;
+                            continue; /* we already tried that one*/
                         }
+                        [otherSubsystemsToTry addObject:user];
                     }
+                }
+            }
+            NSInteger otherUserCount = [otherSubsystemsToTry count];
+            for(id<UMSCCP_UserProtocol> otherUser in otherSubsystemsToTry)
+            {
+                BOOL verifyAcceptance = YES;
+                otherUserCount--;
+                if(otherUserCount<1)
+                {
+                    verifyAcceptance = NO;
+                }
+                accepted = [localUser sccpNUnitdata:data
+                                       callingLayer:self
+                                            calling:callingPartyAddress
+                                             called:calledPartyAddress
+                                   qualityOfService:qos
+                                              class:serviceClass
+                                           handling:handling
+                                            options:options
+                                   verifyAcceptance:verifyAcceptance];
+                if(accepted==YES)
+                {
+                    break;
                 }
             }
         }
