@@ -324,126 +324,6 @@
     [self setUser:usr forSubsystem:ssn number:addr];
 }
 
-#if 0
-
--(UMMTP3_Error) processXUDTsegment:(UMSCCP_Segment *)segment
-                           calling:(SccpAddress *)src
-                            called:(SccpAddress *)dst
-                      serviceClass:(SCCP_ServiceClass)pclass
-                          handling:(SCCP_Handling)handling
-                          hopCount:(int)hopCount
-                               opc:(UMMTP3PointCode *)opc
-                               dpc:(UMMTP3PointCode *)dpc
-                       optionsData:(NSData *)xoptionsdata
-                           options:(NSDictionary *)options
-                          provider:(UMLayerMTP3 *)provider
-                   routedToLinkset:(NSString **)outgoingLinkset
-                               sls:(int)sls
-                            packet:(UMSCCP_Packet *)pkt
-{
-    UMSCCP_ReceivedSegment *s = [[UMSCCP_ReceivedSegment alloc]init];
-    s.src = src;
-    s.dst = dst;
-    s.pclass = pclass;
-    s.handling = handling;
-    s.hopCount = hopCount;
-    s.opc = opc;
-    s.dpc = dpc;
-    s.optionsData = xoptionsdata;
-    s.options = options;
-    s.provider = provider;
-    s.segment = segment;
-    
-    NSArray <UMSCCP_ReceivedSegment *> *segs = [ _pendingSegmentsStorage processReceivedSegment:s];
-    for(UMSCCP_ReceivedSegment *seg in segs)
-    {
-        UMMTP3_Error e =  [self sendXUDTsegment:seg.segment
-                                        calling:seg.src
-                                         called:seg.dst
-                                    serviceClass:seg.pclass
-                                       handling:seg.handling
-                                       hopCount:seg.hopCount
-                                            opc:seg.opc
-                                            dpc:seg.dpc
-                                    optionsData:seg.optionsData
-                                        options:seg.options
-                                       provider:seg.provider
-                                routedToLinkset:outgoingLinkset
-                                            sls:seg.sls];
-        NSString *s = NULL;
-        switch(e)
-        {
-            case UMMTP3_error_internal_error:
-                s = [NSString stringWithFormat:@"Can not forward XUDT segment. internal error OPC=%@ DPC=%@ SRC=%@ DST=%@ DATA=%@",
-                     seg.opc,seg.dpc,seg.src,seg.dst,pkt.incomingSccpData];
-                break;
-            case UMMTP3_error_pdu_too_big:
-                
-                s = [NSString stringWithFormat:@"Can not forward XUDT segment. PDU too big. OPC=%@ DPC=%@ SRC=%@ DST=%@ DATA=%@",
-                     seg.opc,seg.dpc,seg.src,seg.dst,pkt.incomingSccpData];
-                break;
-            case UMMTP3_error_no_route_to_destination:
-                s = [NSString stringWithFormat:@"Can not forward XUDT segment. No route to destination OPC=%@ DPC=%@ SRC=%@ DST=%@ DATA=%@",
-                     seg.opc,seg.dpc,seg.src,seg.dst,pkt.incomingSccpData];
-                break;
-            case UMMTP3_error_invalid_variant:
-                s = [NSString stringWithFormat:@"Can not forward XUDT segment. Invalid variant.OPC=%@ DPC=%@ SRC=%@ DST=%@ DATA=%@",
-                     seg.opc,seg.dpc,seg.src,seg.dst,pkt.incomingSccpData];
-                break;
-            case UMMTP3_no_error:
-                break;
-        }
-        if(s)
-        {
-            [self logMinorError:s];
-            NSLog(@"%@",s);
-        }
-            
-        if(seg.handling == SCCP_HANDLING_RETURN_ON_ERROR)
-        {
-            SCCP_ReturnCause causeValue = SCCP_ReturnCause_not_set;
-            switch(e)
-            {
-                case UMMTP3_error_no_route_to_destination:
-                    causeValue = SCCP_ReturnCause_MTPFailure;
-                    [_unrouteablePacketsTraceDestination logPacket:pkt];
-                    break;
-                case UMMTP3_error_pdu_too_big:
-                    causeValue = SCCP_ReturnCause_ErrorInMessageTransport;
-                    [_problematicTraceDestination logPacket:pkt];
-                    break;
-                case UMMTP3_error_invalid_variant:
-                    causeValue = SCCP_ReturnCause_ErrorInMessageTransport;
-                    [_problematicTraceDestination logPacket:pkt];
-                    break;
-                case UMMTP3_error_internal_error:
-                    causeValue = SCCP_ReturnCause_ErrorInLocalProcessing;
-                    [_problematicTraceDestination logPacket:pkt];
-                    break;
-                case UMMTP3_no_error:
-                    causeValue = SCCP_ReturnCause_not_set;
-                    break;
-            }
-
-           if(causeValue != SCCP_ReturnCause_not_set)
-           {
-               [self generateXUDTS:pkt.incomingSccpData
-                           calling:seg.src
-                            called:seg.dst
-                             class:seg.pclass
-                       returnCause:causeValue
-                               opc:_mtp3.opc /* errors are always sent from this instance */
-                               dpc:seg.opc
-                           options:@{}
-                          provider:seg.provider
-                               sls:pkt.sls];
-           }
-        }
-    }
-    return UMMTP3_no_error; /* we already did error processing ourselves */
-}
-#endif
-
 -(UMMTP3_Error) sendXUDTsegment:(UMSCCP_Segment *)segment
                         calling:(SccpAddress *)src
                          called:(SccpAddress *)dst
@@ -1981,22 +1861,26 @@
             if((routingPacket.incomingServiceType == SCCP_UDTS) || (routingPacket.incomingServiceType == SCCP_XUDTS) || (routingPacket.incomingServiceType == SCCP_LUDTS))
             {
                 [localUser sccpNNotice:routingPacket.outgoingSccpData
-                          callingLayer:self
-                               calling:routingPacket.outgoingCallingPartyAddress
-                                called:routingPacket.outgoingCalledPartyAddress
-                                reason:routingPacket.outgoingReturnCause
-                               options:routingPacket.outgoingOptions];
+                                callingLayer:self
+                                     calling:routingPacket.outgoingCallingPartyAddress
+                                      called:routingPacket.outgoingCalledPartyAddress
+                                      reason:routingPacket.outgoingReturnCause
+                                     options:routingPacket.outgoingOptions];
             }
             else
             {
-                [self localDeliverNUnitdata:routingPacket.outgoingSccpData
-                                     toUser:localUser
-                                    calling:routingPacket.outgoingCallingPartyAddress
-                                     called:routingPacket.outgoingCalledPartyAddress
-                           qualityOfService:0
-                                      class:routingPacket.outgoingServiceClass
-                                   handling:routingPacket.outgoingHandling
-                                    options:routingPacket.outgoingOptions];
+                causeValue = [self localDeliverNUnitdata:routingPacket.outgoingSccpData
+                                                  toUser:localUser
+                                                 calling:routingPacket.outgoingCallingPartyAddress
+                                                  called:routingPacket.outgoingCalledPartyAddress
+                                        qualityOfService:0
+                                                   class:routingPacket.outgoingServiceClass
+                                                handling:routingPacket.outgoingHandling
+                                                 options:routingPacket.outgoingOptions];
+                if(causeValue != SCCP_ReturnCause_not_set)
+                {
+                    doSendStatus = YES;
+                }
             }
             returnValue = YES;
         }
@@ -4528,20 +4412,21 @@
     NSString *s = [d jsonString];
     return s;
 }
-- (void) localDeliverNUnitdata:(NSData *)data
-                        toUser:(id<UMSCCP_UserProtocol>)localUser
-                       calling:(SccpAddress *)callingPartyAddress
-                        called:(SccpAddress *)calledPartyAddress
-              qualityOfService:(int)qos
-                         class:(SCCP_ServiceClass)serviceClass
-                      handling:(SCCP_Handling)handling
-                       options:(NSDictionary *)options
+- (SCCP_ReturnCause) localDeliverNUnitdata:(NSData *)data
+                                    toUser:(id<UMSCCP_UserProtocol>)localUser
+                                   calling:(SccpAddress *)callingPartyAddress
+                                    called:(SccpAddress *)calledPartyAddress
+                          qualityOfService:(int)qos
+                                     class:(SCCP_ServiceClass)serviceClass
+                                  handling:(SCCP_Handling)handling
+                                   options:(NSDictionary *)options
 {
+    BOOL accepted = NO;
     NSArray *allKeys = [_subsystemUsers allKeys];
     if([allKeys count] == 1)
     {
         /* we only have one subsystem. So we forward to it*/
-        BOOL accepted = [localUser sccpNUnitdata:data
+        accepted = [localUser sccpNUnitdata:data
                                     callingLayer:self
                                          calling:callingPartyAddress
                                           called:calledPartyAddress
@@ -4556,7 +4441,7 @@
         /* we have multiple subsystem. So we forward to the designated one
          if not we try the others if they have a pending transactotn
          */
-        BOOL accepted = [localUser sccpNUnitdata:data
+        accepted = [localUser sccpNUnitdata:data
                                     callingLayer:self
                                          calling:callingPartyAddress
                                           called:calledPartyAddress
@@ -4612,6 +4497,11 @@
             }
         }
     }
+    if(accepted==NO)
+    {
+        return SCCP_ReturnCause_Unequipped;
+    }
+    return SCCP_ReturnCause_not_set;
 }
 
 - (NSNumber *) extractTransactionNumber:(NSData *)data

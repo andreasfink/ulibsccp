@@ -455,7 +455,7 @@ sls:(int)sls;
 - (NSString *)webE212;
 - (NSString *)webE214;
 
-- (void) localDeliverNUnitdata:(NSData *)data
+- (SCCP_ReturnCause) localDeliverNUnitdata:(NSData *)data
           toUser:(id<UMSCCP_UserProtocol>)localUser
          calling:(SccpAddress *)callingPartyAddress
           called:(SccpAddress *)calledPartyAddress
