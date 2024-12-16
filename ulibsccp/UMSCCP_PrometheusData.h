@@ -34,6 +34,15 @@
     UMPrometheusMetric            *_xudtsRxCounter;
     UMPrometheusMetric            *_xudtsTxCounter;
     UMPrometheusMetric            *_xudtsTransitCounter;
+    
+    UMPrometheusMetric            *_ludtRxCounter;
+    UMPrometheusMetric            *_ludtTxCounter;
+    UMPrometheusMetric            *_ludtTransitCounter;
+
+    UMPrometheusMetric            *_ludtsRxCounter;
+    UMPrometheusMetric            *_ludtsTxCounter;
+    UMPrometheusMetric            *_ludtsTransitCounter;
+
     UMPrometheusMetric            *_transitCounterPerMapOperation[256];
     UMPrometheusMetric            *_rxCounterPerMapOperation[256];
     UMPrometheusMetric            *_txCounterPerMapOperation[256];
@@ -57,6 +66,14 @@
 @property(readwrite,strong) UMPrometheusMetric            *xudtsRxCounter;
 @property(readwrite,strong) UMPrometheusMetric            *xudtsTxCounter;
 @property(readwrite,strong) UMPrometheusMetric            *xudtsTransitCounter;
+
+
+@property(readwrite,strong) UMPrometheusMetric            *ludtRxCounter;
+@property(readwrite,strong) UMPrometheusMetric            *ludtTxCounter;
+@property(readwrite,strong) UMPrometheusMetric            *ludtTransitCounter;
+@property(readwrite,strong) UMPrometheusMetric            *ludtsRxCounter;
+@property(readwrite,strong) UMPrometheusMetric            *ludtsTxCounter;
+@property(readwrite,strong) UMPrometheusMetric            *ludtsTransitCounter;
 @property(readwrite,strong) UMPrometheusThroughputMetric  *throughput;
 
 

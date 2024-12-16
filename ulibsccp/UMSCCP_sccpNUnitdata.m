@@ -128,7 +128,7 @@ static int segmentReferenceId;
             NSUInteger maxPdu = 0;
             //BOOL useUDT         = [_options[@"sccp-udt"] boolValue];
             BOOL useXUDT        = [_options[@"sccp-xudt"] boolValue];
-            //BOOL useLUDT        = [_options[@"sccp-ludt"] boolValue];
+            BOOL useLUDT        = [_options[@"sccp-ludt"] boolValue];
             BOOL useSegments    = [_options[@"sccp-segment"] boolValue];
             int segmentSize    = [_options[@"sccp-segment-size"] intValue];
             NSArray *segmentSizes =  _options[@"sccp-segment-sizes"];
@@ -234,7 +234,7 @@ static int segmentReferenceId;
             if(_data.length > 0)
             {
                 /* we have single data as input, no segments yet */
-                if(useXUDT == NO)
+                if((useXUDT == NO) && ( useLUDT==NO))
                 {
                     maxPdu = [_sccpLayer maxPayloadSizeForServiceType:SCCP_UDT
                                                    callingAddressSize:cas
@@ -262,7 +262,7 @@ static int segmentReferenceId;
                         }
                     }
                 }
-                else /* use XUDT is set */
+                else if(useXUDT)/* use XUDT is set */
                 {
                     maxPdu = [_sccpLayer maxPayloadSizeForServiceType:SCCP_XUDT
                                                    callingAddressSize:cas
@@ -279,6 +279,33 @@ static int segmentReferenceId;
                         useSegments = YES;
                         useXUDT = YES;
                         maxPdu = [_sccpLayer maxPayloadSizeForServiceType:SCCP_XUDT
+                                                       callingAddressSize:cas
+                                                        calledAddressSize:cds
+                                                            usingSegments:useSegments
+                                                                 provider:_sccpLayer.mtp3];
+                        if((segmentSize !=0) && (maxPdu>segmentSize))
+                        {
+                            maxPdu = segmentSize;
+                        }
+                    }
+                }
+                else if(useLUDT)/* use XUDT is set */
+                {
+                    maxPdu = [_sccpLayer maxPayloadSizeForServiceType:SCCP_LUDT
+                                                   callingAddressSize:cas
+                                                    calledAddressSize:cds
+                                                        usingSegments:useSegments
+                                                             provider:_sccpLayer.mtp3];
+                    if((segmentSize !=0) && (maxPdu>segmentSize))
+                    {
+                        maxPdu = segmentSize;
+                    }
+                    if(_data.length > maxPdu)
+                    {
+                        /* no choice, we must segment */
+                        useSegments = YES;
+                        useLUDT = YES;
+                        maxPdu = [_sccpLayer maxPayloadSizeForServiceType:SCCP_LUDT
                                                        callingAddressSize:cas
                                                         calledAddressSize:cds
                                                             usingSegments:useSegments
@@ -308,7 +335,7 @@ static int segmentReferenceId;
                     for(int i=0;i<count;i++)
                     {
                         UMSCCP_Segment *s = _dataSegments[i];
-
+                        
                         UMSCCP_Packet *packet = [[UMSCCP_Packet alloc]init];
                         packet.sccp = _sccpLayer;
                         packet.logFeed = _sccpLayer.logFeed;
@@ -330,11 +357,25 @@ static int segmentReferenceId;
                         packet.incomingOptions = _options;
                         packet.incomingMaxHopCount = _maxHopCount;
                         packet.incomingOptionalData = optional_data;
-                        packet.incomingServiceType = SCCP_XUDT;
+                        if(useLUDT)
+                        {
+                            packet.incomingServiceType = SCCP_LUDT;
+                        }
+                        else
+                        {
+                            packet.incomingServiceType = SCCP_XUDT;
+                        }
                         packet.incomingFromLocal = YES;
                         packet.sls = -1;
                         [_sccpLayer.filterDelegate sccpDecodeTcapGsmmap:packet];
-                        _statisticsSection2 = UMSCCP_StatisticSection_XUDT_TX;
+                        if(useLUDT)
+                        {
+                            _statisticsSection2 = UMSCCP_StatisticSection_LUDT_TX;
+                        }
+                        else
+                        {
+                            _statisticsSection2 = UMSCCP_StatisticSection_XUDT_TX;
+                        }
                         [packet copyIncomingToOutgoing];
                         UMSCCP_FilterResult r = UMSCCP_FILTER_RESULT_UNMODIFIED;
                         if(_sccpLayer.filterDelegate)
@@ -375,6 +416,11 @@ static int segmentReferenceId;
                     {
                         packet.incomingServiceType = SCCP_XUDT;
                         _statisticsSection2 = UMSCCP_StatisticSection_XUDT_TX;
+                    }
+                    else if(useLUDT)
+                    {
+                        packet.incomingServiceType = SCCP_LUDT;
+                        _statisticsSection2 = UMSCCP_StatisticSection_LUDT_TX;
                     }
                     else
                     {

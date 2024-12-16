@@ -2997,6 +2997,17 @@
             return (maxSccpSize - 10 -cas -cds);
         }
     }
+    else if(serviceType == SCCP_LUDT)
+    {
+        if(useSeg)
+        {
+            return (maxSccpSize - 21 -cas -cds);
+        }
+        else
+        {
+            return (maxSccpSize - 14 -cas -cds);
+        }
+    }
     /* FIXME: other PDU types have other maximums */
     return  (maxSccpSize - 8  - cas - cds);
 }
@@ -3926,6 +3937,13 @@
         case UMSCCP_StatisticSection_XUDTS_TRANSIT:
             [_prometheusData.xudtsTransitCounter  increaseBy:1];
             break;
+        case UMSCCP_StatisticSection_LUDT_TRANSIT:
+            [_prometheusData.ludtTransitCounter  increaseBy:1];
+            break;
+        case UMSCCP_StatisticSection_LUDTS_TRANSIT:
+            [_prometheusData.ludtsTransitCounter  increaseBy:1];
+            break;
+
     }
     
 }
@@ -3971,6 +3989,15 @@
                         key = @"rx-xudts";
                         break;
 
+                    case UMSCCP_StatisticSection_LUDT_RX:
+                        key = @"rx-ludt";
+                        break;
+
+                    case UMSCCP_StatisticSection_LUDTS_RX:
+                        key = @"rx-ludts";
+                        break;
+
+
                     case UMSCCP_StatisticSection_UDT_TX:
                         key = @"tx-udt";
                         break;
@@ -3985,6 +4012,14 @@
 
                     case UMSCCP_StatisticSection_XUDTS_TX:
                         key = @"tx-xudts";
+                        break;
+
+                    case UMSCCP_StatisticSection_LUDT_TX:
+                        key = @"tx-ludt";
+                        break;
+
+                    case UMSCCP_StatisticSection_LUDTS_TX:
+                        key = @"tx-ludts";
                         break;
 
                     case UMSCCP_StatisticSection_UDT_TRANSIT:
@@ -4002,6 +4037,17 @@
                     case UMSCCP_StatisticSection_XUDTS_TRANSIT:
                         key = @"tr-xudts";
                         break;
+                        
+                    case UMSCCP_StatisticSection_LUDT_TRANSIT:
+                        key = @"tr-ludt";
+                        break;
+
+                    case UMSCCP_StatisticSection_LUDTS_TRANSIT:
+                        key = @"tr-ludts";
+                        break;
+                    case UMSCCP_StatisticSection_MAX:
+                        break;
+
                 }
 
                 UMThroughputCounter *tc = _throughputCounters[i];
