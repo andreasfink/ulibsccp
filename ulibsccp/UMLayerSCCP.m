@@ -324,6 +324,53 @@
     [self setUser:usr forSubsystem:ssn number:addr];
 }
 
+
+-(UMMTP3_Error) sendLUDTsegment:(UMSCCP_Segment *)segment
+                        calling:(SccpAddress *)src
+                         called:(SccpAddress *)dst
+                   serviceClass:(SCCP_ServiceClass)pclass
+                       handling:(SCCP_Handling)handling
+                       hopCount:(int)hopCount
+                            opc:(UMMTP3PointCode *)opc
+                            dpc:(UMMTP3PointCode *)dpc
+                    optionsData:(NSData *)xoptionsdata
+                        options:(NSDictionary *)options
+                       provider:(UMLayerMTP3 *)provider
+                routedToLinkset:(NSString **)outgoingLinkset
+                            sls:(int)sls
+{
+    /* we assume here the segmentation header is not included. So we add it here*/
+    NSMutableData *optionsData = [[NSMutableData alloc]init];
+    [optionsData appendByte:0x10]; /* optional parameter "segmentation" */
+    [optionsData appendByte:0x04]; /* length of optional parameter */
+    [optionsData appendData:[segment segmentationHeader]];
+    if(xoptionsdata.length > 0)
+    {
+        [optionsData appendData:xoptionsdata];
+    }
+    
+    /* The standard says
+        – The SCCP shall place each segment of user data into separate LUDT messages, each with the same Called Party Address and identical MTP routing information (DPC, SLS).
+       
+        which means we need to collect all segments first, do a routing
+        decision and then send all the segments down the same pipe with the same SLC.
+     */
+    
+    return [self sendLUDT:segment.data
+                  calling:src
+                   called:dst
+                    class:pclass
+                 handling:handling
+                 hopCount:hopCount
+                      opc:opc
+                      dpc:dpc
+              optionsData:optionsData
+                  options:options
+                 provider:provider
+          routedToLinkset:outgoingLinkset
+                      sls:sls];
+}
+
 -(UMMTP3_Error) sendXUDTsegment:(UMSCCP_Segment *)segment
                         calling:(SccpAddress *)src
                          called:(SccpAddress *)dst
@@ -396,6 +443,36 @@
                       sls:sls];
 }
 
+-(UMMTP3_Error) sendLUDT:(NSData *)data
+                 calling:(SccpAddress *)src
+                  called:(SccpAddress *)dst
+                   class:(SCCP_ServiceClass)pclass
+                handling:(SCCP_Handling)handling
+                hopCount:(int)maxHopCount
+                     opc:(UMMTP3PointCode *)opc
+                     dpc:(UMMTP3PointCode *)dpc
+             optionsData:(NSData *)xoptionsdata
+                 options:(NSDictionary *)options
+                provider:(UMLayerMTP3 *)provider
+         routedToLinkset:(NSString **)outgoingLinkset
+                     sls:(int)sls
+{
+    return [self sendLXUDT:data
+                   calling:src
+                    called:dst
+                     class:pclass
+                  handling:handling
+                  hopCount:maxHopCount
+                       opc:opc
+                       dpc:dpc
+               optionsData:xoptionsdata
+                   options:options
+                  provider:provider
+           routedToLinkset:outgoingLinkset
+                       sls:sls
+                    isLUDT:YES];
+}
+
 -(UMMTP3_Error) sendXUDT:(NSData *)data
                  calling:(SccpAddress *)src
                   called:(SccpAddress *)dst
@@ -409,6 +486,38 @@
                 provider:(UMLayerMTP3 *)provider
          routedToLinkset:(NSString **)outgoingLinkset
                      sls:(int)sls
+
+{
+    return [self sendLXUDT:data
+                   calling:src
+                    called:dst
+                     class:pclass
+                  handling:handling
+                  hopCount:maxHopCount
+                       opc:opc
+                       dpc:dpc
+               optionsData:xoptionsdata
+                   options:options
+                  provider:provider
+           routedToLinkset:outgoingLinkset
+                       sls:sls
+                    isLUDT:NO];
+}
+
+-(UMMTP3_Error) sendLXUDT:(NSData *)data
+                 calling:(SccpAddress *)src
+                  called:(SccpAddress *)dst
+                   class:(SCCP_ServiceClass)pclass
+                handling:(SCCP_Handling)handling
+                hopCount:(int)maxHopCount
+                     opc:(UMMTP3PointCode *)opc
+                     dpc:(UMMTP3PointCode *)dpc
+             optionsData:(NSData *)xoptionsdata
+                 options:(NSDictionary *)options
+                provider:(UMLayerMTP3 *)provider
+         routedToLinkset:(NSString **)outgoingLinkset
+                     sls:(int)sls
+                   isLUDT:(BOOL)isLUDT
 {
     SccpNumberTranslation *cga_number_translation_out = NULL;
     SccpNumberTranslation *cda_number_translation_out = NULL;
@@ -460,22 +569,51 @@
 
     
     NSMutableData *sccp_pdu = [[NSMutableData alloc]init];
-    uint8_t header[7];
-    header[0] = SCCP_XUDT;
-    header[1] = (pclass & 0x0F) | ((handling & 0x0F) << 4);
-    header[2] = maxHopCount;
-    header[3] = 4;
-    header[4] = 4 + dstEncoded.length;
-    header[5] = 4 + dstEncoded.length + srcEncoded.length;
-    if(xoptionsdata.length > 0)
+    
+    if(isLUDT)
     {
-        header[6] = 4 + dstEncoded.length + srcEncoded.length + data.length;
+        uint8_t header[11];
+        header[0] = SCCP_LUDT;
+        header[1] = (pclass & 0x0F) | ((handling & 0x0F) << 4);
+        header[2] = maxHopCount;
+        header[3] = ((8 + 0) >> 0) & 0xFF;
+        header[4] = ((8 + 0) >> 8) & 0xFF;
+        header[5] = ((8 + dstEncoded.length)>> 0) & 0xFF;
+        header[6] = ((8 + dstEncoded.length)>> 8) & 0xFF;
+        header[7] = ((8 + dstEncoded.length + srcEncoded.length) >> 0) & 0xFF;
+        header[8] = ((8 + dstEncoded.length + srcEncoded.length) >> 8) & 0xFF;
+        if(xoptionsdata.length > 0)
+        {
+            header[9]  = ((8 + dstEncoded.length + srcEncoded.length + data.length) >> 0) & 0xFF;
+            header[10] = ((8 + dstEncoded.length + srcEncoded.length + data.length) >> 8) & 0xFF;
+        }
+        else
+        {
+            header[9] = 0;
+            header[10] = 0;
+        }
+        [sccp_pdu appendBytes:header length:11];
     }
     else
     {
-        header[6] = 0;
+        uint8_t header[7];
+        header[0] = SCCP_XUDT;
+        header[1] = (pclass & 0x0F) | ((handling & 0x0F) << 4);
+        header[2] = maxHopCount;
+        header[3] = 4;
+        header[4] = 4 + dstEncoded.length;
+        header[5] = 4 + dstEncoded.length + srcEncoded.length;
+        if(xoptionsdata.length > 0)
+        {
+            header[6] = 4 + dstEncoded.length + srcEncoded.length + data.length;
+        }
+        else
+        {
+            header[6] = 0;
+        }
+        [sccp_pdu appendBytes:header length:7];
     }
-    [sccp_pdu appendBytes:header length:7];
+    
     [sccp_pdu appendByte:dstEncoded.length];
     [sccp_pdu appendData:dstEncoded];
     [sccp_pdu appendByte:srcEncoded.length];
@@ -487,6 +625,7 @@
         [sccp_pdu appendData:xoptionsdata];
         [sccp_pdu appendByte:0x00]; /* end of optional parameters */
     }
+
     UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc options:options routedToLinkset:outgoingLinkset sls:sls];
 
     NSString *s;
@@ -509,7 +648,7 @@
             break;
     }
     NSDictionary *o = @{
-                        @"type" : @"XUDT",
+                        @"type" : isLUDT ? @"LUDT" : @"XUDT",
                         @"action" : @"drop",
                         @"error"  : s,
                         @"opc"  : ( opc ? opc.stringValue : @"(not-set)" ),
@@ -531,8 +670,6 @@
 }
 
 
-
-
 -(UMMTP3_Error) sendXUDTS:(NSData *)data
                   calling:(SccpAddress *)src
                    called:(SccpAddress *)dst
@@ -546,6 +683,67 @@
                  provider:(UMLayerMTP3 *)provider
           routedToLinkset:(NSString **)outgoingLinkset
                       sls:(int)sls
+{
+    return [self sendLXUDTS:data
+                    calling:src
+                     called:dst
+                      class:serviceClass
+                   hopCount:hopCounter
+                returnCause:returnCause
+                        opc:opc
+                        dpc:dpc
+                optionsData:xoptionsdata
+                    options:options
+                   provider:provider
+            routedToLinkset:outgoingLinkset
+                        sls:sls
+                    isLUDTS:NO];
+}
+
+-(UMMTP3_Error) sendLUDTS:(NSData *)data
+                  calling:(SccpAddress *)src
+                   called:(SccpAddress *)dst
+                    class:(SCCP_ServiceClass)serviceClass
+                 hopCount:(int)hopCounter
+              returnCause:(SCCP_ReturnCause)returnCause
+                      opc:(UMMTP3PointCode *)opc
+                      dpc:(UMMTP3PointCode *)dpc
+              optionsData:(NSData *)xoptionsdata
+                  options:(NSDictionary *)options
+                 provider:(UMLayerMTP3 *)provider
+          routedToLinkset:(NSString **)outgoingLinkset
+                      sls:(int)sls
+{
+    return [self sendLXUDTS:data
+                    calling:src
+                     called:dst
+                      class:serviceClass
+                   hopCount:hopCounter
+                returnCause:returnCause
+                        opc:opc
+                        dpc:dpc
+                optionsData:xoptionsdata
+                    options:options
+                   provider:provider
+            routedToLinkset:outgoingLinkset
+                        sls:sls
+                    isLUDTS:YES];
+}
+
+-(UMMTP3_Error) sendLXUDTS:(NSData *)data
+                   calling:(SccpAddress *)src
+                    called:(SccpAddress *)dst
+                     class:(SCCP_ServiceClass)serviceClass
+                  hopCount:(int)hopCounter
+               returnCause:(SCCP_ReturnCause)returnCause
+                       opc:(UMMTP3PointCode *)opc
+                       dpc:(UMMTP3PointCode *)dpc
+               optionsData:(NSData *)xoptionsdata
+                   options:(NSDictionary *)options
+                  provider:(UMLayerMTP3 *)provider
+           routedToLinkset:(NSString **)outgoingLinkset
+                       sls:(int)sls
+                   isLUDTS:(BOOL)isLUDTS
 {
     
     SccpNumberTranslation *cga_number_translation_out = NULL;
@@ -597,23 +795,51 @@
     NSData *dstEncoded = [dst encode:_sccpVariant];
 
     NSMutableData *sccp_pdu = [[NSMutableData alloc]init];
-    uint8_t header[7];
-    header[0] = SCCP_XUDTS;
-    header[1] = returnCause;
-    header[2] = hopCounter;
-    header[3] = 4;
-    header[4] = 4 + dstEncoded.length;
-    header[5] = 4 + dstEncoded.length + srcEncoded.length;
     
-    if(xoptionsdata.length > 0)
+    if(isLUDTS)
     {
-        header[6] = 4 + dstEncoded.length + srcEncoded.length + data.length;
+        uint8_t header[11];
+        header[0] = SCCP_LUDTS;
+        header[1] = returnCause;
+        header[2] = hopCounter;
+        header[3] = ((8 + 0) >> 0) & 0xFF;
+        header[4] = ((8 + 0) >> 8) & 0xFF;
+        header[5] = ((8 + dstEncoded.length)>> 0) & 0xFF;
+        header[6] = ((8 + dstEncoded.length)>> 8) & 0xFF;
+        header[7] = ((8 + dstEncoded.length + srcEncoded.length) >> 0) & 0xFF;
+        header[8] = ((8 + dstEncoded.length + srcEncoded.length) >> 8) & 0xFF;
+        if(xoptionsdata.length > 0)
+        {
+            header[9]  = ((8 + dstEncoded.length + srcEncoded.length + data.length) >> 0) & 0xFF;
+            header[10] = ((8 + dstEncoded.length + srcEncoded.length + data.length) >> 8) & 0xFF;
+        }
+        else
+        {
+            header[9] = 0;
+            header[10] = 0;
+        }
+        [sccp_pdu appendBytes:header length:11];
     }
     else
     {
-        header[6] = 0;
+        uint8_t header[7];
+        header[0] = SCCP_XUDTS;
+        header[1] = returnCause;
+        header[2] = hopCounter;
+        header[3] = 4;
+        header[4] = 4 + dstEncoded.length;
+        header[5] = 4 + dstEncoded.length + srcEncoded.length;
+        
+        if(xoptionsdata.length > 0)
+        {
+            header[6] = 4 + dstEncoded.length + srcEncoded.length + data.length;
+        }
+        else
+        {
+            header[6] = 0;
+        }
+        [sccp_pdu appendBytes:header length:7];
     }
-    [sccp_pdu appendBytes:header length:7];
     [sccp_pdu appendByte:dstEncoded.length];
     [sccp_pdu appendData:dstEncoded];
     [sccp_pdu appendByte:srcEncoded.length];
@@ -651,7 +877,7 @@
             break;
     }
     NSDictionary *o = @{
-                        @"type" : @"XUDTS",
+                        @"type" : (isLUDTS ? @"LUDTS" : @"XUDTS"),
                         @"action" : action,
                         @"error"  : s,
                         @"opc"  : ( opc ? opc.stringValue : @"(not-set)" ),
@@ -2076,11 +2302,70 @@
                           packet.outgoingLinksetName = outgoingLinkset;
                         break;
                     case SCCP_LUDT:
-                        e = UMMTP3_error_invalid_variant;
+                        if(processSegmentedDelivery)
+                        {
+                            for(UMSCCP_ReceivedSegment *seg in segs)
+                            {
+                                seg.opc = routingPacket.outgoingMtp3Layer.opc;
+                                seg.dpc = routingPacket.outgoingDpc;
+                                seg.src = routingPacket.outgoingCallingPartyAddress;
+                                seg.dst = routingPacket.outgoingCalledPartyAddress;
+                                seg.sls = routingPacket.sls;
+                                seg.provider = routingPacket.outgoingMtp3Layer;
+                                seg.options = routingPacket.outgoingOptions;
+                                e =  [self sendLUDTsegment:seg.segment
+                                                   calling:seg.src
+                                                    called:seg.dst
+                                              serviceClass:seg.pclass
+                                                  handling:seg.handling
+                                                  hopCount:seg.hopCount
+                                                       opc:seg.opc
+                                                       dpc:seg.dpc
+                                               optionsData:seg.optionsData
+                                                   options:seg.options
+                                                  provider:seg.provider
+                                           routedToLinkset:&outgoingLinkset
+                                                       sls:seg.sls];
+                            }
+                        }
+                        else if(processSingleDelivery)
+                        {
+                            e = [self sendLUDT:routingPacket.outgoingSccpData
+                                       calling:routingPacket.outgoingCallingPartyAddress
+                                        called:routingPacket.outgoingCalledPartyAddress
+                                         class:routingPacket.outgoingServiceClass
+                                      handling:routingPacket.outgoingHandling
+                                      hopCount:routingPacket.outgoingMaxHopCount
+                                           opc:routingPacket.outgoingOpc
+                                           dpc:routingPacket.outgoingDpc
+                                   optionsData:routingPacket.outgoingOptionalData
+                                       options:routingPacket.outgoingOptions
+                                      provider:provider
+                                   routedToLinkset:&outgoingLinkset
+                                           sls:packet.sls];
+                             packet.outgoingLinksetName = outgoingLinkset;
+                        }
+                        else
+                        {
+                            e = UMMTP3_no_error;
+                        }
                         break;
                     case SCCP_LUDTS:
-                        e = UMMTP3_error_invalid_variant;
-                        break;
+                        e = [self sendLUDTS:packet.outgoingSccpData
+                                    calling:packet.outgoingCallingPartyAddress
+                                     called:packet.outgoingCalledPartyAddress
+                                      class:packet.outgoingServiceClass
+                                   hopCount:packet.outgoingMaxHopCount
+                                returnCause:packet.outgoingReturnCause
+                                        opc:packet.outgoingOpc
+                                        dpc:packet.outgoingDpc
+                                optionsData:packet.outgoingOptionalData
+                                    options:packet.outgoingOptions
+                                   provider:provider
+                            routedToLinkset:&outgoingLinkset
+                                        sls:packet.sls];
+                          packet.outgoingLinksetName = outgoingLinkset;
+                        break;                        break;
                 }
                 NSString *s= NULL;
                 switch(e)
@@ -3313,7 +3598,38 @@
                     param_segment   = d[i] + i;
                     i++;
                     break;
+                case SCCP_LUDT:
+                    m_protocol_class = d[i] & 0x0F;
+                    m_handling = (d[i++]>>4) & 0x0F;
+                    param_called_party_address   = d[i] + i;
+                    param_called_party_address  |= (d[i+1] + i) << 8;
+                    i +=2;
+                    param_calling_party_address  = d[i] + i;
+                    param_calling_party_address |= (d[i+1] + i) << 8;
+                    i +=2;
+                    param_data  = d[i] + i;
+                    param_data |= (d[i+1] + i) << 8;
+                    i +=2;
+                    param_segment = -1;
+                    break;
 
+                case SCCP_LUDTS:
+                    m_return_cause = d[i++] & 0x0F;
+                    m_hopcounter = d[i++] & 0x0F;
+                    
+                    param_called_party_address   = d[i] + i;
+                    param_called_party_address  |= (d[i+1] + i) << 8;
+                    i +=2;
+                    param_calling_party_address  = d[i] + i;
+                    param_calling_party_address |= (d[i+1] + i) << 8;
+                    i +=2;
+                    param_data  = d[i] + i;
+                    param_data |= (d[i+1] + i) << 8;
+                    i +=2;
+                    param_segment  = d[i] + i;
+                    param_segment |= (d[i+1] + i) << 8;
+                    i +=2;
+                    break;
                 default:
                     @throw([NSException exceptionWithName:@"SCCP_UNKNOWN_PACKET_TYPE" reason:NULL userInfo:NULL] );
             }
@@ -3385,6 +3701,13 @@
                 case SCCP_XUDTS:
                     dict[@"pdu-type"] = @"XUDTS";
                     break;
+                case SCCP_LUDT:
+                    dict[@"pdu-type"] = @"LUDT";
+                    break;
+                case SCCP_LUDTS:
+                    dict[@"pdu-type"] = @"LUDTS";
+                    break;
+
             }
         }
         @catch(NSException *e)

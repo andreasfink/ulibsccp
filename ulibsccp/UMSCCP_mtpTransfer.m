@@ -167,6 +167,10 @@
             switch(m_type)
             {
                 case SCCP_UDT:
+                    if(len < 8)
+                    {
+                        @throw([NSException exceptionWithName:@"SCCP_TOO_SMALL_UDT_PACKET_RECEIVED" reason:NULL userInfo:NULL] );
+                    }
                     type = @"UDT";
                     _decodedJson[@"sccp-pdu-type"]=type;
                     _m_protocol_class = d[i] & 0x0F;
@@ -191,6 +195,10 @@
                     break;
                     
                 case SCCP_UDTS:
+                    if(len < (3+10))
+                    {
+                        @throw([NSException exceptionWithName:@"SCCP_TOO_SMALL_UDTS_PACKET_RECEIVED" reason:NULL userInfo:NULL] );
+                    }
                     type=@"UDTS";
                     _decodedJson[@"sccp-pdu-type"]=type;
                     _m_return_cause = d[i++] & 0x0F;
@@ -206,6 +214,10 @@
                     break;
                     
                 case SCCP_XUDT:
+                    if(len < (4+11))
+                    {
+                        @throw([NSException exceptionWithName:@"SCCP_TOO_SMALL_XUDT_PACKET_RECEIVED" reason:NULL userInfo:NULL] );
+                    }
                     type=@"XUDT";
                     _decodedJson[@"sccp-pdu-type"]=type;
                     _m_protocol_class = d[i] & 0x0F;
@@ -233,6 +245,10 @@
                     break;
 
                 case SCCP_XUDTS:
+                    if(len < (4+11))
+                    {
+                        @throw([NSException exceptionWithName:@"SCCP_TOO_SMALL_XUDTS_PACKET_RECEIVED" reason:NULL userInfo:NULL] );
+                    }
                     type=@"XUDTS";
                     _decodedJson[@"sccp-pdu-type"]=type;
                     _m_return_cause = d[i++] & 0x0F;
@@ -250,7 +266,61 @@
                     param_optional   = d[i] + i;
                     i++;
                     break;
+                    
+                case SCCP_LUDT:
+                    if(len < (8+12))
+                    {
+                        @throw([NSException exceptionWithName:@"SCCP_TOO_SMALL_LUDT_PACKET_RECEIVED" reason:NULL userInfo:NULL] );
+                    }
+                    type=@"LUDT";
+                    _decodedJson[@"sccp-pdu-type"]=type;
+                    _m_protocol_class = d[i] & 0x0F;
+                    _packet.incomingServiceClass = _m_protocol_class;
+                    _packet.outgoingServiceClass = _m_protocol_class;
+                    _decodedJson[@"sccp-protocol-class"]=@(_m_protocol_class);
+                    _m_handling = (d[i++]>>4) & 0x0F;
+                    if(_m_handling & 0x08)
+                    {
+                        _packet.incomingHandling = SCCP_HANDLING_RETURN_ON_ERROR;
+                        _packet.outgoingHandling = SCCP_HANDLING_RETURN_ON_ERROR;
+                    }
+                    _decodedJson[@"sccp-protocol-handling"]=@(_m_handling);
+                    param_hop_counter=d[i];
+                    _packet.incomingMaxHopCount = param_hop_counter;
+                    i++;
+                    param_called_party_address = d[i] + (d[i+1]<<8) + i;
+                    i +=2;
+                    param_calling_party_address = d[i] + (d[i+1]<<8) + i;
+                    i +=2;
+                    param_data =  d[i] + (d[i+1]<<8) + i;
+                    i +=2;
+                    param_optional = d[i] + (d[i+1]<<8) + i;
+                    i +=2;
+                    break;
 
+                case SCCP_LUDTS:
+                    if(len < (8+12))
+                    {
+                        @throw([NSException exceptionWithName:@"SCCP_TOO_SMALL_LUDTS_PACKET_RECEIVED" reason:NULL userInfo:NULL] );
+                    }
+                    type=@"LUDTS";
+                    _decodedJson[@"sccp-pdu-type"]=type;
+                    _m_return_cause = d[i++] & 0x0F;
+                    _packet.incomingReturnCause = _m_return_cause;
+                    _decodedJson[@"sccp-protocol-return-cause"]=@(_m_return_cause);
+                    _m_hopcounter = d[i++] & 0x0F;
+                    _decodedJson[@"sccp-hop-counter"]=@(_m_hopcounter);
+                    _packet.incomingMaxHopCount = _m_return_cause;
+                    param_called_party_address = d[i] + (d[i+1]<<8) + i;
+                    i +=2;
+                    param_calling_party_address = d[i] + (d[i+1]<<8) + i;
+                    i +=2;
+                    param_data =  d[i] + (d[i+1]<<8) + i;
+                    i +=2;
+                    param_optional = d[i] + (d[i+1]<<8) + i;
+                    i +=2;
+                    break;
+                    
                 default:
                     @throw([NSException exceptionWithName:@"SCCP_UNKNOWN_PACKET_TYPE" reason:NULL
                                                  userInfo:@{@"mtp3": [rawMtp3 hexString] } ]);
