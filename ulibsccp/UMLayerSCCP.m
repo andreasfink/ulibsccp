@@ -581,14 +581,14 @@
         header[2] = maxHopCount;
         header[3] = ((7 + 0) >> 0) & 0xFF;
         header[4] = ((7 + 0) >> 8) & 0xFF;
-        header[5] = ((6 + dstEncoded.length)>> 0) & 0xFF;
-        header[6] = ((6 + dstEncoded.length)>> 8) & 0xFF;
-        header[7] = ((5 + dstEncoded.length + srcEncoded.length) >> 0) & 0xFF;
-        header[8] = ((5 + dstEncoded.length + srcEncoded.length) >> 8) & 0xFF;
+        header[5] = ((5 + dstEncoded.length)>> 0) & 0xFF;
+        header[6] = ((5 + dstEncoded.length)>> 8) & 0xFF;
+        header[7] = ((3 + dstEncoded.length + srcEncoded.length) >> 0) & 0xFF;
+        header[8] = ((3 + dstEncoded.length + srcEncoded.length) >> 8) & 0xFF;
         if(xoptionsdata.length > 0)
         {
-            header[9]  = ((4 + dstEncoded.length + srcEncoded.length + data.length) >> 0) & 0xFF;
-            header[10] = ((4 + dstEncoded.length + srcEncoded.length + data.length) >> 8) & 0xFF;
+            header[9]  = ((1 + dstEncoded.length + srcEncoded.length + data.length) >> 0) & 0xFF;
+            header[10] = ((1 + dstEncoded.length + srcEncoded.length + data.length) >> 8) & 0xFF;
         }
         else
         {
