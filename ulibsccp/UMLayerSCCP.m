@@ -576,16 +576,16 @@
         header[0] = SCCP_LUDT;
         header[1] = (pclass & 0x0F) | ((handling & 0x0F) << 4);
         header[2] = maxHopCount;
-        header[3] = ((8 + 0) >> 0) & 0xFF;
-        header[4] = ((8 + 0) >> 8) & 0xFF;
-        header[5] = ((9 + dstEncoded.length)>> 0) & 0xFF;
-        header[6] = ((9 + dstEncoded.length)>> 8) & 0xFF;
-        header[7] = ((10 + dstEncoded.length + srcEncoded.length) >> 0) & 0xFF;
-        header[8] = ((10 + dstEncoded.length + srcEncoded.length) >> 8) & 0xFF;
+        header[3] = ((11-3 + 0) >> 0) & 0xFF;
+        header[4] = ((11-3 + 0) >> 8) & 0xFF;
+        header[5] = ((11-3 + dstEncoded.length)>> 0) & 0xFF;
+        header[6] = ((11-3 + dstEncoded.length)>> 8) & 0xFF;
+        header[7] = ((11-3 + dstEncoded.length + srcEncoded.length) >> 0) & 0xFF;
+        header[8] = ((11-3 + dstEncoded.length + srcEncoded.length) >> 8) & 0xFF;
         if(xoptionsdata.length > 0)
         {
-            header[9]  = ((11 + dstEncoded.length + srcEncoded.length + data.length) >> 0) & 0xFF;
-            header[10] = ((11 + dstEncoded.length + srcEncoded.length + data.length) >> 8) & 0xFF;
+            header[9]  = ((11-3 + dstEncoded.length + srcEncoded.length + data.length) >> 0) & 0xFF;
+            header[10] = ((11-3 + dstEncoded.length + srcEncoded.length + data.length) >> 8) & 0xFF;
         }
         else
         {
