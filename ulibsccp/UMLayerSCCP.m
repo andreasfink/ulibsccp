@@ -3616,14 +3616,18 @@
                     /* FIXME */
                     m_protocol_class = d[i] & 0x0F;
                     m_handling = (d[i++]>>4) & 0x0F;
-                    param_called_party_address   = d[i] + i+1;
-                    param_called_party_address  |= (d[i+1] + i+1) << 8;
+                    param_called_party_address   = d[i];
+                    param_called_party_address  |= (d[i+1]<<8);
+                    param_called_party_address += i+1;
                     i +=2;
-                    param_calling_party_address  = d[i] + i+1;
-                    param_calling_party_address |= (d[i+1] + i+1) << 8;
+                    param_calling_party_address  = d[i];
+                    param_calling_party_address |= (d[i+1]<<8);
+                    param_calling_party_address += i+1;
+
                     i +=2;
-                    param_data  = d[i] + i+1;
-                    param_data |= (d[i+1] + i+1) << 8;
+                    param_data   = d[i];
+                    param_data | = (d[i+1]<< 8);
+                    param_data + = i+1;
                     i +=2;
                     param_segment = -1;
                     break;
