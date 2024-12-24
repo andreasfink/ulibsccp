@@ -3597,7 +3597,8 @@
                     i++;
                     param_data = d[i] + i;
                     i++;
-                    param_segment = -1;
+                    param_segment   = d[i] + i;
+                    i++;
                     break;
 
                 case SCCP_XUDTS:
@@ -3623,30 +3624,36 @@
                     param_calling_party_address  = d[i];
                     param_calling_party_address |= (d[i+1]<<8);
                     param_calling_party_address += i+1;
-
                     i +=2;
                     param_data   = d[i];
                     param_data  |= (d[i+1]<< 8);
                     param_data  += i+1;
                     i +=2;
-                    param_segment = -1;
+                    param_segment   = d[i] + i;
+                    param_segment  |= (d[i+1]<< 8);
+                    param_segment  += i+1;
+                    i +=2;
                     break;
 
                 case SCCP_LUDTS:
                     m_return_cause = d[i++] & 0x0F;
                     m_hopcounter = d[i++] & 0x0F;
                     
-                    param_called_party_address   = d[i] + i;
-                    param_called_party_address  |= (d[i+1] + i) << 8;
+                    param_called_party_address   = d[i];
+                    param_called_party_address  |= (d[i+1]<<8);
+                    param_called_party_address += i+1;
                     i +=2;
-                    param_calling_party_address  = d[i] + i;
-                    param_calling_party_address |= (d[i+1] + i) << 8;
+                    param_calling_party_address  = d[i];
+                    param_calling_party_address |= (d[i+1]<<8);
+                    param_calling_party_address += i+1;
                     i +=2;
-                    param_data  = d[i] + i;
-                    param_data |= (d[i+1] + i) << 8;
+                    param_data   = d[i];
+                    param_data  |= (d[i+1]<< 8);
+                    param_data  += i+1;
                     i +=2;
-                    param_segment  = d[i] + i;
-                    param_segment |= (d[i+1] + i) << 8;
+                    param_segment   = d[i] + i;
+                    param_segment  |= (d[i+1]<< 8);
+                    param_segment  += i+1;
                     i +=2;
                     break;
                 default:
