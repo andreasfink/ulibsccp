@@ -3937,7 +3937,6 @@
         case UMSCCP_StatisticSection_LUDTS_TX:
             [_prometheusData.ludtsTxCounter  increaseBy:1];
             break;
-
         case UMSCCP_StatisticSection_UDT_TRANSIT:
             [_prometheusData.udtTransitCounter  increaseBy:1];
             break;
@@ -3956,7 +3955,9 @@
         case UMSCCP_StatisticSection_LUDTS_TRANSIT:
             [_prometheusData.ludtsTransitCounter  increaseBy:1];
             break;
-
+        case:
+            UMSCCP_StatisticSection_MAX
+            break;
     }
     
 }
