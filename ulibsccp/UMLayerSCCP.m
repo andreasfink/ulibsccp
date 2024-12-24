@@ -570,22 +570,25 @@
     
     NSMutableData *sccp_pdu = [[NSMutableData alloc]init];
     
+    /* The pointer value (in binary) gives the number of octets between the most significant octet of pointer
+     itself (included) and the first octet (not included) of the parameter associated with that pointer2 as
+     shown in the following diagram. Q.713 SCCP Formts & Codes section 2.3 */
     if(isLUDT)
     {
         uint8_t header[11];
         header[0] = SCCP_LUDT;
         header[1] = (pclass & 0x0F) | ((handling & 0x0F) << 4);
         header[2] = maxHopCount;
-        header[3] = ((4 + 0) >> 0) & 0xFF;
-        header[4] = ((4 + 0) >> 8) & 0xFF;
-        header[5] = ((6 + dstEncoded.length)>> 0) & 0xFF;
-        header[6] = ((6 + dstEncoded.length)>> 8) & 0xFF;
-        header[7] = ((8 + dstEncoded.length + srcEncoded.length) >> 0) & 0xFF;
-        header[8] = ((8 + dstEncoded.length + srcEncoded.length) >> 8) & 0xFF;
+        header[3] = ((5 + 0) >> 0) & 0xFF;
+        header[4] = ((5 + 0) >> 8) & 0xFF;
+        header[5] = ((5 + dstEncoded.length)>> 0) & 0xFF;
+        header[6] = ((5 + dstEncoded.length)>> 8) & 0xFF;
+        header[7] = ((5 + dstEncoded.length + srcEncoded.length) >> 0) & 0xFF;
+        header[8] = ((5 + dstEncoded.length + srcEncoded.length) >> 8) & 0xFF;
         if(xoptionsdata.length > 0)
         {
-            header[9]  = ((10 + dstEncoded.length + srcEncoded.length + data.length) >> 0) & 0xFF;
-            header[10] = ((10 + dstEncoded.length + srcEncoded.length + data.length) >> 8) & 0xFF;
+            header[9]  = ((5 + dstEncoded.length + srcEncoded.length + data.length) >> 0) & 0xFF;
+            header[10] = ((5 + dstEncoded.length + srcEncoded.length + data.length) >> 8) & 0xFF;
         }
         else
         {
