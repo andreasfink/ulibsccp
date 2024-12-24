@@ -579,16 +579,16 @@
         header[0] = SCCP_LUDT;
         header[1] = (pclass & 0x0F) | ((handling & 0x0F) << 4);
         header[2] = maxHopCount;
-        header[3] = ((4 + 0) >> 0) & 0xFF;
-        header[4] = ((4 + 0) >> 8) & 0xFF;
-        header[5] = ((6 + dstEncoded.length)>> 0) & 0xFF;
-        header[6] = ((6 + dstEncoded.length)>> 8) & 0xFF;
+        header[3] = ((8 + 0) >> 0) & 0xFF;
+        header[4] = ((8 + 0) >> 8) & 0xFF;
+        header[5] = ((8 + dstEncoded.length)>> 0) & 0xFF;
+        header[6] = ((8 + dstEncoded.length)>> 8) & 0xFF;
         header[7] = ((8 + dstEncoded.length + srcEncoded.length) >> 0) & 0xFF;
         header[8] = ((8 + dstEncoded.length + srcEncoded.length) >> 8) & 0xFF;
         if(xoptionsdata.length > 0)
         {
-            header[9]  = ((10 + dstEncoded.length + srcEncoded.length + data.length) >> 0) & 0xFF;
-            header[10] = ((10 + dstEncoded.length + srcEncoded.length + data.length) >> 8) & 0xFF;
+            header[9]  = ((8 + dstEncoded.length + srcEncoded.length + data.length) >> 0) & 0xFF;
+            header[10] = ((8 + dstEncoded.length + srcEncoded.length + data.length) >> 8) & 0xFF;
         }
         else
         {
