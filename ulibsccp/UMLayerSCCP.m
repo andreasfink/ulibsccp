@@ -3626,8 +3626,8 @@
 
                     i +=2;
                     param_data   = d[i];
-                    param_data | = (d[i+1]<< 8);
-                    param_data + = i+1;
+                    param_data  |= (d[i+1]<< 8);
+                    param_data  += i+1;
                     i +=2;
                     param_segment = -1;
                     break;
