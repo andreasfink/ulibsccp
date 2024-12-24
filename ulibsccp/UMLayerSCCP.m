@@ -3913,6 +3913,12 @@
         case UMSCCP_StatisticSection_XUDTS_RX:
             [_prometheusData.xudtsRxCounter  increaseBy:1];
             break;
+        case UMSCCP_StatisticSection_LUDT_RX:
+            [_prometheusData.ludtRxCounter  increaseBy:1];
+            break;
+        case UMSCCP_StatisticSection_LUDTS_RX:
+            [_prometheusData.ludtsRxCounter  increaseBy:1];
+            break;
         case UMSCCP_StatisticSection_UDT_TX:
             [_prometheusData.udtTxCounter  increaseBy:1];
             break;
@@ -3925,6 +3931,13 @@
         case UMSCCP_StatisticSection_XUDTS_TX:
             [_prometheusData.xudtsTxCounter  increaseBy:1];
             break;
+        case UMSCCP_StatisticSection_LUDT_TX:
+            [_prometheusData.ludtTxCounter  increaseBy:1];
+            break;
+        case UMSCCP_StatisticSection_LUDTS_TX:
+            [_prometheusData.ludtsTxCounter  increaseBy:1];
+            break;
+
         case UMSCCP_StatisticSection_UDT_TRANSIT:
             [_prometheusData.udtTransitCounter  increaseBy:1];
             break;
