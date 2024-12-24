@@ -587,8 +587,8 @@
         header[8] = ((4 + dstEncoded.length + srcEncoded.length) >> 8) & 0xFF;
         if(xoptionsdata.length > 0)
         {
-            header[9]  = ((1 + dstEncoded.length + srcEncoded.length + data.length) >> 0) & 0xFF;
-            header[10] = ((1 + dstEncoded.length + srcEncoded.length + data.length) >> 8) & 0xFF;
+            header[9]  = ((2 + dstEncoded.length + srcEncoded.length + data.length) >> 0) & 0xFF;
+            header[10] = ((2 + dstEncoded.length + srcEncoded.length + data.length) >> 8) & 0xFF;
         }
         else
         {
