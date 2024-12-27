@@ -751,7 +751,6 @@
     
     SccpNumberTranslation *cga_number_translation_out = NULL;
     SccpNumberTranslation *cda_number_translation_out = NULL;
-    
     if((*outgoingLinkset).length > 0)
     {
         UMMTP3InstanceRoute *route = [_mtp3 findRouteForDestination:dpc];
@@ -3597,7 +3596,14 @@
                     i++;
                     param_data = d[i] + i;
                     i++;
-                    param_segment   = d[i] + i;
+                    if(d[i]==0)
+                    {
+                        param_segment = -1;
+                    }
+                    else
+                    {
+                        param_segment   = d[i] + i;
+                    }
                     i++;
                     break;
 
@@ -3610,51 +3616,55 @@
                     i++;
                     param_data      = d[i] + i;
                     i++;
-                    param_segment   = d[i] + i;
+                    if(d[i]==0)
+                    {
+                        param_segment = -1;
+                    }
+                    else
+                    {
+                        param_segment   = d[i] + i;
+                    }
                     i++;
                     break;
                 case SCCP_LUDT:
-                    /* FIXME */
+                    /* FIXME. Somethings wrong here with segments */
                     m_protocol_class = d[i] & 0x0F;
                     m_handling = (d[i++]>>4) & 0x0F;
-                    param_called_party_address   = d[i];
-                    param_called_party_address  |= (d[i+1]<<8);
-                    param_called_party_address += i+1;
-                    i +=2;
-                    param_calling_party_address  = d[i];
-                    param_calling_party_address |= (d[i+1]<<8);
-                    param_calling_party_address += i+1;
-                    i +=2;
-                    param_data   = d[i];
-                    param_data  |= (d[i+1]<< 8);
-                    param_data  += i+1;
-                    i +=2;
-                    param_segment   = d[i] + i;
-                    param_segment  |= (d[i+1]<< 8);
-                    param_segment  += i+1;
-                    i +=2;
+                    param_called_party_address = d[i] + (d[i+1]<<8) + i + 1;
+                    i+=2;
+                    param_calling_party_address = d[i] + (d[i+1]<<8) + i + 1;
+                    i+=2;
+                    param_data = d[i] + (d[i+1]<<8) + i + 1;
+                    i+=2;
+                    if((d[i]==0) &&(d[i+1]==0))
+                    {
+                        param_segment = -1;
+                    }
+                    else
+                    {
+                        param_segment = d[i] + (d[i+1]<<8) + i + 1;
+                    }
+                    i+=2;
                     break;
 
                 case SCCP_LUDTS:
                     m_return_cause = d[i++] & 0x0F;
                     m_hopcounter = d[i++] & 0x0F;
-                    
-                    param_called_party_address   = d[i];
-                    param_called_party_address  |= (d[i+1]<<8);
-                    param_called_party_address += i+1;
-                    i +=2;
-                    param_calling_party_address  = d[i];
-                    param_calling_party_address |= (d[i+1]<<8);
-                    param_calling_party_address += i+1;
-                    i +=2;
-                    param_data   = d[i];
-                    param_data  |= (d[i+1]<< 8);
-                    param_data  += i+1;
-                    i +=2;
-                    param_segment   = d[i] + i;
-                    param_segment  |= (d[i+1]<< 8);
-                    param_segment  += i+1;
-                    i +=2;
+                    param_called_party_address = d[i] + (d[i+1]<<8) + i + 1;
+                    i+=2;
+                    param_calling_party_address = d[i] + (d[i+1]<<8) + i + 1;
+                    i+=2;
+                    param_data = d[i] + (d[i+1]<<8) + i + 1;
+                    i+=2;
+                    if((d[i]==0) &&(d[i+1]==0))
+                    {
+                        param_segment = -1;
+                    }
+                    else
+                    {
+                        param_segment = d[i] + (d[i+1]<<8) + i + 1;
+                    }
+                    i+=2;
                     break;
                 default:
                     @throw([NSException exceptionWithName:@"SCCP_UNKNOWN_PACKET_TYPE" reason:NULL userInfo:NULL] );
@@ -3781,7 +3791,6 @@
         }
     }
     return dict;
-
 }
 
 - (NSString *)status
