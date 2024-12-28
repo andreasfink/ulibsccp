@@ -437,8 +437,8 @@ sls:(int)sls;
 -(UMMTP3_Error) sendLUDTS:(NSData *)data
                   calling:(SccpAddress *)src
                    called:(SccpAddress *)dst
-                    class:(SCCP_ServiceClass)pclass
-                 hopCount:(int)hopCount
+                    class:(SCCP_ServiceClass)serviceClass
+                 hopCount:(int)hopCounter
               returnCause:(SCCP_ReturnCause)returnCause
                       opc:(UMMTP3PointCode *)opc
                       dpc:(UMMTP3PointCode *)dpc
@@ -447,6 +447,7 @@ sls:(int)sls;
                  provider:(UMLayerMTP3 *)provider
           routedToLinkset:(NSString **)outgoingLinkset
                       sls:(int)sls;
+
 
 
 - (UMSynchronizedSortedDictionary *) routeTestForMSISDN:(NSString *)msisdn

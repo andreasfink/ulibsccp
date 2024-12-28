@@ -11,7 +11,7 @@
 
 @implementation UMSCCP_PrometheusData
 
-
+ 
 - (UMSCCP_PrometheusData *)initWithPrometheus:(UMPrometheus *)prometheus
 {
     self = [super init];
@@ -98,20 +98,40 @@
                                                             subname1:NULL
                                                            subvalue1:NULL
                                                                 type:UMPrometheusMetricType_counter];
-        _xudtsRxCounter.help = @"count of received UDT packets";
+        _xudtsRxCounter.help = @"count of received XUDT packets";
 
         _xudtsTxCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp_tx_xudts"
                                                             subname1:NULL
                                                            subvalue1:NULL
                                                                 type:UMPrometheusMetricType_counter];
-        _xudtsTxCounter.help = @"count of sent UDT packets";
+        _xudtsTxCounter.help = @"count of sent XUDT packets";
         
         _xudtsTransitCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp_transit_xudts"
                                                             subname1:NULL
                                                            subvalue1:NULL
                                                                 type:UMPrometheusMetricType_counter];
-        _xudtsTransitCounter.help = @"count of transited UDT packets";
+        _xudtsTransitCounter.help = @"count of transited XUDT packets";
 
+
+        /* LUDTS */
+
+        _ludtsRxCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp_rx_ludts"
+                                                            subname1:NULL
+                                                           subvalue1:NULL
+                                                                type:UMPrometheusMetricType_counter];
+        _ludtsRxCounter.help = @"count of received LUDT packets";
+
+        _ludtsTxCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp_tx_ludts"
+                                                            subname1:NULL
+                                                           subvalue1:NULL
+                                                                type:UMPrometheusMetricType_counter];
+        _ludtsTxCounter.help = @"count of sent LUDT packets";
+        
+        _ludtsTransitCounter = [[UMPrometheusMetric alloc]initWithMetricName:@"sccp_transit_ludts"
+                                                            subname1:NULL
+                                                           subvalue1:NULL
+                                                                type:UMPrometheusMetricType_counter];
+        _ludtsTransitCounter.help = @"count of transited LUDT packets";
 
         _throughput = [[UMPrometheusThroughputMetric alloc]initWithResolutionInSeconds:0.1
                                                                         reportDuration:10.0

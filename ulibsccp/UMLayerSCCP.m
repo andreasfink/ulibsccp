@@ -570,22 +570,25 @@
     
     NSMutableData *sccp_pdu = [[NSMutableData alloc]init];
     
+    /* The pointer value (in binary) gives the number of octets between the most significant octet of pointer
+     itself (included) and the first octet (not included) of the parameter associated with that pointer2 as
+     shown in the following diagram. Q.713 SCCP Formts & Codes section 2.3 */
     if(isLUDT)
     {
         uint8_t header[11];
         header[0] = SCCP_LUDT;
         header[1] = (pclass & 0x0F) | ((handling & 0x0F) << 4);
         header[2] = maxHopCount;
-        header[3] = ((8 + 0) >> 0) & 0xFF;
-        header[4] = ((8 + 0) >> 8) & 0xFF;
-        header[5] = ((8 + dstEncoded.length)>> 0) & 0xFF;
-        header[6] = ((8 + dstEncoded.length)>> 8) & 0xFF;
-        header[7] = ((8 + dstEncoded.length + srcEncoded.length) >> 0) & 0xFF;
-        header[8] = ((8 + dstEncoded.length + srcEncoded.length) >> 8) & 0xFF;
+        header[3] = ((7 + 0) >> 0) & 0xFF;
+        header[4] = ((7 + 0) >> 8) & 0xFF;
+        header[5] = ((6 + dstEncoded.length)>> 0) & 0xFF;
+        header[6] = ((6 + dstEncoded.length)>> 8) & 0xFF;
+        header[7] = ((4 + dstEncoded.length + srcEncoded.length) >> 0) & 0xFF;
+        header[8] = ((4 + dstEncoded.length + srcEncoded.length) >> 8) & 0xFF;
         if(xoptionsdata.length > 0)
         {
-            header[9]  = ((8 + dstEncoded.length + srcEncoded.length + data.length) >> 0) & 0xFF;
-            header[10] = ((8 + dstEncoded.length + srcEncoded.length + data.length) >> 8) & 0xFF;
+            header[9]  = ((4 + dstEncoded.length + srcEncoded.length + data.length) >> 0) & 0xFF;
+            header[10] = ((4 + dstEncoded.length + srcEncoded.length + data.length) >> 8) & 0xFF;
         }
         else
         {
@@ -748,7 +751,6 @@
     
     SccpNumberTranslation *cga_number_translation_out = NULL;
     SccpNumberTranslation *cda_number_translation_out = NULL;
-    
     if((*outgoingLinkset).length > 0)
     {
         UMMTP3InstanceRoute *route = [_mtp3 findRouteForDestination:dpc];
@@ -3600,7 +3602,15 @@
                     i++;
                     param_data = d[i] + i;
                     i++;
-                    param_segment = -1;
+                    if(d[i]==0)
+                    {
+                        param_segment = -1;
+                    }
+                    else
+                    {
+                        param_segment   = d[i] + i;
+                    }
+                    i++;
                     break;
 
                 case SCCP_XUDTS:
@@ -3612,40 +3622,55 @@
                     i++;
                     param_data      = d[i] + i;
                     i++;
-                    param_segment   = d[i] + i;
+                    if(d[i]==0)
+                    {
+                        param_segment = -1;
+                    }
+                    else
+                    {
+                        param_segment   = d[i] + i;
+                    }
                     i++;
                     break;
                 case SCCP_LUDT:
+                    /* FIXME. Somethings wrong here with segments */
                     m_protocol_class = d[i] & 0x0F;
                     m_handling = (d[i++]>>4) & 0x0F;
-                    param_called_party_address   = d[i] + i;
-                    param_called_party_address  |= (d[i+1] + i) << 8;
-                    i +=2;
-                    param_calling_party_address  = d[i] + i;
-                    param_calling_party_address |= (d[i+1] + i) << 8;
-                    i +=2;
-                    param_data  = d[i] + i;
-                    param_data |= (d[i+1] + i) << 8;
-                    i +=2;
-                    param_segment = -1;
+                    param_called_party_address = d[i] + (d[i+1]<<8) + i + 1;
+                    i+=2;
+                    param_calling_party_address = d[i] + (d[i+1]<<8) + i + 1;
+                    i+=2;
+                    param_data = d[i] + (d[i+1]<<8) + i + 1;
+                    i+=2;
+                    if((d[i]==0) &&(d[i+1]==0))
+                    {
+                        param_segment = -1;
+                    }
+                    else
+                    {
+                        param_segment = d[i] + (d[i+1]<<8) + i + 1;
+                    }
+                    i+=2;
                     break;
 
                 case SCCP_LUDTS:
                     m_return_cause = d[i++] & 0x0F;
                     m_hopcounter = d[i++] & 0x0F;
-                    
-                    param_called_party_address   = d[i] + i;
-                    param_called_party_address  |= (d[i+1] + i) << 8;
-                    i +=2;
-                    param_calling_party_address  = d[i] + i;
-                    param_calling_party_address |= (d[i+1] + i) << 8;
-                    i +=2;
-                    param_data  = d[i] + i;
-                    param_data |= (d[i+1] + i) << 8;
-                    i +=2;
-                    param_segment  = d[i] + i;
-                    param_segment |= (d[i+1] + i) << 8;
-                    i +=2;
+                    param_called_party_address = d[i] + (d[i+1]<<8) + i + 1;
+                    i+=2;
+                    param_calling_party_address = d[i] + (d[i+1]<<8) + i + 1;
+                    i+=2;
+                    param_data = d[i] + (d[i+1]<<8) + i + 1;
+                    i+=2;
+                    if((d[i]==0) &&(d[i+1]==0))
+                    {
+                        param_segment = -1;
+                    }
+                    else
+                    {
+                        param_segment = d[i] + (d[i+1]<<8) + i + 1;
+                    }
+                    i+=2;
                     break;
                 default:
                     @throw([NSException exceptionWithName:@"SCCP_UNKNOWN_PACKET_TYPE" reason:NULL userInfo:NULL] );
@@ -3772,7 +3797,6 @@
         }
     }
     return dict;
-
 }
 
 - (NSString *)status
@@ -3919,6 +3943,12 @@
         case UMSCCP_StatisticSection_XUDTS_RX:
             [_prometheusData.xudtsRxCounter  increaseBy:1];
             break;
+        case UMSCCP_StatisticSection_LUDT_RX:
+            [_prometheusData.ludtRxCounter  increaseBy:1];
+            break;
+        case UMSCCP_StatisticSection_LUDTS_RX:
+            [_prometheusData.ludtsRxCounter  increaseBy:1];
+            break;
         case UMSCCP_StatisticSection_UDT_TX:
             [_prometheusData.udtTxCounter  increaseBy:1];
             break;
@@ -3930,6 +3960,12 @@
             break;
         case UMSCCP_StatisticSection_XUDTS_TX:
             [_prometheusData.xudtsTxCounter  increaseBy:1];
+            break;
+        case UMSCCP_StatisticSection_LUDT_TX:
+            [_prometheusData.ludtTxCounter  increaseBy:1];
+            break;
+        case UMSCCP_StatisticSection_LUDTS_TX:
+            [_prometheusData.ludtsTxCounter  increaseBy:1];
             break;
         case UMSCCP_StatisticSection_UDT_TRANSIT:
             [_prometheusData.udtTransitCounter  increaseBy:1];
@@ -3949,7 +3985,8 @@
         case UMSCCP_StatisticSection_LUDTS_TRANSIT:
             [_prometheusData.ludtsTransitCounter  increaseBy:1];
             break;
-
+        default:
+            break;
     }
     
 }

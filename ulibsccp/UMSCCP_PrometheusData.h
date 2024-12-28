@@ -67,13 +67,14 @@
 @property(readwrite,strong) UMPrometheusMetric            *xudtsTxCounter;
 @property(readwrite,strong) UMPrometheusMetric            *xudtsTransitCounter;
 
-
 @property(readwrite,strong) UMPrometheusMetric            *ludtRxCounter;
 @property(readwrite,strong) UMPrometheusMetric            *ludtTxCounter;
 @property(readwrite,strong) UMPrometheusMetric            *ludtTransitCounter;
+
 @property(readwrite,strong) UMPrometheusMetric            *ludtsRxCounter;
 @property(readwrite,strong) UMPrometheusMetric            *ludtsTxCounter;
 @property(readwrite,strong) UMPrometheusMetric            *ludtsTransitCounter;
+
 @property(readwrite,strong) UMPrometheusThroughputMetric  *throughput;
 
 

@@ -240,7 +240,14 @@
                     i++;
                     param_data = d[i] + i;
                     i++;
-                    param_optional = d[i] + i;
+                    if(d[i]==0)
+                    {
+                        param_optional = -1;
+                    }
+                    else
+                    {
+                        param_optional = d[i] + i;
+                    }
                     i++;
                     break;
 
@@ -263,7 +270,14 @@
                     i++;
                     param_data      = d[i] + i;
                     i++;
-                    param_optional   = d[i] + i;
+                    if(d[i]==0)
+                    {
+                        param_optional = -1;
+                    }
+                    else
+                    {
+                        param_optional = d[i] + i;
+                    }
                     i++;
                     break;
                     
@@ -288,13 +302,20 @@
                     param_hop_counter=d[i];
                     _packet.incomingMaxHopCount = param_hop_counter;
                     i++;
-                    param_called_party_address = d[i] + (d[i+1]<<8) + i;
+                    param_called_party_address = d[i] + (d[i+1]<<8) + i + 1;
                     i +=2;
-                    param_calling_party_address = d[i] + (d[i+1]<<8) + i;
+                    param_calling_party_address = d[i] + (d[i+1]<<8) + i + 1 ;
                     i +=2;
-                    param_data =  d[i] + (d[i+1]<<8) + i;
+                    param_data =  d[i] + (d[i+1]<<8) + i + 1 ;
                     i +=2;
-                    param_optional = d[i] + (d[i+1]<<8) + i;
+                    if((d[i] != 0x00) && (d[i+1] != 0x00))
+                    {
+                        param_optional = d[i] + (d[i+1]<<8) + i + 1;
+                    }
+                    else
+                    {
+                        param_optional = -1;
+                    }
                     i +=2;
                     break;
 
@@ -311,13 +332,20 @@
                     _m_hopcounter = d[i++] & 0x0F;
                     _decodedJson[@"sccp-hop-counter"]=@(_m_hopcounter);
                     _packet.incomingMaxHopCount = _m_return_cause;
-                    param_called_party_address = d[i] + (d[i+1]<<8) + i;
+                    param_called_party_address = d[i] + (d[i+1]<<8) + i + 1;
                     i +=2;
-                    param_calling_party_address = d[i] + (d[i+1]<<8) + i;
+                    param_calling_party_address = d[i] + (d[i+1]<<8) + i + 1;
                     i +=2;
-                    param_data =  d[i] + (d[i+1]<<8) + i;
+                    param_data =  d[i] + (d[i+1]<<8) + i + 1;
                     i +=2;
-                    param_optional = d[i] + (d[i+1]<<8) + i;
+                    if((d[i] != 0x00) && (d[i+1] != 0x00))
+                    {
+                        param_optional = d[i] + (d[i+1]<<8) + i + 1;
+                    }
+                    else
+                    {
+                        param_optional = -1;
+                    }
                     i +=2;
                     break;
                     
@@ -713,12 +741,16 @@
                                               calling:_packet.incomingCalledPartyAddress
                                                called:_packet.incomingCallingPartyAddress
                                                 class:_packet.incomingServiceClass
+                                             hopCount:0x0F
                                           returnCause:_packet.outgoingReturnCause
-                                                  opc:_sccpLayer.mtp3.opc
+                                                  opc:_sccpLayer.mtp3.opc /* errors are always sent from this instance */
                                                   dpc:_packet.incomingOpc
+                                          optionsData:_packet.incomingOptionalData
                                               options:@{}
                                              provider:_sccpLayer.mtp3
+                                      routedToLinkset:&outgoingLinkset
                                                   sls:_packet.sls];
+                                _packet.outgoingLinksetName = outgoingLinkset;
                             }
                             else
                             {
