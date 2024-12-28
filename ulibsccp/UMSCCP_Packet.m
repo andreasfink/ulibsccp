@@ -95,17 +95,17 @@ typedef enum UMTCAP_Command
     switch(_incomingServiceType)
     {
         case SCCP_UDT:
-            return @"udt";
+            return @"UDT";
         case SCCP_UDTS:
-            return @"udts";
+            return @"UDTS";
         case SCCP_XUDT:
-            return @"xudt";
+            return @"XUDT";
         case SCCP_XUDTS:
-            return @"xudts";
+            return @"XUDTS";
         case SCCP_LUDT:
-            return @"ludt";
+            return @"LUDT";
         case SCCP_LUDTS:
-            return @"ludts";
+            return @"LUDTS";
         default:
             return [NSString stringWithFormat:@"%d",_incomingServiceType];
     }

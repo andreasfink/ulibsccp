@@ -1749,8 +1749,7 @@
     BOOL processRouting = NO;
     BOOL processSingleDelivery = NO;
     BOOL processSegmentedDelivery = NO;
-    BOOL isLUDT = (packet.outgoingPacketType==SCCP_LUDT);
-    BOOL isLUDTS = (packet.outgoingPacketType==SCCP_LUDTS);
+    BOOL isLUDT = (packet.incomingServiceType==SCCP_LUDT);
     NSMutableData *combined = NULL;
     UMSCCP_ReceivedSegment *firstSegment = NULL;
     if(packet.incomingSegment)
@@ -1773,6 +1772,7 @@
         s.provider = _mtp3;
         s.sls = packet.sls;
         s.segment = packet.incomingSegment;
+        s.reference = packet.incomingSegment.reference;
         
         if(s.segment.first)
         {
@@ -1861,16 +1861,34 @@
                 }
                 else
                 {
-                    [self generateXUDTS:firstSegment.combinedPacket.incomingSccpData
-                                      calling:firstSegment.combinedPacket.incomingCalledPartyAddress
-                                       called:firstSegment.combinedPacket.incomingCallingPartyAddress
-                                        class:firstSegment.combinedPacket.incomingServiceClass
-                                  returnCause:firstSegment.combinedPacket.outgoingReturnCause
-                                          opc:_mtp3.opc /* errors are always sent from this instance */
-                                          dpc:firstSegment.combinedPacket.incomingOpc
-                                      options:@{}
-                                     provider:_mtp3
-                                          sls:firstSegment.combinedPacket.sls];
+                    if(isLUDT)
+                    {
+                        [self generateLUDTS:firstSegment.combinedPacket.incomingSccpData
+                                          calling:firstSegment.combinedPacket.incomingCalledPartyAddress
+                                           called:firstSegment.combinedPacket.incomingCallingPartyAddress
+                                            class:firstSegment.combinedPacket.incomingServiceClass
+                                      returnCause:firstSegment.combinedPacket.outgoingReturnCause
+                                              opc:_mtp3.opc /* errors are always sent from this instance */
+                                              dpc:firstSegment.combinedPacket.incomingOpc
+                                          options:@{}
+                                         provider:_mtp3
+                                              sls:firstSegment.combinedPacket.sls];
+
+                    }
+                    else
+                    {
+                        [self generateXUDTS:firstSegment.combinedPacket.incomingSccpData
+                                          calling:firstSegment.combinedPacket.incomingCalledPartyAddress
+                                           called:firstSegment.combinedPacket.incomingCallingPartyAddress
+                                            class:firstSegment.combinedPacket.incomingServiceClass
+                                      returnCause:firstSegment.combinedPacket.outgoingReturnCause
+                                              opc:_mtp3.opc /* errors are always sent from this instance */
+                                              dpc:firstSegment.combinedPacket.incomingOpc
+                                          options:@{}
+                                         provider:_mtp3
+                                              sls:firstSegment.combinedPacket.sls];
+
+                    }
                 }
                 return NO;
             }
