@@ -254,7 +254,7 @@ static int segmentReferenceId;
                         maxPdu = [_sccpLayer maxPayloadSizeForServiceType:SCCP_XUDT
                                                        callingAddressSize:cas
                                                         calledAddressSize:cds
-                                                            usingSegments:YES
+                                                            usingSegments:useSegments
                                                                  provider:_sccpLayer.mtp3];
                         if((segmentSize !=0) && (segmentSize<maxPdu))
                         {

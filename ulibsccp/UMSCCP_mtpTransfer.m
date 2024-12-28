@@ -707,7 +707,6 @@
                             }
                             break;
                         case SCCP_LUDTS:
-    #if 0       /* sendLUDTS is not implemented yet */
                             if(_sccpLayer.routeErrorsBackToSource)
                             {
                                 [_sccpLayer sendLUDTS:_packet.incomingSccpData
@@ -722,7 +721,6 @@
                                                   sls:_packet.sls];
                             }
                             else
-    #endif
                             {
                                 [_sccpLayer generateLUDTS:_packet.incomingSccpData
                                                   calling:_packet.incomingCalledPartyAddress

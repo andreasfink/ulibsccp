@@ -1747,6 +1747,8 @@
     BOOL processRouting = NO;
     BOOL processSingleDelivery = NO;
     BOOL processSegmentedDelivery = NO;
+    BOOL isLUDT = (packet.outgoingPacketType==SCCP_LUDT);
+    BOOL isLUDTS = (packet.outgoingPacketType==SCCP_LUDTS);
     NSMutableData *combined = NULL;
     UMSCCP_ReceivedSegment *firstSegment = NULL;
     if(packet.incomingSegment)
@@ -1839,7 +1841,7 @@
                 NSString *outgoingLinkset;
                 if(_routeErrorsBackToSource)
                 {
-                    [self sendXUDTS:firstSegment.combinedPacket.incomingSccpData
+                    [self sendLXUDTS:firstSegment.combinedPacket.incomingSccpData
                             calling:firstSegment.combinedPacket.incomingCalledPartyAddress
                              called:firstSegment.combinedPacket.incomingCallingPartyAddress
                               class:firstSegment.combinedPacket.incomingServiceClass
@@ -1851,7 +1853,9 @@
                             options:@{}
                            provider:_mtp3
                     routedToLinkset:&outgoingLinkset
-                                sls:firstSegment.combinedPacket.sls];
+                                sls:firstSegment.combinedPacket.sls
+                             isLUDTS:isLUDT];
+                    
                 }
                 else
                 {
@@ -2872,6 +2876,8 @@
     return result;
 }
 
+
+
 - (UMMTP3_Error) generateXUDTS:(NSData *)data
                       calling:(SccpAddress *)src
                        called:(SccpAddress *)dst
@@ -3001,11 +3007,11 @@
     {
         if(useSeg)
         {
-            return (maxSccpSize - 21 -cas -cds);
+            return (maxSccpSize - 21 -cas - cds);
         }
         else
         {
-            return (maxSccpSize - 14 -cas -cds);
+            return (maxSccpSize - 14 -cas - cds);
         }
     }
     /* FIXME: other PDU types have other maximums */
