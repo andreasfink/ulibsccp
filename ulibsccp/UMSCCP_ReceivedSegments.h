@@ -25,19 +25,18 @@
     NSDate                  *_created;
     SccpAddress             *_src;
     SccpAddress             *_dst;
-    int                     _reference;
+    unsigned int            _reference;
     UMSCCP_ReceivedSegment  *_rxSegments[MAX_SEGMENTS];
     int                     _max;
     int                     _current;
     NSDate                  *_firstPacket;
     UMMutex                 *_segmentsLock;
-    NSString                *_key;
 }
 
 @property(readwrite,strong) NSDate      *create;
 @property(readwrite,strong) SccpAddress *src;
 @property(readwrite,strong) SccpAddress *dst;
-@property(readwrite,assign) int         reference;
+@property(readwrite,assign) unsigned int reference;
 @property(readwrite,assign) int         max;
 @property(readwrite,strong) NSDate      *firstPacket;
 

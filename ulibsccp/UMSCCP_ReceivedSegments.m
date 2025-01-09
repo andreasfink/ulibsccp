@@ -12,7 +12,7 @@
 #import "UMSCCP_ReceivedSegments.h"
 #import "UMSCCP_ReceivedSegment.h"
 
-//#define SEGMENTATION_DEBUG  1
+#define SEGMENTATION_DEBUG  1
 
 @implementation UMSCCP_ReceivedSegments
 
@@ -24,14 +24,13 @@
         _created = [NSDate date];
         _max = -1;
         _segmentsLock = [[UMMutex alloc]initWithName:@"received-segments"];
-        _key = NULL;
     }
     return self;
 }
 
 - (NSString *)key
 {
-    return [NSString stringWithFormat:@"%@/%@/%06X", _src.stringValueE164, _dst.stringValueE164,_reference];
+    return [NSString stringWithFormat:@"%@/%@/%u", _src.stringValueE164, _dst.stringValueE164,_reference];
 }
 
 - (NSData *)reassembledData
