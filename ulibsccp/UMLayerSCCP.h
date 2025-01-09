@@ -110,6 +110,7 @@ typedef enum UMSccpScreening_result
     UMSCCP_PrometheusData                    *_prometheusData;
     id<sccp_tcapDecoder>                     _tcapDecodeDelegate; /* a delegate which decodes opcode and appcontext for us */
     UMSCCP_PendingSegmentsStorage            *_pendingSegmentsStorage;
+    BOOL                                     _routingDebug;
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;
@@ -121,6 +122,7 @@ typedef enum UMSccpScreening_result
 @property(readwrite,assign) int xudts_max_hop_count;
 @property(readwrite,assign) BOOL stpMode;
 @property(readwrite,assign) BOOL statisticsReady;
+@property(readwrite,assign) BOOL routingDebug;
 @property(readwrite,strong) UMMTP3PointCode *next_pc;
 
 @property(readwrite,strong,atomic)  id<UMSCCP_FilterDelegateProtocol> filterDelegate;
