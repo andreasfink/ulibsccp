@@ -50,111 +50,90 @@
     return d;
 }
 
-/*
-- (void)addSegment:(UMSCCP_Segment *)s
-{
-    ummutex_lock(_lock);
-    int index = MAX_SEGMENTS - s.remainingSegment -1;
-    if(index>=0)
-    {
-        _segments[index] = s;
-    }
-    ummutex_unlock(_lock);
-}
-*/
-
 - (BOOL)processReceivedSegment:(UMSCCP_ReceivedSegment *)s
 {
-    ummutex_lock(_segmentsLock);
-    int current = 0; /* value from 0...15 */
-
-#ifdef SEGMENTATION_DEBUG
-    if(s.segment == NULL)
+    if(s==NULL)
     {
-        NSLog(@"s.segment = NULL");
+        return YES;
     }
-#endif
-
-    if(s.segment.first == YES)
+    ummutex_lock(_segmentsLock);
+    BOOL failure = NO;
+    int current = 0; /* value from 0...15 */
+    if((s.segment.first == NO) && (_rxSegments[0]==NULL))
     {
-#ifdef SEGMENTATION_DEBUG
-        NSLog(@"first packet = YES");
-#endif
-        _firstPacket = [NSDate date];
-        /* max is 1 ... 16 */
-        s.max = s.segment.remainingSegment + 1;
-        _max = s.max;
-        _src = s.src;
-        _dst = s.dst;
-        _reference = s.reference;
-        current = 0;
-        _rxSegments[current] = s;
-        
-        NSLog(@"s.segment.remainingSegment = %d",s.segment.remainingSegment);
-        NSLog(@"current = %d,s.max=%d, _max=%d",current,s.max,_max);
-
+        /* we receive a secondary segment before receiving the first */
+        /* We put it into a temporary waiting queue */
+        if(_preFirstSegments==NULL)
+        {
+            _preFirstSegments = [[NSMutableArray alloc]init];
+            [_preFirstSegments addObject:s];
+        }
     }
     else
     {
-#ifdef SEGMENTATION_DEBUG
-        NSLog(@"first packet = NO");
-#endif
-        s.max = _max;
-        current = _max - s.segment.remainingSegment - 1;
-
-#ifdef SEGMENTATION_DEBUG
-        NSLog(@"s.segment.remainingSegment = %d",s.segment.remainingSegment);
-        NSLog(@"current = %d,s.max=%d, _max=%d",current,s.max,_max);
-#endif
-        if((current < 0) || (current >15))
+        if(s.segment.first == YES)
         {
-#ifdef SEGMENTATION_DEBUG
-            NSLog(@"current is out of bounds");
-#endif
-            /* somethings odd here */
-            ummutex_unlock(_segmentsLock);
-            return YES;
+            _firstPacket = [NSDate date];
+            /* max is 1 ... 16 */
+            s.max = s.segment.remainingSegment + 1;
+            _max = s.max;
+            _src = s.src;
+            _dst = s.dst;
+            _reference = s.reference;
+            current = 0;
+            _rxSegments[current] = s;
+            if(_preFirstSegments)
+            {
+                ummutex_unlock(_segmentsLock);
+                for( UMSCCP_ReceivedSegment *s1 in _preFirstSegments)
+                {
+                    [self processReceivedSegment:s1];
+                }
+                ummutex_lock(_segmentsLock);
+                _preFirstSegments = NULL;
+            }
+        }
+        
+        else
+        {
+            s.max = _max;
+            current = _max - s.segment.remainingSegment - 1;
+            if((current < 0) || (current >15))
+            {
+                /* somethings out of bounds */
+                failure = YES;
+            }
+            else
+            {
+                _rxSegments[current] = s;
+            }
         }
     }
-    _rxSegments[current] = s;
-//    _segments[current] = s.segment;
     ummutex_unlock(_segmentsLock);
-    return NO;
+    return failure;
 }
 
 - (BOOL) isComplete
 {
-    
-#ifdef SEGMENTATION_DEBUG
-    NSLog(@"isComplete is called. max = %d",_max);
-    for(int i=0;i<16;i++)
+    BOOL returnValue = YES;
+    ummutex_lock(_segmentsLock);
+    if(_max > 0)
     {
-        NSLog(@" _rxSegments[%d] = %@",i,_rxSegments[i]);
-    }
-#endif
-    
-    if(_max < 0)
-    {
-#ifdef SEGMENTATION_DEBUG
-        NSLog(@" returning NO (max<0)");
-#endif
-        return NO;
-    }
-    for(int i=0;i<_max;i++)
-    {
-
-        if(_rxSegments[i] == NULL)
+        for(int i=0;i<_max;i++)
         {
-#ifdef SEGMENTATION_DEBUG
-            NSLog(@" returning NO");
-#endif
-            return NO;
+            if(_rxSegments[i] == NULL)
+            {
+                returnValue = NO;
+                break;
+            }
         }
     }
-#ifdef SEGMENTATION_DEBUG
-    NSLog(@" returning YES");
-#endif
-    return YES;
+    else
+    {
+        returnValue = NO;
+    }
+    ummutex_unlock(_segmentsLock);
+    return returnValue;
 }
 
 

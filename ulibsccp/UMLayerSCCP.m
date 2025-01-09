@@ -394,14 +394,11 @@
     {
         [optionsData appendData:xoptionsdata];
     }
-    
     /* The standard says
         – The SCCP shall place each segment of user data into separate XUDT messages, each with the same Called Party Address and identical MTP routing information (DPC, SLS).
-       
         which means we need to collect all segments first, do a routing
         decision and then send all the segments down the same pipe with the same SLC.
      */
-    
     return [self sendXUDT:segment.data
                   calling:src
                    called:dst
@@ -1784,6 +1781,7 @@
         }
 
         segs = [ _pendingSegmentsStorage processReceivedSegment:s];
+        /* returns an ordered array of segments */
         if(segs)
         {
             if(self.logLevel <=UMLOG_DEBUG)
@@ -1794,33 +1792,16 @@
             processRouting = YES;
             processSingleDelivery = NO;
             processSegmentedDelivery = YES;
-            /* lets reassemble */
-            
-            NSData *data[16];
-            int max = 0;
 
-            /* find the number of segments. The first segment has a number of remaining semgnets so we know the max is + 1 */
-            for(UMSCCP_ReceivedSegment *s in segs)
-            {
-                if(s.segment.first)
-                {
-                    firstSegment = s;
-                    max = s.segment.remainingSegment + 1 ;
-                }
-            }
-            /* assign the individual segments to the array */
-            for(UMSCCP_ReceivedSegment *s in segs)
-            {
-                int index = max - s.segment.remainingSegment - 1;
-                data[index] = s.segment.data;
-            }
+            /* the segments are already in order here. */
             /* combine the segments */
+            UMSCCP_ReceivedSegment *firstSegment = NULL;
             combined = [[NSMutableData alloc]init];
-            for(int i=0;i<16;i++)
+            for(UMSCCP_ReceivedSegment *s in segs)
             {
-                if(data[i])
+                if(s.segment.data)
                 {
-                    [combined appendData:data[i]];
+                    [combined appendData:s.segment.data];
                 }
             }
             /* at this point "combined" should have the reassembled PDU */
@@ -1829,7 +1810,6 @@
             processScreening = YES;
             processRouting = YES;
             processSegmentedDelivery = YES;
-            
             /* filtering of combined packets */
             UMSCCP_FilterResult r =  UMSCCP_FILTER_RESULT_UNMODIFIED;
             r = [_filterDelegate filterInbound:firstSegment.combinedPacket];

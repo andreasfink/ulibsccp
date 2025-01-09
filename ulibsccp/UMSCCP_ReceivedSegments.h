@@ -31,6 +31,7 @@
     int                     _current;
     NSDate                  *_firstPacket;
     UMMutex                 *_segmentsLock;
+    NSMutableArray          *_preFirstSegments;
 }
 
 @property(readwrite,strong) NSDate      *create;
