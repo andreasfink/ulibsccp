@@ -17,14 +17,14 @@
     BOOL                _first;
     BOOL                _class1;
     int                 _remainingSegment;
-    long                _reference;
+    unsigned int        _reference;
     NSData              *_data;
 }
 //@property(readwrite,assign)    int segmentIndex;
 @property(readwrite,assign)    BOOL first;
 @property(readwrite,assign)    BOOL class1;
 @property(readwrite,assign)    int remainingSegment;
-@property(readwrite,assign)    long reference;
+@property(readwrite,assign)    unsigned int reference;
 @property(readwrite,strong)    NSData *data;
 
 - (NSData *)segmentationHeader;
