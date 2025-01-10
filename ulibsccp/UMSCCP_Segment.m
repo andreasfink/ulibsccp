@@ -1,5 +1,5 @@
 //
-//  UMSCCP_SegmentationHeader.m
+//  UMSCCP_Segment.m
 //  ulibsccp
 //
 //  Created by Andreas Fink on 30.04.16.

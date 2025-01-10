@@ -135,6 +135,12 @@
         _options[@"sccp-pdu"] = [_data hexString];
         _packet.incomingSccpData = _data;
         
+        
+        if(_packet.logLevel <=UMLOG_DEBUG)
+        {
+            [_packet.logFeed debugText:[NSString stringWithFormat:@"Entering mtpTransfer for packet %@",rawMtp3]];
+        }
+
         BOOL decodeOnly = [_options[@"decode-only"] boolValue];
         if(decodeOnly)
         {
@@ -167,6 +173,11 @@
             switch(m_type)
             {
                 case SCCP_UDT:
+                    if(_packet.logLevel <=UMLOG_DEBUG)
+                    {
+                        [_packet.logFeed debugText:@"UDT"];
+                    }
+
                     if(len < 8)
                     {
                         @throw([NSException exceptionWithName:@"SCCP_TOO_SMALL_UDT_PACKET_RECEIVED" reason:NULL userInfo:NULL] );
@@ -195,6 +206,10 @@
                     break;
                     
                 case SCCP_UDTS:
+                    if(_packet.logLevel <=UMLOG_DEBUG)
+                    {
+                        [_packet.logFeed debugText:@"UDTS"];
+                    }
                     if(len < (3+10))
                     {
                         @throw([NSException exceptionWithName:@"SCCP_TOO_SMALL_UDTS_PACKET_RECEIVED" reason:NULL userInfo:NULL] );
@@ -214,6 +229,10 @@
                     break;
                     
                 case SCCP_XUDT:
+                    if(_packet.logLevel <=UMLOG_DEBUG)
+                    {
+                        [_packet.logFeed debugText:@"XUDTS"];
+                    }
                     if(len < (4+11))
                     {
                         @throw([NSException exceptionWithName:@"SCCP_TOO_SMALL_XUDT_PACKET_RECEIVED" reason:NULL userInfo:NULL] );
@@ -252,6 +271,11 @@
                     break;
 
                 case SCCP_XUDTS:
+                    if(_packet.logLevel <=UMLOG_DEBUG)
+                    {
+                        [_packet.logFeed debugText:@"XUDTS"];
+                    }
+
                     if(len < (4+11))
                     {
                         @throw([NSException exceptionWithName:@"SCCP_TOO_SMALL_XUDTS_PACKET_RECEIVED" reason:NULL userInfo:NULL] );
@@ -358,7 +382,7 @@
                 @throw([NSException exceptionWithName:@"SCCP_PTR1_POINTS_BEYOND_END" reason:NULL userInfo:@{@"mtp3": [rawMtp3 hexString] }] );
                 return;
             }
-            
+
             if(param_calling_party_address > len)
             {
                 @throw([NSException exceptionWithName:@"SCCP_PTR2_POINTS_BEYOND_END" reason:NULL userInfo:@{@"mtp3": [rawMtp3 hexString] }] );
@@ -376,16 +400,6 @@
             }
             NSData *dstData = NULL;
             NSData *srcData = NULL;
-#if defined(SCCP_DECODING_DEBUG)
-            if(_sccpLayer.sccpVariant == SCCP_VARIANT_ANSI)
-            {
-                NSLog(@"We are in ANSI mode");
-            }
-            else
-            {
-                NSLog(@"We are NOT in ANSI mode");
-            }
-#endif
             
             if(param_called_party_address>0)
             {
@@ -418,6 +432,12 @@
                 _decodedJson[@"sccp-called-party-address"]=[_dst dictionaryValue];
                 _packet.incomingCalledPartyAddress = _dst;
             }
+            
+            if(_packet.logLevel <=UMLOG_DEBUG)
+            {
+                [_packet.logFeed debugText:[NSString stringWithFormat:@"CALLED_PARTY_ADDRESS:%@",_packet.incomingCalledPartyAddress]];
+            }
+
             if(param_calling_party_address>0)
             {
                 i = (int)d[param_calling_party_address];
@@ -445,6 +465,10 @@
                 _decodedJson[@"sccp-calling-party-address"]=[_src dictionaryValue];
                 _packet.incomingCalledPartyAddress = _src;
             }
+            if(_packet.logLevel <=UMLOG_DEBUG)
+            {
+                [_packet.logFeed debugText:[NSString stringWithFormat:@"CALLED_PARTY_ADDRESS:%@",_packet.incomingCallingPartyAddress]];
+            }
             if(param_data > 0)
             {
                 i = (int)d[param_data];
@@ -459,10 +483,19 @@
                 }
                 _packet.incomingSccpData = _sccp_pdu;
             }
+            if(_packet.logLevel <=UMLOG_DEBUG)
+            {
+                [_packet.logFeed debugText:[NSString stringWithFormat:@"DATA:%@",_packet.incomingSccpData]];
+            }
             if(param_optional > 0)
             {
+                
                 NSData *sccp_optional = [NSData dataWithBytes:&d[param_optional] length:len-param_optional];
                 _decodedJson[@"sccp-optional-raw"] = sccp_optional.hexString;
+                if(_packet.logLevel <=UMLOG_DEBUG)
+                {
+                    [_packet.logFeed debugText:[NSString stringWithFormat:@"OPTIONAL:%@",sccp_optional.hexString]];
+                }
                 const uint8_t *bytes = sccp_optional.bytes;
                 NSUInteger m = sccp_optional.length;
                 NSUInteger j=0;
@@ -559,8 +592,12 @@
                 }
                 _packet.incomingOptionalData = optionalData;
                 _decodedJson[@"sccp-optional"] = _optional_dict;
+                if(_packet.logLevel <=UMLOG_DEBUG)
+                {
+                    [_packet.logFeed debugText:[NSString stringWithFormat:@"OPTIONAL-DECODED:%@",_optional_dict.jsonString]];
+                }
             }
-            
+
             if(_src == NULL)
             {
                 @throw([NSException exceptionWithName:@"SCCP_MISSING_CALLING_PARTY_ADDRESS" reason:NULL userInfo:@{@"mtp3": [rawMtp3 hexString] }] );
@@ -604,7 +641,7 @@
                     }
                     [s appendFormat:@"OPC: %@\tCgPA: %@\n",_packet.incomingOpc,_packet.incomingCallingPartyAddress];
                     [s appendFormat:@"DPC: %@\tCdPA: %@\n",_packet.incomingDpc,_packet.incomingCalledPartyAddress];
-                    [_sccpLayer.logFeed debugText:s];
+                    [_packet.logFeed debugText:s];
                 }
 
                 switch(m_type)
