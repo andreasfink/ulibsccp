@@ -2264,6 +2264,10 @@
                         {
                             for(UMSCCP_ReceivedSegment *seg in segs)
                             {
+                                if(self.logLevel <=UMLOG_DEBUG)
+                                {
+                                    [self.logFeed debugText:[NSString stringWithFormat:@"Sending XUDT with segment %@",seg.segment]];
+                                }
                                 seg.opc = routingPacket.outgoingMtp3Layer.opc;
                                 seg.dpc = routingPacket.outgoingDpc;
                                 seg.src = routingPacket.outgoingCallingPartyAddress;
@@ -2329,6 +2333,10 @@
                         {
                             for(UMSCCP_ReceivedSegment *seg in segs)
                             {
+                                if(self.logLevel <=UMLOG_DEBUG)
+                                {
+                                    [self.logFeed debugText:[NSString stringWithFormat:@"Sending LUDT with segment %@",seg.segment]];
+                                }
                                 seg.opc = routingPacket.outgoingMtp3Layer.opc;
                                 seg.dpc = routingPacket.outgoingDpc;
                                 seg.src = routingPacket.outgoingCallingPartyAddress;
