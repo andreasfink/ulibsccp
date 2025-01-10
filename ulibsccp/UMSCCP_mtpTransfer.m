@@ -463,11 +463,11 @@
 #endif
                 }
                 _decodedJson[@"sccp-calling-party-address"]=[_src dictionaryValue];
-                _packet.incomingCalledPartyAddress = _src;
+                _packet.incomingCallingPartyAddress = _src;
             }
             if(_packet.logLevel <=UMLOG_DEBUG)
             {
-                [_packet.logFeed debugText:[NSString stringWithFormat:@"CALLED_PARTY_ADDRESS:%@",_packet.incomingCallingPartyAddress]];
+                [_packet.logFeed debugText:[NSString stringWithFormat:@"CALLING_PARTY_ADDRESS:%@",_packet.incomingCallingPartyAddress]];
             }
             if(param_data > 0)
             {
@@ -808,7 +808,7 @@
                     return;
                 }
 
-                if((m_type != SCCP_UDT) || (_dst.ssn.ssn!=SCCP_SSN_SCCP_MG))
+                if(_dst.ssn.ssn!=SCCP_SSN_SCCP_MG)
                 {
                     if([_sccpLayer routePacket:_packet] == NO)
                     {
@@ -882,6 +882,15 @@
                         {
                             _statsSection = UMSCCP_StatisticSection_TRANSIT;
                             _statsSection2 = UMSCCP_StatisticSection_XUDTS_TRANSIT;
+                        }
+                        break;
+                    default:
+                        if([_sccpLayer routePacket:_packet] == NO)
+                        {
+                            if(_sccpLayer.unrouteablePacketsTraceDestination)
+                            {
+                                [_sccpLayer.unrouteablePacketsTraceDestination logPacket:_packet];
+                            }
                         }
                         break;
                 }

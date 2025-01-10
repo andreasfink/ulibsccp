@@ -1780,16 +1780,17 @@
             [self.logFeed debugText:[NSString stringWithFormat:@"calling processReceivedSegment:%@",s.segment]];
         }
 
-        
-        if(self.logLevel <=UMLOG_DEBUG)
-        {
-            [self.logFeed debugText:[NSString stringWithFormat:@"got segment %@",s]];
-        }
 
         segs = [ _pendingSegmentsStorage processReceivedSegment:s];
         /* returns an ordered array of segments */
         if(segs)
         {
+            for(UMSCCP_ReceivedSegment *s in segs)
+            {
+                NSInteger i=0;
+                [self.logFeed debugText:@"processReceivedSegment returns Array:"];
+                [self.logFeed debugText:[NSString stringWithFormat:@"[%ld]: %@",i++,s.segment]];
+            }
             if(self.logLevel <=UMLOG_DEBUG)
             {
                 [self.logFeed debugText:[NSString stringWithFormat:@"calling processReceivedSegment returns %@",segs]];
@@ -1810,6 +1811,12 @@
                     [combined appendData:s.segment.data];
                 }
             }
+            
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                [self.logFeed debugText:[NSString stringWithFormat:@"combined Data: %@",combined]];
+            }
+
             /* at this point "combined" should have the reassembled PDU */
             firstSegment.combinedPacket.incomingSccpData = combined;
             firstSegment.combinedPacket.outgoingSccpData = combined;
