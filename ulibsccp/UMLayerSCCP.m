@@ -2237,7 +2237,10 @@
                 UMMTP3_Error e = UMMTP3_error_internal_error;
                 if(self.logLevel <=UMLOG_DEBUG)
                 {
-                    [self.logFeed debugText:[NSString stringWithFormat:@"Sending %@ (%d), processSegmentedDelivery=%@, processSingleDelivery=%@",
+                    [self.logFeed debugText:[NSString stringWithFormat:@"Sending %@,%@ (%d)/%@(%d), processSegmentedDelivery=%@, processSingleDelivery=%@",
+                                             routingPacket ? @"PACKET" : @"NULL",
+                                             routingPacket.incomingPacketType,
+                                             routingPacket.incomingServiceType,
                                              routingPacket.outgoingPacketType,
                                              routingPacket.outgoingServiceType,
                                              processSegmentedDelivery ? @"YES" : @"NO",
