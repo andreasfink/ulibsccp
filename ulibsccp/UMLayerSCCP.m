@@ -1785,15 +1785,16 @@
         /* returns an ordered array of segments */
         if(segs)
         {
-            for(UMSCCP_ReceivedSegment *s in segs)
-            {
-                NSInteger i=0;
-                [self.logFeed debugText:@"processReceivedSegment returns Array:"];
-                [self.logFeed debugText:[NSString stringWithFormat:@"[%ld]: %@",i++,s.segment]];
-            }
+
             if(self.logLevel <=UMLOG_DEBUG)
             {
-                [self.logFeed debugText:[NSString stringWithFormat:@"calling processReceivedSegment returns %@",segs]];
+
+                [self.logFeed debugText:@"processReceivedSegment returns Array:"];
+                NSInteger i=0;
+                for(UMSCCP_ReceivedSegment *s in segs)
+                {
+                    [self.logFeed debugText:[NSString stringWithFormat:@"[%ld]: %@",i++,s.segment]];
+                }
             }
             processMultipleSegments = YES;
             processRouting = YES;
@@ -1804,8 +1805,14 @@
             /* combine the segments */
             UMSCCP_ReceivedSegment *firstSegment = NULL;
             combined = [[NSMutableData alloc]init];
+            NSInteger i=0;
             for(UMSCCP_ReceivedSegment *s in segs)
             {
+                if(i==0)
+                {
+                    firstSegment = s;
+                }
+                i++;
                 if(s.segment.data)
                 {
                     [combined appendData:s.segment.data];
