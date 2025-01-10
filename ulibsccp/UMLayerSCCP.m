@@ -2091,11 +2091,15 @@
         if(self.logLevel <=UMLOG_DEBUG)
         {
             NSMutableString *s = [[NSMutableString alloc]init];
-            [s appendFormat:@"findRoutes(%@) returns:\n",dst];
-            [s appendString:[grp descriptionWithRt:_sccpL3RoutingTable]];
+            [s appendFormat:@"findRoutes(%@) returns:\n", dst];
+            NSString *s1 = [grp descriptionWithRt:_sccpL3RoutingTable];
+            if(s1)
+            {
+                [s appendString:s1];
+            }
             [s appendFormat:@"    causeValue: %d\n",causeValue];
-            [s appendFormat:@"    newCalledAddress: %@\n",called_out];
-            [s appendFormat:@"    localUser: %@\n",localUser];
+            [s appendFormat:@"    newCalledAddress: %@\n",called_out ? called_out : @"(null)"];
+            [s appendFormat:@"    localUser: %@\n", localUser ? localUser : @"(null)"];
             [s appendFormat:@"    fromLocal: %@\n",routingPacket.incomingFromLocal ? @"YES" : @"NO"];
             [self logDebug:s];
         }
