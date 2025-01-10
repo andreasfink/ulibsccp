@@ -2240,6 +2240,11 @@
                 switch(routingPacket.outgoingServiceType)
                 {
                     case SCCP_UDT:
+                        if(self.logLevel <=UMLOG_DEBUG)
+                        {
+                            [self.logFeed debugText:@"Sending UDT"];
+                        }
+
                         e = [self sendUDT:routingPacket.outgoingSccpData
                                   calling:routingPacket.outgoingCallingPartyAddress
                                    called:routingPacket.outgoingCalledPartyAddress
@@ -2254,6 +2259,10 @@
                         packet.outgoingLinksetName = outgoingLinkset;
                         break;
                     case SCCP_UDTS:
+                        if(self.logLevel <=UMLOG_DEBUG)
+                        {
+                            [self.logFeed debugText:@"Sending UDTS"];
+                        }
                         e = [self sendUDTS:routingPacket.outgoingSccpData
                                    calling:routingPacket.outgoingCallingPartyAddress
                                     called:routingPacket.outgoingCalledPartyAddress
@@ -2268,6 +2277,10 @@
                            packet.outgoingLinksetName = outgoingLinkset;
                         break;
                     case SCCP_XUDT:
+                        if(self.logLevel <=UMLOG_DEBUG)
+                        {
+                            [self.logFeed debugText:@"Sending XUDT"];
+                        }
 
                         if(processSegmentedDelivery)
                         {
@@ -2360,6 +2373,10 @@
                         }
                         break;
                     case SCCP_XUDTS:
+                        if(self.logLevel <=UMLOG_DEBUG)
+                        {
+                            [self.logFeed debugText:@"Sending XUDTS"];
+                        }
                         e = [self sendXUDTS:packet.outgoingSccpData
                                     calling:packet.outgoingCallingPartyAddress
                                      called:packet.outgoingCalledPartyAddress
@@ -2376,8 +2393,16 @@
                           packet.outgoingLinksetName = outgoingLinkset;
                         break;
                     case SCCP_LUDT:
+                        if(self.logLevel <=UMLOG_DEBUG)
+                        {
+                            [self.logFeed debugText:@"Sending LUDT"];
+                        }
                         if(processSegmentedDelivery)
                         {
+                            if(self.logLevel <=UMLOG_DEBUG)
+                            {
+                                [self.logFeed debugText:@"Sending LUDT processSegmentedDelivery"];
+                            }
                             for(UMSCCP_ReceivedSegment *seg in segs)
                             {
                                 if(self.logLevel <=UMLOG_DEBUG)
@@ -2390,7 +2415,6 @@
                                 seg.dst = routingPacket.outgoingCalledPartyAddress;
                                 seg.sls = routingPacket.sls;
                                 seg.provider = routingPacket.outgoingMtp3Layer;
-                                seg.options = routingPacket.outgoingOptions;
                                 e =  [self sendLUDTsegment:seg.segment
                                                    calling:seg.src
                                                     called:seg.dst
@@ -2408,6 +2432,10 @@
                         }
                         else if(processSingleDelivery)
                         {
+                            if(self.logLevel <=UMLOG_DEBUG)
+                            {
+                                [self.logFeed debugText:@"Sending LUDT processSingleDelivery"];
+                            }
                             e = [self sendLUDT:routingPacket.outgoingSccpData
                                        calling:routingPacket.outgoingCallingPartyAddress
                                         called:routingPacket.outgoingCalledPartyAddress
@@ -2429,6 +2457,10 @@
                         }
                         break;
                     case SCCP_LUDTS:
+                        if(self.logLevel <=UMLOG_DEBUG)
+                        {
+                            [self.logFeed debugText:@"Sending SCCP_LUDTS"];
+                        }
                         e = [self sendLUDTS:packet.outgoingSccpData
                                     calling:packet.outgoingCallingPartyAddress
                                      called:packet.outgoingCalledPartyAddress
