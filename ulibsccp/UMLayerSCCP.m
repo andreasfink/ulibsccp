@@ -2029,7 +2029,7 @@
                     NSLog(@"firstSegment.combinedPacket: %@",firstSegment.combinedPacket);
                     NSLog(@"firstSegment.segmentedPacket: %@",firstSegment.segmentedPacket);
                     NSLog(@"RoutingPacket: %@",routingPacket);
-                    NSLog(@"SLS: %@",routingPacket.sls);
+                    NSLog(@"SLS: %d",routingPacket.sls);
                 }
             }
             else
