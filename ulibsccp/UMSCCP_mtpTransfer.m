@@ -599,7 +599,6 @@
                     [_packet.logFeed debugText:[NSString stringWithFormat:@"OPTIONAL-DECODED:%@",_optional_dict.jsonString]];
                 }
             }
-
             if(_src == NULL)
             {
                 @throw([NSException exceptionWithName:@"SCCP_MISSING_CALLING_PARTY_ADDRESS" reason:NULL userInfo:@{@"mtp3": [rawMtp3 hexString] }] );
