@@ -1770,7 +1770,6 @@
         s.sls = packet.sls;
         s.segment = packet.incomingSegment;
         s.reference = packet.incomingSegment.reference;
-        
         if(s.segment.first)
         {
             s.combinedPacket = [packet copy];
@@ -1779,7 +1778,6 @@
         {
             [self.logFeed debugText:[NSString stringWithFormat:@"calling processReceivedSegment:%@",s.segment]];
         }
-
 
         segs = [ _pendingSegmentsStorage processReceivedSegment:s];
         /* returns an ordered array of segments */
@@ -2237,6 +2235,15 @@
             else
             {
                 UMMTP3_Error e = UMMTP3_error_internal_error;
+                if(self.logLevel <=UMLOG_DEBUG)
+                {
+                    [self.logFeed debugText:[NSString stringWithFormat:@"Sending %@ (%d), processSegmentedDelivery=%@, processSingleDelivery=%@",
+                                             routingPacket.outgoingPacketType,
+                                             routingPacket.outgoingServiceType,
+                                             processSegmentedDelivery ? @"YES" : @"NO",
+                                             processSingleDelivery ? @"YES" : @"NO"]];
+                }
+
                 switch(routingPacket.outgoingServiceType)
                 {
                     case SCCP_UDT:
@@ -2373,9 +2380,9 @@
                         }
                         break;
                     case SCCP_XUDTS:
-                        if(self.logLevel <=UMLOG_DEBUG)
+                        if(packet.logLevel <=UMLOG_DEBUG)
                         {
-                            [self.logFeed debugText:@"Sending XUDTS"];
+                            [packet.logFeed debugText:@"Sending XUDTS"];
                         }
                         e = [self sendXUDTS:packet.outgoingSccpData
                                     calling:packet.outgoingCallingPartyAddress
@@ -2399,9 +2406,9 @@
                         }
                         if(processSegmentedDelivery)
                         {
-                            if(self.logLevel <=UMLOG_DEBUG)
+                            if(packet.logLevel <=UMLOG_DEBUG)
                             {
-                                [self.logFeed debugText:@"Sending LUDT processSegmentedDelivery"];
+                                [packet.logFeed debugText:@"Sending LUDT processSegmentedDelivery"];
                             }
                             for(UMSCCP_ReceivedSegment *seg in segs)
                             {
@@ -2432,9 +2439,9 @@
                         }
                         else if(processSingleDelivery)
                         {
-                            if(self.logLevel <=UMLOG_DEBUG)
+                            if(packet.logLevel <=UMLOG_DEBUG)
                             {
-                                [self.logFeed debugText:@"Sending LUDT processSingleDelivery"];
+                                [packet.logFeed debugText:@"Sending LUDT processSingleDelivery"];
                             }
                             e = [self sendLUDT:routingPacket.outgoingSccpData
                                        calling:routingPacket.outgoingCallingPartyAddress
@@ -2457,9 +2464,9 @@
                         }
                         break;
                     case SCCP_LUDTS:
-                        if(self.logLevel <=UMLOG_DEBUG)
+                        if(packet.logLevel <=UMLOG_DEBUG)
                         {
-                            [self.logFeed debugText:@"Sending SCCP_LUDTS"];
+                            [packet.logFeed debugText:@"Sending SCCP_LUDTS"];
                         }
                         e = [self sendLUDTS:packet.outgoingSccpData
                                     calling:packet.outgoingCallingPartyAddress
