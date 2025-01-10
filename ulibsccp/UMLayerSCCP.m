@@ -1654,6 +1654,8 @@
 
 - (BOOL)routePacket:(UMSCCP_Packet *)packet
 {
+    UMSCCP_Packet *routingPacket = packet;
+    
     if(packet.incomingOpc==NULL)
     {
         packet.incomingOpc = _mtp3.opc;
@@ -1985,7 +1987,6 @@
             }
         }
     }
-    UMSCCP_Packet *routingPacket = NULL;
 
     if(processRouting)
     {
