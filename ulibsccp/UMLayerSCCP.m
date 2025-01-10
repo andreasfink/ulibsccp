@@ -1830,7 +1830,8 @@
             processScreening = YES;
             processRouting = YES;
             processSegmentedDelivery = YES;
-            
+            processSingleDelivery = YES;
+
 			if(self.logLevel <=UMLOG_DEBUG)
    			{
                 NSString *s = [NSString stringWithFormat:@"combined PDU %@",firstSegment.combinedPacket.incomingSccpData];
@@ -2267,13 +2268,24 @@
                            packet.outgoingLinksetName = outgoingLinkset;
                         break;
                     case SCCP_XUDT:
+
                         if(processSegmentedDelivery)
                         {
+                            if(self.logLevel <=UMLOG_DEBUG)
+                            {
+                                [self.logFeed debugText:@"Sending XUDT processSegmentedDelivery"];
+                            }
+                            BOOL first=YES;
                             for(UMSCCP_ReceivedSegment *seg in segs)
                             {
                                 if(self.logLevel <=UMLOG_DEBUG)
                                 {
                                     [self.logFeed debugText:[NSString stringWithFormat:@"Sending XUDT with segment %@",seg.segment]];
+                                }
+                                if(first)
+                                {
+                                    packet.outgoingLinksetName = outgoingLinkset;
+
                                 }
                                 seg.opc = routingPacket.outgoingMtp3Layer.opc;
                                 seg.dpc = routingPacket.outgoingDpc;
@@ -2281,24 +2293,48 @@
                                 seg.dst = routingPacket.outgoingCalledPartyAddress;
                                 seg.sls = routingPacket.sls;
                                 seg.provider = routingPacket.outgoingMtp3Layer;
-                                seg.options = routingPacket.outgoingOptions;
-                                e =  [self sendXUDTsegment:seg.segment
-                                                   calling:seg.src
-                                                    called:seg.dst
-                                              serviceClass:seg.pclass
-                                                  handling:seg.handling
-                                                  hopCount:seg.hopCount
-                                                       opc:seg.opc
-                                                       dpc:seg.dpc
-                                               optionsData:seg.optionsData
-                                                   options:seg.options
-                                                  provider:seg.provider
-                                           routedToLinkset:&outgoingLinkset
-                                                       sls:seg.sls];
+                                //seg.options = routingPacket.outgoingOptions;
+                                if(first)
+                                {
+                                    e =  [self sendXUDTsegment:seg.segment
+                                                       calling:seg.src
+                                                        called:seg.dst
+                                                  serviceClass:seg.pclass
+                                                      handling:seg.handling
+                                                      hopCount:seg.hopCount
+                                                           opc:seg.opc
+                                                           dpc:seg.dpc
+                                                   optionsData:seg.optionsData
+                                                       options:seg.options
+                                                      provider:seg.provider
+                                               routedToLinkset:&outgoingLinkset
+                                                           sls:seg.sls];
+                                }
+                                else
+                                {
+                                    e =  [self sendXUDTsegment:seg.segment
+                                                       calling:seg.src
+                                                        called:seg.dst
+                                                  serviceClass:seg.pclass
+                                                      handling:seg.handling
+                                                      hopCount:seg.hopCount
+                                                           opc:seg.opc
+                                                           dpc:seg.dpc
+                                                   optionsData:seg.optionsData
+                                                       options:seg.options
+                                                      provider:seg.provider
+                                               routedToLinkset:&outgoingLinkset
+                                                           sls:seg.sls];
+                                }
+                                first=NO;
                             }
                         }
                         else if(processSingleDelivery)
                         {
+                            if(self.logLevel <=UMLOG_DEBUG)
+                            {
+                                [self.logFeed debugText:@"Sending XUDT processSingleDelivery"];
+                            }
                             e = [self sendXUDT:routingPacket.outgoingSccpData
                                        calling:routingPacket.outgoingCallingPartyAddress
                                         called:routingPacket.outgoingCalledPartyAddress
@@ -2316,6 +2352,10 @@
                         }
                         else
                         {
+                            if(self.logLevel <=UMLOG_DEBUG)
+                            {
+                                [self.logFeed debugText:@"Neither  processSingleDelivery nor processSegmentedDelivery"];
+                            }
                             e = UMMTP3_no_error;
                         }
                         break;

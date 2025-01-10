@@ -65,8 +65,6 @@
     self = [super initWithName:@"UMSCCP_mtpTransfer" receiver:layer sender:mtp3 requiresSynchronisation:NO];
     if(self)
     {
-		NSLog(@"Creating SCCP Packet for layer %@ with logLevel=%d logFeed=%@",layer,layer.logLevel,layer.logFeed);
-		layer.logLevel = 0;
 		_packet = [[UMSCCP_Packet alloc]init];
         if(xoptions[@"created-timestamp"])
         {
