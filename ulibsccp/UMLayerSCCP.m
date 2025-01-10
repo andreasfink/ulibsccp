@@ -1823,6 +1823,7 @@
             if(self.logLevel <=UMLOG_DEBUG)
             {
                 [self.logFeed debugText:[NSString stringWithFormat:@"combined Data: %@",combined]];
+                [self.logFeed debugText:[NSString stringWithFormat:@"firstSegment: %@",firstSegment]];
             }
 
             /* at this point "combined" should have the reassembled PDU */
