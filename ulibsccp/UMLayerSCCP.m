@@ -2020,13 +2020,17 @@
 
                 tid = [self extractTransactionNumber:combined];
                 op = [self extractOperation:combined applicationContext:&ac];
-                
-                
-                NSLog(@"firstSegment: %@",firstSegment);
-                NSLog(@"firstSegment.combinedPacket: %@",firstSegment.combinedPacket);
-                NSLog(@"firstSegment.segmentedPacket: %@",firstSegment.segmentedPacket);
+
                 routingPacket = firstSegment.combinedPacket;
-                NSLog(@"RoutingPacket: %@",routingPacket);
+
+                if(self.logLevel <=UMLOG_DEBUG)
+                {
+                    NSLog(@"firstSegment: %@",firstSegment);
+                    NSLog(@"firstSegment.combinedPacket: %@",firstSegment.combinedPacket);
+                    NSLog(@"firstSegment.segmentedPacket: %@",firstSegment.segmentedPacket);
+                    NSLog(@"RoutingPacket: %@",routingPacket);
+                    NSLog(@"SLS: %@",routingPacket.sls);
+                }
             }
             else
             {
