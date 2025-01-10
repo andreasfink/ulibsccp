@@ -1829,7 +1829,7 @@
             processScreening = YES;
             processRouting = YES;
             processSegmentedDelivery = YES;
-            
+            NSLog(@"combined PDU %@",firstSegment.combinedPacket.incomingSccpData);
             /* filtering of combined packets */
             UMSCCP_FilterResult r =  UMSCCP_FILTER_RESULT_UNMODIFIED;
             r = [_filterDelegate filterInbound:firstSegment.combinedPacket];
