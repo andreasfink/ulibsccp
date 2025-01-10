@@ -2313,6 +2313,8 @@
                                 [self.logFeed debugText:@"Sending XUDT processSegmentedDelivery"];
                             }
                             BOOL first=YES;
+                            int sls = routingPacket.sls % 16;
+
                             for(UMSCCP_ReceivedSegment *seg in segs)
                             {
                                 if(self.logLevel <=UMLOG_DEBUG)
@@ -2328,41 +2330,21 @@
                                 seg.dpc = routingPacket.outgoingDpc;
                                 seg.src = routingPacket.outgoingCallingPartyAddress;
                                 seg.dst = routingPacket.outgoingCalledPartyAddress;
-                                seg.sls = routingPacket.sls;
                                 seg.provider = routingPacket.outgoingMtp3Layer;
-                                //seg.options = routingPacket.outgoingOptions;
-                                if(first)
-                                {
-                                    e =  [self sendXUDTsegment:seg.segment
-                                                       calling:seg.src
-                                                        called:seg.dst
-                                                  serviceClass:seg.pclass
-                                                      handling:seg.handling
-                                                      hopCount:seg.hopCount
-                                                           opc:seg.opc
-                                                           dpc:seg.dpc
-                                                   optionsData:seg.optionsData
-                                                       options:seg.options
-                                                      provider:seg.provider
-                                               routedToLinkset:&outgoingLinkset
-                                                           sls:seg.sls];
-                                }
-                                else
-                                {
-                                    e =  [self sendXUDTsegment:seg.segment
-                                                       calling:seg.src
-                                                        called:seg.dst
-                                                  serviceClass:seg.pclass
-                                                      handling:seg.handling
-                                                      hopCount:seg.hopCount
-                                                           opc:seg.opc
-                                                           dpc:seg.dpc
-                                                   optionsData:seg.optionsData
-                                                       options:seg.options
-                                                      provider:seg.provider
-                                               routedToLinkset:&outgoingLinkset
-                                                           sls:seg.sls];
-                                }
+                                seg.sls = sls;
+                                e =  [self sendXUDTsegment:seg.segment
+                                                   calling:routingPacket.outgoingCallingPartyAddress
+                                                    called:routingPacket.outgoingCalledPartyAddress
+                                              serviceClass:seg.pclass
+                                                  handling:seg.handling
+                                                  hopCount:seg.hopCount
+                                                       opc:routingPacket.outgoingOpc
+                                                       dpc:routingPacket.outgoingDpc
+                                               optionsData:seg.optionsData
+                                                   options:seg.options
+                                                  provider:seg.provider
+                                           routedToLinkset:&outgoingLinkset
+                                                       sls:sls];
                                 first=NO;
                             }
                         }
