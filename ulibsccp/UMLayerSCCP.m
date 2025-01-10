@@ -1654,6 +1654,8 @@
 
 - (BOOL)routePacket:(UMSCCP_Packet *)packet
 {
+    UMSCCP_ReceivedSegment *firstSegment = NULL;
+
     UMSCCP_Packet *routingPacket = packet;
     
     if(packet.incomingOpc==NULL)
@@ -1750,7 +1752,6 @@
     BOOL processSegmentedDelivery = NO;
     BOOL isLUDT = (packet.incomingServiceType==SCCP_LUDT);
     NSMutableData *combined = NULL;
-    UMSCCP_ReceivedSegment *firstSegment = NULL;
     if(packet.incomingSegment)
     {
         processSinglePdu = NO;
@@ -1804,7 +1805,7 @@
 
             /* the segments are already in order here. */
             /* combine the segments */
-            UMSCCP_ReceivedSegment *firstSegment = NULL;
+            firstSegment = NULL;
             combined = [[NSMutableData alloc]init];
             NSInteger i=0;
             for(UMSCCP_ReceivedSegment *s in segs)
