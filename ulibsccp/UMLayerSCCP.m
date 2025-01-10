@@ -4321,7 +4321,6 @@
             entry.digits = gta;
             entry.routeToName = appGrpName;
             entry.table = currentSel.name;
-            entry.enabled=YES;
             [currentSel.routingTable addEntry:entry];
         }
         else if([destType isEqualToString:@"asname"])
