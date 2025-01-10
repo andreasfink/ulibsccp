@@ -1772,6 +1772,7 @@
         s.sls = packet.sls;
         s.segment = packet.incomingSegment;
         s.reference = packet.incomingSegment.reference;
+        s.segmentedPacket = [packet copy];
         if(s.segment.first)
         {
             s.combinedPacket = [packet copy];
@@ -1818,7 +1819,7 @@
                     [combined appendData:s.segment.data];
                 }
             }
-            
+            firstSegment.combinedPacket = [firstSegment.segmentedPacket copy];
             if(self.logLevel <=UMLOG_DEBUG)
             {
                 [self.logFeed debugText:[NSString stringWithFormat:@"combined Data: %@",combined]];

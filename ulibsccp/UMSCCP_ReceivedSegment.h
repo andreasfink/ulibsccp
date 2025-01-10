@@ -30,6 +30,7 @@
     NSDictionary        *_options;
     UMLayerMTP3         *_provider;
     UMSCCP_Packet       *_combinedPacket;
+    UMSCCP_Packet       *_segmentedPacket;
 }
 
 @property(readwrite,strong,atomic)  SccpAddress         *src;
@@ -47,6 +48,8 @@
 @property(readwrite,strong,atomic)  NSDictionary        *options;
 @property(readwrite,strong,atomic)  UMLayerMTP3         *provider;
 @property(readwrite,strong,atomic)  UMSCCP_Packet       *combinedPacket;
+@property(readwrite,strong,atomic)  UMSCCP_Packet       *segmentedPacket;
+
 
 - (NSString *)key;
 
