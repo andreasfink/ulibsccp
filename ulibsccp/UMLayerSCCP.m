@@ -2018,6 +2018,11 @@
 
                 tid = [self extractTransactionNumber:combined];
                 op = [self extractOperation:combined applicationContext:&ac];
+                
+                
+                NSLog(@"firstSegment: %@",firstSegment);
+                NSLog(@"firstSegment.combinedPacket: %@",firstSegment.combinedPacket);
+                NSLog(@"firstSegment.segmentedPacket: %@",firstSegment.segmentedPacket);
                 routingPacket = firstSegment.combinedPacket;
                 NSLog(@"RoutingPacket: %@",routingPacket);
             }
