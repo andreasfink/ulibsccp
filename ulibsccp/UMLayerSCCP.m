@@ -1777,7 +1777,13 @@
         }
         if(self.logLevel <=UMLOG_DEBUG)
         {
-            [self.logFeed debugText:[NSString stringWithFormat:@"calling processReceivedSegment:%@",s]];
+            [self.logFeed debugText:[NSString stringWithFormat:@"calling processReceivedSegment:%@",s.segment]];
+        }
+
+        
+        if(self.logLevel <=UMLOG_DEBUG)
+        {
+            [self.logFeed debugText:[NSString stringWithFormat:@"got segment %@",s]];
         }
 
         segs = [ _pendingSegmentsStorage processReceivedSegment:s];
