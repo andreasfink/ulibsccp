@@ -1985,7 +1985,8 @@
             }
         }
     }
-    
+    UMSCCP_Packet *routingPacket = NULL;
+
     if(processRouting)
     {
         if(self.logLevel <=UMLOG_DEBUG)
@@ -2003,7 +2004,6 @@
         NSNumber *tid = NULL;
         NSString *ac = NULL;
         NSNumber *op = NULL;
-        UMSCCP_Packet *routingPacket;
 
         @try
         {
