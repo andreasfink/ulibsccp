@@ -2099,7 +2099,7 @@
             }
             [s appendFormat:@"    causeValue: %d\n",causeValue];
             [s appendFormat:@"    newCalledAddress: %@\n",called_out ? called_out : @"(null)"];
-            [s appendFormat:@"    localUser: %@\n", localUser ? localUser : @"(null)"];
+            [s appendFormat:@"    localUser: %@\n", localUser ? localUser.name : @"(null)"];
             [s appendFormat:@"    fromLocal: %@\n",routingPacket.incomingFromLocal ? @"YES" : @"NO"];
             [self logDebug:s];
         }

@@ -22,6 +22,8 @@
 
 /* this is called from lower layer to deliver data to the TCAP Layer */
 
+- (NSString *)name;
+
 - (void)sccpNDataIndication:(NSData *)data
                  connection:(UMSCCPConnection *)connection
                     options:(NSDictionary *)options;
