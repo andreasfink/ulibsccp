@@ -513,7 +513,9 @@ static int segmentReferenceId;
     }
 }
 
-- (NSArray <UMSCCP_Segment *>*)splitDataIntoSegments:(NSData *)data withSegmentSizes:(NSArray<NSNumber *>*)segmentSizes reference:(long)ref maxPdu:(NSUInteger)maxPdu
+- (NSArray <UMSCCP_Segment *>*)splitDataIntoSegments:(NSData *)data
+                                    withSegmentSizes:(NSArray<NSNumber *>*)segmentSizes
+                                           reference:(unsigned int)ref maxPdu:(NSUInteger)maxPdu
 {
     BOOL debug =( _sccpLayer.logLevel <=UMLOG_DEBUG);
     if(debug)
@@ -535,7 +537,7 @@ static int segmentReferenceId;
             }
         }
         [s appendFormat:@"}\n"];
-        [s appendFormat:@"\treference:%ld\n",ref];
+        [s appendFormat:@"\treference:%u\n",ref];
         [s appendFormat:@"\tmaxPdu:%ld\n",(long)maxPdu];
         [_sccpLayer logDebug:s];
     }
