@@ -538,7 +538,7 @@ static int segmentReferenceId;
             }
         }
         [s appendFormat:@"}\n"];
-        [s appendFormat:@"\treference:%ld\n",ref];
+        [s appendFormat:@"\treference:%u\n",ref];
         [s appendFormat:@"\tmaxPdu:%ld\n",(long)maxPdu];
         [_sccpLayer logDebug:s];
     }
