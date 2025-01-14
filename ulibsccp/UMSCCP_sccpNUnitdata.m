@@ -318,7 +318,7 @@ static int segmentReferenceId;
                 }
                 if(useSegments) /* we want or must use segments. we prepare it only here */
                 {
-                    int ref;
+                    unsigned int ref;
                     @synchronized(self)
                     {
                         segmentReferenceId = segmentReferenceId + 1;
@@ -513,7 +513,10 @@ static int segmentReferenceId;
     }
 }
 
-- (NSArray <UMSCCP_Segment *>*)splitDataIntoSegments:(NSData *)data withSegmentSizes:(NSArray<NSNumber *>*)segmentSizes reference:(long)ref maxPdu:(NSUInteger)maxPdu
+- (NSArray <UMSCCP_Segment *>*)splitDataIntoSegments:(NSData *)data
+                                    withSegmentSizes:(NSArray<NSNumber *>*)segmentSizes
+                                           reference:(unsigned int)ref
+                                              maxPdu:(NSUInteger)maxPdu
 {
     BOOL debug =( _sccpLayer.logLevel <=UMLOG_DEBUG);
     if(debug)
