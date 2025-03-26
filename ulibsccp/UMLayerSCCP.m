@@ -295,7 +295,9 @@
     return NULL;
 }
 
-- (void)setUser:(id<UMSCCP_UserProtocol>)usr forSubsystem:(SccpSubSystemNumber *)ssn number:(SccpAddress *)sccpAddress
+- (void)setUser:(id<UMSCCP_UserProtocol>)usr
+   forSubsystem:(SccpSubSystemNumber *)ssn
+         number:(SccpAddress *)sccpAddress
 {
     int subsystem = ssn.ssn;
     NSMutableDictionary *a = _subsystemUsers[@(ssn.ssn)];
