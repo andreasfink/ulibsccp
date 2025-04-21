@@ -517,5 +517,6 @@ qualityOfService:(int)qos
 - (void)reopenLogfiles;
 - (void)reloadPluginConfigs;
 - (void)reloadPlugins;
++ (NSString *)causeValueToString:(SCCP_ReturnCause)causeValue;
 
 @end

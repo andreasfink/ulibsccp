@@ -946,6 +946,11 @@
                 {
                     *localUser = upperLayer;
                 }
+                if(self.logLevel <=UMLOG_DEBUG)
+                {
+                    NSString *s = [NSString stringWithFormat:@" local user = %@",upperLayer.layerName];
+                    [self.logFeed debugText:s];
+                }
             }
         }
         else if(_default_destination_group)
@@ -1193,7 +1198,19 @@
     }
     if(self.logLevel <=UMLOG_DEBUG)
     {
-        [self.logFeed debugText:[NSString stringWithFormat:@"findRoutes returning destination=%@",destination.description]];
+        if(destination)
+        {
+            [self.logFeed debugText:[NSString stringWithFormat:@"findRoutes returning destination=%@",destination.description]];
+        }
+        else if(*localUser)
+        {
+            [self.logFeed debugText:[NSString stringWithFormat:@"findRoutes returning localUser=%@",(*localUser).layerName]];
+
+        }
+        else
+        {
+            [self.logFeed debugText:@"findRoutes returning neither destination nor localUser"];
+        }
     }
     return destination;
 }
@@ -1503,67 +1520,6 @@
 
     if(dict[@"cause-value"])
     {
-        switch([dict[@"cause-value"]intValue])
-        {
-            case SCCP_ReturnCause_NoTranslationForAnAddressOfSuchNature:
-                dict[@"cause-description"] = @"No translation for an address of such nature";
-                break;
-            case SCCP_ReturnCause_NoTranslationForThisSpecificAddress:
-                dict[@"cause-description"] = @"No translation for this specific address";
-                break;
-            case SCCP_ReturnCause_SubsystemCongestion:
-                dict[@"cause-description"] = @"Subsystem congestion";
-                break;
-            case SCCP_ReturnCause_SubsystemFailure:
-                dict[@"cause-description"] = @"Subsystem Failure";
-                break;
-
-            case SCCP_ReturnCause_Unequipped:
-                dict[@"cause-description"] = @"Unequipped";
-                break;
-
-            case SCCP_ReturnCause_MTPFailure:
-                dict[@"cause-description"] = @"MTP failure";
-                break;
-
-            case SCCP_ReturnCause_NetworkCongestion:
-                dict[@"cause-description"] = @"Network congestion";
-                break;
-
-            case SCCP_ReturnCause_Unqualified:
-                dict[@"cause-description"] = @"Unqualified";
-                break;
-
-            case SCCP_ReturnCause_ErrorInMessageTransport:
-                dict[@"cause-description"] = @"Errpr in message transport";
-                break;
-
-            case SCCP_ReturnCause_ErrorInLocalProcessing:
-                dict[@"cause-description"] = @"Error in local processing";
-                break;
-
-            case SCCP_ReturnCause_DestinationCannotPerformReassembly:
-                dict[@"cause-description"] = @"Destination cannot perform reassembly";
-                break;
-
-            case SCCP_ReturnCause_SCCPFailure:
-                dict[@"cause-description"] = @"SCCP failure";
-                break;
-
-            case SCCP_ReturnCause_HopCounterViolation:
-                dict[@"cause-description"] = @"Hop counter violation";
-                break;
-
-            case SCCP_ReturnCause_SegmentationNotSupported:
-                dict[@"cause-description"] = @"Segmentation not supported";
-                break;
-
-            case SCCP_ReturnCause_SegmentationFailure:
-                dict[@"cause-description"] = @"Segmentation failure";
-                break;
-            default:
-                break;
-        }
     }
     dict[@"new-number"] = called_out.stringValueE164;
     dict[@"new-tt"] = @(called_out.tt.tt);
@@ -1652,8 +1608,73 @@
     return dict;
 }
 
-
-
++ (NSString *)causeValueToString:(SCCP_ReturnCause)causeValue
+{
+    switch(causeValue)
+    {
+        case SCCP_ReturnCause_not_set:
+            return  @"cause value not set";
+            
+        case SCCP_ReturnCause_NoTranslationForAnAddressOfSuchNature:
+            return  @"No translation for an address of such nature";
+            break;
+        case SCCP_ReturnCause_NoTranslationForThisSpecificAddress:
+            return  @"No translation for this specific address";
+            break;
+        case SCCP_ReturnCause_SubsystemCongestion:
+            return  @"Subsystem congestion";
+            break;
+        case SCCP_ReturnCause_SubsystemFailure:
+            return  @"Subsystem Failure";
+            break;
+            
+        case SCCP_ReturnCause_Unequipped:
+            return  @"Unequipped";
+            break;
+            
+        case SCCP_ReturnCause_MTPFailure:
+            return  @"MTP failure";
+            break;
+            
+        case SCCP_ReturnCause_NetworkCongestion:
+            return  @"Network congestion";
+            break;
+            
+        case SCCP_ReturnCause_Unqualified:
+            return  @"Unqualified";
+            break;
+            
+        case SCCP_ReturnCause_ErrorInMessageTransport:
+            return  @"Errpr in message transport";
+            break;
+            
+        case SCCP_ReturnCause_ErrorInLocalProcessing:
+            return  @"Error in local processing";
+            break;
+            
+        case SCCP_ReturnCause_DestinationCannotPerformReassembly:
+            return  @"Destination cannot perform reassembly";
+            break;
+            
+        case SCCP_ReturnCause_SCCPFailure:
+            return  @"SCCP failure";
+            break;
+            
+        case SCCP_ReturnCause_HopCounterViolation:
+            return  @"Hop counter violation";
+            break;
+        case SCCP_ReturnCause_SegmentationNotSupported:
+            return @"Segmentation not supported";
+            break;
+            
+        case SCCP_ReturnCause_SegmentationFailure:
+            return @"Segmentation failure";
+            break;
+        default:
+            return [NSString stringWithFormat:@"Unknown Cause Value (%d)",causeValue];
+            break;
+    }
+}
 - (BOOL)routePacket:(UMSCCP_Packet *)packet
 {
     UMSCCP_ReceivedSegment *firstSegment = NULL;
@@ -2099,7 +2120,7 @@
             {
                 [s appendString:s1];
             }
-            [s appendFormat:@"    causeValue: %d\n",causeValue];
+            [s appendFormat:@"    causeValue: %d %@\n",causeValue,[UMLayerSCCP causeValueToString:causeValue]];
             [s appendFormat:@"    newCalledAddress: %@\n",called_out ? called_out : @"(null)"];
             [s appendFormat:@"    localUser: %@\n", localUser ? localUser.name : @"(null)"];
             [s appendFormat:@"    fromLocal: %@\n",routingPacket.incomingFromLocal ? @"YES" : @"NO"];
