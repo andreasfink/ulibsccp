@@ -262,33 +262,64 @@
     return [self getUserForSubsystem:ssn number:[SccpAddress anyAddress]];
 }
 
+- (NSString *)subsystemRoutingTable
+{
+    NSMutableString *s = [[NSMutableString alloc]init];
+    [s appendString:@"{\n"];
+
+    NSArray *allSubsytemKeys = [_subsystemUsers allKeys];
+    for(NSNumber *subsystemKey in allSubsytemKeys)
+    {
+        NSMutableDictionary *subsystem = _subsystemUsers[subsystemKey];
+        NSArray *subsystemRouteKeys = [subsystem allKeys];
+        for(NSString *key in subsystemRouteKeys)
+        {
+            id<UMSCCP_UserProtocol>  user = subsystem[key];
+            [s appendFormat:@"\t{ ssn:%@, number:%@, routed-to:'%@' },\n",subsystemKey,key,user.layerName];
+        }
+    }
+    [s appendString:@"}\n"];
+    return s;
+}
+
+- (void)logSubsystemRoutingTable
+{
+    [_logFeed debugText:@"-- subsystem routing table dump start ---\n"];
+    NSString *s = [self subsystemRoutingTable];
+    [_logFeed debugText:s];
+    [_logFeed debugText:@"-- subsystem routing table dump end ---"];
+}
+
 - (id<UMSCCP_UserProtocol>)getUserForSubsystem:(SccpSubSystemNumber *)ssn number:(SccpAddress *)sccpAddr
 {
-    NSString *number = [sccpAddr address];
-    NSString *any = [[sccpAddr anyAddress] address];
-
-
-    int subsystem = ssn.ssn;
-    NSMutableDictionary *a = _subsystemUsers[@(subsystem)];
-    if(a)
+    NSString *number                = [sccpAddr address];
+    NSString *any                   = [[sccpAddr anyAddress] address];
+    int subsystem                   = ssn.ssn;
+    NSMutableDictionary *subsystems = _subsystemUsers[@(subsystem)];
+    
+    if(_logLevel <=UMLOG_DEBUG)
     {
-        id<UMSCCP_UserProtocol>  user = a[number];
+        [self logSubsystemRoutingTable];
+    }
+    if(subsystems)
+    {
+        id<UMSCCP_UserProtocol>  user = subsystems[number];
         if(user==NULL)
         {
-            user = a[any];
+            user = subsystems[any];
         }
         if(user)
         {
             return user;
         }
     }
-    a = _subsystemUsers[@(0)];
-    if(a)
+    subsystems = _subsystemUsers[@(0)];
+    if(subsystems)
     {
-        id<UMSCCP_UserProtocol>  user = a[number];
+        id<UMSCCP_UserProtocol>  user = subsystems[number];
         if(user==NULL)
         {
-            user = a[any];
+            user = subsystems[any];
         }
         return user;
     }
