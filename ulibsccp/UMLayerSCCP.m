@@ -4065,9 +4065,24 @@
     return d;
 }
 
+- (UMSynchronizedSortedDictionary *)routingTableStatus
+{
+    UMSynchronizedSortedDictionary *d = [_gttSelectorRegistry status];
+    if(d==NULL)
+    {
+        return [[UMSynchronizedSortedDictionary alloc]init];
+    }
+    return d;
+}
+
+
 - (UMSynchronizedSortedDictionary *)mtp3routeStatus
 {
     UMSynchronizedSortedDictionary *d = [_sccpL3RoutingTable status];
+    if(d==NULL)
+    {
+        return [[UMSynchronizedSortedDictionary alloc]init];
+    }
     return d;
 }
 
