@@ -798,13 +798,14 @@ typedef enum UMTCAP_Command
     _incomingCallingPartyAddressBeforeTranslation = [_incomingCallingPartyAddress copy];
     _incomingCalledPartyAddressBeforeTranslation = [_incomingCalledPartyAddress copy];
     
-    if(_cga_number_translation_in)
+    
+    if(_called_number_translation_in)
     {
         NSNumber *newCallingTT = NULL;
         NSNumber *newCalledTT = NULL;
-        _incomingCallingPartyAddress = [_cga_number_translation_in translateAddress:_incomingCallingPartyAddressBeforeTranslation
-                                                                       newCallingTT:&newCallingTT
-                                                                        newCalledTT:&newCalledTT];
+        _incomingCalledPartyAddress = [_called_number_translation_in translateAddress:_incomingCalledPartyAddressBeforeTranslation
+                                                                      newCallingTT:&newCallingTT
+                                                                       newCalledTT:&newCalledTT];
         if(newCalledTT)
         {
             _incomingCalledPartyAddress.tt.tt = newCalledTT.intValue;
@@ -814,13 +815,13 @@ typedef enum UMTCAP_Command
             _incomingCallingPartyAddress.tt.tt = newCallingTT.intValue;
         }
     }
-    if(_cda_number_translation_in)
+    if(_calling_number_translation_in)
     {
         NSNumber *newCallingTT = NULL;
         NSNumber *newCalledTT = NULL;
-        _incomingCalledPartyAddress = [_cda_number_translation_in translateAddress:_incomingCalledPartyAddressBeforeTranslation
-                                                                      newCallingTT:&newCallingTT
-                                                                       newCalledTT:&newCalledTT];
+        _incomingCallingPartyAddress = [_calling_number_translation_in translateAddress:_incomingCallingPartyAddressBeforeTranslation
+                                                                       newCallingTT:&newCallingTT
+                                                                        newCalledTT:&newCalledTT];
         if(newCalledTT)
         {
             _incomingCalledPartyAddress.tt.tt = newCalledTT.intValue;
@@ -837,11 +838,11 @@ typedef enum UMTCAP_Command
     _outgoingCallingPartyAddressBeforeTranslation = [_outgoingCallingPartyAddress copy];
     _outgoingCalledPartyAddressBeforeTranslation = [_outgoingCalledPartyAddress copy];
     
-    if(_cga_number_translation_out)
+    if(_calling_number_translation_out)
     {
         NSNumber *newCallingTT = NULL;
         NSNumber *newCalledTT = NULL;
-        _outgoingCallingPartyAddress = [_cga_number_translation_out translateAddress:_outgoingCallingPartyAddressBeforeTranslation
+        _outgoingCallingPartyAddress = [_calling_number_translation_out translateAddress:_outgoingCallingPartyAddressBeforeTranslation
                                                                         newCallingTT:&newCallingTT
                                                                          newCalledTT:&newCalledTT];
         if(newCalledTT)
@@ -853,11 +854,11 @@ typedef enum UMTCAP_Command
             _outgoingCallingPartyAddress.tt.tt = newCallingTT.intValue;
         }
     }
-    if(_cda_number_translation_out)
+    if(_called_number_translation_out)
     {
         NSNumber *newCallingTT = NULL;
         NSNumber *newCalledTT = NULL;
-        _outgoingCalledPartyAddress = [_cda_number_translation_out translateAddress:_outgoingCalledPartyAddressBeforeTranslation
+        _outgoingCalledPartyAddress = [_called_number_translation_out translateAddress:_outgoingCalledPartyAddressBeforeTranslation
                                                                       newCallingTT:&newCallingTT
                                                                        newCalledTT:&newCalledTT];
         if(newCalledTT)

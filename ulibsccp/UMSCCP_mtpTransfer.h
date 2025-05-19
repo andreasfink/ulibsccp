@@ -50,7 +50,8 @@
     UMSCCP_StatisticSection _statsSection;
     UMSCCP_StatisticSection _statsSection2;
 	UMSCCP_Packet		    *_packet;
-    UMMTP3TranslationTableMap       *_map;
+    UMMTP3TranslationTableMap       *_called_ttmap;
+    UMMTP3TranslationTableMap       *_calling_ttmap;
     UMMTP3CGATranslationTableMap *_cga_map;
     NSString                *_incomingLinksetName;
     SccpNumberTranslation *_cga_number_translation_in;
@@ -62,20 +63,9 @@
 @property(readwrite,strong,atomic)  SccpAddress *decodedCalled;
 @property(readwrite,strong,atomic)  NSData *decodedData;
 @property(readwrite,strong,atomic)  UMSCCP_Packet *packet;
-@property(readwrite,strong,atomic)  UMMTP3TranslationTableMap *map;
+@property(readwrite,strong,atomic)  UMMTP3TranslationTableMap *called_ttmap;
+@property(readwrite,strong,atomic)  UMMTP3TranslationTableMap *calling_ttmap;
 @property(readwrite,strong,atomic)  NSString *incomingLinksetName;
-
-- (UMSCCP_mtpTransfer *)initForSccp:(UMLayerSCCP *)layer
-                               mtp3:(UMLayerMTP3 *)mtp3
-                                opc:(UMMTP3PointCode *)opc
-                                dpc:(UMMTP3PointCode *)dpc
-                                 si:(int)si
-                                 ni:(int)ni
-                                sls:(int)sls
-                               data:(NSData *)data
-                            options:(NSDictionary *)options
-                                map:(UMMTP3TranslationTableMap *)map
-                incomingLinksetName:(NSString *)linksetName;
 
 - (UMSCCP_mtpTransfer *)initForSccp:(UMLayerSCCP *)layer
                                mtp3:(UMLayerMTP3 *)mtp3
@@ -86,10 +76,11 @@
                                 sls:(int)sls
                                data:(NSData *)xdata
                             options:(NSDictionary *)xoptions
-                                map:(UMMTP3TranslationTableMap *)ttmap
-                incomingLinksetName:(NSString *)linksetName
-                   cgaTranslationIn:(SccpNumberTranslation *)cga_number_translation_in
-                   cdaTranslationIn:(SccpNumberTranslation *)cda_number_translation_in;
+                        called_ttmap:(UMMTP3TranslationTableMap *)called_ttmap
+                       calling_ttmap:(UMMTP3TranslationTableMap *)calling_ttmap
+                  called_translation:(SccpNumberTranslation *)called_number_translation_in
+                 calling_translation:(SccpNumberTranslation *)calling_number_translation_in
+                 incomingLinksetName:(NSString *)linksetName;
 
 
 @end

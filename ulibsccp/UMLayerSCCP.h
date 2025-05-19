@@ -235,7 +235,9 @@ typedef enum UMSccpScreening_result
                 sls:(int)sls
         linksetName:(NSString *)linksetName
             options:(NSDictionary *)xoptions
-              ttmap:(UMMTP3TranslationTableMap *)map;
+      calling_ttmap:(UMMTP3TranslationTableMap *)map
+      calling_ttmap:(UMMTP3TranslationTableMap *)calling_ttmap;
+
 
 - (void)mtpTransfer:(NSData *)data
        callingLayer:(id)mtp3Layer
@@ -246,10 +248,10 @@ typedef enum UMSccpScreening_result
                 sls:(int)sls
         linksetName:(NSString *)linksetName
             options:(NSDictionary *)options
-              ttmap:(UMMTP3TranslationTableMap *)map
-   cgaTranslationIn:(SccpNumberTranslation *)cga_number_translation_in
-   cdaTranslationIn:(SccpNumberTranslation *)cda_number_translation_in;
-
+       called_ttmap:(UMMTP3TranslationTableMap *)called_ttmap
+      calling_ttmap:(UMMTP3TranslationTableMap *)calling_ttmap
+ called_translation:(SccpNumberTranslation *)called_number_translation_in
+calling_translation:(SccpNumberTranslation *)calling_number_translation_in;
 
 - (void)mtpPause:(NSData *)data
     callingLayer:(id)mtp3Layer

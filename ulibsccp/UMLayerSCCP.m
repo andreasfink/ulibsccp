@@ -126,34 +126,10 @@
                 sls:(int)sls
         linksetName:(NSString *)linksetName
             options:(NSDictionary *)xoptions
-              ttmap:(UMMTP3TranslationTableMap *)map
-{
-    [self mtpTransfer:data
-         callingLayer:mtp3Layer
-                  opc:opc
-                  dpc:dpc
-                   si:si
-                   ni:ni
-                  sls:sls
-          linksetName:linksetName
-              options:xoptions
-                ttmap:map
-     cgaTranslationIn:NULL
-     cdaTranslationIn:NULL];
-}
-
-- (void)mtpTransfer:(NSData *)data
-       callingLayer:(id)mtp3Layer
-                opc:(UMMTP3PointCode *)opc
-                dpc:(UMMTP3PointCode *)dpc
-                 si:(int)si
-                 ni:(int)ni
-                sls:(int)sls
-        linksetName:(NSString *)linksetName
-            options:(NSDictionary *)xoptions
-              ttmap:(UMMTP3TranslationTableMap *)map
-   cgaTranslationIn:(SccpNumberTranslation *)cga_number_translation_in
-   cdaTranslationIn:(SccpNumberTranslation *)cda_number_translation_in
+       called_ttmap:(UMMTP3TranslationTableMap *)called_ttmap
+      calling_ttmap:(UMMTP3TranslationTableMap *)calling_ttmap
+ called_translation:(SccpNumberTranslation *)cga_number_translation_in
+calling_translation:(SccpNumberTranslation *)cda_number_translation_in
 {
     @autoreleasepool
     {
@@ -177,10 +153,11 @@
                                                                       sls:sls
                                                                      data:data
                                                                   options:options
-                                                                      map:map
-                                                      incomingLinksetName:linksetName
-                                                         cgaTranslationIn:cga_number_translation_in
-                                                        cdaTranslationIn:cda_number_translation_in];
+                                                             called_ttmap:called_ttmap
+                                                            calling_ttmap:calling_ttmap
+                                                       called_translation:cga_number_translation_in
+                                                      calling_translation:cda_number_translation_in
+                                                      incomingLinksetName:linksetName];
         [self queueFromLower:task];
     }
 }
@@ -1370,27 +1347,27 @@
         }
         else
         {
-            if(ls.cga_number_translation_in_name)
+            if(ls.calling_number_translation_in_name)
             {
-                dict[@"incoming-linkset-cga-translation-in"] = ls.cga_number_translation_in_name;
-                if(ls.cga_number_translation_in==NULL)
+                dict[@"incoming-linkset-cga-translation-in"] = ls.calling_number_translation_in_name;
+                if(ls.calling_number_translation_in==NULL)
                 {
-                    ls.cga_number_translation_in = [_mtp3.appContext getSccpNumberTransationByName:ls.cga_number_translation_in_name];
+                    ls.calling_number_translation_in = [_mtp3.appContext getSccpNumberTransationByName:ls.calling_number_translation_in_name];
                 }
-                packet.cga_number_translation_in = ls.cga_number_translation_in;
+                packet.calling_number_translation_in = ls.calling_number_translation_in;
             }
-            if(ls.cda_number_translation_in_name)
+            if(ls.called_number_translation_in_name)
             {
-                dict[@"incoming-linkset-cda-translation-in"] = ls.cda_number_translation_in_name;
-                if(ls.cda_number_translation_in==NULL)
+                dict[@"incoming-linkset-cda-translation-in"] = ls.called_number_translation_in_name;
+                if(ls.called_number_translation_in==NULL)
                 {
-                    ls.cda_number_translation_in = [_mtp3.appContext getSccpNumberTransationByName:ls.cda_number_translation_in_name];
+                    ls.called_number_translation_in = [_mtp3.appContext getSccpNumberTransationByName:ls.called_number_translation_in_name];
                 }
-                packet.cda_number_translation_in = ls.cda_number_translation_in;
+                packet.called_number_translation_in = ls.called_number_translation_in;
 
             }
             [packet applyIncomingNumberTranslation];
-            if((ls.cga_number_translation_in_name) || (ls.cda_number_translation_in_name))
+            if((ls.calling_number_translation_in_name) || (ls.called_number_translation_in_name))
             {
                 dict[@"incoming-calling-address-before-translation"] = packet.incomingCallingPartyAddressBeforeTranslation.address;
                 dict[@"incoming-calling-nai-before-translation"] = @(packet.incomingCallingPartyAddressBeforeTranslation.nai.nai);
@@ -1586,28 +1563,28 @@
         UMMTP3LinkSet *ls = [_mtp3 getLinkSetByName:packet.outgoingLinksetName];
         if(ls)
         {
-            if(ls.cga_number_translation_in_name)
+            if(ls.calling_number_translation_in_name)
             {
-                dict[@"outgoing-linkset-cga-translation-out"] = ls.cga_number_translation_out_name;
-                if(ls.cga_number_translation_out==NULL)
+                dict[@"outgoing-linkset-cga-translation-out"] = ls.calling_number_translation_out_name;
+                if(ls.calling_number_translation_out==NULL)
                 {
-                    ls.cga_number_translation_out = [_mtp3.appContext getSccpNumberTransationByName:ls.cga_number_translation_out_name];
+                    ls.calling_number_translation_out = [_mtp3.appContext getSccpNumberTransationByName:ls.calling_number_translation_out_name];
                 }
-                packet.cga_number_translation_out = ls.cga_number_translation_out;
+                packet.calling_number_translation_out = ls.calling_number_translation_out;
             }
-            if(ls.cda_number_translation_out_name)
+            if(ls.called_number_translation_out_name)
             {
-                dict[@"outgoing-linkset-cda-translation-out"] = ls.cda_number_translation_out_name;
-                if(ls.cda_number_translation_out==NULL)
+                dict[@"outgoing-linkset-cda-translation-out"] = ls.called_number_translation_out_name;
+                if(ls.called_number_translation_out==NULL)
                 {
-                    ls.cda_number_translation_out = [_mtp3.appContext getSccpNumberTransationByName:ls.cda_number_translation_out_name];
+                    ls.called_number_translation_out = [_mtp3.appContext getSccpNumberTransationByName:ls.called_number_translation_out_name];
                 }
-                packet.cda_number_translation_out = ls.cda_number_translation_out;
+                packet.called_number_translation_out = ls.called_number_translation_out;
 
             }
             [packet applyOutgoingNumberTranslation];
             
-            if((ls.cga_number_translation_out_name) || (ls.cda_number_translation_out_name))
+            if((ls.calling_number_translation_out_name) || (ls.called_number_translation_out_name))
             {
                 dict[@"outgoing-calling-address-before-translation"] = packet.outgoingCallingPartyAddressBeforeTranslation.address;
                 dict[@"outgoing-calling-nai-before-translation"] = @(packet.outgoingCallingPartyAddressBeforeTranslation.nai.nai);

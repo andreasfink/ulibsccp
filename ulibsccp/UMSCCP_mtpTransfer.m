@@ -30,37 +30,11 @@
                                 sls:(int)sls
                                data:(NSData *)xdata
                             options:(NSDictionary *)xoptions
-                                map:(UMMTP3TranslationTableMap *)ttmap
-                incomingLinksetName:(NSString *)linksetName
-{
-    return [self initForSccp:layer
-                        mtp3:mtp3
-                         opc:xopc
-                         dpc:xdpc
-                          si:xsi
-                          ni:xni
-                         sls:sls
-                        data:xdata
-                     options:xoptions
-                         map:ttmap
-         incomingLinksetName:linksetName
-            cgaTranslationIn:NULL
-            cdaTranslationIn:NULL];
-}
-
-- (UMSCCP_mtpTransfer *)initForSccp:(UMLayerSCCP *)layer
-                               mtp3:(UMLayerMTP3 *)mtp3
-                                opc:(UMMTP3PointCode *)xopc
-                                dpc:(UMMTP3PointCode *)xdpc
-                                 si:(int)xsi
-                                 ni:(int)xni
-                                sls:(int)sls
-                               data:(NSData *)xdata
-                            options:(NSDictionary *)xoptions
-                                map:(UMMTP3TranslationTableMap *)ttmap
-                incomingLinksetName:(NSString *)linksetName
-                   cgaTranslationIn:(SccpNumberTranslation *)cga_number_translation_in
-                   cdaTranslationIn:(SccpNumberTranslation *)cda_number_translation_in
+                       called_ttmap:(UMMTP3TranslationTableMap *)called_ttmap
+                      calling_ttmap:(UMMTP3TranslationTableMap *)calling_ttmap
+                 called_translation:(SccpNumberTranslation *)called_number_translation
+                calling_translation:(SccpNumberTranslation *)calling_number_translation
+                incomingLinksetName:(NSString *)linksetName;
 {
     self = [super initWithName:@"UMSCCP_mtpTransfer" receiver:layer sender:mtp3 requiresSynchronisation:NO];
     if(self)
@@ -76,11 +50,12 @@
 		_packet.incomingOpc = xopc;
 		_packet.incomingDpc = xdpc;
         _packet.sls = sls;
-        _packet.cga_number_translation_in = cga_number_translation_in;
-        _packet.cda_number_translation_in = cda_number_translation_in;
-        _packet.cga_number_translation_out = NULL;
-        _packet.cda_number_translation_out = NULL;
-        _map = ttmap;
+        _packet.called_number_translation_in = called_number_translation;
+        _packet.calling_number_translation_in = calling_number_translation;
+        _packet.called_number_translation_out = NULL;
+        _packet.calling_number_translation_out = NULL;
+        _called_ttmap = called_ttmap;
+        _calling_ttmap = calling_ttmap;
         _data = xdata;
 
         if(xoptions)
@@ -425,9 +400,13 @@
                     NSLog(@"resulting %@",_dst.description);
 #endif
                 }
-                if(_map)
+                if(_called_ttmap)
                 {
-                    _dst.tt.tt = [_map mapTT:_dst.tt.tt];
+                    _dst.tt.tt = [_called_ttmap mapTT:_dst.tt.tt];
+                }
+                if(_calling_ttmap)
+                {
+                    _src.tt.tt = [_calling_ttmap mapTT:_src.tt.tt];
                 }
                 _decodedJson[@"sccp-called-party-address"]=[_dst dictionaryValue];
                 _packet.incomingCalledPartyAddress = _dst;
