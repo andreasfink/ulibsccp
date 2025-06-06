@@ -1409,8 +1409,6 @@
             dict[@"incoming-called-tt"]         = @(packet.incomingCalledPartyAddress.tt.tt);
         }
         
-        SccpAddress *called_out = dst;
-
         if(ls.sccp_screeningPluginName)
         {
             if(ls.sccp_screeningPlugin==NULL)
