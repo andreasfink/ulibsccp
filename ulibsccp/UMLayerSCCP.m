@@ -4065,6 +4065,11 @@
     return d;
 }
 
+- (void)routeRefresh
+{
+    [_mtp3 updateUpperLayerMtp3RoutingTable:self si:3];
+}
+
 - (UMSynchronizedSortedDictionary *)routingTableStatus
 {
     UMSynchronizedSortedDictionary *d = [_gttSelectorRegistry status];
