@@ -210,10 +210,10 @@ typedef enum UMSCCP_Packet_Tag_enum
     NSString                    *_routingSelector;
     int                         _sls;
     
-    SccpNumberTranslation       *_cga_number_translation_in;
-    SccpNumberTranslation       *_cda_number_translation_in;
-    SccpNumberTranslation       *_cga_number_translation_out;
-    SccpNumberTranslation       *_cda_number_translation_out;
+    SccpNumberTranslation      *_calling_number_translation_in;
+    SccpNumberTranslation      *_called_number_translation_in;
+    SccpNumberTranslation      *_calling_number_translation_out;
+    SccpNumberTranslation      *_called_number_translation_out;
 }
 
 @property(readwrite,strong,atomic) NSString                    *instance;
@@ -310,10 +310,10 @@ typedef enum UMSCCP_Packet_Tag_enum
 @property(readwrite,strong,atomic) NSString                    *partsInfo;
 @property(readwrite,strong,atomic) NSString                    *routingSelector;
 @property(readwrite,assign,atomic) int                         sls;
-@property(readwrite,strong,atomic)  SccpNumberTranslation      *cga_number_translation_in;
-@property(readwrite,strong,atomic)  SccpNumberTranslation      *cda_number_translation_in;
-@property(readwrite,strong,atomic)  SccpNumberTranslation      *cga_number_translation_out;
-@property(readwrite,strong,atomic)  SccpNumberTranslation      *cda_number_translation_out;
+@property(readwrite,strong,atomic)  SccpNumberTranslation      *calling_number_translation_in;
+@property(readwrite,strong,atomic)  SccpNumberTranslation      *called_number_translation_in;
+@property(readwrite,strong,atomic)  SccpNumberTranslation      *calling_number_translation_out;
+@property(readwrite,strong,atomic)  SccpNumberTranslation      *called_number_translation_out;
 
 
 - (NSString *) incomingPacketType;
