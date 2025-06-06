@@ -4065,9 +4065,29 @@
     return d;
 }
 
+- (void)routeRefresh
+{
+    [_mtp3 updateUpperLayerMtp3RoutingTable:self si:3];
+}
+
+- (UMSynchronizedSortedDictionary *)routingTableStatus
+{
+    UMSynchronizedSortedDictionary *d = [_gttSelectorRegistry status];
+    if(d==NULL)
+    {
+        return [[UMSynchronizedSortedDictionary alloc]init];
+    }
+    return d;
+}
+
+
 - (UMSynchronizedSortedDictionary *)mtp3routeStatus
 {
     UMSynchronizedSortedDictionary *d = [_sccpL3RoutingTable status];
+    if(d==NULL)
+    {
+        return [[UMSynchronizedSortedDictionary alloc]init];
+    }
     return d;
 }
 
