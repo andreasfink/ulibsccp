@@ -623,6 +623,8 @@
             _packet.incomingCallingPartyCountry     = [_packet.incomingCallingPartyAddress country];
             _packet.incomingCalledPartyCountry      = [_packet.incomingCalledPartyAddress country];
             [_packet applyIncomingNumberTranslation];
+            _src = _packet.incomingCallingPartyAddress;
+            _dst = _packet.incomingCalledPartyAddress;
             if(!decodeOnly)
             {
                 [_packet copyIncomingToOutgoing];

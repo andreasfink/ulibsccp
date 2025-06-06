@@ -1334,7 +1334,7 @@
     UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
     int causeValue = -1;
     id<UMSCCP_UserProtocol> localUser = NULL;
-    UMMTP3PointCode *pc = NULL;
+    UMMTP3PointCode *pc             = NULL;
     
     dict[@"original-number"]        = msisdn;
     dict[@"original-tt"]            = @(tt);
@@ -1363,59 +1363,54 @@
     if(linkset.length > 0)
     {
         UMMTP3LinkSet *ls = [_mtp3 getLinkSetByName:linkset];
-        
         if(ls == NULL)
         {
             dict[@"incoming-linkset-error"]   = [NSString stringWithFormat:@"linkset %@ not found in mtp3 %@",linkset, _mtp3.layerName];
         }
         else
         {
-            if(ls.cga_number_translation_in_name)
+            if(ls.cga_number_translation_in)
             {
-                dict[@"incoming-linkset-cga-translation-in"] = ls.cga_number_translation_in_name;
-                if(ls.cga_number_translation_in==NULL)
-                {
-                    ls.cga_number_translation_in = [_mtp3.appContext getSccpNumberTransationByName:ls.cga_number_translation_in_name];
-                }
                 packet.cga_number_translation_in = ls.cga_number_translation_in;
+                dict[@"incoming-linkset-calling-number-translation-in"] = ls.cga_number_translation_in.name;
             }
-            if(ls.cda_number_translation_in_name)
+            if(ls.cda_number_translation_in)
             {
-                dict[@"incoming-linkset-cda-translation-in"] = ls.cda_number_translation_in_name;
-                if(ls.cda_number_translation_in==NULL)
-                {
-                    ls.cda_number_translation_in = [_mtp3.appContext getSccpNumberTransationByName:ls.cda_number_translation_in_name];
-                }
                 packet.cda_number_translation_in = ls.cda_number_translation_in;
+                dict[@"incoming-linkset-called-number-translation-in"] = ls.cda_number_translation_in.name;
 
             }
             [packet applyIncomingNumberTranslation];
-            if((ls.cga_number_translation_in_name) || (ls.cda_number_translation_in_name))
+            if((ls.cga_number_translation_in) || (ls.cda_number_translation_in))
             {
-                dict[@"incoming-calling-address-before-translation"] = packet.incomingCallingPartyAddressBeforeTranslation.address;
-                dict[@"incoming-calling-nai-before-translation"] = @(packet.incomingCallingPartyAddressBeforeTranslation.nai.nai);
-                dict[@"incoming-calling-npi-before-translation"] = @(packet.incomingCallingPartyAddressBeforeTranslation.npi.npi);
-                dict[@"incoming-calling-ssn-before-translation"] = @(packet.incomingCallingPartyAddressBeforeTranslation.ssn.ssn);
-                dict[@"incoming-calling-tt-before-translation"] = @(packet.incomingCallingPartyAddressBeforeTranslation.tt.tt);
-
-                dict[@"incoming-called-address-before-translation"] = packet.incomingCalledPartyAddressBeforeTranslation.address;
-                dict[@"incoming-called-nai-before-translation"] = @(packet.incomingCalledPartyAddressBeforeTranslation.nai.nai);
-                dict[@"incoming-called-npi-before-translation"] = @(packet.incomingCalledPartyAddressBeforeTranslation.npi.npi);
-                dict[@"incoming-called-ssn-before-translation"] = @(packet.incomingCalledPartyAddressBeforeTranslation.ssn.ssn);
-                dict[@"incoming-called-tt-before-translation"] = @(packet.incomingCalledPartyAddressBeforeTranslation.tt.tt);
+                dict[@"incoming-calling-address-before-translation"]    = packet.incomingCallingPartyAddressBeforeTranslation.address;
+                dict[@"incoming-calling-nai-before-translation"]        = @(packet.incomingCallingPartyAddressBeforeTranslation.nai.nai);
+                dict[@"incoming-calling-npi-before-translation"]        = @(packet.incomingCallingPartyAddressBeforeTranslation.npi.npi);
+                dict[@"incoming-calling-ssn-before-translation"]        = @(packet.incomingCallingPartyAddressBeforeTranslation.ssn.ssn);
+                dict[@"incoming-calling-tt-before-translation"]         = @(packet.incomingCallingPartyAddressBeforeTranslation.tt.tt);
+                dict[@"incoming-called-address-before-translation"]     = packet.incomingCalledPartyAddressBeforeTranslation.address;
+                dict[@"incoming-called-nai-before-translation"]         = @(packet.incomingCalledPartyAddressBeforeTranslation.nai.nai);
+                dict[@"incoming-called-npi-before-translation"]         = @(packet.incomingCalledPartyAddressBeforeTranslation.npi.npi);
+                dict[@"incoming-called-ssn-before-translation"]         = @(packet.incomingCalledPartyAddressBeforeTranslation.ssn.ssn);
+                dict[@"incoming-called-tt-before-translation"]          = @(packet.incomingCalledPartyAddressBeforeTranslation.tt.tt);
+                dst = [packet.incomingCalledPartyAddress copy];
             }
-            dict[@"incoming-calling-address"] = packet.incomingCallingPartyAddress.address;
-            dict[@"incoming-calling-nai"] = @(packet.incomingCallingPartyAddress.nai.nai);
-            dict[@"incoming-calling-npi"] = @(packet.incomingCallingPartyAddress.npi.npi);
-            dict[@"incoming-calling-ssn"] = @(packet.incomingCallingPartyAddress.ssn.ssn);
-            dict[@"incoming-calling-tt"] = @(packet.incomingCallingPartyAddress.tt.tt);
 
-            dict[@"incoming-called-address"] = packet.incomingCalledPartyAddress.address;
-            dict[@"incoming-called-nai"] = @(packet.incomingCalledPartyAddress.nai.nai);
-            dict[@"incoming-called-npi"] = @(packet.incomingCalledPartyAddress.npi.npi);
-            dict[@"incoming-called-ssn"] = @(packet.incomingCalledPartyAddress.ssn.ssn);
-            dict[@"incoming-called-tt"] = @(packet.incomingCalledPartyAddress.tt.tt);
+            dict[@"incoming-calling-address"]   = packet.incomingCallingPartyAddress.address;
+            dict[@"incoming-calling-nai"]       = @(packet.incomingCallingPartyAddress.nai.nai);
+            dict[@"incoming-calling-npi"]       = @(packet.incomingCallingPartyAddress.npi.npi);
+            dict[@"incoming-calling-ssn"]       = @(packet.incomingCallingPartyAddress.ssn.ssn);
+            dict[@"incoming-calling-tt"]        = @(packet.incomingCallingPartyAddress.tt.tt);
+
+            dict[@"incoming-called-address"]    = packet.incomingCalledPartyAddress.address;
+            dict[@"incoming-called-nai"]        = @(packet.incomingCalledPartyAddress.nai.nai);
+            dict[@"incoming-called-npi"]        = @(packet.incomingCalledPartyAddress.npi.npi);
+            dict[@"incoming-called-ssn"]        = @(packet.incomingCalledPartyAddress.ssn.ssn);
+            dict[@"incoming-called-tt"]         = @(packet.incomingCalledPartyAddress.tt.tt);
         }
+        
+        SccpAddress *called_out = dst;
+
         if(ls.sccp_screeningPluginName)
         {
             if(ls.sccp_screeningPlugin==NULL)
