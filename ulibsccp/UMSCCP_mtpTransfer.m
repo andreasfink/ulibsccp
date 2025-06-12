@@ -595,14 +595,13 @@
             [_sccpLayer traceReceivedPdu:_data options:o];
             [_sccpLayer traceReceivedPacket:_packet options:o];
 
-            _options[@"sccp-calling-address"] = _src;
-            _options[@"sccp-called-address"] = _dst;
-            _packet.incomingCallingPartyAddress = _src;
-            _packet.incomingCalledPartyAddress = _dst;
-            _packet.incomingCallingPartyCountry = [_packet.incomingCallingPartyAddress country];
-            _packet.incomingCalledPartyCountry = [_packet.incomingCalledPartyAddress country];
+            _options[@"sccp-calling-address"]       = _src;
+            _options[@"sccp-called-address"]        = _dst;
+            _packet.incomingCallingPartyAddress     = _src;
+            _packet.incomingCalledPartyAddress      = _dst;
+            _packet.incomingCallingPartyCountry     = [_packet.incomingCallingPartyAddress country];
+            _packet.incomingCalledPartyCountry      = [_packet.incomingCalledPartyAddress country];
             [_packet applyIncomingNumberTranslation];
-            
             if(!decodeOnly)
             {
                 [_packet copyIncomingToOutgoing];

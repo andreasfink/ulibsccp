@@ -4043,6 +4043,11 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     return d;
 }
 
+- (void)routeRefresh
+{
+    [_mtp3 updateUpperLayerMtp3RoutingTable:self si:3];
+}
+
 - (UMSynchronizedSortedDictionary *)routingTableStatus
 {
     UMSynchronizedSortedDictionary *d = [_gttSelectorRegistry status];

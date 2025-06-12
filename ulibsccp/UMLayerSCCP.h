@@ -489,6 +489,7 @@ sls:(int)sls;
 - (NSDictionary *)apiStatus;
 - (UMSynchronizedSortedDictionary *)routeStatus;
 - (UMSynchronizedSortedDictionary *)routingTableStatus;
+- (void)routeRefresh;
 
 - (void)startStatisticsDb;
 
