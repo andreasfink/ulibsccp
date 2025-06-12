@@ -1380,6 +1380,7 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                 dict[@"incoming-called-npi-before-translation"] = @(packet.incomingCalledPartyAddressBeforeTranslation.npi.npi);
                 dict[@"incoming-called-ssn-before-translation"] = @(packet.incomingCalledPartyAddressBeforeTranslation.ssn.ssn);
                 dict[@"incoming-called-tt-before-translation"] = @(packet.incomingCalledPartyAddressBeforeTranslation.tt.tt);
+
             }
             dict[@"incoming-calling-address"] = packet.incomingCallingPartyAddress.address;
             dict[@"incoming-calling-nai"] = @(packet.incomingCallingPartyAddress.nai.nai);
