@@ -50,6 +50,8 @@
     UMSCCP_StatisticSection         _statsSection2;
 	UMSCCP_Packet		            *_packet;
     UMMTP3TranslationTableMap       *_map;
+    UMMTP3TranslationTableMap       *_called_ttmap;
+    UMMTP3TranslationTableMap       *_calling_ttmap;
     UMMTP3CGATranslationTableMap    *_cga_map;
     NSString                        *_incomingLinksetName;
     SccpNumberTranslation           *_cga_number_translation_in;
