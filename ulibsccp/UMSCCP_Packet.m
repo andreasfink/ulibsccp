@@ -794,7 +794,7 @@ typedef enum UMTCAP_Command
 }
 
 - (void)applyIncomingNumberTranslation
-{{
+{
     BOOL translationWasApplied = NO;
 
     _incomingCallingPartyAddressBeforeTranslation = [_incomingCallingPartyAddress copy];

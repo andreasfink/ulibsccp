@@ -43,8 +43,6 @@
     UMSynchronizedSortedDictionary  *_decodedJson;
     NSData                          *_decodedPdu;
     int                             _m_type;
-
-<<<<<<< HEAD
     NSDate                          *_created;
     NSDate                          *_startOfProcessing;
     NSDate                          *_endOfProcessing;
@@ -56,20 +54,6 @@
     NSString                        *_incomingLinksetName;
     SccpNumberTranslation           *_cga_number_translation_in;
     SccpNumberTranslation           *_cda_number_translation_in;
-=======
-    NSDate                  *_created;
-    NSDate                  *_startOfProcessing;
-    NSDate                  *_endOfProcessing;
-    UMSCCP_StatisticSection _statsSection;
-    UMSCCP_StatisticSection _statsSection2;
-	UMSCCP_Packet		    *_packet;
-    UMMTP3TranslationTableMap       *_called_ttmap;
-    UMMTP3TranslationTableMap       *_calling_ttmap;
-    UMMTP3CGATranslationTableMap *_cga_map;
-    NSString                *_incomingLinksetName;
-    SccpNumberTranslation *_cga_number_translation_in;
-    SccpNumberTranslation *_cda_number_translation_in;
->>>>>>> 85dd5e4a8799fffc92aa40be0440ac5fe12bb0f0
 }
 
 @property(readwrite,strong,atomic)  UMSynchronizedSortedDictionary *decodedJson;
