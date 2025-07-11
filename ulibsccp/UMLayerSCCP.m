@@ -1328,7 +1328,7 @@
                                       transactionNumber:(NSNumber *)tid
                                               operation:(NSNumber *)op
                                      applicationContext:(NSString *)ac
-                                        incomingLinkset:(NSString *)linkset
+                                        incomingLinkset:(NSString *)linksetName
                                           sourceAddress:(NSString *)source
 {
     UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
@@ -1342,7 +1342,7 @@
     dict[@"transaction-id"]         = tid ? tid : @"<null>";
     dict[@"operation"]              = op ? op : @"<null>";
     dict[@"application-context"]    = ac  ? ac : @"<null>";
-    dict[@"incoming-linkset"]       = linkset ? linkset : @"<null>";
+    dict[@"incoming-linkset"]       = linksetName ? linksetName : @"<null>";
     dict[@"source-address"]         = source ? source : @"<null>";
     
     SccpAddress *dst = [[SccpAddress alloc]initWithHumanReadableString:msisdn variant:_mtp3.variant];
@@ -1356,19 +1356,23 @@
     
     UMSCCP_Packet *packet = [[UMSCCP_Packet alloc]init];
     packet.instance = _appDelegate.instanceName;
-    packet.incomingLinksetName = linkset;
+    packet.incomingLinksetName = linksetName;
+
     packet.incomingCallingPartyAddress = [[SccpAddress alloc]initWithHumanReadableString:source sccpVariant:_sccpVariant mtp3Variant:_mtp3.variant];
     packet.incomingCalledPartyAddress = [[SccpAddress alloc]initWithHumanReadableString:msisdn sccpVariant:_sccpVariant mtp3Variant:_mtp3.variant];
     packet.incomingCalledPartyAddress.tt.tt = tt;
-    if(linkset.length > 0)
+    if(linksetName.length > 0)
     {
-        UMMTP3LinkSet *ls = [_mtp3 getLinkSetByName:linkset];
+        UMMTP3LinkSet *ls = [_mtp3 getLinkSetByName:linksetName];
         if(ls == NULL)
         {
-            dict[@"incoming-linkset-error"]   = [NSString stringWithFormat:@"linkset %@ not found in mtp3 %@",linkset, _mtp3.layerName];
+            dict[@"incoming-linkset-error"]   = [NSString stringWithFormat:@"linkset %@ not found in mtp3 %@",linksetName, _mtp3.layerName];
         }
         else
         {
+            packet.incomingLinksetTcapSharingInsideName    = ls.tcapSharingInsideName;
+            packet.incomingLinksetTcapSharingOutsideName   = ls.tcapSharingOutsideName;
+            packet.incomingLinksetTcapSharingPriority       = ls.tcapSharingPriority;
             if(ls.cga_number_translation_in)
             {
                 packet.cga_number_translation_in = ls.cga_number_translation_in;
@@ -1702,7 +1706,6 @@
 - (BOOL)routePacket:(UMSCCP_Packet *)packet
 {
     UMSCCP_ReceivedSegment *firstSegment = NULL;
-
     UMSCCP_Packet *routingPacket = packet;
     
     if(packet.incomingOpc==NULL)

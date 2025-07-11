@@ -113,6 +113,8 @@ typedef enum UMSCCP_Packet_Tag_enum
     UMSCCP_Packet_Tag_cda_number_translation_in                     = 88,
     UMSCCP_Packet_Tag_cga_number_translation_out                    = 89,
     UMSCCP_Packet_Tag_cda_number_translation_out                    = 90,
+    UMSCCP_Packet_Tag_incomingLinksetInboundName                           = 91,
+
 } UMSCCP_Packet_Tag_enum;
 
 @interface UMSCCP_Packet : UMASN1Sequence
@@ -134,6 +136,9 @@ typedef enum UMSCCP_Packet_Tag_enum
     id<UMSCCP_UserProtocol>     _incomingLocalUser;
     UMLayerMTP3                 *_incomingMtp3Layer;
     NSString                    *_incomingLinksetName;
+    NSString                    *_incomingLinksetTcapSharingInsideName;
+    NSString                    *_incomingLinksetTcapSharingOutsideName;
+    NSNumber                    *_incomingLinksetTcapSharingPriority;
     NSDictionary                *_incomingOptions;
     UMMTP3PointCode             *_incomingOpc;
     UMMTP3PointCode             *_incomingDpc;
@@ -230,13 +235,17 @@ typedef enum UMSCCP_Packet_Tag_enum
 
 @property(readwrite,assign,atomic)    SCCP_State              state;
 
-@property(readwrite,strong,atomic)    id<UMSCCP_UserProtocol>    incomingLocalUser;
-@property(readwrite,strong,atomic)    UMLayerMTP3                *incomingMtp3Layer;
-@property(readwrite,strong,atomic)    NSString                *incomingLinksetName;
-@property(readwrite,strong,atomic)    NSDictionary             *incomingOptions;
-@property(readwrite,strong,atomic)    UMMTP3PointCode            *incomingOpc;
-@property(readwrite,strong,atomic)    UMMTP3PointCode         *incomingDpc;
-@property(readwrite,assign,atomic)  SCCP_ServiceClass       incomingServiceClass;
+@property(readwrite,strong,atomic)    id<UMSCCP_UserProtocol>   incomingLocalUser;
+@property(readwrite,strong,atomic)    UMLayerMTP3               *incomingMtp3Layer;
+@property(readwrite,strong,atomic)    NSString                  *incomingLinksetName;
+@property(readwrite,strong,atomic)    NSString                  *incomingLinksetTcapSharingInsideName;
+@property(readwrite,strong,atomic)    NSString                  *incomingLinksetTcapSharingOutsideName;
+@property(readwrite,strong,atomic)    NSNumber                  *incomingLinksetTcapSharingPriority;
+
+@property(readwrite,strong,atomic)    NSDictionary              *incomingOptions;
+@property(readwrite,strong,atomic)    UMMTP3PointCode           *incomingOpc;
+@property(readwrite,strong,atomic)    UMMTP3PointCode           *incomingDpc;
+@property(readwrite,assign,atomic)  SCCP_ServiceClass           incomingServiceClass;
 @property(readwrite,assign,atomic)  SCCP_ServiceType        incomingServiceType;
 @property(readwrite,assign,atomic)  SCCP_Handling           incomingHandling;
 @property(readwrite,assign,atomic)  int                     incomingMaxHopCount;

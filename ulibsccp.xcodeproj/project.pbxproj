@@ -43,6 +43,8 @@
 		A6ADC5C71CADB25500211137 /* UMSCCP_sccpNUnitdata.h in Headers */ = {isa = PBXBuildFile; fileRef = A6ADC5C51CADB25500211137 /* UMSCCP_sccpNUnitdata.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A6ADC5C81CADB25500211137 /* UMSCCP_sccpNUnitdata.m in Sources */ = {isa = PBXBuildFile; fileRef = A6ADC5C61CADB25500211137 /* UMSCCP_sccpNUnitdata.m */; };
 		A6ADC5E51CAE8C7600211137 /* UMSCCP_Defs.h in Headers */ = {isa = PBXBuildFile; fileRef = A6ADC5E31CAE8C7600211137 /* UMSCCP_Defs.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A6BA06BD2E21348C00EEB4E7 /* UMTcapSharingInstance.h in Headers */ = {isa = PBXBuildFile; fileRef = A6BA06BB2E21348C00EEB4E7 /* UMTcapSharingInstance.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A6BA06BE2E21348C00EEB4E7 /* UMTcapSharingInstance.m in Sources */ = {isa = PBXBuildFile; fileRef = A6BA06BC2E21348C00EEB4E7 /* UMTcapSharingInstance.m */; };
 		A6CEB97422BABC4800B2BD9D /* ulibmtp3.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6CEB97222BABC4700B2BD9D /* ulibmtp3.framework */; };
 		A6CEB97522BABC4800B2BD9D /* ulibgt.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6CEB97322BABC4800B2BD9D /* ulibgt.framework */; };
 		A6CF1ABD2185A41C00F09659 /* UMSCCP_StatisticData.h in Headers */ = {isa = PBXBuildFile; fileRef = A6CF1ABB2185A41C00F09659 /* UMSCCP_StatisticData.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -114,6 +116,8 @@
 		A6ADC5C51CADB25500211137 /* UMSCCP_sccpNUnitdata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_sccpNUnitdata.h; sourceTree = "<group>"; };
 		A6ADC5C61CADB25500211137 /* UMSCCP_sccpNUnitdata.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_sccpNUnitdata.m; sourceTree = "<group>"; };
 		A6ADC5E31CAE8C7600211137 /* UMSCCP_Defs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_Defs.h; sourceTree = "<group>"; };
+		A6BA06BB2E21348C00EEB4E7 /* UMTcapSharingInstance.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMTcapSharingInstance.h; sourceTree = "<group>"; };
+		A6BA06BC2E21348C00EEB4E7 /* UMTcapSharingInstance.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UMTcapSharingInstance.m; sourceTree = "<group>"; };
 		A6C6052C207698DE002DEBDD /* q-712 SCCP Messages.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "q-712 SCCP Messages.pdf"; sourceTree = "<group>"; };
 		A6C6052D207698DE002DEBDD /* q-714 SCCP Procedures.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "q-714 SCCP Procedures.pdf"; sourceTree = "<group>"; };
 		A6C6052E207698DE002DEBDD /* q-715 SCCP User Guide.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "q-715 SCCP User Guide.pdf"; sourceTree = "<group>"; };
@@ -250,6 +254,8 @@
 				A6F442B01CB2595000C2B472 /* UMSCCPConnection.h */,
 				A658E1FF21E882E600825E4A /* UMSCCP_Filter.h */,
 				A658E20021E882E600825E4A /* UMSCCP_Filter.m */,
+				A6BA06BB2E21348C00EEB4E7 /* UMTcapSharingInstance.h */,
+				A6BA06BC2E21348C00EEB4E7 /* UMTcapSharingInstance.m */,
 			);
 			path = ulibsccp;
 			sourceTree = "<group>";
@@ -318,6 +324,7 @@
 				A68494DA1CB320AB00211137 /* UMSCCP_mtpTransfer.h in Headers */,
 				A6ADC5E51CAE8C7600211137 /* UMSCCP_Defs.h in Headers */,
 				A6AA23C524853F09008D5A57 /* UMSCCP_StatisticDbRecord.h in Headers */,
+				A6BA06BD2E21348C00EEB4E7 /* UMTcapSharingInstance.h in Headers */,
 				A64D452D2684893C00540708 /* UMSCCP_PrometheusData.h in Headers */,
 				A61571EE1CD4891200211137 /* UMSCCP_Segment.h in Headers */,
 				A664143027BD09AE00DFF263 /* UMSCCP_ReceivedSegment.h in Headers */,
@@ -440,6 +447,7 @@
 				A658E20621E8863700825E4A /* UMSCCP_Packet.m in Sources */,
 				A68494E71CB320C800211137 /* UMSCCP_mtpStatus.m in Sources */,
 				A664143127BD09AE00DFF263 /* UMSCCP_ReceivedSegment.m in Sources */,
+				A6BA06BE2E21348C00EEB4E7 /* UMTcapSharingInstance.m in Sources */,
 				A6ADC5C81CADB25500211137 /* UMSCCP_sccpNUnitdata.m in Sources */,
 				A68494DF1CB320B600211137 /* UMSCCP_mtpPause.m in Sources */,
 				A61571F71CD4AADF00211137 /* UMSCCP_ReceivedSegments.m in Sources */,
