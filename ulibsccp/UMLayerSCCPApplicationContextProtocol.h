@@ -10,6 +10,7 @@
 #import <ulibsccp/UMSCCP_FilterProtocol.h>
 
 @class UMLayerMTP3;
+@class UMSCCP_TcapSharingInstance;
 @protocol UMLayerSCCPApplicationContextProtocol<NSObject,UMSCCP_FilterDelegateProtocol>
 - (UMLayerMTP3 *)getMTP3:(NSString *)name;
 - (UMLayerSCCP *)getSCCP:(NSString *)name;
@@ -18,5 +19,7 @@
 - (id)licenseDirectory;
 - (UMPrometheus *)prometheus;
 - (NSString *)instanceName;
+- (UMSCCP_TcapSharingInstance *)getTcapSharingInstance:(NSString *)name;
+
 @end
 

@@ -20,6 +20,7 @@
 @class UMTCAP_itu_asn1_unidirectional;
 @class UMSMS;
 @class UMSCCP_Segment;
+@class UMSCCP_TcapSharingInstance;
 
 typedef enum UMSCCP_Packet_Tag_enum
 {
@@ -213,79 +214,85 @@ typedef enum UMSCCP_Packet_Tag_enum
     UMSMS                       *_sms;
     NSString                    *_partsInfo;
     NSString                    *_routingSelector;
+    NSString                    *_forcedDestination;
     int                         _sls;
     
     SccpNumberTranslation       *_cga_number_translation_in;
     SccpNumberTranslation       *_cda_number_translation_in;
     SccpNumberTranslation       *_cga_number_translation_out;
     SccpNumberTranslation       *_cda_number_translation_out;
+    UMSCCP_TcapSharingInstance  *_incomingLinksetTcapSharingInside;
+    UMSCCP_TcapSharingInstance  *_incomingLinksetTcapSharingOutside;
+    SCCP_ReturnCause            _errorCauseValue;
+
 }
 
-@property(readwrite,strong,atomic) NSString                    *instance;
-@property(readwrite,strong,atomic)    UMLayerSCCP           *sccp;
-@property(readwrite,strong,atomic)    NSDate                *created;
-@property(readwrite,strong,atomic)    NSDate                    *reassembled;
-@property(readwrite,strong,atomic)    NSDate                    *routed;
-@property(readwrite,strong,atomic)    NSDate                    *segmented;
-@property(readwrite,strong,atomic)    NSDate                    *queuedForDelivery;
-@property(readwrite,strong,atomic)    NSDate                    *afterFilter1;
-@property(readwrite,strong,atomic)    NSDate                    *afterFilter2;
-@property(readwrite,strong,atomic)    NSDate                    *afterFilter3;
-@property(readwrite,strong,atomic)    NSDate                    *afterFilter4;
+@property(readwrite,strong,atomic)  NSString                    *instance;
+@property(readwrite,strong,atomic)  UMLayerSCCP                 *sccp;
+@property(readwrite,strong,atomic)  NSDate                      *created;
+@property(readwrite,strong,atomic)  NSDate                      *reassembled;
+@property(readwrite,strong,atomic)  NSDate                      *routed;
+@property(readwrite,strong,atomic)  NSDate                      *segmented;
+@property(readwrite,strong,atomic)  NSDate                      *queuedForDelivery;
+@property(readwrite,strong,atomic)  NSDate                      *afterFilter1;
+@property(readwrite,strong,atomic)  NSDate                      *afterFilter2;
+@property(readwrite,strong,atomic)  NSDate                      *afterFilter3;
+@property(readwrite,strong,atomic)  NSDate                      *afterFilter4;
 
-@property(readwrite,assign,atomic)    SCCP_State              state;
+@property(readwrite,assign,atomic)  SCCP_State                  state;
 
-@property(readwrite,strong,atomic)    id<UMSCCP_UserProtocol>   incomingLocalUser;
-@property(readwrite,strong,atomic)    UMLayerMTP3               *incomingMtp3Layer;
-@property(readwrite,strong,atomic)    NSString                  *incomingLinksetName;
-@property(readwrite,strong,atomic)    NSString                  *incomingLinksetTcapSharingInsideName;
-@property(readwrite,strong,atomic)    NSString                  *incomingLinksetTcapSharingOutsideName;
-@property(readwrite,strong,atomic)    NSNumber                  *incomingLinksetTcapSharingPriority;
+@property(readwrite,strong,atomic)  id<UMSCCP_UserProtocol>     incomingLocalUser;
+@property(readwrite,strong,atomic)  UMLayerMTP3                 *incomingMtp3Layer;
+@property(readwrite,strong,atomic)  NSString                    *incomingLinksetName;
+@property(readwrite,strong,atomic)  NSString                    *incomingLinksetTcapSharingInsideName;
+@property(readwrite,strong,atomic)  NSString                    *incomingLinksetTcapSharingOutsideName;
+@property(readwrite,strong,atomic)  NSNumber                    *incomingLinksetTcapSharingPriority;
 
-@property(readwrite,strong,atomic)    NSDictionary              *incomingOptions;
-@property(readwrite,strong,atomic)    UMMTP3PointCode           *incomingOpc;
-@property(readwrite,strong,atomic)    UMMTP3PointCode           *incomingDpc;
+@property(readwrite,strong,atomic)  NSDictionary                *incomingOptions;
+@property(readwrite,strong,atomic)  UMMTP3PointCode             *incomingOpc;
+@property(readwrite,strong,atomic)  UMMTP3PointCode             *incomingDpc;
 @property(readwrite,assign,atomic)  SCCP_ServiceClass           incomingServiceClass;
-@property(readwrite,assign,atomic)  SCCP_ServiceType        incomingServiceType;
-@property(readwrite,assign,atomic)  SCCP_Handling           incomingHandling;
-@property(readwrite,assign,atomic)  int                     incomingMaxHopCount;
-@property(readwrite,strong,atomic)  SccpAddress             *incomingCallingPartyAddressBeforeTranslation;
-@property(readwrite,strong,atomic)  SccpAddress             *incomingCalledPartyAddressBeforeTranslation;
-@property(readwrite,strong,atomic)  SccpAddress             *incomingCallingPartyAddress;
-@property(readwrite,strong,atomic)  NSString                *incomingCallingPartyCountry;
-@property(readwrite,strong,atomic)  SccpAddress             *incomingCalledPartyAddress;
-@property(readwrite,strong,atomic)  NSString                *incomingCalledPartyCountry;
-@property(readwrite,strong,atomic)  NSData                  *incomingMtp3Data;
-@property(readwrite,strong,atomic)  NSData                  *incomingSccpData;
-@property(readwrite,strong,atomic)  UMSCCP_Segment          *incomingSegment;
-@property(readwrite,strong,atomic)  NSData                  *incomingOptionalData;
-@property(readwrite,assign,atomic)  BOOL                    incomingFromLocal;
-@property(readwrite,assign,atomic)  BOOL                    incomingToLocal;
-@property(readwrite,assign,atomic)  SCCP_ReturnCause        incomingReturnCause;
+@property(readwrite,assign,atomic)  SCCP_ServiceType            incomingServiceType;
+@property(readwrite,assign,atomic)  SCCP_Handling               incomingHandling;
+@property(readwrite,assign,atomic)  int                         incomingMaxHopCount;
+@property(readwrite,strong,atomic)  SccpAddress                 *incomingCallingPartyAddressBeforeTranslation;
+@property(readwrite,strong,atomic)  SccpAddress                 *incomingCalledPartyAddressBeforeTranslation;
+@property(readwrite,strong,atomic)  SccpAddress                 *incomingCallingPartyAddress;
+@property(readwrite,strong,atomic)  NSString                    *incomingCallingPartyCountry;
+@property(readwrite,strong,atomic)  SccpAddress                 *incomingCalledPartyAddress;
+@property(readwrite,strong,atomic)  NSString                    *incomingCalledPartyCountry;
+@property(readwrite,strong,atomic)  NSData                      *incomingMtp3Data;
+@property(readwrite,strong,atomic)  NSData                      *incomingSccpData;
+@property(readwrite,strong,atomic)  UMSCCP_Segment              *incomingSegment;
+@property(readwrite,strong,atomic)  NSData                      *incomingOptionalData;
+@property(readwrite,assign,atomic)  BOOL                        incomingFromLocal;
+@property(readwrite,assign,atomic)  BOOL                        incomingToLocal;
+@property(readwrite,assign,atomic)  SCCP_ReturnCause            incomingReturnCause;
 
-@property(readwrite,strong,atomic)    id<UMSCCP_UserProtocol>    outgoingLocalUser;
-@property(readwrite,strong,atomic)    UMLayerMTP3                *outgoingMtp3Layer;
-@property(readwrite,strong,atomic)    NSString                *outgoingLinksetName;
-@property(readwrite,strong,atomic)    NSDictionary             *outgoingOptions;
-@property(readwrite,strong,atomic)    UMMTP3PointCode            *outgoingOpc;
-@property(readwrite,strong,atomic)    UMMTP3PointCode         *outgoingDpc;
-@property(readwrite,assign,atomic)  SCCP_ServiceClass       outgoingServiceClass;
-@property(readwrite,assign,atomic)  SCCP_ServiceType        outgoingServiceType;
-@property(readwrite,assign,atomic)  SCCP_Handling           outgoingHandling;
-@property(readwrite,assign,atomic)  int                     outgoingMaxHopCount;
-@property(readwrite,strong,atomic)  SccpAddress             *outgoingCallingPartyAddress;
-@property(readwrite,strong,atomic)  SccpAddress             *outgoingCalledPartyAddress;
-@property(readwrite,strong,atomic)  SccpAddress             *outgoingCallingPartyAddressBeforeTranslation;
-@property(readwrite,strong,atomic)  SccpAddress             *outgoingCalledPartyAddressBeforeTranslation;
+@property(readwrite,strong,atomic)  id<UMSCCP_UserProtocol>     outgoingLocalUser;
+@property(readwrite,strong,atomic)  UMLayerMTP3                 *outgoingMtp3Layer;
+@property(readwrite,strong,atomic)  NSString                    *outgoingLinksetName;
+@property(readwrite,strong,atomic)  NSDictionary                *outgoingOptions;
+@property(readwrite,strong,atomic)  UMMTP3PointCode             *outgoingOpc;
+@property(readwrite,strong,atomic)  UMMTP3PointCode             *outgoingDpc;
+@property(readwrite,assign,atomic)  SCCP_ServiceClass           outgoingServiceClass;
+@property(readwrite,assign,atomic)  SCCP_ServiceType            outgoingServiceType;
+@property(readwrite,assign,atomic)  SCCP_Handling               outgoingHandling;
+@property(readwrite,assign,atomic)  int                         outgoingMaxHopCount;
+@property(readwrite,strong,atomic)  SccpAddress                 *outgoingCallingPartyAddress;
+@property(readwrite,strong,atomic)  SccpAddress                 *outgoingCalledPartyAddress;
+@property(readwrite,strong,atomic)  SccpAddress                 *outgoingCallingPartyAddressBeforeTranslation;
+@property(readwrite,strong,atomic)  SccpAddress                 *outgoingCalledPartyAddressBeforeTranslation;
 
-@property(readwrite,strong,atomic)  NSData                  *outgoingMtp3Data;
-@property(readwrite,strong,atomic)  NSData                  *outgoingSccpData;
-@property(readwrite,strong,atomic)  UMSCCP_Segment          *outgoingSegment;
-@property(readwrite,strong,atomic)  NSData                  *outgoingOptionalData;
-@property(readwrite,assign,atomic)  BOOL                    outgoingFromLocal;
-@property(readwrite,assign,atomic)  BOOL                    outgoingToLocal;
-@property(readwrite,assign,atomic)  SCCP_ReturnCause        outgoingReturnCause;
-@property(readwrite,strong,atomic)  NSString                *outgoingDestination;
+@property(readwrite,strong,atomic)  NSData                      *outgoingMtp3Data;
+@property(readwrite,strong,atomic)  NSData                      *outgoingSccpData;
+@property(readwrite,strong,atomic)  UMSCCP_Segment              *outgoingSegment;
+@property(readwrite,strong,atomic)  NSData                      *outgoingOptionalData;
+@property(readwrite,assign,atomic)  BOOL                        outgoingFromLocal;
+@property(readwrite,assign,atomic)  BOOL                        outgoingToLocal;
+@property(readwrite,assign,atomic)  SCCP_ReturnCause            outgoingReturnCause;
+@property(readwrite,strong,atomic)  NSString                    *outgoingDestination;
+@property(readwrite,assign,atomic)  SCCP_ReturnCause            errorCauseValue;
 
 @property(readwrite,strong,atomic)  UMASN1Object           		*incomingTcapAsn1; /* this can be set by filters */
 @property(readwrite,strong,atomic)  UMTCAP_itu_asn1_begin		*incomingTcapBegin;
@@ -293,36 +300,39 @@ typedef enum UMSCCP_Packet_Tag_enum
 @property(readwrite,strong,atomic)  UMTCAP_itu_asn1_end			*incomingTcapEnd;
 @property(readwrite,strong,atomic)  UMTCAP_itu_asn1_abort		*incomingTcapAbort;
 @property(readwrite,strong,atomic)  UMTCAP_itu_asn1_unidirectional *incomingTcapUnidirectional;
-@property(readwrite,assign,atomic)  int                      incomingTcapCommand; /* UMTCAP_Command */
+@property(readwrite,assign,atomic)  int                         incomingTcapCommand; /* UMTCAP_Command */
 
-@property(readwrite,strong,atomic)  UMASN1Object            *incomingGsmMapAsn1;/* this can be set by filters */
-@property(readwrite,strong,atomic)  NSString                *incomingApplicationContext;
-@property(readwrite,strong,atomic)  NSArray                 *incomingGsmMapOperations;
-@property(readwrite,assign,atomic)  int                     incomingCategory;
-@property(readwrite,strong,atomic)  NSString                *incomingLocalTransactionId;
-@property(readwrite,strong,atomic)  NSString                *incomingRemoteTransactionId;
-@property(readwrite,assign,atomic) BOOL                     canNotDecode;
+@property(readwrite,strong,atomic)  UMASN1Object                *incomingGsmMapAsn1;/* this can be set by filters */
+@property(readwrite,strong,atomic)  NSString                    *incomingApplicationContext;
+@property(readwrite,strong,atomic)  NSArray                     *incomingGsmMapOperations;
+@property(readwrite,assign,atomic)  int                         incomingCategory;
+@property(readwrite,strong,atomic)  NSString                    *incomingLocalTransactionId;
+@property(readwrite,strong,atomic)  NSString                    *incomingRemoteTransactionId;
+@property(readwrite,assign,atomic)  BOOL                         canNotDecode;
 
-@property(readwrite,strong,atomic) UMSynchronizedDictionary    *tags;
-@property(readwrite,strong,atomic) UMSynchronizedDictionary    *vars;
-@property(readwrite,strong,atomic) SccpDestinationGroup        *rerouteDestinationGroup;
-@property(readwrite,assign,atomic) UMLogLevel                  logLevel;
-@property(readwrite,strong,atomic) NSString                    *msisdn;
-@property(readwrite,strong,atomic) NSString                    *imsi;
-@property(readwrite,strong,atomic) NSString                    *smsc;
-@property(readwrite,strong,atomic) NSString                    *hlr;
-@property(readwrite,strong,atomic) NSString                    *msc;
+@property(readwrite,strong,atomic)  UMSynchronizedDictionary    *tags;
+@property(readwrite,strong,atomic)  UMSynchronizedDictionary    *vars;
+@property(readwrite,strong,atomic)  SccpDestinationGroup        *rerouteDestinationGroup;
+@property(readwrite,assign,atomic)  UMLogLevel                  logLevel;
+@property(readwrite,strong,atomic)  NSString                    *msisdn;
+@property(readwrite,strong,atomic)  NSString                    *imsi;
+@property(readwrite,strong,atomic)  NSString                    *smsc;
+@property(readwrite,strong,atomic)  NSString                    *hlr;
+@property(readwrite,strong,atomic)  NSString                    *msc;
 
-@property(readwrite,strong,atomic) NSString                    *incoming_tcap_otid;
-@property(readwrite,strong,atomic) NSString                    *incoming_tcap_dtid;
-@property(readwrite,strong,atomic) UMSMS                       *sms;
-@property(readwrite,strong,atomic) NSString                    *partsInfo;
-@property(readwrite,strong,atomic) NSString                    *routingSelector;
-@property(readwrite,assign,atomic) int                         sls;
-@property(readwrite,strong,atomic)  SccpNumberTranslation      *cga_number_translation_in;
-@property(readwrite,strong,atomic)  SccpNumberTranslation      *cda_number_translation_in;
-@property(readwrite,strong,atomic)  SccpNumberTranslation      *cga_number_translation_out;
-@property(readwrite,strong,atomic)  SccpNumberTranslation      *cda_number_translation_out;
+@property(readwrite,strong,atomic)  NSString                    *incoming_tcap_otid;
+@property(readwrite,strong,atomic)  NSString                    *incoming_tcap_dtid;
+@property(readwrite,strong,atomic)  UMSMS                       *sms;
+@property(readwrite,strong,atomic)  NSString                    *partsInfo;
+@property(readwrite,strong,atomic)  NSString                    *routingSelector;
+@property(readwrite,assign,atomic)  int                         sls;
+@property(readwrite,strong,atomic)  SccpNumberTranslation       *cga_number_translation_in;
+@property(readwrite,strong,atomic)  SccpNumberTranslation       *cda_number_translation_in;
+@property(readwrite,strong,atomic)  SccpNumberTranslation       *cga_number_translation_out;
+@property(readwrite,strong,atomic)  SccpNumberTranslation       *cda_number_translation_out;
+@property(readwrite,strong,atomic)  UMSCCP_TcapSharingInstance  *incomingLinksetTcapSharingInside;
+@property(readwrite,strong,atomic)  UMSCCP_TcapSharingInstance  *incomingLinksetTcapSharingOutside;
+@property(readwrite,strong,atomic)  NSString                    *forcedDestination;
 
 
 - (NSString *) incomingPacketType;

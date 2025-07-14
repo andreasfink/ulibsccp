@@ -50,6 +50,16 @@ typedef enum UMSccpScreening_result
 } UMSccpScreening_result;
 
 
+typedef enum UMSCCP_RoutingStatus
+{
+    UMSCCP_RoutingStatus_success,
+    UMSCCP_RoutingStatus_awaitingSegments,
+    UMSCCP_RoutingStatus_failed,
+    UMSCCP_RoutingStatus_failedSendError,
+    UMSCCP_RoutingStatus_dropPacket,
+} UMSCCP_RoutingStatus;
+
+
 @protocol sccp_tcapDecoder<NSObject>
 - (NSString *) getAppContextFromDialogPortion:(UMASN1Object *)o;
 - (NSNumber *) getOperationFromComponentPortion:(UMASN1Object *)o;
