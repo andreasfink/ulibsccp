@@ -2332,12 +2332,16 @@
     
 }
 
-- (UMSCCP_RoutingStatus)processOutgoingSegmentation:(UMSCCP_Packet *)combinedPacket outboundSegments:(NSArray<UMSCCP_Packet *> **)segments
+- (UMSCCP_RoutingStatus)processOutgoingSegmentation:(UMSCCP_Packet *)combinedPacket    outboundSegments:(NSArray<UMSCCP_Packet *> **)segments
 {
-    
+    /* if we have one big packet, we split it into segments here if needed */
 }
 
-- (UMSCCP_RoutingStatus)processDelivery:(UMSCCP_Packet *)packet
+- (UMSCCP_RoutingStatus)processSegmentedDelivery:(NSArray<UMSCCP_Packet *> *)segments route:(id)route
+{
+}
+
+- (UMSCCP_RoutingStatus)processDelivery:(UMSCCP_Packet *)packet route:(id)route
 {
 }
 
@@ -2392,6 +2396,7 @@
                     status = [self processRouting:combinedPacket];
                     if(status==UMSCCP_RoutingStatus_success)
                     {
+                        id route = combinedPacket.route;
                         status = [self processOutgoingTcapSharing:combinedPacket];
                         if(status==UMSCCP_RoutingStatus_success)
                         {
@@ -2399,15 +2404,27 @@
                             status = [self processOutgoingSegmentation:combinedPacket outboundSegments:&segments];
                             if(segments.count==0)
                             {
-                                status = [self processDelivery:combinedPacket];
+                                if(self.logLevel <=UMLOG_DEBUG)
+                                {
+                                    [self.logFeed debugText:@"calling processDelivery: (unsegmented)"];
+                                }
+                                status = [self processDelivery:combinedPacket route:route];
                             }
                             else
                             {
                                 for(UMSCCP_Packet *p in segments)
                                 {
-                                    status = [self processDelivery:p];
+                                    if(self.logLevel <=UMLOG_DEBUG)
+                                    {
+                                        [self.logFeed debugText:@"calling processDelivery:"];
+                                    }
+                                    status = [self processSegmentedDelivery:segments route:route];
                                     if(status==UMSCCP_RoutingStatus_failedSendError)
                                     {
+                                        if(self.logLevel <=UMLOG_DEBUG)
+                                        {
+                                            [self.logFeed debugText:@"calling sendStatusBack:"];
+                                        }
                                         [self sendStatusBack:p status:p.errorCauseValue];
                                     }
                                 }
@@ -2418,7 +2435,7 @@
             }
         }
     }
-    
+}
     NSArray <UMSCCP_ReceivedSegment *> *segs =  NULL;
     BOOL processSinglePdu = NO;
     BOOL processMultipleSegments = NO;
