@@ -2089,18 +2089,18 @@
 
 - (void)processRouting:(UMSCCP_RoutingState *)routingState
 {
-    UMSCCP_Packet   *routingPacket  = routingState.inboundReassembledPacket;
-    NSData          *payload        = routingPacket.incomingSccpData;
-    id<UMSCCP_UserProtocol> localUser = NULL;
-    UMMTP3PointCode *pc = NULL;
-    UMLayerMTP3 *provider = _mtp3;
-    NSString *outgoingLinkset = NULL;
-    SccpAddress *dst = routingPacket.incomingCalledPartyAddress;
-    SccpAddress *called_out = NULL;
-    NSString *usedSelector=NULL;
-    NSNumber *tid = NULL;
-    NSString *ac = NULL;
-    NSNumber *op = NULL;
+    UMSCCP_Packet   *routingPacket      = routingState.inboundReassembledPacket;
+    NSData          *payload            = routingPacket.incomingSccpData;
+    id<UMSCCP_UserProtocol> localUser   = NULL;
+    UMMTP3PointCode *pc                 = NULL;
+    UMLayerMTP3 *provider               = _mtp3;
+    NSString *outgoingLinkset           = NULL;
+    SccpAddress *dst                    = routingPacket.incomingCalledPartyAddress;
+    SccpAddress *called_out             = NULL;
+    NSString *usedSelector              = NULL;
+    NSNumber *tid                       = NULL;
+    NSString *ac                        = NULL;
+    NSNumber *op                        = NULL;
     
     @try
     {
@@ -2302,6 +2302,7 @@
         }
         routingPacket.outgoingOpc = _mtp3.opc;
         routingPacket.outgoingDpc = pc;
+
         if(pc==NULL)
         {
             if(grp == NULL)
@@ -2322,288 +2323,6 @@
                            routingPacket.outgoingSccpData];
             [self logMinorError:s];
             [_unrouteablePacketsTraceDestination logPacket:routingPacket];
-        }
-        else
-        {
-            UMMTP3_Error e = UMMTP3_error_internal_error;
-            if(self.logLevel <=UMLOG_DEBUG)
-            {
-                [self.logFeed debugText:[NSString stringWithFormat:@"Sending %@,%@ (%d)/%@(%d)",
-                                         routingPacket ? @"PACKET" : @"NULL",
-                                         routingPacket.incomingPacketType,
-                                         routingPacket.incomingServiceType,
-                                         routingPacket.outgoingPacketType,
-                                         routingPacket.outgoingServiceType]];
-            }
-
-            switch(routingPacket.outgoingServiceType)
-            {
-                case SCCP_UDT:
-                    if(self.logLevel <=UMLOG_DEBUG)
-                    {
-                        [self.logFeed debugText:@"Sending UDT"];
-                    }
-
-                    e = [self sendUDT:routingPacket.outgoingSccpData
-                              calling:routingPacket.outgoingCallingPartyAddress
-                               called:routingPacket.outgoingCalledPartyAddress
-                                class:routingPacket.outgoingServiceClass
-                             handling:routingPacket.outgoingHandling
-                                  opc:routingPacket.outgoingOpc
-                                  dpc:routingPacket.outgoingDpc
-                              options:routingPacket.outgoingOptions
-                             provider:provider
-                      routedToLinkset:&outgoingLinkset
-                                  sls:routingPacket.sls];
-                    routingPacket.outgoingLinksetName = outgoingLinkset;
-                    break;
-                case SCCP_UDTS:
-                    if(self.logLevel <=UMLOG_DEBUG)
-                    {
-                        [self.logFeed debugText:@"Sending UDTS"];
-                    }
-                    e = [self sendUDTS:routingPacket.outgoingSccpData
-                               calling:routingPacket.outgoingCallingPartyAddress
-                                called:routingPacket.outgoingCalledPartyAddress
-                                 class:routingPacket.outgoingServiceClass
-                           returnCause:routingPacket.outgoingReturnCause
-                                   opc:routingPacket.outgoingOpc
-                                   dpc:routingPacket.outgoingDpc
-                               options:routingPacket.outgoingOptions
-                              provider:provider
-                       routedToLinkset:&outgoingLinkset
-                                   sls:routingPacket.sls];
-                    routingPacket.outgoingLinksetName = outgoingLinkset;
-                    break;
-                case SCCP_XUDT:
-                    if(self.logLevel <=UMLOG_DEBUG)
-                    {
-                        [self.logFeed debugText:@"Sending XUDT"];
-                    }
-
-                    if(processSegmentedDelivery)
-                    {
-                        if(self.logLevel <=UMLOG_DEBUG)
-                        {
-                            [self.logFeed debugText:@"Sending XUDT processSegmentedDelivery"];
-                        }
-                        BOOL first=YES;
-                        int sls = routingPacket.sls % 16;
-
-                        for(UMSCCP_ReceivedSegment *seg in segments)
-                        {
-                            if(self.logLevel <=UMLOG_DEBUG)
-                            {
-                                [self.logFeed debugText:[NSString stringWithFormat:@"Sending XUDT with segment %@",seg.segment]];
-                            }
-                            if(first)
-                            {
-                                packet.outgoingLinksetName = outgoingLinkset;
-
-                            }
-                            seg.opc = routingPacket.outgoingMtp3Layer.opc;
-                            seg.dpc = routingPacket.outgoingDpc;
-                            seg.src = routingPacket.outgoingCallingPartyAddress;
-                            seg.dst = routingPacket.outgoingCalledPartyAddress;
-                            seg.provider = routingPacket.outgoingMtp3Layer;
-                            seg.sls = sls;
-                            e =  [self sendXUDTsegment:seg.segment
-                                               calling:routingPacket.outgoingCallingPartyAddress
-                                                called:routingPacket.outgoingCalledPartyAddress
-                                          serviceClass:seg.pclass
-                                              handling:seg.handling
-                                              hopCount:seg.hopCount
-                                                   opc:routingPacket.outgoingOpc
-                                                   dpc:routingPacket.outgoingDpc
-                                           optionsData:seg.optionsData
-                                               options:seg.options
-                                              provider:seg.provider
-                                       routedToLinkset:&outgoingLinkset
-                                                   sls:sls];
-                            first=NO;
-                        }
-                    }
-                    else if(processSingleDelivery)
-                    {
-                        if(self.logLevel <=UMLOG_DEBUG)
-                        {
-                            [self.logFeed debugText:@"Sending XUDT processSingleDelivery"];
-                        }
-                        e = [self sendXUDT:routingPacket.outgoingSccpData
-                                   calling:routingPacket.outgoingCallingPartyAddress
-                                    called:routingPacket.outgoingCalledPartyAddress
-                                     class:routingPacket.outgoingServiceClass
-                                  handling:routingPacket.outgoingHandling
-                                  hopCount:routingPacket.outgoingMaxHopCount
-                                       opc:routingPacket.outgoingOpc
-                                       dpc:routingPacket.outgoingDpc
-                               optionsData:routingPacket.outgoingOptionalData
-                                   options:routingPacket.outgoingOptions
-                                  provider:provider
-                               routedToLinkset:&outgoingLinkset
-                                       sls:packet.sls];
-                         packet.outgoingLinksetName = outgoingLinkset;
-                    }
-                    else
-                    {
-                        if(self.logLevel <=UMLOG_DEBUG)
-                        {
-                            [self.logFeed debugText:@"Neither  processSingleDelivery nor processSegmentedDelivery"];
-                        }
-                        e = UMMTP3_no_error;
-                    }
-                    break;
-                case SCCP_XUDTS:
-                    if(packet.logLevel <=UMLOG_DEBUG)
-                    {
-                        [packet.logFeed debugText:@"Sending XUDTS"];
-                    }
-                    e = [self sendXUDTS:packet.outgoingSccpData
-                                calling:packet.outgoingCallingPartyAddress
-                                 called:packet.outgoingCalledPartyAddress
-                                  class:packet.outgoingServiceClass
-                               hopCount:packet.outgoingMaxHopCount
-                            returnCause:packet.outgoingReturnCause
-                                    opc:packet.outgoingOpc
-                                    dpc:packet.outgoingDpc
-                            optionsData:packet.outgoingOptionalData
-                                options:packet.outgoingOptions
-                               provider:provider
-                        routedToLinkset:&outgoingLinkset
-                                    sls:packet.sls];
-                      packet.outgoingLinksetName = outgoingLinkset;
-                    break;
-                case SCCP_LUDT:
-                    if(self.logLevel <=UMLOG_DEBUG)
-                    {
-                        [self.logFeed debugText:@"Sending LUDT"];
-                    }
-                    if(processSegmentedDelivery)
-                    {
-                        if(packet.logLevel <=UMLOG_DEBUG)
-                        {
-                            [packet.logFeed debugText:@"Sending LUDT processSegmentedDelivery"];
-                        }
-                        for(UMSCCP_ReceivedSegment *seg in segs)
-                        {
-                            if(self.logLevel <=UMLOG_DEBUG)
-                            {
-                                [self.logFeed debugText:[NSString stringWithFormat:@"Sending LUDT with segment %@",seg.segment]];
-                            }
-                            seg.opc = routingPacket.outgoingMtp3Layer.opc;
-                            seg.dpc = routingPacket.outgoingDpc;
-                            seg.src = routingPacket.outgoingCallingPartyAddress;
-                            seg.dst = routingPacket.outgoingCalledPartyAddress;
-                            seg.sls = routingPacket.sls;
-                            seg.provider = routingPacket.outgoingMtp3Layer;
-                            e =  [self sendLUDTsegment:seg.segment
-                                               calling:seg.src
-                                                called:seg.dst
-                                          serviceClass:seg.pclass
-                                              handling:seg.handling
-                                              hopCount:seg.hopCount
-                                                   opc:seg.opc
-                                                   dpc:seg.dpc
-                                           optionsData:seg.optionsData
-                                               options:seg.options
-                                              provider:seg.provider
-                                       routedToLinkset:&outgoingLinkset
-                                                   sls:seg.sls];
-                        }
-                    }
-                    else if(processSingleDelivery)
-                    {
-                        if(packet.logLevel <=UMLOG_DEBUG)
-                        {
-                            [packet.logFeed debugText:@"Sending LUDT processSingleDelivery"];
-                        }
-                        e = [self sendLUDT:routingPacket.outgoingSccpData
-                                   calling:routingPacket.outgoingCallingPartyAddress
-                                    called:routingPacket.outgoingCalledPartyAddress
-                                     class:routingPacket.outgoingServiceClass
-                                  handling:routingPacket.outgoingHandling
-                                  hopCount:routingPacket.outgoingMaxHopCount
-                                       opc:routingPacket.outgoingOpc
-                                       dpc:routingPacket.outgoingDpc
-                               optionsData:routingPacket.outgoingOptionalData
-                                   options:routingPacket.outgoingOptions
-                                  provider:provider
-                               routedToLinkset:&outgoingLinkset
-                                       sls:packet.sls];
-                         packet.outgoingLinksetName = outgoingLinkset;
-                    }
-                    else
-                    {
-                        e = UMMTP3_no_error;
-                    }
-                    break;
-                case SCCP_LUDTS:
-                    if(packet.logLevel <=UMLOG_DEBUG)
-                    {
-                        [packet.logFeed debugText:@"Sending SCCP_LUDTS"];
-                    }
-                    e = [self sendLUDTS:packet.outgoingSccpData
-                                calling:packet.outgoingCallingPartyAddress
-                                 called:packet.outgoingCalledPartyAddress
-                                  class:packet.outgoingServiceClass
-                               hopCount:packet.outgoingMaxHopCount
-                            returnCause:packet.outgoingReturnCause
-                                    opc:packet.outgoingOpc
-                                    dpc:packet.outgoingDpc
-                            optionsData:packet.outgoingOptionalData
-                                options:packet.outgoingOptions
-                               provider:provider
-                        routedToLinkset:&outgoingLinkset
-                                    sls:packet.sls];
-                      packet.outgoingLinksetName = outgoingLinkset;
-                    break;                        break;
-            }
-            NSString *s= NULL;
-            switch(e)
-            {
-                case UMMTP3_error_internal_error:
-                    s = [NSString stringWithFormat:@"Can not forward %@. internal error SRC=%@ DST=%@ DATA=%@",packet.outgoingPacketType,packet.outgoingOpc,packet.outgoingDpc,packet.outgoingSccpData];
-                    break;
-                case UMMTP3_no_error:
-                    break;
-                case UMMTP3_error_pdu_too_big:
-                    
-                    s = [NSString stringWithFormat:@"Can not forward %@. PDU too big. SRC=%@ DST=%@ DATA=%@",packet.outgoingPacketType,packet.outgoingOpc,packet.outgoingDpc,packet.outgoingSccpData];
-                    break;
-                case UMMTP3_error_no_route_to_destination:
-                    s = [NSString stringWithFormat:@"Can not forward %@. No route to destination DPC=%@ SRC=%@ DST=%@ DATA=%@",packet.outgoingPacketType,packet.outgoingDpc,packet.outgoingCallingPartyAddress,packet.outgoingCalledPartyAddress,packet.outgoingSccpData];
-                    break;
-                case UMMTP3_error_invalid_variant:
-                    s = [NSString stringWithFormat:@"Can not forward %@. Invalid variant. SRC=%@ DST=%@ DATA=%@",packet.outgoingPacketType,packet.outgoingOpc,packet.outgoingDpc,packet.outgoingSccpData];
-                    break;
-            }
-            if(s)
-            {
-                [self logMinorError:s];
-                  [self logMinorError:[NSString stringWithFormat:@"Packet:\n%@\n",packet.description]];
-            }
-            if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
-            {
-                doSendStatus = YES;
-                switch(e)
-                {
-                    case UMMTP3_error_no_route_to_destination:
-                        causeValue = SCCP_ReturnCause_MTPFailure;
-                        [_unrouteablePacketsTraceDestination logPacket:packet];
-                        break;
-                    case UMMTP3_error_pdu_too_big:
-                        causeValue = SCCP_ReturnCause_ErrorInMessageTransport;
-                        [_problematicTraceDestination logPacket:packet];
-                        break;
-                    case UMMTP3_error_invalid_variant:
-                        causeValue = SCCP_ReturnCause_ErrorInLocalProcessing;
-                        [_problematicTraceDestination logPacket:packet];
-                        break;
-                    default:
-                        doSendStatus = NO;
-                        break;
-                }
-            }
         }
     }
 }
