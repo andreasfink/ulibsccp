@@ -50,7 +50,7 @@
     return d;
 }
 
-- (BOOL)processReceivedSegment:(UMSCCP_ReceivedSegment *)s
+- (BOOL)processReceivedSegment:(UMSCCP_ReceivedSegment *)s originalPacket:(UMSCCP_Packet *)p
 {
     if(s==NULL)
     {

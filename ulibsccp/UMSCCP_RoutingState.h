@@ -1,5 +1,5 @@
 //
-//  UMSCCP_DeliveryDestination.h
+//  UMSCCP_RoutingState.h
 //  ulibsccp
 //
 //  Created by Andreas Fink on 15.07.2025.
@@ -9,10 +9,31 @@
 #import <ulib/ulib.h>
 #import <ulibgt/ulibgt.h>
 #import <ulibsccp/UMSCCP_Defs.h>
+
+typedef enum UMSCCP_RoutingStatus
+{
+    UMSCCP_RoutingStatus_success = 0,
+    UMSCCP_RoutingStatus_failed,
+    UMSCCP_RoutingStatus_dropPacket,
+    UMSCCP_RoutingStatus_awaitingSegments,
+} UMSCCP_RoutingStatus;
+
+typedef enum UMSCCP_RoutingErrorProcessing
+{
+    UMSCCP_RoutingErrorProcessing_Ignore,
+    UMSCCP_RoutingErrorProcessing_UDTS,
+    UMSCCP_RoutingErrorProcessing_XUDTS,
+    UMSCCP_RoutingErrorProcessing_LUDTS,
+} UMSCCP_RoutingErrorProcessing;
+
+
+
 @class UMSCCP_Packet;
 
 @interface UMSCCP_RoutingState : UMObject
 {
+    UMSCCP_RoutingStatus    _status;
+    UMSCCP_RoutingErrorProcessing   _errorProcessing;
     /* if we run into errors, thats where we signal it back to */
     UMSCCP_Packet           *_inboundPacket;
     UMSCCP_Packet           *_inboundReassembledPacket;
@@ -27,7 +48,7 @@
     UMM3UAApplicationServer *_asForErrors;
     UMSCCP_Packet           *_errorPacket;              /* the original packet which created the error. We use it for UDTS generation */
     NSArray<UMSCCP_Packet *>*_errorPacketSegments;      /* if it was multiparts, we have to send errors for every part. in this case _errorPacket is null */
-
+    BOOL                    _errorDestinationLocal;
     BOOL                    _reportStatus;              /* do we report errors at all?  */
     BOOL                    _deliverLocal;              /* we deliver on to the local upper layers  */
     BOOL                    _swallow;                   /* eated the packet because its a multi segment packet and we wait for more */
@@ -45,6 +66,8 @@
     
 }
 
+@property(readwrite,atomic,assign)  UMSCCP_RoutingStatus            status;
+@property(readwrite,atomic,assign)  UMSCCP_RoutingErrorProcessing   errorProcessing;
 
 @property(readwrite,atomic,strong)  UMSCCP_Packet           *inboundPacket;
 @property(readwrite,atomic,strong)  UMSCCP_Packet           *inboundReassembledPacket;
@@ -60,6 +83,7 @@
 @property(readwrite,atomic,strong)  UMSCCP_Packet           *errorPacket;
 @property(readwrite,atomic,strong)  NSArray<UMSCCP_Packet *>*errorPacketSegments;
 @property(readwrite,atomic,assign)  BOOL                    deliverLocal;
+@property(readwrite,atomic,assign)  BOOL                    errorDestinationLocal;
 @property(readwrite,atomic,assign)  BOOL                    reportStatus;
 @property(readwrite,atomic,assign)  BOOL                    swallow;
 @property(readwrite,atomic,assign)  BOOL                    drop;

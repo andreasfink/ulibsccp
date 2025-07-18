@@ -25,6 +25,7 @@
 #import <ulibsccp/UMSCCP_Packet.h>
 #import <ulibsccp/UMSCCP_TracefileProtocol.h>
 #import <ulibsccp/UMSCCP_StatisticDb.h>
+#import <ulibsccp/UMSCCP_RoutingState.h>
 
 @class UMSCCP_Statistics;
 @class UMSCCP_PrometheusData;
@@ -49,15 +50,6 @@ typedef enum UMSccpScreening_result
     UMSccpScreening_errorResult = -99,
 } UMSccpScreening_result;
 
-
-typedef enum UMSCCP_RoutingStatus
-{
-    UMSCCP_RoutingStatus_success,
-    UMSCCP_RoutingStatus_awaitingSegments,
-    UMSCCP_RoutingStatus_failed,
-    UMSCCP_RoutingStatus_failedSendError,
-    UMSCCP_RoutingStatus_dropPacket,
-} UMSCCP_RoutingStatus;
 
 
 @protocol sccp_tcapDecoder<NSObject>
@@ -147,7 +139,7 @@ typedef enum UMSCCP_RoutingStatus
 
 @property(readwrite,strong,atomic) id<UMSCCP_TracefileProtocol>    problematicTraceDestination;
 @property(readwrite,strong,atomic) id<UMSCCP_TracefileProtocol>    unrouteablePacketsTraceDestination;
-@property(readwrite,assign,atomic) BOOL    routeErrorsBackToSource;
+@property(readwrite,assign,atomic) BOOL                            routeErrorsBackToSource;
 
 @property(readwrite,strong,atomic) NSString                    *sccp_screeningPluginName;
 @property(readwrite,strong,atomic) NSString                    *sccp_screeningPluginConfig;
@@ -472,7 +464,8 @@ sls:(int)sls;
                                           sourceAddress:(NSString *)source;
 
 
-- (BOOL)routePacket:(UMSCCP_Packet *)packet; /* returns YES if sucessfully forwarded, NO if it wasn able to route it */
+- (UMSCCP_RoutingState *)routePacket:(UMSCCP_Packet *)packet;
+
 /* Note: this doesnt work if all packets dont have the same routing destination ! */
 
 

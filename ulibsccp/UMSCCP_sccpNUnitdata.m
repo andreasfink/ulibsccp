@@ -387,7 +387,7 @@ static int segmentReferenceId;
                             [_sccpLayer.logFeed debugText:@"fromLocalFilter returns DROP"];
                             return;
                         }
-                        [_sccpLayer routePacket:packet];
+                        UMSCCP_RoutingState *dst = [_sccpLayer routePacket:packet];
                     }
                 }
                 else /* we have pure data only */
@@ -438,8 +438,7 @@ static int segmentReferenceId;
                         [_sccpLayer.logFeed debugText:@"fromLocalFilter returns DROP"];
                         return;
                     }
-                    [_sccpLayer routePacket:packet];
-                    
+                    UMSCCP_RoutingState *dst = [_sccpLayer routePacket:packet];
                     
                     if(_sccpLayer.statisticDb)
                     {

@@ -45,8 +45,8 @@
 		A6ADC5E51CAE8C7600211137 /* UMSCCP_Defs.h in Headers */ = {isa = PBXBuildFile; fileRef = A6ADC5E31CAE8C7600211137 /* UMSCCP_Defs.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A6BA06BD2E21348C00EEB4E7 /* UMSCCP_TcapSharingInstance.h in Headers */ = {isa = PBXBuildFile; fileRef = A6BA06BB2E21348C00EEB4E7 /* UMSCCP_TcapSharingInstance.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A6BA06BE2E21348C00EEB4E7 /* UMSCCP_TcapSharingInstance.m in Sources */ = {isa = PBXBuildFile; fileRef = A6BA06BC2E21348C00EEB4E7 /* UMSCCP_TcapSharingInstance.m */; };
-		A6BA06CC2E2620F200EEB4E7 /* UMSCCP_Route.h in Headers */ = {isa = PBXBuildFile; fileRef = A6BA06CA2E2620F200EEB4E7 /* UMSCCP_Route.h */; };
-		A6BA06CD2E2620F200EEB4E7 /* UMSCCP_Route.m in Sources */ = {isa = PBXBuildFile; fileRef = A6BA06CB2E2620F200EEB4E7 /* UMSCCP_Route.m */; };
+		A6BA06CC2E2620F200EEB4E7 /* UMSCCP_RoutingState.h in Headers */ = {isa = PBXBuildFile; fileRef = A6BA06CA2E2620F200EEB4E7 /* UMSCCP_RoutingState.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A6BA06CD2E2620F200EEB4E7 /* UMSCCP_RoutingState.m in Sources */ = {isa = PBXBuildFile; fileRef = A6BA06CB2E2620F200EEB4E7 /* UMSCCP_RoutingState.m */; };
 		A6CEB97422BABC4800B2BD9D /* ulibmtp3.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6CEB97222BABC4700B2BD9D /* ulibmtp3.framework */; };
 		A6CEB97522BABC4800B2BD9D /* ulibgt.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6CEB97322BABC4800B2BD9D /* ulibgt.framework */; };
 		A6CF1ABD2185A41C00F09659 /* UMSCCP_StatisticData.h in Headers */ = {isa = PBXBuildFile; fileRef = A6CF1ABB2185A41C00F09659 /* UMSCCP_StatisticData.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -120,8 +120,8 @@
 		A6ADC5E31CAE8C7600211137 /* UMSCCP_Defs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_Defs.h; sourceTree = "<group>"; };
 		A6BA06BB2E21348C00EEB4E7 /* UMSCCP_TcapSharingInstance.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_TcapSharingInstance.h; sourceTree = "<group>"; };
 		A6BA06BC2E21348C00EEB4E7 /* UMSCCP_TcapSharingInstance.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_TcapSharingInstance.m; sourceTree = "<group>"; };
-		A6BA06CA2E2620F200EEB4E7 /* UMSCCP_Route.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_Route.h; sourceTree = "<group>"; };
-		A6BA06CB2E2620F200EEB4E7 /* UMSCCP_Route.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_Route.m; sourceTree = "<group>"; };
+		A6BA06CA2E2620F200EEB4E7 /* UMSCCP_RoutingState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_RoutingState.h; sourceTree = "<group>"; };
+		A6BA06CB2E2620F200EEB4E7 /* UMSCCP_RoutingState.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_RoutingState.m; sourceTree = "<group>"; };
 		A6C6052C207698DE002DEBDD /* q-712 SCCP Messages.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "q-712 SCCP Messages.pdf"; sourceTree = "<group>"; };
 		A6C6052D207698DE002DEBDD /* q-714 SCCP Procedures.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "q-714 SCCP Procedures.pdf"; sourceTree = "<group>"; };
 		A6C6052E207698DE002DEBDD /* q-715 SCCP User Guide.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "q-715 SCCP User Guide.pdf"; sourceTree = "<group>"; };
@@ -229,8 +229,8 @@
 				A63259592BC7DA82001AA485 /* UMSCCP_Packet.asn.h */,
 				A658E20321E8863700825E4A /* UMSCCP_Packet.h */,
 				A658E20421E8863700825E4A /* UMSCCP_Packet.m */,
-				A6BA06CA2E2620F200EEB4E7 /* UMSCCP_Route.h */,
-				A6BA06CB2E2620F200EEB4E7 /* UMSCCP_Route.m */,
+				A6BA06CA2E2620F200EEB4E7 /* UMSCCP_RoutingState.h */,
+				A6BA06CB2E2620F200EEB4E7 /* UMSCCP_RoutingState.m */,
 				A6ED5C6B1B435A8A00854472 /* UMLayerSCCP.h */,
 				A6ED5C6C1B435A8A00854472 /* UMLayerSCCP.m */,
 				A64D452B2684893C00540708 /* UMSCCP_PrometheusData.h */,
@@ -339,7 +339,7 @@
 				A6EE01B622E834FB003BA2A5 /* UMSCCP_FilterProtocol.h in Headers */,
 				A61571F61CD4AADF00211137 /* UMSCCP_ReceivedSegments.h in Headers */,
 				A6092FCF228D763A0025D782 /* UMSCCP_Filter.h in Headers */,
-				A6BA06CC2E2620F200EEB4E7 /* UMSCCP_Route.h in Headers */,
+				A6BA06CC2E2620F200EEB4E7 /* UMSCCP_RoutingState.h in Headers */,
 				A664143427BD159600DFF263 /* UMSCCP_PendingSegmentsStorage.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -447,7 +447,7 @@
 			files = (
 				A6F442B31CB2595000C2B472 /* UMSCCPConnection.m in Sources */,
 				A61571EF1CD4891200211137 /* UMSCCP_Segment.m in Sources */,
-				A6BA06CD2E2620F200EEB4E7 /* UMSCCP_Route.m in Sources */,
+				A6BA06CD2E2620F200EEB4E7 /* UMSCCP_RoutingState.m in Sources */,
 				A64D452E2684893C00540708 /* UMSCCP_PrometheusData.m in Sources */,
 				A658E20221E882E600825E4A /* UMSCCP_Filter.m in Sources */,
 				A68494E31CB320BF00211137 /* UMSCCP_mtpResume.m in Sources */,
