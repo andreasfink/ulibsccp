@@ -27,22 +27,22 @@
     return self;
 }
 
-- (UMSCCP_TcapSharing_prerouteResult)preroutingPacketInside:(UMSCCP_Packet *)packet
+- (UMSCCP_TcapSharing_result)preroutingPacketInside:(UMSCCP_Packet *)packet
 {
     return UMSCCP_TcapSharing_routeNormal;
 }
 
-- (UMSCCP_TcapSharing_prerouteResult)postroutingPacketInside:(UMSCCP_Packet *)packet
+- (UMSCCP_TcapSharing_result)postroutingPacketInside:(UMSCCP_Packet *)packet
 {
     return UMSCCP_TcapSharing_routeNormal;
 }
 
-- (UMSCCP_TcapSharing_prerouteResult)preroutingPacketOutside:(UMSCCP_Packet *)packet
+- (UMSCCP_TcapSharing_result)preroutingPacketOutside:(UMSCCP_Packet *)packet
 {
     return UMSCCP_TcapSharing_routeNormal;
 }
 
-- (UMSCCP_TcapSharing_prerouteResult)postroutingPacketOutside:(UMSCCP_Packet *)packet
+- (UMSCCP_TcapSharing_result)postroutingPacketOutside:(UMSCCP_Packet *)packet
 {
     return UMSCCP_TcapSharing_routeNormal;
 }

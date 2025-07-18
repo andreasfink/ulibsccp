@@ -10,6 +10,8 @@
 #import <ulibgt/ulibgt.h>
 #import <ulibsccp/UMSCCP_Defs.h>
 
+@class UMSCCP_ReceivedSegment;
+
 typedef enum UMSCCP_RoutingStatus
 {
     UMSCCP_RoutingStatus_success = 0,
@@ -37,7 +39,7 @@ typedef enum UMSCCP_RoutingErrorProcessing
     /* if we run into errors, thats where we signal it back to */
     UMSCCP_Packet           *_inboundPacket;
     UMSCCP_Packet           *_inboundReassembledPacket;
-    NSArray<UMSCCP_Packet *>*_inboundPacketSegments;
+    NSArray<UMSCCP_ReceivedSegment *>*_inboundPacketSegments;
 
     UMMTP3PointCode         *_dpcForErrors;
     UMMTP3PointCode         *_opcForErrors;
@@ -63,6 +65,14 @@ typedef enum UMSCCP_RoutingErrorProcessing
 
     UMSCCP_Packet           *_packetToDeliver;
     NSArray<UMSCCP_Packet *>*_packetSegmentsToDeliver;
+    UMMTP3_Error            _mtp3DeliveryError;
+    BOOL                    _skipRouting;
+    
+    SccpDestinationGroup    *_forcedDestinationGroup;
+    NSString                *_forcedDestinationName;
+    NSString                *_forcedLinkset;
+    UMMTP3PointCode         *_forcedDpc;
+
     
 }
 
@@ -71,7 +81,7 @@ typedef enum UMSCCP_RoutingErrorProcessing
 
 @property(readwrite,atomic,strong)  UMSCCP_Packet           *inboundPacket;
 @property(readwrite,atomic,strong)  UMSCCP_Packet           *inboundReassembledPacket;
-@property(readwrite,atomic,strong)  NSArray<UMSCCP_Packet *>*inboundPacketSegments;
+@property(readwrite,atomic,strong)  NSArray<UMSCCP_ReceivedSegment *>*inboundPacketSegments;
 
 @property(readwrite,atomic,strong)  UMMTP3PointCode         *dpcForErrors;
 @property(readwrite,atomic,strong)  UMMTP3PointCode         *opcForErrors;
@@ -94,7 +104,14 @@ typedef enum UMSCCP_RoutingErrorProcessing
 @property(readwrite,atomic,strong)  UMMTP3PointCode         *outgoingDpc;
 @property(readwrite,atomic,strong)  NSNumber                *outgoingSlc;
 @property(readwrite,atomic,strong)  UMSCCP_Packet           *packetToDeliver;
-@property(readwrite,atomic,strong)  NSArray<UMSCCP_Packet *>*packetSegmentsToDeliver;
+@property(readwrite,atomic,strong)  NSArray<UMSCCP_ReceivedSegment *>*segmentsToDeliver;
+@property(readwrite,atomic,assign)  UMMTP3_Error            mtp3DeliveryError;
+@property(readwrite,atomic,assign)  BOOL                    skipRouting;
+@property(readwrite,atomic,strong)  SccpDestinationGroup    *forcedDestinationGroup;
+@property(readwrite,atomic,strong)  NSString                *forcedDestinationName;
+@property(readwrite,atomic,strong)  NSString                *forcedLinkset;
+@property(readwrite,atomic,strong)  UMMTP3PointCode         *forcedDpc;
+
 
 - (UMSynchronizedSortedDictionary *)objectValue;
 @end

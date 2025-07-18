@@ -214,7 +214,11 @@ typedef enum UMSCCP_Packet_Tag_enum
     UMSMS                       *_sms;
     NSString                    *_partsInfo;
     NSString                    *_routingSelector;
-    NSString                    *_forcedDestination;
+    NSString                    *_forcedDestinationName;
+    SccpDestinationGroup        *_forcedDestinationGroup;
+    NSString                    *_forcedLinkset;
+    UMMTP3PointCode             *_forcedDpc;
+
     int                         _sls;
     
     SccpNumberTranslation       *_cga_number_translation_in;
@@ -332,7 +336,10 @@ typedef enum UMSCCP_Packet_Tag_enum
 @property(readwrite,strong,atomic)  SccpNumberTranslation       *cda_number_translation_out;
 @property(readwrite,strong,atomic)  UMSCCP_TcapSharingInstance  *incomingLinksetTcapSharingInside;
 @property(readwrite,strong,atomic)  UMSCCP_TcapSharingInstance  *incomingLinksetTcapSharingOutside;
-@property(readwrite,strong,atomic)  NSString                    *forcedDestination;
+@property(readwrite,strong,atomic)  NSString                    *forcedDestinationName;
+@property(readwrite,strong,atomic)  SccpDestinationGroup        *forcedDestinationGroup;
+@property(readwrite,strong,atomic)  NSString                    *forcedLinkset;
+@property(readwrite,strong,atomic)  UMMTP3PointCode             *forcedDpc;
 
 
 - (NSString *) incomingPacketType;

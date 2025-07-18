@@ -11,11 +11,11 @@
 @class UMLayerSCCP;
 @class UMSCCP_Packet;
 
-typedef enum UMSCCP_TcapSharing_prerouteResult
+typedef enum UMSCCP_TcapSharing_result
 {
     UMSCCP_TcapSharing_routeNormal      = 0,
-    UMSCCP_TcapSharing_routingComplete  = 1,
-} UMSCCP_TcapSharing_prerouteResult;
+    UMSCCP_TcapSharing_skipRouting      = 1,
+} UMSCCP_TcapSharing_result;
 
 @interface UMSCCP_TcapSharingInstance : UMBackgrounder
 {
@@ -31,10 +31,10 @@ typedef enum UMSCCP_TcapSharing_prerouteResult
 
 - (UMSCCP_TcapSharingInstance *)initWithConfig:(NSDictionary *)config;
 
-- (UMSCCP_TcapSharing_prerouteResult)preroutingPacketInside:(UMSCCP_Packet *)packet;
-- (UMSCCP_TcapSharing_prerouteResult)postroutingPacketInside:(UMSCCP_Packet *)packet;
-- (UMSCCP_TcapSharing_prerouteResult)preroutingPacketOutside:(UMSCCP_Packet *)packet;
-- (UMSCCP_TcapSharing_prerouteResult)postroutingPacketOutside:(UMSCCP_Packet *)packet;
+- (UMSCCP_TcapSharing_result)preroutingPacketInside:(UMSCCP_Packet *)packet;
+- (UMSCCP_TcapSharing_result)postroutingPacketInside:(UMSCCP_Packet *)packet;
+- (UMSCCP_TcapSharing_result)preroutingPacketOutside:(UMSCCP_Packet *)packet;
+- (UMSCCP_TcapSharing_result)postroutingPacketOutside:(UMSCCP_Packet *)packet;
 
 @end
 
