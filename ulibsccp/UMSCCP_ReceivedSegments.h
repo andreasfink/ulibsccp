@@ -19,6 +19,7 @@
 #define MAKE_SEGMENT_KEY(src,dst,ref)  [NSString stringWithFormat:@"src=%@ dst=%@ ref=%06lx", src.stringValueE164, dst.stringValueE164,ref]
 
 @class UMSCCP_ReceivedSegment;
+@class UMSCCP_Packet;
 
 @interface UMSCCP_ReceivedSegments : UMObject
 {

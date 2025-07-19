@@ -64,7 +64,7 @@ typedef enum UMSCCP_RoutingErrorProcessing
     NSNumber                *_outgoingSlc;
 
     UMSCCP_Packet           *_packetToDeliver;
-    NSArray<UMSCCP_Packet *>*_packetSegmentsToDeliver;
+    NSArray<UMSCCP_ReceivedSegment *>*_packetSegmentsToDeliver;
     UMMTP3_Error            _mtp3DeliveryError;
     BOOL                    _skipRouting;
     
@@ -72,8 +72,6 @@ typedef enum UMSCCP_RoutingErrorProcessing
     NSString                *_forcedDestinationName;
     NSString                *_forcedLinkset;
     UMMTP3PointCode         *_forcedDpc;
-
-    
 }
 
 @property(readwrite,atomic,assign)  UMSCCP_RoutingStatus            status;
@@ -104,7 +102,7 @@ typedef enum UMSCCP_RoutingErrorProcessing
 @property(readwrite,atomic,strong)  UMMTP3PointCode         *outgoingDpc;
 @property(readwrite,atomic,strong)  NSNumber                *outgoingSlc;
 @property(readwrite,atomic,strong)  UMSCCP_Packet           *packetToDeliver;
-@property(readwrite,atomic,strong)  NSArray<UMSCCP_ReceivedSegment *>*segmentsToDeliver;
+@property(readwrite,atomic,strong)  NSArray<UMSCCP_ReceivedSegment *>*packetSegmentsToDeliver;
 @property(readwrite,atomic,assign)  UMMTP3_Error            mtp3DeliveryError;
 @property(readwrite,atomic,assign)  BOOL                    skipRouting;
 @property(readwrite,atomic,strong)  SccpDestinationGroup    *forcedDestinationGroup;
@@ -112,7 +110,7 @@ typedef enum UMSCCP_RoutingErrorProcessing
 @property(readwrite,atomic,strong)  NSString                *forcedLinkset;
 @property(readwrite,atomic,strong)  UMMTP3PointCode         *forcedDpc;
 
-
+- (BOOL)forceRouted;
 - (UMSynchronizedSortedDictionary *)objectValue;
 @end
 

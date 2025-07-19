@@ -479,7 +479,6 @@ sls:(int)sls;
 - (NSDictionary *)config;
 - (void)startUp;
 
-+ (NSString *)reasonString:(SCCP_ReturnCause)reason;
 - (id)decodePdu:(NSData *)data;
 - (void)traceSentPdu:(NSData *)pdu options:(NSDictionary *)dict;
 - (void)traceSentPacket:(UMSCCP_Packet *)packet options:(NSDictionary *)dict;
@@ -523,5 +522,6 @@ qualityOfService:(int)qos
 - (void)reloadPluginConfigs;
 - (void)reloadPlugins;
 + (NSString *)causeValueToString:(SCCP_ReturnCause)causeValue;
+
 
 @end

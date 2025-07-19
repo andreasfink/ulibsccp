@@ -84,7 +84,6 @@ typedef enum UMTCAP_Command
         _tags = [[UMSynchronizedDictionary alloc]init];
         _incomingReturnCause = SCCP_ReturnCause_not_set;
         _outgoingReturnCause = SCCP_ReturnCause_not_set;
-
 	}
 	return self;
 }
@@ -92,44 +91,12 @@ typedef enum UMTCAP_Command
 
 - (NSString *)incomingPacketType
 {
-    switch(_incomingServiceType)
-    {
-        case SCCP_UDT:
-            return @"UDT";
-        case SCCP_UDTS:
-            return @"UDTS";
-        case SCCP_XUDT:
-            return @"XUDT";
-        case SCCP_XUDTS:
-            return @"XUDTS";
-        case SCCP_LUDT:
-            return @"LUDT";
-        case SCCP_LUDTS:
-            return @"LUDTS";
-        default:
-            return [NSString stringWithFormat:@"%d",_incomingServiceType];
-    }
+    return [UMSCCP_Packet sccpServiceTypeToString:_incomingServiceType];
 }
 
 - (NSString *)outgoingPacketType
 {
-    switch(_outgoingServiceType)
-    {
-        case SCCP_UDT:
-            return @"UDT";
-        case SCCP_UDTS:
-            return @"UDTS";
-        case SCCP_XUDT:
-            return @"XUDT";
-        case SCCP_XUDTS:
-            return @"XUDTS";
-        case SCCP_LUDT:
-            return @"LUDT";
-        case SCCP_LUDTS:
-            return @"LUDTS";
-        default:
-            return [NSString stringWithFormat:@"%d",_outgoingServiceType];
-    }
+    return [UMSCCP_Packet sccpServiceTypeToString:_outgoingServiceType];
 }
 
 - (void)copyIncomingToOutgoing
@@ -289,80 +256,14 @@ typedef enum UMTCAP_Command
     [s appendFormat:@"\t_segmented: %@\n", _segmented ? _segmented : @"NULL"];
     [s appendFormat:@"\t_afterFilter4: %@\n", _afterFilter4 ? _afterFilter4 : @"NULL"];
     [s appendFormat:@"\t_queuedForDelivery: %@\n", _queuedForDelivery ? _queuedForDelivery : @"NULL"];
-    switch(_state)
-    {
-        case       SCCP_STATE_IDLE:
-            [s appendFormat:@"\t_state: SCCP_STATE_IDLE\n"];
-            break;
-        case       SCCP_STATE_DATA_TRANSFER:
-            [s appendFormat:@"\t_state: SCCP_STATE_DATA_TRANSFER\n"];
-            break;
-        case       SCCP_STATE_INCOMING_CONNECTION_PENDING:
-            [s appendFormat:@"\t_state: SCCP_STATE_INCOMING_CONNECTION_PENDING\n"];
-            break;
-        case       SCCP_STATE_PROVIDER_INITIATED_RESET_PENDING:
-            [s appendFormat:@"\t_state: SCCP_STATE_PROVIDER_INITIATED_RESET_PENDING\n"];
-            break;
-        case       SCCP_STATE_OUTGOING_CONNECTION_PENDING:
-            [s appendFormat:@"\t_state: SCCP_STATE_OUTGOING_CONNECTION_PENDING\n"];
-            break;
-        case       SCCP_STATE_USER_REQUEST_RESET_PENDING:
-            [s appendFormat:@"\t_state: SCCP_STATE_USER_REQUEST_RESET_PENDING\n"];
-            break;
-        default:
-            [s appendFormat:@"\t_state: unknown(%d)\n",(int)_state];
-            break;
-    }
+    [s appendFormat:@"\t_state: %@\n", [UMSCCP_Packet sccpStatToString:_state]];
     [s appendFormat:@"\t_incomingLocalUser: %@\n", _incomingLocalUser ? _incomingLocalUser.layerName : @"NULL"];
     [s appendFormat:@"\t_incomingMtp3Layer: %@\n", _incomingMtp3Layer ? _incomingMtp3Layer.layerName : @"NULL"];
     [s appendFormat:@"\t_incomingOptions: %@\n", _incomingOptions ? _incomingOptions : @"NULL"];
     [s appendFormat:@"\t_incomingOpc: %@\n", _incomingOpc ? _incomingOpc : @"NULL"];
     [s appendFormat:@"\t_incomingOptions: %@\n", _incomingDpc ? _incomingDpc : @"NULL"];
-    switch(_incomingServiceClass)
-    {
-        case SCCP_CLASS_UNDEFINED:
-            [s appendFormat:@"\t_incomingServiceClass: SCCP_CLASS_UNDEFINED\n"];
-            break;
-        case SCCP_CLASS_BASIC:
-            [s appendFormat:@"\t_incomingServiceClass: SCCP_CLASS_BASIC\n"];
-            break;
-        case SCCP_CLASS_INSEQ_CL:
-            [s appendFormat:@"\t_incomingServiceClass: SCCP_CLASS_INSEQ_CL\n"];
-            break;
-        case SCCP_CLASS_BASIC_CO:
-            [s appendFormat:@"\t_incomingServiceClass: SCCP_CLASS_BASIC_CO\n"];
-            break;
-        case SCCP_CLASS_FLOW_CONTROL_CO:
-            [s appendFormat:@"\t_incomingServiceClass: SCCP_CLASS_FLOW_CONTROL_CO\n"];
-            break;
-        default:
-            [s appendFormat:@"\t_incomingServiceClass: undefined(%d)\n",_incomingServiceClass];
-            break;
-    }
-    switch(_incomingServiceType)
-    {
-        case SCCP_UDT:
-            [s appendFormat:@"\t_incomingServiceType: SCCP_UDT\n"];
-            break;
-        case SCCP_UDTS:
-            [s appendFormat:@"\t_incomingServiceType: SCCP_UDTS\n"];
-            break;
-        case SCCP_XUDT:
-            [s appendFormat:@"\t_incomingServiceType: SCCP_XUDT\n"];
-            break;
-        case SCCP_XUDTS:
-            [s appendFormat:@"\t_incomingServiceType: SCCP_XUDTS\n"];
-            break;
-        case SCCP_LUDT:
-            [s appendFormat:@"\t_incomingServiceType: SCCP_LUDT\n"];
-            break;
-        case SCCP_LUDTS:
-            [s appendFormat:@"\t_incomingServiceType: SCCP_LUDTS\n"];
-            break;
-        default:
-            [s appendFormat:@"\t_incomingServiceType: unknown(%d)\n",_incomingServiceType];
-            break;
-    }
+    [s appendFormat:@"\t_incomingServiceClass: %@\n",[UMSCCP_Packet sccpServiceClassToString:_incomingServiceClass]];
+    [s appendFormat:@"\t_incomingServiceType: %@\n",[UMSCCP_Packet sccpServiceTypeToString:_incomingServiceType]];
     [s appendFormat:@"\t_incomingHandling: %d\n",_incomingHandling];
     [s appendFormat:@"\t_incomingMaxHopCount: %d\n",_incomingMaxHopCount];
     [s appendFormat:@"\t_incomingFromLocal: %@\n",_incomingFromLocal ? @"YES" : @"NO"];
@@ -629,36 +530,7 @@ typedef enum UMTCAP_Command
     DICT_SET_STRING(dict2,@"queuedForDelivery",[_queuedForDelivery stringValue]);
     DICT_SET_STRING(dict,@"sccp_debug",[dict2 jsonCompactString]);
 
-    switch(_state)
-    {
-        case SCCP_STATE_IDLE:
-            dict[@"sccp_state"] = @"IDLE";
-            break;
-
-        case SCCP_STATE_DATA_TRANSFER:
-            dict[@"sccp_state"] = @"DATA_TRANSFER";
-            break;
-
-        case SCCP_STATE_INCOMING_CONNECTION_PENDING:
-            dict[@"sccp_state"] = @"INCOMING_CONNECTION_PENDING";
-            break;
-
-        case SCCP_STATE_PROVIDER_INITIATED_RESET_PENDING:
-            dict[@"sccp_state"] = @"PROVIDER_INITIATED_RESET_PENDING";
-            break;
-
-        case SCCP_STATE_OUTGOING_CONNECTION_PENDING:
-            dict[@"sccp_state"] = @"OUTGOING_CONNECTION_PENDING";
-            break;
-
-        case SCCP_STATE_USER_REQUEST_RESET_PENDING:
-            dict[@"sccp_state"] = @"USER_REQUEST_RESET_PENDING";
-            break;
-        default:
-            dict[@"sccp_state"] = @"USER_REQUEST_RESET_PENDING";
-
-    }
-
+    dict[@"sccp_state"] = [UMSCCP_Packet sccpStatToString:_state];
 
     switch(_incomingServiceClass)
     {
@@ -681,90 +553,14 @@ typedef enum UMTCAP_Command
             dict[@"sccp_service_class"] = @"";
     }
     BOOL hasCause = NO;
-    switch(_incomingServiceType)
-    {
-        case    SCCP_UDT:
-            dict[@"sccp_service_type"] = @"UDT";
-            break;
-        case    SCCP_UDTS:
-            dict[@"sccp_service_type"] = @"UDTS";
-            hasCause = YES;
-
-            break;
-        case    SCCP_XUDT:
-            dict[@"sccp_service_type"] = @"XUDT";
-            break;
-        case    SCCP_XUDTS:
-            dict[@"sccp_service_type"] = @"XUDTS";
-            hasCause = YES;
-            break;
-        case    SCCP_LUDT:
-            dict[@"sccp_service_type"] = @"LUDT";
-            break;
-        case    SCCP_LUDTS:
-            dict[@"sccp_service_type"] = @"LUDTS";
-            hasCause = YES;
-            break;
-        default:
-            dict[@"sccp_service_type"] = @"";
-            break;
-    }
+    
+    dict[@"sccp_service_type"] = [UMSCCP_Packet sccpServiceTypeToString:_incomingServiceType];
     DICT_SET_INTEGER(dict,@"sccp_handling",_incomingHandling);
     DICT_SET_INTEGER(dict,@"sccp_hopcount",_incomingMaxHopCount);
     if(hasCause)
     {
-        switch(_incomingReturnCause)
-        {
-            case SCCP_ReturnCause_NoTranslationForAnAddressOfSuchNature:
-                dict[@"sccp_return_cause"] = @"0: NOTRANS NOA";
-                break;
-            case SCCP_ReturnCause_NoTranslationForThisSpecificAddress:
-                dict[@"sccp_return_cause"] = @"1: NOTRANS ADDR";
-                break;
-            case SCCP_ReturnCause_SubsystemCongestion:
-                dict[@"sccp_return_cause"] = @"2: CONGESTION";
-                break;
-            case SCCP_ReturnCause_SubsystemFailure:
-                dict[@"sccp_return_cause"] = @"3: SSFAIL";
-                break;
-            case SCCP_ReturnCause_Unequipped:
-                dict[@"sccp_return_cause"] = @"4: UNEQUIPPED";
-                break;
-            case SCCP_ReturnCause_MTPFailure:
-                dict[@"sccp_return_cause"] = @"5: MTPFAIL";
-                break;
-            case SCCP_ReturnCause_NetworkCongestion:
-                dict[@"sccp_return_cause"] = @"6: NETCONGEST";
-                break;
-            case SCCP_ReturnCause_Unqualified:
-                dict[@"sccp_return_cause"] = @"7: UNQUALIFIED";
-                break;
-            case SCCP_ReturnCause_ErrorInMessageTransport:
-                dict[@"sccp_return_cause"] = @"8: ERROR IN MSGTRANS";
-                break;
-            case SCCP_ReturnCause_ErrorInLocalProcessing:
-                dict[@"sccp_return_cause"] = @"9: ERROR LOCAL PROC";
-                break;
-            case SCCP_ReturnCause_DestinationCannotPerformReassembly:
-                dict[@"sccp_return_cause"] = @"10: REASSEMBLY NOT SUPP";
-                break;
-            case SCCP_ReturnCause_SCCPFailure:
-                dict[@"sccp_return_cause"] = @"11: SCCPFAILURE";
-                break;
-            case SCCP_ReturnCause_HopCounterViolation:
-                dict[@"sccp_return_cause"] = @"12: HOPCOUNT";
-                break;
-            case SCCP_ReturnCause_SegmentationNotSupported:
-                dict[@"sccp_return_cause"] = @"13: SEGMENTATION NOTSUPP";
-                break;
-            case SCCP_ReturnCause_SegmentationFailure:
-                dict[@"sccp_return_cause"] = @"14: SEGMENTATION FAILURE";
-                break;
-            case SCCP_ReturnCause_not_set:
-            default:
-                    dict[@"sccp_return_cause"] = @"";
-                    break;
-        }
+        NSString *s = [UMLayerSCCP causeValueToString: _incomingReturnCause];
+        dict[@"sccp_return_cause"] = [NSString stringWithFormat:@"%d: %@",_incomingReturnCause,s];
     }
     return dict;
 }
@@ -901,6 +697,137 @@ typedef enum UMTCAP_Command
             _outgoingCallingPartyAddress.tt.tt = newCallingTT.intValue;
         }
     }
+}
+
+
++(NSString *)sccpServiceTypeToString:(SCCP_ServiceType)i
+{
+    switch(i)
+    {
+        case SCCP_UDT:
+        {
+            return @"UDT";
+        }
+        case SCCP_UDTS:
+        {
+            return @"UDTS";
+        }
+        case SCCP_XUDT:
+        {
+            return @"XUDT";
+        }
+        case SCCP_XUDTS:
+        {
+            return @"XUDTS";
+        }
+        case SCCP_LUDT:
+        {
+            return @"LUDT";
+        }
+        case SCCP_LUDTS:
+        {
+            return @"LUDTS";
+        }
+        default:
+        {
+            return [NSString stringWithFormat:@"%d",i];
+        }
+    }
+}
+
++ (SCCP_ServiceType) stringToSccpServiceType:(NSString *)str
+{
+    if([str isEqualToStringCaseInsensitive:@"UDT"])
+    {
+        return SCCP_UDT;
+    }
+    else if([str isEqualToStringCaseInsensitive:@"UDTS"])
+    {
+        return SCCP_UDTS;
+    }
+    else if([str isEqualToStringCaseInsensitive:@"XUDT"])
+    {
+        return SCCP_XUDT;
+    }
+    else if([str isEqualToStringCaseInsensitive:@"XUDTS"])
+    {
+        return SCCP_XUDTS;
+    }
+    else if([str isEqualToStringCaseInsensitive:@"LUDT"])
+    {
+        return SCCP_LUDT;
+    }
+    else if([str isEqualToStringCaseInsensitive:@"LUDTS"])
+    {
+        return SCCP_LUDTS;
+    }
+    else
+    {
+        return (SCCP_ServiceType)[str integerValue];
+    }
+}
+
+
++ (NSString *) sccpStatToString:(SCCP_State)state
+{
+    NSString *s;
+    switch(state)
+    {
+        case SCCP_STATE_IDLE:
+            s = @"IDLE";
+            break;
+            
+        case SCCP_STATE_DATA_TRANSFER:
+            s = @"DATA_TRANSFER";
+            break;
+            
+        case SCCP_STATE_INCOMING_CONNECTION_PENDING:
+            s = @"INCOMING_CONNECTION_PENDING";
+            break;
+            
+        case SCCP_STATE_PROVIDER_INITIATED_RESET_PENDING:
+            s = @"PROVIDER_INITIATED_RESET_PENDING";
+            break;
+            
+        case SCCP_STATE_OUTGOING_CONNECTION_PENDING:
+            s = @"OUTGOING_CONNECTION_PENDING";
+            break;
+            
+        case SCCP_STATE_USER_REQUEST_RESET_PENDING:
+            s = @"USER_REQUEST_RESET_PENDING";
+            break;
+        default:
+            s = [NSString stringWithFormat:@"unknown(%d)",(int)state];
+            break;
+    }
+    return s;
+}
+
++ (NSString *) sccpServiceClassToString:(SCCP_ServiceClass)serviceClass
+{
+    NSString *s;
+    switch(serviceClass)
+    {
+        case SCCP_CLASS_UNDEFINED:
+            s = @"UNDEFINED";
+            break;
+        case SCCP_CLASS_BASIC:
+            s = @"BASIC";
+            break;
+        case SCCP_CLASS_INSEQ_CL:
+            s = @"INSEQ_CL";
+            break;
+        case SCCP_CLASS_BASIC_CO:
+            s = @"BASIC_CO";
+            break;
+        case SCCP_CLASS_FLOW_CONTROL_CO:
+            s = @"FLOW_CONTROL_CO";
+            break;
+        default:
+            s = [NSString stringWithFormat:@"unknown(%d)",(int)serviceClass];
+            break;
+    }
+    return s;
 }
 
 @end

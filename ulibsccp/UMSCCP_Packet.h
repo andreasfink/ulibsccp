@@ -357,5 +357,11 @@ typedef enum UMSCCP_Packet_Tag_enum
 
 - (void)applyIncomingNumberTranslation;
 - (void)applyOutgoingNumberTranslation;
+
++ (NSString *)sccpServiceTypeToString:(SCCP_ServiceType)i;
++ (SCCP_ServiceType) stringToSccpServiceType:(NSString *)str;
++ (NSString *) sccpStatToString:(SCCP_State)state;
++ (NSString *) sccpServiceClassToString:(SCCP_ServiceClass)serviceClass;
+
 @end
 

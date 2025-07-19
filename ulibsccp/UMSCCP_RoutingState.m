@@ -24,7 +24,7 @@
 
 - (UMSynchronizedSortedDictionary *)objectValue
 {
-
+    
     UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc] init];
     if(_dpcForErrors)
     {
@@ -58,7 +58,7 @@
     {
         dict[@"error-packet-segments"] = _errorPacketSegments;
     }
-
+    
     if(_deliverLocal)
     {
         dict[@"deliver-local"] = @(YES);
@@ -79,7 +79,7 @@
     {
         dict[@"cause"] = [NSString stringWithFormat:@"%@: %@",_cause,[UMLayerSCCP causeValueToString: _cause.intValue]];
     }
-
+    
     if(_destinationGroup)
     {
         dict[@"destination-group"] = _destinationGroup.name;
@@ -87,7 +87,7 @@
     if(_outgoingLinksetName)
     {
         dict[@"outgoing-linkset-name"] = _outgoingLinksetName;
-
+        
     }
     if(_outgoingDpc)
     {
@@ -105,7 +105,31 @@
     {
         dict[@"packet-segments-to-deliver"] = _packetSegmentsToDeliver;
     }
+    if(_forcedDestinationGroup)
+    {
+        dict[@"forced-destination-group"] = _forcedDestinationGroup;
+    }
+    if(_forcedDestinationName)
+    {
+        dict[@"forced-destination"] = _forcedDestinationName;
+    }
+    if(_forcedLinkset)
+    {
+        dict[@"forced-linkset"] = _forcedLinkset;
+    }
+    if(_forcedDpc)
+    {
+        dict[@"forced-dpc"] = _forcedDpc.objectValue;
+    }
     return dict;
 }
 
+- (BOOL)forceRouted
+{
+    if(_forcedDestinationGroup || _forcedDestinationName || _forcedLinkset || _forcedDpc)
+    {
+        return YES;
+    }
+    return NO;
+}
 @end
