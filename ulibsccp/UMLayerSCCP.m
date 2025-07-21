@@ -2661,8 +2661,8 @@
     {                                                                   \
         if(self.logLevel <=UMLOG_DEBUG)                                 \
         {                                                               \
-            [self.logFeed debugText:[NSString stringWithFormat@"entering %@",sectionname]];       \
-            [self.logFeed debugText:[NSString stringWithFormat@"routingState: %@",routingState.objectValue.jsonString]];       \
+[self.logFeed debugText:[NSString stringWithFormat:@"entering %@",sectionname]];       \
+[self.logFeed debugText:[NSString stringWithFormat:@"routingState: %@",routingState.objectValue.jsonString]];       \
         }                                                               \
         [self method:routingState];                                     \
         switch(routingState.status)                                     \
