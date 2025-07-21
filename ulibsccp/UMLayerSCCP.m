@@ -2084,9 +2084,8 @@
 
 - (void) processPostroutingTcapSharing:(UMSCCP_RoutingState *)routingState
 {
-    UMSCCP_TcapSharingInstance  *inside    = packet.incomingLinksetTcapSharingInside;
-    UMSCCP_TcapSharingInstance  *outside   = packet.incomingLinksetTcapSharingOutside;
-
+ //   UMSCCP_TcapSharingInstance  *inside    = packet.incomingLinksetTcapSharingInside;
+ //   UMSCCP_TcapSharingInstance  *outside   = packet.incomingLinksetTcapSharingOutside;
 }
 
 - (void)processForcedRouting:(UMSCCP_RoutingState *)routingState
@@ -3294,9 +3293,9 @@
 {
     @autoreleasepool
     {
+        [self readLayerConfig:cfg];
         _filterDelegate = appContext;
         _appDelegate =appContext;
-        [self readLayerConfig:cfg];
         if(cfg[@"attach-to"])
         {
             _mtp3_name =  [cfg[@"attach-to"] stringValue];
