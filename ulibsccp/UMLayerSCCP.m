@@ -1968,7 +1968,7 @@
                     [combined appendData:s.segment.data];
                 }
             }
-            firstSegment.combinedPacket = [firstSegment.segmentedPacket copy];
+            UMSCCP_Packet *combinedPacket = [firstSegment.segmentedPacket copy];
             if(self.logLevel <=UMLOG_DEBUG)
             {
                 [self.logFeed debugText:[NSString stringWithFormat:@"combined Data: %@",combined]];
@@ -1976,8 +1976,8 @@
             }
             
             /* at this point "combined" should have the reassembled PDU */
-            firstSegment.combinedPacket.incomingSccpData = combined;
-            firstSegment.combinedPacket.outgoingSccpData = combined;
+            combinedPacket.incomingSccpData = combined;
+            combinedPacket.outgoingSccpData = combined;
             
             if(self.logLevel <=UMLOG_DEBUG)
             {
@@ -1986,7 +1986,7 @@
             }
             /* all segments received */
             routingState.status  = UMSCCP_RoutingStatus_success;
-            routingState.inboundReassembledPacket = firstSegment.combinedPacket;
+            routingState.inboundReassembledPacket = combinedPacket;
             if(self.logLevel <=UMLOG_DEBUG)
             {
                 [self.logFeed debugText:[NSString stringWithFormat:@"inboundReassembledPacket is set to  %@",routingState.inboundReassembledPacket]];
