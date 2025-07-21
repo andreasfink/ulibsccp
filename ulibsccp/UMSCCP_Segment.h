@@ -30,5 +30,5 @@
 - (NSData *)segmentationHeader;
 - (UMSCCP_Segment *)initWithHeaderData:(NSData *)d;
 - (NSString *)description;
-
+- (UMSynchronizedSortedDictionary *)objectValue;
 @end

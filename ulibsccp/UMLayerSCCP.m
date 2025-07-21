@@ -2424,11 +2424,13 @@
                     [self.logFeed debugText:[NSString stringWithFormat:@" Sending XUDT with %lu segments",segments.count]];
                 }
                 int sls = routingPacket.sls % 16;
+                int no = 0;
                 for(UMSCCP_ReceivedSegment *seg in segments)
                 {
+                    no++;
                     if(self.logLevel <=UMLOG_DEBUG)
                     {
-                        [self.logFeed debugText:[NSString stringWithFormat:@"Sending XUDT segment #%@",seg]];
+                        [self.logFeed debugText:[NSString stringWithFormat:@"Sending XUDT segment #%d: %@",seg.description]];
                     }
                     seg.opc = routingPacket.outgoingMtp3Layer.opc;
                     seg.dpc = routingPacket.outgoingDpc;
