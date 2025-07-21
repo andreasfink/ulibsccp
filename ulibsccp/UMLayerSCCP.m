@@ -2084,8 +2084,8 @@
 
 - (void) processPostroutingTcapSharing:(UMSCCP_RoutingState *)routingState
 {
-    UMSCCP_TcapSharingInstance  *inside    = packet.incomingLinksetTcapSharingInside;
-    UMSCCP_TcapSharingInstance  *outside   = packet.incomingLinksetTcapSharingOutside;
+    //UMSCCP_TcapSharingInstance  *inside    = packet.incomingLinksetTcapSharingInside;
+    //UMSCCP_TcapSharingInstance  *outside   = packet.incomingLinksetTcapSharingOutside;
 
 }
 
