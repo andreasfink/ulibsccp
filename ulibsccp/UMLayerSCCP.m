@@ -2438,7 +2438,6 @@
                                       provider:seg.provider
                                routedToLinkset:&outgoingLinkset
                                            sls:sls];
-                    first=NO;
                 }
             }
             else
