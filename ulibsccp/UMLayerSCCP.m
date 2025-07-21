@@ -2374,7 +2374,7 @@
     UMSCCP_Packet *routingPacket = routingState.inboundReassembledPacket;
     
     NSArray<UMSCCP_ReceivedSegment *>*segments = routingState.packetSegmentsToDeliver;
-    BOOL processSegmentedDelivery = segments.count > 0) ? YES : NO;
+    BOOL processSegmentedDelivery = (segments.count > 0) ? YES : NO;
     
     UMMTP3_Error e = UMMTP3_no_error;
     NSString *outgoingLinkset = routingPacket.outgoingLinksetName;
