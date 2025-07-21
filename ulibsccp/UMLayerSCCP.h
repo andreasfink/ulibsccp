@@ -89,15 +89,15 @@ typedef enum UMSccpScreening_result
     UMSCCP_StatisticDb          *_statisticDb;
     NSString                    *_statisticDbInstance;
 
-    id<UMSCCP_TracefileProtocol>    _problematicTraceDestination;
-    id<UMSCCP_TracefileProtocol>    _unrouteablePacketsTraceDestination;
-    BOOL                         _routeErrorsBackToOriginatingPointCode;
-    id<UMSCCP_FilterDelegateProtocol> _filterDelegate;
+    id<UMSCCP_TracefileProtocol>        _problematicTraceDestination;
+    id<UMSCCP_TracefileProtocol>        _unrouteablePacketsTraceDestination;
+    BOOL                                _routeErrorsBackToOriginatingPointCode;
+    id<UMSCCP_FilterDelegateProtocol>   _filterDelegate;
     id<UMLayerSCCPApplicationContextProtocol>_appDelegate;
-    UMTimer                     *_housekeepingTimer;
-    BOOL                        _automaticAnsiItuConversion;
-    NSNumber                    *_conversion_e164_tt;
-    NSNumber                    *_conversion_e212_tt;
+    UMTimer                                 *_housekeepingTimer;
+    BOOL                                    _automaticAnsiItuConversion;
+    NSNumber                                *_conversion_e164_tt;
+    NSNumber                                *_conversion_e212_tt;
     
     NSString                                *_sccp_screeningPluginName;
     NSString                                *_sccp_screeningPluginConfigFileName;
@@ -522,6 +522,12 @@ qualityOfService:(int)qos
 - (void)reloadPluginConfigs;
 - (void)reloadPlugins;
 + (NSString *)causeValueToString:(SCCP_ReturnCause)causeValue;
+
+- (NSArray <UMSCCP_Segment *>*)splitDataIntoSegments:(NSData *)data
+                                    withSegmentSizes:(NSArray<NSNumber *>*)segmentSizes
+                                           reference:(unsigned int)ref
+                                              maxPdu:(NSUInteger)maxPdu
+                                       protocolClass:(SCCP_ServiceClass)pclass;
 
 
 @end

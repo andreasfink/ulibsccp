@@ -326,10 +326,11 @@ static int segmentReferenceId;
                         ref = segmentReferenceId;
                     }
 
-                    _dataSegments  = [self splitDataIntoSegments:_data
-                                                withSegmentSizes:segmentSizes
-                                                       reference:ref
-                                                          maxPdu:maxPdu];
+                    _dataSegments  = [_sccpLayer splitDataIntoSegments:_data
+                                                      withSegmentSizes:segmentSizes
+                                                             reference:ref
+                                                                maxPdu:maxPdu
+                                                         protocolClass:_protocolClass];
                     NSUInteger count = _dataSegments.count;
                     _data = NULL;
                     for(int i=0;i<count;i++)
@@ -438,7 +439,7 @@ static int segmentReferenceId;
                         [_sccpLayer.logFeed debugText:@"fromLocalFilter returns DROP"];
                         return;
                     }
-                    /* UMSCCP_RoutingState *routingState = */[_sccpLayer routePacket:packet];
+                    [_sccpLayer routePacket:packet];
                     
                     if(_sccpLayer.statisticDb)
                     {
@@ -512,7 +513,8 @@ static int segmentReferenceId;
     }
 }
 
-- (NSArray <UMSCCP_Segment *>*)splitDataIntoSegments:(NSData *)data
+#if 0
++ (NSArray <UMSCCP_Segment *>*)splitDataIntoSegments:(NSData *)data
                                     withSegmentSizes:(NSArray<NSNumber *>*)segmentSizes
                                            reference:(unsigned int)ref
                                               maxPdu:(NSUInteger)maxPdu
@@ -614,4 +616,6 @@ static int segmentReferenceId;
     }
     return segments;
 }
+#endif
+
 @end

@@ -2369,6 +2369,131 @@
      also split before submitting. This would only apply if we resize packets to smaller ones and thus resplit
      the already existing packets for some reason. But thats not currently done... YET.
      */
+    
+    /* if mustSegment is set, we must recreate the outgoing segments, not just use them 1:1  */
+    /* this can happen if a filter has to modify the reassembled PDU and it might get longer */
+    /* or if the outbound maximum packet size is smaller */
+    
+    UMSCCP_Packet *packet = routingState.inboundReassembledPacket;
+    
+    NSData *srcEncoded = [packet.outgoingCallingPartyAddress encode:_sccpVariant];
+    NSData *dstEncoded = [packet.outgoingCalledPartyAddress encode:_sccpVariant];
+    NSUInteger cas = srcEncoded.length;
+    NSUInteger cds = dstEncoded.length;
+    
+    BOOL useUDT         = (packet.outgoingServiceType == SCCP_UDT);
+    BOOL useXUDT        = (packet.outgoingServiceType == SCCP_XUDT);
+    BOOL useLUDT        = (packet.outgoingServiceType == SCCP_LUDT);
+    BOOL hasSegments    = (routingState.packetSegmentsToDeliver.count > 0);
+    
+    NSInteger   maxPduUDT = [self maxPayloadSizeForServiceType:SCCP_UDT
+                                            callingAddressSize:cas
+                                             calledAddressSize:cds
+                                                 usingSegments:hasSegments
+                                                      provider:_mtp3];
+    
+    NSInteger   maxPduXUDT = [self maxPayloadSizeForServiceType:SCCP_XUDT
+                                             callingAddressSize:cas
+                                              calledAddressSize:cds
+                                                  usingSegments:packet.segmented
+                                                       provider:_mtp3];
+    NSInteger   maxPduLUDT = [self maxPayloadSizeForServiceType:SCCP_LUDT
+                                             callingAddressSize:cas
+                                              calledAddressSize:cds
+                                                  usingSegments:hasSegments
+                                                       provider:_mtp3];
+    
+    /* we have single data as input, no segments yet */
+    if(useUDT)
+    {
+        if(packet.outgoingSccpData.length > maxPduUDT)
+        {
+            /* no choice, we must segment */
+            routingState.mustResegment=YES;
+            useXUDT = YES;
+        }
+    }
+    else if(useXUDT)
+    {
+        if(packet.outgoingSccpData.length > maxPduXUDT)
+        {
+            /* no choice, we must segment */
+            routingState.mustResegment=YES;
+            useXUDT = YES;
+        }
+    }
+    else if(useLUDT)
+    {
+        if(packet.outgoingSccpData.length > maxPduLUDT)
+        {
+            /* no choice, we must segment */
+            routingState.mustResegment=YES;
+            useLUDT = YES;
+        }
+    }
+    
+    if(useXUDT)
+    {
+        if(packet.outgoingSccpData.length > maxPduXUDT)
+        {
+            /* no choice, we must segment */
+            routingState.mustResegment = YES;
+        }
+    }
+    else if(useLUDT)/* use XUDT is set */
+    {
+        if(packet.outgoingSccpData.length > maxPduLUDT)
+        {
+            routingState.mustResegment = YES;
+        }
+    }
+    
+    static int _segmentReferenceId;
+    
+    if(routingState.mustResegment)
+    {
+        unsigned int ref;
+        @synchronized(self)
+        {
+            _segmentReferenceId = _segmentReferenceId + 1;
+            _segmentReferenceId = _segmentReferenceId % 0xFFFFFF;
+            ref = _segmentReferenceId;
+        }
+        NSArray *dataSegments  = [self splitDataIntoSegments:routingState.inboundReassembledPacket.outgoingSccpData
+                                            withSegmentSizes:NULL
+                                                   reference:ref
+                                                      maxPdu:(useXUDT ? maxPduXUDT : maxPduLUDT)
+                                               protocolClass:routingState.inboundReassembledPacket.outgoingServiceClass];
+
+        NSUInteger count = dataSegments.count;
+        NSMutableArray *arr = [[NSMutableArray alloc]init];
+        for(int i=0;i<count;i++)
+        {
+            UMSCCP_Segment *ds           = dataSegments[i];
+            UMSCCP_ReceivedSegment *s = [[UMSCCP_ReceivedSegment alloc]init];
+            s.src = packet.outgoingCallingPartyAddress;
+            s.dst = packet.outgoingCalledPartyAddress;
+            s.pclass = packet.outgoingServiceClass;
+            s.handling = packet.outgoingHandling;
+            s.hopCount = packet.outgoingMaxHopCount;
+            s.opc = packet.outgoingOpc;
+            s.dpc = packet.outgoingDpc;
+            s.optionsData = packet.outgoingOptionalData;
+            s.options = packet.outgoingOptions;
+            s.provider = _mtp3;
+            s.sls = packet.sls;
+            s.segment = ds;
+            s.reference = packet.incomingSegment.reference;
+            s.segmentedPacket = [packet copy];
+            if(s.segment.first)
+            {
+                s.combinedPacket = packet;
+            }
+            [arr addObject:s];
+        }
+        routingState.packetSegmentsToDeliver = arr;
+        routingState.packetToDeliver = NULL;
+    }
 }
 
 - (void)processDelivery:(UMSCCP_RoutingState *)routingState
@@ -5620,6 +5745,108 @@
     [self openSccpScreeningTraceFile];
 }
 
+- (NSArray <UMSCCP_Segment *>*)splitDataIntoSegments:(NSData *)data
+                                    withSegmentSizes:(NSArray<NSNumber *>*)segmentSizes
+                                           reference:(unsigned int)ref
+                                              maxPdu:(NSUInteger)maxPdu
+                                       protocolClass:(SCCP_ServiceClass)pclass
+{
+    BOOL debug =( _logLevel <=UMLOG_DEBUG);
+    if(debug)
+    {
+        NSMutableString *s = [[NSMutableString alloc]init];
+        [s appendFormat:@"Entering splitDataIntoSegments: %@\n",[data hexString]];
+        [s appendFormat:@"\twithSegmentSizes: {"];
+        for(int i=0;i<segmentSizes.count;i++)
+        {
+            NSNumber *num = segmentSizes[i];
+            int n = [num intValue];
+            if(i>0)
+            {
+                [s appendFormat:@", %d",n];
+            }
+            else
+            {
+                [s appendFormat:@"%d", n];
+            }
+        }
+        [s appendFormat:@"}\n"];
+        [s appendFormat:@"\treference:%u\n",ref];
+        [s appendFormat:@"\tmaxPdu:%ld\n",(long)maxPdu];
+        [self logDebug:s];
+    }
+    NSMutableArray<UMSCCP_Segment *> *segments = [[NSMutableArray alloc]init];
 
+    NSData *remainingData = [data copy];
+    
+    NSUInteger remainingLength = remainingData.length;
+    NSUInteger index=0;
+    while(remainingLength > 0)
+    {
+        NSUInteger currentLength = maxPdu;
+        if((segmentSizes!=NULL) && (segmentSizes.count < index))
+        {
+            NSNumber *n = segmentSizes[index];
+            currentLength = [n intValue];
+            if(currentLength > maxPdu)
+            {
+                currentLength = maxPdu;
+            }
+        }
+        else if((segmentSizes!=NULL) && (segmentSizes.count>0))
+        {
+            NSNumber *n = segmentSizes[segmentSizes.count -1];
+            currentLength = [n intValue];
+            if(currentLength > maxPdu)
+            {
+                currentLength = maxPdu;
+            }
+        }
+        else
+        {
+            currentLength = maxPdu;
+        }
+        if(currentLength > remainingLength)
+        {
+            currentLength = remainingLength;
+        }
+        UMSCCP_Segment *currentSegment = [[UMSCCP_Segment alloc]init];
+        if(index==0)
+        {
+            currentSegment.first = YES;
+        }
+        else
+        {
+            currentSegment.first = NO;
+        }
+        currentSegment.class1 = (pclass == SCCP_CLASS_INSEQ_CL);
+        currentSegment.reference = ref;
+        currentSegment.data = [NSData dataWithBytes:remainingData.bytes length:currentLength];
+        [segments addObject:currentSegment];
+    
+        remainingData = [NSData dataWithBytes:&remainingData.bytes[currentLength] length:(remainingLength - currentLength)];
+        remainingLength = remainingData.length;
+        index++;
+    }
+    
+    for(int i=0;i<segments.count;i++)
+    {
+        UMSCCP_Segment *s = segments[i];
+        s.remainingSegment = (int)segments.count - i - 1;
+    }
+
+    if(debug)
+    {
+        NSMutableString *s = [[NSMutableString alloc]init];
+        [s appendFormat:@"returning segments:\n"];
+        for(int i=0;i<segments.count;i++)
+        {
+            UMSCCP_Segment *seg = segments[i];
+            [s appendFormat:@"\t%@\n",seg.description];
+        }
+        [self logDebug:s];
+    }
+    return segments;
+}
 
 @end

@@ -72,6 +72,7 @@ typedef enum UMSCCP_RoutingErrorProcessing
     NSString                *_forcedDestinationName;
     NSString                *_forcedLinkset;
     UMMTP3PointCode         *_forcedDpc;
+    BOOL                    _mustResegment;
 }
 
 @property(readwrite,atomic,assign)  UMSCCP_RoutingStatus            status;
@@ -109,6 +110,7 @@ typedef enum UMSCCP_RoutingErrorProcessing
 @property(readwrite,atomic,strong)  NSString                *forcedDestinationName;
 @property(readwrite,atomic,strong)  NSString                *forcedLinkset;
 @property(readwrite,atomic,strong)  UMMTP3PointCode         *forcedDpc;
+@property(readwrite,atomic,assign) BOOL                     mustResegment;
 
 - (BOOL)forceRouted;
 - (UMSynchronizedSortedDictionary *)objectValue;
