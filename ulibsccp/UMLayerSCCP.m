@@ -2350,7 +2350,6 @@
 
 - (void)processOutgoingTcapSharing:(UMSCCP_RoutingState *)routingState
 {
-        NSMutableString *s;
 //        UMSCCP_TcapSharingInstance *inst = packet.outgoingLinksetTcapSharingOutside;
 //        UMSCCP_TcapSharing_result r      = [inst postroutingPacketOutside:packet];
 }
@@ -2413,7 +2412,6 @@
                 {
                     [self.logFeed debugText:@" Sending XUDT with segments"];
                 }
-                BOOL first=YES;
                 int sls = routingPacket.sls % 16;
                 for(UMSCCP_ReceivedSegment *seg in routingState.packetSegmentsToDeliver)
                 {
@@ -2628,7 +2626,7 @@
     }
     packet.outgoingOpc = _mtp3.opc;
     UMSCCP_RoutingState *routingState = [[UMSCCP_RoutingState alloc]init];
-    if(packet.incomingHandling || SCCP_HANDLING_RETURN_ON_ERROR)
+    if(packet.incomingHandling | SCCP_HANDLING_RETURN_ON_ERROR)
     {
         routingState.inboundPacket = packet;
         routingState.dpcForErrors        = packet.incomingOpc;
