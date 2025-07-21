@@ -2432,6 +2432,10 @@
                     {
                         [self.logFeed debugText:[NSString stringWithFormat:@"Sending XUDT segment #%d: %@",no,seg.description]];
                     }
+                    if(![seg isKindOfClass:[UMSCCP_ReceivedSegment class]])
+                    {
+                        NSLog(@"wront object type: %@",seg.className);
+                    }
                     seg.opc = routingPacket.outgoingMtp3Layer.opc;
                     seg.dpc = routingPacket.outgoingDpc;
                     seg.src = routingPacket.outgoingCallingPartyAddress;
