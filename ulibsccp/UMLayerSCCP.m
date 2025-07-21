@@ -2430,7 +2430,7 @@
                     no++;
                     if(self.logLevel <=UMLOG_DEBUG)
                     {
-                        [self.logFeed debugText:[NSString stringWithFormat:@"Sending XUDT segment #%d: %@",seg.description]];
+                        [self.logFeed debugText:[NSString stringWithFormat:@"Sending XUDT segment #%d: %@",no,seg.description]];
                     }
                     seg.opc = routingPacket.outgoingMtp3Layer.opc;
                     seg.dpc = routingPacket.outgoingDpc;
