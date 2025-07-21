@@ -2373,7 +2373,9 @@
 {
     UMSCCP_Packet *routingPacket = routingState.inboundReassembledPacket;
     
-    BOOL processSegmentedDelivery = (routingState.packetSegmentsToDeliver.count > 0) ? YES : NO;
+    NSArray<UMSCCP_ReceivedSegment *>*segments = routingState.packetSegmentsToDeliver;
+    BOOL processSegmentedDelivery = segments.count > 0) ? YES : NO;
+    
     UMMTP3_Error e = UMMTP3_no_error;
     NSString *outgoingLinkset = routingPacket.outgoingLinksetName;
     switch(routingPacket.outgoingServiceType)
@@ -2417,14 +2419,14 @@
             {
                 if(self.logLevel <=UMLOG_DEBUG)
                 {
-                    [self.logFeed debugText:@" Sending XUDT with segments"];
+                    [self.logFeed debugText:[NSString stringWithFormat:@" Sending XUDT with %lu segments",segments.count]];
                 }
                 int sls = routingPacket.sls % 16;
-                for(UMSCCP_ReceivedSegment *seg in routingState.packetSegmentsToDeliver)
+                for(UMSCCP_ReceivedSegment *seg in segments)
                 {
                     if(self.logLevel <=UMLOG_DEBUG)
                     {
-                        [self.logFeed debugText:[NSString stringWithFormat:@"Sending XUDT with segment %@",seg.segment]];
+                        [self.logFeed debugText:[NSString stringWithFormat:@"Sending XUDT segment #%@",seg]];
                     }
                     seg.opc = routingPacket.outgoingMtp3Layer.opc;
                     seg.dpc = routingPacket.outgoingDpc;
