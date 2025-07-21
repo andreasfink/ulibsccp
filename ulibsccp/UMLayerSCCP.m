@@ -3261,8 +3261,8 @@
     }
     else
     {
-        BOOL routingResult = [self routePacket:packet];
-        if(routingResult==YES) /* success */ 
+        UMSCCP_RoutingState *routingState   = [self routePacket:packet];
+        if(routingState.status==UMSCCP_RoutingStatus_success)
         {
             return UMMTP3_no_error;
         }
