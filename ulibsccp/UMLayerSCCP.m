@@ -1968,6 +1968,8 @@
                     [combined appendData:s.segment.data];
                 }
             }
+            NSLog(@"firstsegment=%@",firstSegment);
+            NSLog(@"firstSegment.segmentedPacket=%@",firstSegment.segmentedPacket);
             UMSCCP_Packet *combinedPacket = [firstSegment.segmentedPacket copy];
             if(self.logLevel <=UMLOG_DEBUG)
             {
