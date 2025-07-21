@@ -2625,7 +2625,8 @@
     }
     packet.outgoingOpc = _mtp3.opc;
     UMSCCP_RoutingState *routingState = [[UMSCCP_RoutingState alloc]init];
-    if(packet.incomingHandling | SCCP_HANDLING_RETURN_ON_ERROR)
+    int bit = packet.incomingHandling | SCCP_HANDLING_RETURN_ON_ERROR;
+    if(bit)
     {
         routingState.inboundPacket = packet;
         routingState.dpcForErrors        = packet.incomingOpc;
