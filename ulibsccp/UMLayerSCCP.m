@@ -2157,7 +2157,7 @@
         [self.logFeed debugText:@" calling find routes"];
     }
     
-    SCCP_ReturnCause causeValue;
+    SCCP_ReturnCause causeValue = SCCP_ReturnCause_not_set;
     
     SccpDestinationGroup *grp = [self findRoutes:dst
                                            cause:&causeValue
@@ -2186,7 +2186,10 @@
         {
             [s appendString:s1];
         }
-        [s appendFormat:@"    causeValue: %d %@\n",causeValue,[UMLayerSCCP causeValueToString:causeValue]];
+        if(causeValue !=SCCP_ReturnCause_not_set)
+        {
+            [s appendFormat:@"    causeValue: %d %@\n",causeValue,[UMLayerSCCP causeValueToString:causeValue]];
+        }
         [s appendFormat:@"    newCalledAddress: %@\n",called_out ? called_out : @"(null)"];
         [s appendFormat:@"    localUser: %@\n", localUser ? localUser.name : @"(null)"];
         [s appendFormat:@"    fromLocal: %@\n",routingPacket.incomingFromLocal ? @"YES" : @"NO"];
