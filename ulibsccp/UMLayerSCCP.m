@@ -1998,6 +1998,8 @@
                 [arr addObject:s.segmentedPacket];
             }
             routingState.inboundPacketSegments = arr;
+            routingState.packetSegmentsToDeliver = arr;
+            routingState.packetToDeliver = routingState.inboundReassembledPacket;
             if(self.logLevel <=UMLOG_DEBUG)
             {
                 [self.logFeed debugText:[NSString stringWithFormat:@"inboundPacketSegments is set to  %@",routingState.inboundPacketSegments]];
@@ -2012,12 +2014,16 @@
             /* some segments received */
             routingState.status  = UMSCCP_RoutingStatus_awaitingSegments;
             routingState.inboundReassembledPacket = NULL;
+            routingState.packetSegmentsToDeliver = NULL;
+            routingState.packetToDeliver = NULL;
         }
     }
     else
     {
         routingState.status  = UMSCCP_RoutingStatus_success;
         routingState.inboundReassembledPacket = [packet copy]; /* single packet */
+        routingState.packetSegmentsToDeliver = NULL;
+        routingState.packetToDeliver = routingState.inboundReassembledPacket;
     }
 }
 
@@ -2366,6 +2372,7 @@
 - (void)processDelivery:(UMSCCP_RoutingState *)routingState
 {
     UMSCCP_Packet *routingPacket = routingState.inboundReassembledPacket;
+    
     BOOL processSegmentedDelivery = (routingState.packetSegmentsToDeliver.count > 0) ? YES : NO;
     UMMTP3_Error e = UMMTP3_no_error;
     NSString *outgoingLinkset = routingPacket.outgoingLinksetName;
