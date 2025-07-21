@@ -2002,7 +2002,7 @@
     else
     {
         routingState.status  = UMSCCP_RoutingStatus_success;
-        routingState.inboundReassembledPacket = packet; /* single packet */
+        routingState.inboundReassembledPacket = [packet copy]; /* single packet */
     }
 }
 
@@ -2657,11 +2657,12 @@
         [self.logFeed debugText:s];
     }
     
-#define EXECUTE_AND_CHECK_ERROR(routingState,method)                    \
+#define EXECUTE_AND_CHECK_ERROR(routingState,method,sectionname)        \
     {                                                                   \
         if(self.logLevel <=UMLOG_DEBUG)                                 \
         {                                                               \
-            [self.logFeed debugText:@"entering ##method"];              \
+            [self.logFeed debugText:[NSString stringWithFormat@"entering %@",sectionname]];       \
+            [self.logFeed debugText:[NSString stringWithFormat@"routingState: %@",routingState.objectValue.jsonString]];       \
         }                                                               \
         [self method:routingState];                                     \
         switch(routingState.status)                                     \
@@ -2707,47 +2708,47 @@
     /* lets verify if the sender is allowed to send  */
     /* --------------------------------------------- */
 
-    EXECUTE_AND_CHECK_ERROR(routingState,processIncomingScreening)
+    EXECUTE_AND_CHECK_ERROR(routingState,processIncomingScreening,@"incoming-screening")
     /* --------------------------------------------- */
     /* REASSEMBLY                                    */
     /* lets combine individual parts back together   */
     /* --------------------------------------------- */
-    EXECUTE_AND_CHECK_ERROR(routingState,processIncomingSegmentation)
+    EXECUTE_AND_CHECK_ERROR(routingState,processIncomingSegmentation,@"incoming-segmentation")
 
     /* --------------------------------------------- */
     /* FILTERING                                     */
     /* lets pass it through the inbound filtering    */
     /* --------------------------------------------- */
-    EXECUTE_AND_CHECK_ERROR(routingState,processIncomingFiltering)
+    EXECUTE_AND_CHECK_ERROR(routingState,processIncomingFiltering,@"incoming-filtering")
     /* --------------------------------------------- */
     /* INBOUND TCAP SHARING                          */
     /* tcap sharing inbound processing               */
     /* --------------------------------------------- */
-    EXECUTE_AND_CHECK_ERROR(routingState,processPreroutingTcapSharing)
+    EXECUTE_AND_CHECK_ERROR(routingState,processPreroutingTcapSharing,@"prerouting-tcap-sharing")
     /* --------------------------------------------- */
     /* ROUTING                                       */
     /* find the corresponding route                  */
     /* --------------------------------------------- */
     if(routingState.forceRouted==NO)
     {
-        EXECUTE_AND_CHECK_ERROR(routingState,processRouting)
+        EXECUTE_AND_CHECK_ERROR(routingState,processRouting,@"routing")
     }
     /* --------------------------------------------- */
     /* OUTBOUND TCAP SHARING                         */
     /* tcap sharing outbound processing              */
     /* --------------------------------------------- */
-    EXECUTE_AND_CHECK_ERROR(routingState,processPostroutingTcapSharing)
+    EXECUTE_AND_CHECK_ERROR(routingState,processPostroutingTcapSharing,@"postrouting-tcap-sharing")
 
     /* --------------------------------------------- */
     /* OUTBOUND SEGMENTATION                         */
     /* split outbound packets if not split already   */
     /* --------------------------------------------- */
-    EXECUTE_AND_CHECK_ERROR(routingState,processOutgoingSegmentation)
+    EXECUTE_AND_CHECK_ERROR(routingState,processOutgoingSegmentation,@"outgoing-segmentation")
     /* --------------------------------------------- */
     /* DELIVERY TO MTP3                              */
     /* send the packets to the wire                  */
     /* --------------------------------------------- */
-    EXECUTE_AND_CHECK_ERROR(routingState,processDelivery)
+    EXECUTE_AND_CHECK_ERROR(routingState,processDelivery,@"delivery")
     return routingState;
 }
 
