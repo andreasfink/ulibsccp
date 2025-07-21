@@ -2612,6 +2612,7 @@
     UMSCCP_RoutingState *routingState = [[UMSCCP_RoutingState alloc]init];
     if(packet.incomingHandling || SCCP_HANDLING_RETURN_ON_ERROR)
     {
+        routingState.inboundPacket = packet;
         routingState.dpcForErrors        = packet.incomingOpc;
         routingState.opcForErrors        = _mtp3.opc;
         routingState.linksetForErrors    = packet.incomingLinksetName;
