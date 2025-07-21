@@ -1901,7 +1901,7 @@
     }
 }
 
-- (void)processIncomingSegmentation:(UMSCCP_RoutingState *)routingState
+- (void)processIncomingReassembly:(UMSCCP_RoutingState *)routingState
 {
     UMSCCP_Packet *packet = routingState.inboundPacket;
 
@@ -1910,6 +1910,10 @@
     NSArray <UMSCCP_ReceivedSegment *>  *segs;
     if(packet.incomingSegment)
     {
+        if(_logLevel <=UMLOG_DEBUG)
+        {
+            [self logDebug:[NSString stringWithFormat:@"packet.incomingSegment=%@",packet.incomingSegment]];
+        }
         routingState.status = UMSCCP_RoutingStatus_awaitingSegments;
         UMSCCP_ReceivedSegment *s = [[UMSCCP_ReceivedSegment alloc]init];
         s.src = packet.outgoingCallingPartyAddress;
@@ -1938,11 +1942,9 @@
         /* returns an ordered array of segments */
         if(segs)
         {
-            
             if(self.logLevel <=UMLOG_DEBUG)
             {
-                
-                [self.logFeed debugText:@"processReceivedSegment returns Array:"];
+                [self.logFeed debugText:@"all segments received. processReceivedSegment returns Array:"];
                 NSInteger i=0;
                 for(UMSCCP_ReceivedSegment *s in segs)
                 {
@@ -1985,15 +1987,28 @@
             /* all segments received */
             routingState.status  = UMSCCP_RoutingStatus_success;
             routingState.inboundReassembledPacket = firstSegment.combinedPacket;
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                [self.logFeed debugText:[NSString stringWithFormat:@"inboundReassembledPacket is set to  %@",routingState.inboundReassembledPacket]];
+            }
+
             NSMutableArray *arr =  [[NSMutableArray alloc]init];
             for(UMSCCP_ReceivedSegment *s in segs)
             {
                 [arr addObject:s.segmentedPacket];
             }
             routingState.inboundPacketSegments = arr;
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                [self.logFeed debugText:[NSString stringWithFormat:@"inboundPacketSegments is set to  %@",routingState.inboundPacketSegments]];
+            }
         }
         else
         {
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                [self.logFeed debugText:@"  not all segments received yet"];
+            }
             /* some segments received */
             routingState.status  = UMSCCP_RoutingStatus_awaitingSegments;
             routingState.inboundReassembledPacket = NULL;
@@ -2661,12 +2676,14 @@
         [self.logFeed debugText:s];
     }
     
+    routingState.status = UMSCCP_RoutingStatus_success;
+    
 #define EXECUTE_AND_CHECK_ERROR(routingState,method,sectionname)        \
+    if(routingState.status == UMSCCP_RoutingStatus_success)             \
     {                                                                   \
         if(self.logLevel <=UMLOG_DEBUG)                                 \
         {                                                               \
-[self.logFeed debugText:[NSString stringWithFormat:@"entering %@",sectionname]];       \
-[self.logFeed debugText:[NSString stringWithFormat:@"routingState: %@",routingState.objectValue.jsonString]];       \
+            [self.logFeed debugText:[NSString stringWithFormat:@"entering %@",sectionname]];       \
         }                                                               \
         [self method:routingState];                                     \
         switch(routingState.status)                                     \
@@ -2712,47 +2729,47 @@
     /* lets verify if the sender is allowed to send  */
     /* --------------------------------------------- */
 
-    EXECUTE_AND_CHECK_ERROR(routingState,processIncomingScreening,@"incoming-screening")
+    EXECUTE_AND_CHECK_ERROR(routingState,processIncomingScreening,@"processIncomingScreening")
     /* --------------------------------------------- */
     /* REASSEMBLY                                    */
     /* lets combine individual parts back together   */
     /* --------------------------------------------- */
-    EXECUTE_AND_CHECK_ERROR(routingState,processIncomingSegmentation,@"incoming-segmentation")
+    EXECUTE_AND_CHECK_ERROR(routingState,processIncomingReassembly,@"processIncomingReassembly")
 
     /* --------------------------------------------- */
     /* FILTERING                                     */
     /* lets pass it through the inbound filtering    */
     /* --------------------------------------------- */
-    EXECUTE_AND_CHECK_ERROR(routingState,processIncomingFiltering,@"incoming-filtering")
+    EXECUTE_AND_CHECK_ERROR(routingState,processIncomingFiltering,@"processIncomingFiltering")
     /* --------------------------------------------- */
     /* INBOUND TCAP SHARING                          */
     /* tcap sharing inbound processing               */
     /* --------------------------------------------- */
-    EXECUTE_AND_CHECK_ERROR(routingState,processPreroutingTcapSharing,@"prerouting-tcap-sharing")
+    EXECUTE_AND_CHECK_ERROR(routingState,processPreroutingTcapSharing,@"processPreroutingTcapSharing")
     /* --------------------------------------------- */
     /* ROUTING                                       */
     /* find the corresponding route                  */
     /* --------------------------------------------- */
     if(routingState.forceRouted==NO)
     {
-        EXECUTE_AND_CHECK_ERROR(routingState,processRouting,@"routing")
+        EXECUTE_AND_CHECK_ERROR(routingState,processRouting,@"processRouting")
     }
     /* --------------------------------------------- */
     /* OUTBOUND TCAP SHARING                         */
     /* tcap sharing outbound processing              */
     /* --------------------------------------------- */
-    EXECUTE_AND_CHECK_ERROR(routingState,processPostroutingTcapSharing,@"postrouting-tcap-sharing")
+    EXECUTE_AND_CHECK_ERROR(routingState,processPostroutingTcapSharing,@"processPostroutingTcapSharing")
 
     /* --------------------------------------------- */
     /* OUTBOUND SEGMENTATION                         */
     /* split outbound packets if not split already   */
     /* --------------------------------------------- */
-    EXECUTE_AND_CHECK_ERROR(routingState,processOutgoingSegmentation,@"outgoing-segmentation")
+    EXECUTE_AND_CHECK_ERROR(routingState,processOutgoingSegmentation,@"processOutgoingSegmentation")
     /* --------------------------------------------- */
     /* DELIVERY TO MTP3                              */
     /* send the packets to the wire                  */
     /* --------------------------------------------- */
-    EXECUTE_AND_CHECK_ERROR(routingState,processDelivery,@"delivery")
+    EXECUTE_AND_CHECK_ERROR(routingState,processDelivery,@"processDelivery")
     return routingState;
 }
 
