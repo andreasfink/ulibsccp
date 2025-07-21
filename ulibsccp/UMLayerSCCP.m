@@ -1997,7 +1997,7 @@
             NSMutableArray *arr =  [[NSMutableArray alloc]init];
             for(UMSCCP_ReceivedSegment *s in segs)
             {
-                [arr addObject:s.segmentedPacket];
+                [arr addObject:s];
             }
             routingState.inboundPacketSegments = arr;
             routingState.packetSegmentsToDeliver = arr;
