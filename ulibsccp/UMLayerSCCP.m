@@ -1936,7 +1936,7 @@
         }
         if(self.logLevel <=UMLOG_DEBUG)
         {
-            [self.logFeed debugText:[NSString stringWithFormat:@"calling processReceivedSegment:%@",s.segment]];
+            [self.logFeed debugText:[NSString stringWithFormat:@"calling processReceivedSegment:%@",s]];
         }
         segs = [ _pendingSegmentsStorage processReceivedSegment:s];
         /* returns an ordered array of segments */
