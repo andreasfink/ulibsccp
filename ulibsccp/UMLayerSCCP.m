@@ -2395,7 +2395,7 @@
     NSInteger   maxPduXUDT = [self maxPayloadSizeForServiceType:SCCP_XUDT
                                              callingAddressSize:cas
                                               calledAddressSize:cds
-                                                  usingSegments:packet.segmented
+                                                  usingSegments:hasSegments
                                                        provider:_mtp3];
     NSInteger   maxPduLUDT = [self maxPayloadSizeForServiceType:SCCP_LUDT
                                              callingAddressSize:cas
