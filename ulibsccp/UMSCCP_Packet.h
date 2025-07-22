@@ -218,9 +218,7 @@ typedef enum UMSCCP_Packet_Tag_enum
     SccpDestinationGroup        *_forcedDestinationGroup;
     NSString                    *_forcedLinkset;
     UMMTP3PointCode             *_forcedDpc;
-
-    int                         _sls;
-    
+    int                         _sls;    
     SccpNumberTranslation       *_cga_number_translation_in;
     SccpNumberTranslation       *_cda_number_translation_in;
     SccpNumberTranslation       *_cga_number_translation_out;

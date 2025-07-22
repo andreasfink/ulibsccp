@@ -20,6 +20,7 @@
 - (UMPrometheus *)prometheus;
 - (NSString *)instanceName;
 - (UMSCCP_TcapSharingInstance *)getTcapSharingInstance:(NSString *)name;
+- (SccpDestinationGroup *)getDestinationGroup:(NSString *)name;
 
 @end
 

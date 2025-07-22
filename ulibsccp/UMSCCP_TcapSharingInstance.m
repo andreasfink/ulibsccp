@@ -29,6 +29,10 @@
 
 - (UMSCCP_TcapSharing_result)preroutingPacketInside:(UMSCCP_Packet *)packet
 {
+    /* in case of reroute it shall set      */
+    /* packet.forcedDestinationGroup        */
+    /* packet.forcedDestinationName         */
+    /* packet.forcedDpc                     */
     return UMSCCP_TcapSharing_routeNormal;
 }
 

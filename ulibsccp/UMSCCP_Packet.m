@@ -211,6 +211,8 @@ typedef enum UMTCAP_Command
     cpy.sls = _sls;
     cpy.incomingLinksetTcapSharingInsideName    = _incomingLinksetTcapSharingInsideName;
     cpy.incomingLinksetTcapSharingOutsideName   = _incomingLinksetTcapSharingOutsideName;
+    cpy.incomingLinksetTcapSharingInside        = _incomingLinksetTcapSharingInside;
+    cpy.incomingLinksetTcapSharingOutside       = _incomingLinksetTcapSharingOutside;
     cpy.incomingLinksetTcapSharingPriority      = _incomingLinksetTcapSharingPriority;
     cpy.errorCauseValue                         = _errorCauseValue;
     return cpy;

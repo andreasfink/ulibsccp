@@ -2050,65 +2050,97 @@
 
 - (void)processPreroutingTcapSharing:(UMSCCP_RoutingState *)routingState
 {
-    UMSCCP_Packet               *packet = routingState.inboundReassembledPacket;
-    UMSCCP_TcapSharingInstance  *inst   = packet.incomingLinksetTcapSharingInside;
-    if(inst == NULL)
+    UMSCCP_Packet               *packet         = routingState.inboundReassembledPacket;
+    UMSCCP_TcapSharingInstance  *inside_inst    = packet.incomingLinksetTcapSharingInside;
+    UMSCCP_TcapSharingInstance  *outside_inst   = packet.incomingLinksetTcapSharingOutside;
+    
+    UMSCCP_TcapSharing_result r = UMSCCP_TcapSharing_routeNormal;
+    if(outside_inst)
+    {
+        if(self.logLevel <=UMLOG_DEBUG)
+        {
+            NSMutableString *s = [NSMutableString stringWithFormat:@"TCAP-SHARING-PREROUTING-OUTSIDE %@",outside_inst.name];
+            [self logDebug:s];
+        }
+        r = [outside_inst preroutingPacketOutside:packet];
+    }
+    else if(inside_inst)
+    {
+        if(self.logLevel <=UMLOG_DEBUG)
+        {
+            NSMutableString *s = [NSMutableString stringWithFormat:@"TCAP-SHARING-PREROUTING-INSIDE %@",inside_inst.name];
+            [self logDebug:s];
+        }
+        r = [inside_inst preroutingPacketInside:packet];
+    }
+    else
     {
         routingState.status = UMSCCP_RoutingStatus_success;
+        return;
     }
-    if(self.logLevel <=UMLOG_DEBUG)
-    {
-        NSMutableString *s = [NSMutableString stringWithFormat:@"TCAP-SHARING: packet.incomingLinksetTcapSharingInside=%@",inst.name];
-        [self logDebug:s];
-    }
-    UMSCCP_TcapSharing_result r =[inst preroutingPacketInside:packet];
     if(r == UMSCCP_TcapSharing_skipRouting)
     {
-        routingState.skipRouting = YES;
-    }
-    if(self.logLevel <=UMLOG_DEBUG)
-    {
-        NSMutableString *s = [[NSMutableString alloc]init];
-        switch(r)
-        {
-            case UMSCCP_TcapSharing_skipRouting:
-                [s appendFormat:@" <skipRouting>"];
-                if(packet.forcedDestinationGroup)
-                {
-                    [s appendFormat:@" forcedDestination = %@",packet.forcedDestinationGroup.name];
-                }
-                else if(packet.forcedDestinationName)
-                {
-                    [s appendFormat:@" forcedDestination = %@",packet.forcedDestinationName];
-                }
-                if(packet.forcedLinkset)
-                {
-                    [s appendFormat:@" forcedLinkset     = %@",packet.forcedLinkset];
-                }
-                if(packet.forcedDpc)
-                {
-                    [s appendFormat:@" forcedDpc         = %@",packet.forcedDpc];
-                }
-                break;
-            case UMSCCP_TcapSharing_routeNormal:
-                [s appendFormat:@" <routeNormal>"];
-                break;
-            default:
-                [s appendFormat:@" <undefined>"];
-                break;
+       routingState.skipRouting = YES;
+       if(packet.forcedLinkset)
+       {
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                NSMutableString *s = [NSMutableString stringWithFormat:@"TCAP-SHARING: forcerouted to %@",packet.forcedLinkset];
+                [self logDebug:s];
+            }
+            routingState.forcedLinkset = packet.forcedLinkset;
         }
-        [self logDebug:s];
+        if(packet.forcedDpc)
+        {
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                NSMutableString *s = [NSMutableString stringWithFormat:@"TCAP-SHARING: forcerouted to DPC %@",packet.forcedDpc];
+                [self logDebug:s];
+            }
+            routingState.forcedDpc = packet.forcedDpc;
+        }
+        if(packet.forcedDestinationGroup)
+        {
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                NSMutableString *s = [NSMutableString stringWithFormat:@"TCAP-SHARING: forcerouted to Destination %@",packet.forcedDestinationGroup.name];
+                [self logDebug:s];
+            }
+            routingState.forcedDestinationGroup = packet.forcedDestinationGroup;
+        }
     }
-    routingState.forcedDestinationGroup     = packet.forcedDestinationGroup;
-    routingState.forcedDestinationName      = packet.forcedDestinationName;
-    routingState.forcedLinkset              = packet.forcedLinkset;
-    routingState.forcedDpc                  = packet.forcedDpc;
 }
 
 - (void) processPostroutingTcapSharing:(UMSCCP_RoutingState *)routingState
 {
- //   UMSCCP_TcapSharingInstance  *inside    = packet.incomingLinksetTcapSharingInside;
- //   UMSCCP_TcapSharingInstance  *outside   = packet.incomingLinksetTcapSharingOutside;
+    UMSCCP_Packet               *packet         = routingState.inboundReassembledPacket;
+    UMSCCP_TcapSharingInstance  *inside_inst    = packet.incomingLinksetTcapSharingInside;
+    UMSCCP_TcapSharingInstance  *outside_inst   = packet.incomingLinksetTcapSharingOutside;
+    
+    UMSCCP_TcapSharing_result r = UMSCCP_TcapSharing_routeNormal;
+    if(outside_inst)
+    {
+        if(self.logLevel <=UMLOG_DEBUG)
+        {
+            NSMutableString *s = [NSMutableString stringWithFormat:@"TCAP-SHARING-POSTROUTING-OUTSIDE %@",outside_inst.name];
+            [self logDebug:s];
+        }
+        r = [outside_inst postroutingPacketOutside:packet];
+    }
+    else if(inside_inst)
+    {
+        if(self.logLevel <=UMLOG_DEBUG)
+        {
+            NSMutableString *s = [NSMutableString stringWithFormat:@"TCAP-SHARING-POSTROUTING-INSIDE %@",inside_inst.name];
+            [self logDebug:s];
+        }
+        r = [inside_inst postroutingPacketInside:packet];
+    }
+    else
+    {
+        routingState.status = UMSCCP_RoutingStatus_success;
+        return;
+    }
 }
 
 - (void)processForcedRouting:(UMSCCP_RoutingState *)routingState
