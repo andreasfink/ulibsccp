@@ -92,8 +92,8 @@ typedef enum UMSCCP_Packet_Tag_enum
     UMSCCP_Packet_Tag_incomingGsmMapAsn1                            = 66,
     UMSCCP_Packet_Tag_incomingGsmMapOperations                      = 67,
     UMSCCP_Packet_Tag_incomingCategory                              = 68,
-    UMSCCP_Packet_Tag_incomingLocalTransactionId                    = 69,
-    UMSCCP_Packet_Tag_incomingRemoteTransactionId                   = 70,
+  //  UMSCCP_Packet_Tag_incomingLocalTransactionId                    = 69,
+  //  UMSCCP_Packet_Tag_incomingRemoteTransactionId                   = 70,
     UMSCCP_Packet_Tag_canNotDecode                                  = 71,
     UMSCCP_Packet_Tag_tags                                          = 72,
     UMSCCP_Packet_Tag_vars                                          = 73,
@@ -114,7 +114,10 @@ typedef enum UMSCCP_Packet_Tag_enum
     UMSCCP_Packet_Tag_cda_number_translation_in                     = 88,
     UMSCCP_Packet_Tag_cga_number_translation_out                    = 89,
     UMSCCP_Packet_Tag_cda_number_translation_out                    = 90,
-    UMSCCP_Packet_Tag_incomingLinksetInboundName                           = 91,
+    UMSCCP_Packet_Tag_incomingLinksetInboundName                    = 91,
+ //   UMSCCP_Packet_Tag_outgoingLocalTransactionId                    = 92,
+ //   UMSCCP_Packet_Tag_outgoingRemoteTransactionId                   = 93,
+
 
 } UMSCCP_Packet_Tag_enum;
 
@@ -193,12 +196,11 @@ typedef enum UMSCCP_Packet_Tag_enum
 	UMTCAP_itu_asn1_abort		*_incomingTcapAbort;
     UMTCAP_itu_asn1_unidirectional *_incomingTcapUnidirectional;
     int                         _incomingTcapCommand; /* UMTCAP_Command */
+    int                         _outgoingTcapCommand; /* UMTCAP_Command */
     NSString                    *_incomingApplicationContext;
     UMASN1Object                *_incomingGsmMapAsn1;
     NSArray                     *_incomingGsmMapOperations;
     int                         _incomingCategory;
-    NSString                    *_incomingLocalTransactionId;
-    NSString                    *_incomingRemoteTransactionId;
     BOOL                        _canNotDecode;
     UMSynchronizedDictionary    *_tags;
     UMSynchronizedDictionary    *_vars;    
@@ -206,6 +208,8 @@ typedef enum UMSCCP_Packet_Tag_enum
     UMLogLevel                  _logLevel;
     NSString                    *_incoming_tcap_otid;
     NSString                    *_incoming_tcap_dtid;
+    NSString                    *_outgoing_tcap_otid;
+    NSString                    *_outgoing_tcap_dtid;
     NSString                    *_msisdn;
     NSString                    *_imsi;
     NSString                    *_smsc;
@@ -218,7 +222,8 @@ typedef enum UMSCCP_Packet_Tag_enum
     SccpDestinationGroup        *_forcedDestinationGroup;
     NSString                    *_forcedLinkset;
     UMMTP3PointCode             *_forcedDpc;
-    int                         _sls;    
+    id<UMSCCP_UserProtocol>     _forcedLocalUser;
+    int                         _sls;
     SccpNumberTranslation       *_cga_number_translation_in;
     SccpNumberTranslation       *_cda_number_translation_in;
     SccpNumberTranslation       *_cga_number_translation_out;
@@ -226,6 +231,7 @@ typedef enum UMSCCP_Packet_Tag_enum
     UMSCCP_TcapSharingInstance  *_incomingLinksetTcapSharingInside;
     UMSCCP_TcapSharingInstance  *_incomingLinksetTcapSharingOutside;
     SCCP_ReturnCause            _errorCauseValue;
+    BOOL                        _candidateForTcapSharing;
 
 }
 
@@ -303,13 +309,12 @@ typedef enum UMSCCP_Packet_Tag_enum
 @property(readwrite,strong,atomic)  UMTCAP_itu_asn1_abort		*incomingTcapAbort;
 @property(readwrite,strong,atomic)  UMTCAP_itu_asn1_unidirectional *incomingTcapUnidirectional;
 @property(readwrite,assign,atomic)  int                         incomingTcapCommand; /* UMTCAP_Command */
+@property(readwrite,assign,atomic)  int                         outgoingTcapCommand; /* UMTCAP_Command */
 
 @property(readwrite,strong,atomic)  UMASN1Object                *incomingGsmMapAsn1;/* this can be set by filters */
 @property(readwrite,strong,atomic)  NSString                    *incomingApplicationContext;
 @property(readwrite,strong,atomic)  NSArray                     *incomingGsmMapOperations;
 @property(readwrite,assign,atomic)  int                         incomingCategory;
-@property(readwrite,strong,atomic)  NSString                    *incomingLocalTransactionId;
-@property(readwrite,strong,atomic)  NSString                    *incomingRemoteTransactionId;
 @property(readwrite,assign,atomic)  BOOL                         canNotDecode;
 
 @property(readwrite,strong,atomic)  UMSynchronizedDictionary    *tags;
@@ -324,6 +329,8 @@ typedef enum UMSCCP_Packet_Tag_enum
 
 @property(readwrite,strong,atomic)  NSString                    *incoming_tcap_otid;
 @property(readwrite,strong,atomic)  NSString                    *incoming_tcap_dtid;
+@property(readwrite,strong,atomic)  NSString                    *outgoing_tcap_otid;
+@property(readwrite,strong,atomic)  NSString                    *outgoing_tcap_dtid;
 @property(readwrite,strong,atomic)  UMSMS                       *sms;
 @property(readwrite,strong,atomic)  NSString                    *partsInfo;
 @property(readwrite,strong,atomic)  NSString                    *routingSelector;
@@ -337,7 +344,9 @@ typedef enum UMSCCP_Packet_Tag_enum
 @property(readwrite,strong,atomic)  NSString                    *forcedDestinationName;
 @property(readwrite,strong,atomic)  SccpDestinationGroup        *forcedDestinationGroup;
 @property(readwrite,strong,atomic)  NSString                    *forcedLinkset;
+@property(readwrite,strong,atomic)  id<UMSCCP_UserProtocol>     forcedLocalUser;
 @property(readwrite,strong,atomic)  UMMTP3PointCode             *forcedDpc;
+@property(readwrite,assign,atomic)  BOOL                        candidateForTcapSharing;
 
 
 - (NSString *) incomingPacketType;

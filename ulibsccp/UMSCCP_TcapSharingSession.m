@@ -12,7 +12,8 @@
 
 - (UMSCCP_TcapSharingSession *)init
 {
-    return [self initWithTimeout:90];
+    _timeoutValue = 90;
+    return [self initWithTimeout:_timeoutValue];
 }
 
 - (UMSCCP_TcapSharingSession *)initWithTimeout:(NSTimeInterval)timeout
@@ -20,7 +21,8 @@
     self = [super init];
     if(self)
     {
-        _expiry = [NSDate dateWithTimeIntervalSinceNow:timeout];
+        _timeoutValue = timeout;
+        [self touch];
     }
     return self;
 }
@@ -32,6 +34,11 @@
         return NO;
     }
     return YES;
+}
+
+- (void)touch
+{
+    _expiry = [NSDate dateWithTimeIntervalSinceNow:_timeoutValue];
 }
 
 @end

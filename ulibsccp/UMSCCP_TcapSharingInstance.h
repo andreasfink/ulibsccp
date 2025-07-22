@@ -19,15 +19,18 @@ typedef enum UMSCCP_TcapSharing_result
 
 @interface UMSCCP_TcapSharingInstance : UMBackgrounder
 {
-    NSNumber        *_timeout;
+    NSTimeInterval  _timeout;
     id              _appDelegate;
     NSString        *_sccpName;
     UMLayerSCCP     *_sccpInstance;
+    UMSynchronizedDictionary    *_outsideBackRoutes;
+    
 }
-@property(readwrite,strong,atomic)  NSNumber        *timeout;
+@property(readwrite,assign,atomic)  NSTimeInterval  timeout;
 @property(readwrite,strong,atomic)  id              appDelegate;
 @property(readwrite,strong,atomic)  NSString        *sccpName;
 @property(readwrite,strong,atomic)  UMLayerSCCP     *sccpInstance;
+@property(readwrite,strong,atomic)  UMSynchronizedDictionary    *outsideBackRoutes;
 
 - (UMSCCP_TcapSharingInstance *)initWithConfig:(NSDictionary *)config;
 

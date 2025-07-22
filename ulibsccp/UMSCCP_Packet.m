@@ -120,6 +120,9 @@ typedef enum UMTCAP_Command
     _outgoingSccpData               = _incomingSccpData;
     _outgoingOptionalData           = _incomingOptionalData;
     _outgoingSegment                = _incomingSegment;
+    _outgoingTcapCommand            = _incomingTcapCommand;
+    _outgoing_tcap_otid             = _incoming_tcap_otid;
+    _outgoing_tcap_dtid             = _incoming_tcap_dtid;
 }
 
 - (UMSCCP_Packet *)copyWithZone:(NSZone *)zone
@@ -191,8 +194,6 @@ typedef enum UMTCAP_Command
     cpy.incomingGsmMapAsn1 = _incomingGsmMapAsn1;
     cpy.incomingGsmMapOperations = _incomingGsmMapOperations;
     cpy.incomingCategory = _incomingCategory;
-    cpy.incomingLocalTransactionId = _incomingLocalTransactionId;
-    cpy.incomingRemoteTransactionId = _incomingRemoteTransactionId;
     cpy.canNotDecode = _canNotDecode;
     cpy.tags = [_tags copy];
     cpy.vars = [_vars copy];
@@ -215,6 +216,12 @@ typedef enum UMTCAP_Command
     cpy.incomingLinksetTcapSharingOutside       = _incomingLinksetTcapSharingOutside;
     cpy.incomingLinksetTcapSharingPriority      = _incomingLinksetTcapSharingPriority;
     cpy.errorCauseValue                         = _errorCauseValue;
+    cpy.forcedDestinationName                   = _forcedDestinationName;
+    cpy.forcedDestinationGroup                  = _forcedDestinationGroup;
+    cpy.forcedLinkset                           = _forcedLinkset;
+    cpy.forcedDpc                               = _forcedDpc;
+    cpy.forcedLocalUser                         = _forcedLocalUser;
+
     return cpy;
 }
 
@@ -441,9 +448,6 @@ typedef enum UMTCAP_Command
     }
     [s appendFormat:@"\t_incomingGsmMapOperation: %@\n",_incomingGsmMapOperations];
     [s appendFormat:@"\t_incomingCategory: %d\n",_incomingCategory];
-
-    [s appendFormat:@"\t_incomingLocalTransactionId: %@\n",_incomingLocalTransactionId ? _incomingLocalTransactionId : @"NULL"];
-    [s appendFormat:@"\t_incomingRemoteTransactionId: %@\n",_incomingRemoteTransactionId ? _incomingRemoteTransactionId : @"NULL"];
     [s appendFormat:@"\t_canNotDecode: %@\n",_canNotDecode ? @"YES" : @"NO"];
     [s appendFormat:@"\t_tags:\n"];
     NSArray *a = [_tags allKeys];
