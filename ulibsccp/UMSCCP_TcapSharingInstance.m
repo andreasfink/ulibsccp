@@ -72,7 +72,7 @@ typedef enum UMTCAP_Command
     {
         if(packet.incomingTcapCommand == TCAP_TAG_ITU_UNIDIRECTIONAL)
         {
-            /* skip */
+            return UMSCCP_TcapSharing_routeNormal;
         }
         else if(packet.incomingTcapCommand == TCAP_TAG_ITU_BEGIN)
         {
@@ -87,7 +87,6 @@ typedef enum UMTCAP_Command
             session.insidePointcode = packet.incomingOpc;
             session.insideRemoteTcapTransactionId = NULL;
             _outsideBackRoutes[key] = session;
-            
         }
         else if(packet.incomingTcapCommand == TCAP_TAG_ITU_CONTINUE)
         {
@@ -101,17 +100,8 @@ typedef enum UMTCAP_Command
                 packet.outgoing_tcap_dtid = session.outsideRemoteTcapTransactionId;
             }
         }
-        else if((packet.incomingTcapCommand == TCAP_TAG_ITU_END) || (packet.incomingTcapCommand == TCAP_TAG_ITU_ABORT))
-        {
-            NSString *key = [NSString stringWithFormat:@"%@:%@",packet.outgoingCallingPartyAddress.stringValueE164, packet.incoming_tcap_otid];
-            UMSCCP_TcapSharingSession *session = _outsideBackRoutes[key];
-            if(session)
-            {
-                [_outsideBackRoutes removeObjectForKey:key];
-                session = NULL; /* destroys session */
-            }
-        }
-        else if(packet.incomingTcapCommand == TCAP_TAG_ITU_ABORT)
+        else if(   (packet.incomingTcapCommand == TCAP_TAG_ITU_END)
+                || (packet.incomingTcapCommand == TCAP_TAG_ITU_ABORT))
         {
             NSString *key = [NSString stringWithFormat:@"%@:%@",packet.outgoingCallingPartyAddress.stringValueE164, packet.incoming_tcap_otid];
             UMSCCP_TcapSharingSession *session = _outsideBackRoutes[key];
@@ -131,9 +121,6 @@ typedef enum UMTCAP_Command
        (packet.incomingTcapCommand == TCAP_TAG_ITU_END) ||
        (packet.incomingTcapCommand == TCAP_TAG_ITU_ABORT))
     {
-        
-        /* we let routing decide where to go
-         */
         NSString *key = [NSString stringWithFormat:@"%@:%@",packet.incomingCalledPartyAddress.stringValueE164, packet.incoming_tcap_dtid];
         UMSCCP_TcapSharingSession *session = _outsideBackRoutes[key];
         if(session != NULL)
