@@ -19,10 +19,10 @@ typedef enum UMSCCP_TcapSharing_result
 
 @interface UMSCCP_TcapSharingInstance : UMBackgrounder
 {
-    NSTimeInterval  _timeout;
-    id              _appDelegate;
-    NSString        *_sccpName;
-    UMLayerSCCP     *_sccpInstance;
+    NSTimeInterval              _timeout;
+    id                          _appDelegate;
+    NSString                    *_sccpName;
+    UMLayerSCCP                 *_sccpInstance;
     UMSynchronizedDictionary    *_outsideBackRoutes;
     
 }
