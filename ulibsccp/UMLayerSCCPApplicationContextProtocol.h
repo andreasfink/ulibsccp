@@ -6,7 +6,7 @@
 //  Copyright © 2017 Andreas Fink (andreas@fink.org). All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+#import <ulib/ulib.h>
 #import <ulibsccp/UMSCCP_FilterProtocol.h>
 
 @class UMLayerMTP3;
