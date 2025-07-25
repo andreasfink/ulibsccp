@@ -1376,10 +1376,6 @@
             packet.incomingLinksetTcapSharingPriority      = ls.tcapSharingPriority;
             if(packet.incomingLinksetTcapSharingInsideName.length > 0)
             {
-                
-            }
-            if(packet.incomingLinksetTcapSharingInsideName.length > 0)
-            {
                 UMSCCP_TcapSharingInstance *inst = [_appDelegate getTcapSharingInstance:packet.incomingLinksetTcapSharingInsideName];
                 packet.incomingLinksetTcapSharingInside = inst;
             }
@@ -2793,6 +2789,18 @@
 
 - (UMSCCP_RoutingState *)routePacket:(UMSCCP_Packet *)packet
 {
+    
+    if((packet.incomingLinksetTcapSharingInsideName.length > 0) && (packet.incomingLinksetTcapSharingInside==NULL))
+    {
+        UMSCCP_TcapSharingInstance *inst = [_appDelegate getTcapSharingInstance:packet.incomingLinksetTcapSharingInsideName];
+        packet.incomingLinksetTcapSharingInside = inst;
+    }
+    if((packet.incomingLinksetTcapSharingOutsideName.length > 0) && (packet.incomingLinksetTcapSharingOutside==NULL))
+    {
+        UMSCCP_TcapSharingInstance *inst = [_appDelegate getTcapSharingInstance:packet.incomingLinksetTcapSharingOutsideName];
+        packet.incomingLinksetTcapSharingOutside = inst;
+    }
+
     if(packet.incomingOpc==NULL)
     {
         packet.incomingOpc = _mtp3.opc;
