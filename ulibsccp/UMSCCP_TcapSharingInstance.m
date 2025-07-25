@@ -77,7 +77,7 @@ typedef enum UMTCAP_Command
         else if(packet.incomingTcapCommand == TCAP_TAG_ITU_BEGIN)
         {
             NSString *key = [NSString stringWithFormat:@"%@:%@",packet.outgoingCallingPartyAddress.stringValueE164, packet.incoming_tcap_otid];
-
+            
             UMSCCP_TcapSharingSession *session = [[UMSCCP_TcapSharingSession alloc]initWithTimeout:_timeout];
             session.insideLocalTcapTransactionId = packet.incoming_tcap_otid;
             session.callingAddress  = [packet.outgoingCallingPartyAddress copy];
@@ -90,7 +90,7 @@ typedef enum UMTCAP_Command
         }
         else if(packet.incomingTcapCommand == TCAP_TAG_ITU_CONTINUE)
         {
-    
+            
             NSString *key = [NSString stringWithFormat:@"%@:%@",packet.outgoingCallingPartyAddress.stringValueE164, packet.incoming_tcap_otid];
             UMSCCP_TcapSharingSession *session = _outsideBackRoutes[key];
             if(session)
@@ -167,4 +167,24 @@ typedef enum UMTCAP_Command
 {
     _sccpInstance = sccpInstance;
 }
+
+- (int)work
+{
+    NSArray *a = [_outsideBackRoutes allKeys];
+    if(a.count ==0)
+    {
+        return 0;
+    }
+
+    for(NSString *key in a)
+    {
+        UMSCCP_TcapSharingSession *sess = _outsideBackRoutes[key];
+        if(sess.isExpired)
+        {
+            [_outsideBackRoutes removeObjectForKey:key];
+        }
+    }
+    return (int)a.count;
+}
+
 @end
