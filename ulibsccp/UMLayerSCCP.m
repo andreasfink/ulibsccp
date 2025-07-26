@@ -3008,7 +3008,7 @@
     {
         if(self.logLevel <=UMLOG_DEBUG)
         {
-            [self.logFeed debugText:@"skipping processRouting due to forceRouted"]
+            [self.logFeed debugText:@"skipping processRouting due to forceRouted"];
         }
     }
     /* --------------------------------------------- */
