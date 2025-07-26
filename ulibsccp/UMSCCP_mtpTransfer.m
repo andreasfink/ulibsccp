@@ -83,6 +83,37 @@
         _map = ttmap;
         _data = xdata;
 
+        UMMTP3LinkSet *ls = [_packet.sccp.mtp3 getLinkSetByName:linksetName];
+        if(ls)
+        {
+            _packet.incomingLinksetTcapSharingPriority      = ls.tcapSharingPriority;
+            
+            if(ls.tcapSharingInsideInstance)
+            {
+                _packet.incomingLinksetTcapSharingInside =   (UMSCCP_TcapSharingInstance *) ls.tcapSharingInsideInstance;
+                _packet.incomingLinksetTcapSharingInsideName = _packet.incomingLinksetTcapSharingInside.name;
+            }
+            else if(ls.tcapSharingInsideName.length >0 )
+            {
+                _packet.incomingLinksetTcapSharingInsideName = ls.tcapSharingInsideName;
+                UMSCCP_TcapSharingInstance *inst = [_sccpLayer.appDelegate getTcapSharingInstance:_packet.incomingLinksetTcapSharingInsideName];
+                _packet.incomingLinksetTcapSharingInside = inst;
+                ls.tcapSharingInsideInstance = inst;
+                
+            }
+            if(ls.tcapSharingOutsideInstance)
+            {
+                _packet.incomingLinksetTcapSharingOutside =   (UMSCCP_TcapSharingInstance *) ls.tcapSharingOutsideInstance;
+                _packet.incomingLinksetTcapSharingOutsideName = _packet.incomingLinksetTcapSharingOutside.name;
+            }
+            else if(ls.tcapSharingOutsideName.length >0 )
+            {
+                _packet.incomingLinksetTcapSharingOutsideName = ls.tcapSharingOutsideName;
+                UMSCCP_TcapSharingInstance *inst = [_sccpLayer.appDelegate getTcapSharingInstance:_packet.incomingLinksetTcapSharingOutsideName];
+                _packet.incomingLinksetTcapSharingOutside = inst;
+                ls.tcapSharingInsideInstance = inst;
+            }
+        }
         if(xoptions)
         {
             _options = [xoptions mutableCopy];
@@ -94,7 +125,7 @@
         _options[@"mtp3-opc"] = xopc;
         _options[@"mtp3-dpc"] = xdpc;
 		_packet.incomingMtp3Layer = mtp3;
-        _incomingLinksetName = linksetName;
+        _incomingLinksetName        = linksetName;
         _packet.incomingLinksetName = linksetName;
 		_created = [NSDate date];
         _statsSection = UMSCCP_StatisticSection_TRANSIT;
@@ -120,8 +151,6 @@
 {
     @autoreleasepool
     {
-        NSString *outgoingLinkset=NULL;
-
         _startOfProcessing = [NSDate date];
         /* we build a pseudo MTP3 raw packet for debugging /tracing and logging */
         UMMTP3Label *label = [[UMMTP3Label alloc]init];
