@@ -108,6 +108,14 @@
     return self;
 }
 
+#define THROW_EXCEPTION(a,raw) \
+{ \
+    NSLog(@"%@",a); \
+    NSString *s = a; \
+    @throw([NSException exceptionWithName:s reason:NULL userInfo:@{@"raw": [raw hexString] }] ); \
+}
+
+
 - (void)main
 {
     @autoreleasepool
@@ -149,10 +157,10 @@
         _packet.incomingServiceClass = SCCP_CLASS_UNDEFINED;
         @try
         {
-            NSUInteger len = _data.length;
+            NSInteger len = _data.length;
             if(len < 6)
             {
-                @throw([NSException exceptionWithName:@"SCCP_TOO_SMALL_PACKET_RECEIVED" reason:NULL userInfo:NULL] );
+                THROW_EXCEPTION(@"SCCP_TOO_SMALL_PACKET_RECEIVED",rawMtp3);
             }
             const uint8_t *d = _data.bytes;
             int i = 0;
@@ -180,7 +188,7 @@
                     }
                     if(len < 8)
                     {
-                        @throw([NSException exceptionWithName:@"SCCP_TOO_SMALL_UDT_PACKET_RECEIVED" reason:NULL userInfo:NULL] );
+                        THROW_EXCEPTION(@"SCCP_TOO_SMALL_UDT_PACKET_RECEIVED",rawMtp3);
                     }
                     type = @"UDT";
                     _decodedJson[@"sccp-pdu-type"]=type;
@@ -202,7 +210,7 @@
                     i++;
                     param_data = d[i] + i;
                     i++;
-                    param_optional = -1;
+                    param_optional = 0;
                     break;
                 }
                 case SCCP_UDTS:
@@ -213,7 +221,9 @@
                     }
                     if(len < (3+10))
                     {
-                        @throw([NSException exceptionWithName:@"SCCP_TOO_SMALL_UDTS_PACKET_RECEIVED" reason:NULL userInfo:NULL] );
+                        NSString *s = @"SCCP_TOO_SMALL_UDTS_PACKET_RECEIVED";
+                        [_sccpLayer.logFeed debugText:s];
+                        @throw([NSException exceptionWithName:s reason:NULL userInfo:NULL] );
                     }
                     type=@"UDTS";
                     _decodedJson[@"sccp-pdu-type"]=type;
@@ -226,7 +236,7 @@
                     i++;
                     param_data      = d[i] + i;
                     i++;
-                    param_optional   = -1;
+                    param_optional   = 0;
                     break;
                 }
                 case SCCP_XUDT:
@@ -237,7 +247,9 @@
                     }
                     if(len < (4+11))
                     {
-                        @throw([NSException exceptionWithName:@"SCCP_TOO_SMALL_XUDT_PACKET_RECEIVED" reason:NULL userInfo:NULL] );
+                        NSString *s = @"SCCP_TOO_SMALL_XUDT_PACKET_RECEIVED";
+                        [_sccpLayer.logFeed debugText:s];
+                        @throw([NSException exceptionWithName:s reason:NULL userInfo:NULL] );
                     }
                     type=@"XUDT";
                     _decodedJson[@"sccp-pdu-type"]=type;
@@ -263,7 +275,7 @@
                     i++;
                     if(d[i]==0)
                     {
-                        param_optional = -1;
+                        param_optional = 0;
                     }
                     else
                     {
@@ -281,7 +293,9 @@
                     
                     if(len < (4+11))
                     {
-                        @throw([NSException exceptionWithName:@"SCCP_TOO_SMALL_XUDTS_PACKET_RECEIVED" reason:NULL userInfo:NULL] );
+                        NSString *s = @"SCCP_TOO_SMALL_XUDTS_PACKET_RECEIVED";
+                        [_sccpLayer.logFeed debugText:s];
+                        @throw([NSException exceptionWithName:s reason:NULL userInfo:NULL] );
                     }
                     type=@"XUDTS";
                     _decodedJson[@"sccp-pdu-type"]=type;
@@ -299,7 +313,7 @@
                     i++;
                     if(d[i]==0)
                     {
-                        param_optional = -1;
+                        param_optional = 0;
                     }
                     else
                     {
@@ -317,7 +331,9 @@
                     
                     if(len < (8+12))
                     {
-                        @throw([NSException exceptionWithName:@"SCCP_TOO_SMALL_LUDT_PACKET_RECEIVED" reason:NULL userInfo:NULL] );
+                        NSString *s = @"SCCP_TOO_SMALL_LUDT_PACKET_RECEIVED";
+                        [_sccpLayer.logFeed debugText:s];
+                        @throw([NSException exceptionWithName:s reason:NULL userInfo:NULL] );
                     }
                     type=@"LUDT";
                     _decodedJson[@"sccp-pdu-type"]=type;
@@ -364,7 +380,9 @@
                     
                     if(len < (8+12))
                     {
-                        @throw([NSException exceptionWithName:@"SCCP_TOO_SMALL_LUDTS_PACKET_RECEIVED" reason:NULL userInfo:NULL] );
+                        NSString *s = @"SCCP_TOO_SMALL_LUDTS_PACKET_RECEIVED";
+                        [_sccpLayer.logFeed debugText:s];
+                        @throw([NSException exceptionWithName:s reason:NULL userInfo:NULL] );
                     }
                     type=@"LUDTS";
                     _decodedJson[@"sccp-pdu-type"]=type;
@@ -390,40 +408,44 @@
                     
                     param_optional               = d[i++];
                     param_optional              |= d[i++] <<8;
-                    param_optional              += i - 1 ;
-                    
+                    if(param_optional !=0)
+                    {
+                        param_optional          += i - 1;
+                    }                    
                     break;
                 }
                 default:
-                    @throw([NSException exceptionWithName:@"SCCP_UNKNOWN_PACKET_TYPE" reason:NULL
-                                                 userInfo:@{@"mtp3": [rawMtp3 hexString] } ]);
+                {
+                    NSString *s = @"SCCP_UNKNOWN_PACKET_TYPE";
+                    [_sccpLayer.logFeed debugText:s];
+                    @throw([NSException exceptionWithName:s reason:NULL userInfo:NULL] );
+                }
             }
             if(param_called_party_address > len)
             {
-                @throw([NSException exceptionWithName:@"SCCP_PTR1_POINTS_BEYOND_END" reason:NULL userInfo:@{@"mtp3": [rawMtp3 hexString] }] );
+                NSString *s = @"SCCP_PTR1_POINTS_BEYOND_END";
+                [_sccpLayer.logFeed debugText:s];
+                @throw([NSException exceptionWithName:s reason:NULL userInfo:NULL] );
+
                 return;
             }
 
             if(param_calling_party_address > len)
             {
-                @throw([NSException exceptionWithName:@"SCCP_PTR2_POINTS_BEYOND_END" reason:NULL userInfo:@{@"mtp3": [rawMtp3 hexString] }] );
-                return;
+                THROW_EXCEPTION(@"SCCP_PTR2_POINTS_BEYOND_END",rawMtp3);
             }
             if(param_data > len)
             {
-                @throw([NSException exceptionWithName:@"SCCP_PTR3_POINTS_BEYOND_END" reason:NULL userInfo:@{@"mtp3": [rawMtp3 hexString] }] );
-                return;
+                THROW_EXCEPTION(@"SCCP_PTR3_POINTS_BEYOND_END (DATA)",rawMtp3);
             }
             if(param_long_data > len)
             {
-                @throw([NSException exceptionWithName:@"SCCP_PTR3_POINTS_BEYOND_END" reason:NULL userInfo:@{@"mtp3": [rawMtp3 hexString] }] );
-                return;
+                THROW_EXCEPTION(@"SCCP_PTR3_POINTS_BEYOND_END (LONG_DATA)",rawMtp3);
             }
 
             if(param_optional > len)
             {
-                @throw([NSException exceptionWithName:@"SCCP_PTR4_POINTS_BEYOND_END" reason:NULL userInfo:@{@"mtp3": [rawMtp3 hexString] }] );
-                return;
+                THROW_EXCEPTION(@"SCCP_PTR4_POINTS_BEYOND_END (OPTIONAL)",rawMtp3);
             }
             NSData *dstData = NULL;
             NSData *srcData = NULL;
@@ -642,11 +664,11 @@
             }
             if(_src == NULL)
             {
-                @throw([NSException exceptionWithName:@"SCCP_MISSING_CALLING_PARTY_ADDRESS" reason:NULL userInfo:@{@"mtp3": [rawMtp3 hexString] }] );
+                THROW_EXCEPTION(@"SCCP_MISSING_CALLING_PARTY_ADDRESS",rawMtp3);
             }
             if(_dst==NULL)
             {
-                @throw([NSException exceptionWithName:@"SCCP_MISSING_CALLED_PARTY_ADDRESS" reason:NULL userInfo:@{@"mtp3": [rawMtp3 hexString] }] );
+                THROW_EXCEPTION(@"SCCP_MISSING_CALLED_PARTY_ADDRESS",rawMtp3);
             }
             NSDictionary *o = @{
                                 @"type" : type,
@@ -911,7 +933,7 @@
     /* Management Message */
     if(len<1)
     {
-        @throw([NSException exceptionWithName:@"SCCP_MGMT_MESSAGE_TOO_SHORT" reason:NULL userInfo:@{@"backtrace": UMBacktrace(NULL,0)}] );
+        THROW_EXCEPTION(@"SCCP_MGMT_MESSAGE_TOO_SHORT",_sccp_pdu);
     }
     scgm_format = dat[0];
     
@@ -925,7 +947,7 @@
         {
             if(len<5)
             {
-                @throw([NSException exceptionWithName:@"SCCP_MGMT_MESSAGE_TOO_SHORT" reason:NULL userInfo:@{@"backtrace": UMBacktrace(NULL,0)}] );
+                THROW_EXCEPTION(@"SCCP_MGMT_MESSAGE_TOO_SHORT",_sccp_pdu);
             }
             
             affected_ssn = dat[1];
@@ -941,7 +963,7 @@
         {
             if(len<6)
             {
-                @throw([NSException exceptionWithName:@"SCCP_MGMT_MESSAGE_TOO_SHORT" reason:NULL userInfo:@{@"backtrace": UMBacktrace(NULL,0)}] );
+                THROW_EXCEPTION(@"SCCP_MGMT_MESSAGE_TOO_SHORT(subsystem-congested)",_sccp_pdu);
             }
             affected_ssn = dat[1];
             affected_pc = dat[2] | ((dat[3] << 8) & 0x3F);
@@ -951,7 +973,7 @@
             break;
         default:
             /* we dont know what to do with this */
-            @throw([NSException exceptionWithName:@"SCCP_MGMT_UNKNOWN_MESSAGE" reason:NULL userInfo:@{@"backtrace": UMBacktrace(NULL,0)}] );
+            THROW_EXCEPTION(@"SCCP_MGMT_UNKNOWN_MESSAGE",_sccp_pdu);
             break;
     }
     
