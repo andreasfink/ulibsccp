@@ -113,6 +113,8 @@ typedef enum UMSccpScreening_result
     id<sccp_tcapDecoder>                     _tcapDecodeDelegate; /* a delegate which decodes opcode and appcontext for us */
     UMSCCP_PendingSegmentsStorage            *_pendingSegmentsStorage;
     BOOL                                     _routingDebug;
+    UMLogLevel                              _tcapSharingTraceLevel;
+    
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;
@@ -141,12 +143,12 @@ typedef enum UMSccpScreening_result
 @property(readwrite,strong,atomic) id<UMSCCP_TracefileProtocol>    unrouteablePacketsTraceDestination;
 @property(readwrite,assign,atomic) BOOL                            routeErrorsBackToSource;
 
-@property(readwrite,strong,atomic) NSString                    *sccp_screeningPluginName;
-@property(readwrite,strong,atomic) NSString                    *sccp_screeningPluginConfig;
-@property(readwrite,strong,atomic) NSString                    *sccp_screeningPluginTraceFile;
+@property(readwrite,strong,atomic) NSString                     *sccp_screeningPluginName;
+@property(readwrite,strong,atomic) NSString                     *sccp_screeningPluginConfig;
+@property(readwrite,strong,atomic) NSString                     *sccp_screeningPluginTraceFile;
 @property(readwrite,strong,atomic) UMPlugin<UMMTP3SCCPScreeningPluginProtocol>   *sccp_screeningPlugin;
-@property(readwrite,strong,atomic) UMSCCP_PrometheusData    *prometheusData;
-
+@property(readwrite,strong,atomic) UMSCCP_PrometheusData        *prometheusData;
+@property(readwrite,assign,atomic) UMLogLevel                   tcapSharingTraceLevel;
 
 - (void)increaseThroughputCounter:(UMSCCP_StatisticSection)section;
 

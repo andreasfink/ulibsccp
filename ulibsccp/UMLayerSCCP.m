@@ -1356,6 +1356,7 @@
     NSString *usedSelector=@"";
     
     UMSCCP_Packet *packet = [[UMSCCP_Packet alloc]init];
+    packet.tcapSharingTraceLevel = _tcapSharingTraceLevel;
     packet.instance = _appDelegate.instanceName;
     packet.incomingLinksetName = linksetName;
 
@@ -2050,10 +2051,27 @@
     UMSCCP_TcapSharingInstance  *inside_inst    = packet.incomingLinksetTcapSharingInside;
     UMSCCP_TcapSharingInstance  *outside_inst   = packet.incomingLinksetTcapSharingOutside;
     
+    
+    if(packet.tcapSharingTraceLevel <=UMLOG_DEBUG)
+    {
+        NSMutableString *s = [[NSMutableString alloc]init];
+        [s appendString:@"processPreroutingTcapSharing:\n"];
+        [s appendFormat:@"\tincomingLinksetTcapSharingInsideName: %@\n",
+            packet.incomingLinksetTcapSharingInsideName];
+        [s appendFormat:@"\tincomingLinksetTcapSharingOutsideName: %@",
+            packet.incomingLinksetTcapSharingOutsideName];
+
+        [s appendFormat:@"\tincomingLinksetTcapSharingInside: %@\n",
+            packet.incomingLinksetTcapSharingInside.name];
+        [s appendFormat:@"\tincomingLinksetTcapSharingOutside: %@",
+            packet.incomingLinksetTcapSharingOutside.name];
+        [self.logFeed debugText:s];
+    }
+    
     UMSCCP_TcapSharing_result r = UMSCCP_TcapSharing_routeNormal;
     if(outside_inst)
     {
-        if(self.logLevel <=UMLOG_DEBUG)
+        if((self.logLevel <=UMLOG_DEBUG) || (packet.tcapSharingTraceLevel <=UMLOG_DEBUG))
         {
             NSMutableString *s = [NSMutableString stringWithFormat:@"TCAP-SHARING-PREROUTING-OUTSIDE %@",outside_inst.name];
             [self logDebug:s];
@@ -2062,7 +2080,7 @@
     }
     else if(inside_inst)
     {
-        if(self.logLevel <=UMLOG_DEBUG)
+        if((self.logLevel <=UMLOG_DEBUG) || (packet.tcapSharingTraceLevel <=UMLOG_DEBUG))
         {
             NSMutableString *s = [NSMutableString stringWithFormat:@"TCAP-SHARING-PREROUTING-INSIDE %@",inside_inst.name];
             [self logDebug:s];
@@ -2079,7 +2097,7 @@
        routingState.skipRouting = YES;
        if(packet.forcedLinkset)
        {
-            if(self.logLevel <=UMLOG_DEBUG)
+           if((self.logLevel <=UMLOG_DEBUG) || (packet.tcapSharingTraceLevel <=UMLOG_DEBUG))
             {
                 NSMutableString *s = [NSMutableString stringWithFormat:@"TCAP-SHARING: forcerouted to %@",packet.forcedLinkset];
                 [self logDebug:s];
@@ -2088,7 +2106,7 @@
         }
         if(packet.forcedDpc)
         {
-            if(self.logLevel <=UMLOG_DEBUG)
+            if((self.logLevel <=UMLOG_DEBUG) || (packet.tcapSharingTraceLevel <=UMLOG_DEBUG))
             {
                 NSMutableString *s = [NSMutableString stringWithFormat:@"TCAP-SHARING: forcerouted to DPC %@",packet.forcedDpc];
                 [self logDebug:s];
@@ -2097,13 +2115,17 @@
         }
         if(packet.forcedDestinationGroup)
         {
-            if(self.logLevel <=UMLOG_DEBUG)
+            if((self.logLevel <=UMLOG_DEBUG) || (packet.tcapSharingTraceLevel <=UMLOG_DEBUG))
             {
                 NSMutableString *s = [NSMutableString stringWithFormat:@"TCAP-SHARING: forcerouted to Destination %@",packet.forcedDestinationGroup.name];
                 [self logDebug:s];
             }
             routingState.forcedDestinationGroup = packet.forcedDestinationGroup;
         }
+    }
+    if(packet.tcapSharingTraceLevel <=UMLOG_DEBUG)
+    {
+        [self.logFeed debugText:@"processPreroutingTcapSharing completed"];
     }
 }
 
@@ -2113,10 +2135,22 @@
     UMSCCP_TcapSharingInstance  *inside_inst    = packet.incomingLinksetTcapSharingInside;
     UMSCCP_TcapSharingInstance  *outside_inst   = packet.incomingLinksetTcapSharingOutside;
     
+    
+    if(packet.tcapSharingTraceLevel <=UMLOG_DEBUG)
+    {
+        NSMutableString *s = [[NSMutableString alloc]init];
+        [s appendString:@"processPostroutingTcapSharing:\n"];
+        [s appendFormat:@"\tincomingLinksetTcapSharingInside: %@\n",
+            packet.incomingLinksetTcapSharingInside.name];
+        [s appendFormat:@"\tincomingLinksetTcapSharingOutside: %@",
+            packet.incomingLinksetTcapSharingOutside.name];
+        [self.logFeed debugText:s];
+    }
+
     UMSCCP_TcapSharing_result r = UMSCCP_TcapSharing_routeNormal;
     if(outside_inst)
     {
-        if(self.logLevel <=UMLOG_DEBUG)
+        if((self.logLevel <=UMLOG_DEBUG) || (packet.tcapSharingTraceLevel <=UMLOG_DEBUG))
         {
             NSMutableString *s = [NSMutableString stringWithFormat:@"TCAP-SHARING-POSTROUTING-OUTSIDE %@",outside_inst.name];
             [self logDebug:s];
@@ -2125,7 +2159,7 @@
     }
     else if(inside_inst)
     {
-        if(self.logLevel <=UMLOG_DEBUG)
+        if((self.logLevel <=UMLOG_DEBUG) || (packet.tcapSharingTraceLevel <=UMLOG_DEBUG))
         {
             NSMutableString *s = [NSMutableString stringWithFormat:@"TCAP-SHARING-POSTROUTING-INSIDE %@",inside_inst.name];
             [self logDebug:s];
@@ -2135,6 +2169,10 @@
     else
     {
         routingState.status = UMSCCP_RoutingStatus_success;
+        if(packet.tcapSharingTraceLevel <=UMLOG_DEBUG)
+        {
+            [self.logFeed debugText:@"processPostroutingTcapSharing completed with success"];
+        }
         return;
     }
 }
@@ -2789,7 +2827,20 @@
 
 - (UMSCCP_RoutingState *)routePacket:(UMSCCP_Packet *)packet
 {
-    
+    if(packet.tcapSharingTraceLevel <=UMLOG_DEBUG)
+    {
+        NSMutableString *s = [[NSMutableString alloc]init];
+        [s appendFormat:@"incomingLinksetTcapSharingInsideName: %@\n",
+            packet.incomingLinksetTcapSharingInsideName];
+        [s appendFormat:@"incomingLinksetTcapSharingOutsideName: %@",
+            packet.incomingLinksetTcapSharingOutsideName];
+
+        [s appendFormat:@"incomingLinksetTcapSharingInside: %@\n",
+            packet.incomingLinksetTcapSharingInside.name];
+        [s appendFormat:@"incomingLinksetTcapSharingOutside: %@",
+            packet.incomingLinksetTcapSharingOutside.name];
+        [self.logFeed debugText:s];
+    }
     if((packet.incomingLinksetTcapSharingInsideName.length > 0) && (packet.incomingLinksetTcapSharingInside==NULL))
     {
         UMSCCP_TcapSharingInstance *inst = [_appDelegate getTcapSharingInstance:packet.incomingLinksetTcapSharingInsideName];
@@ -3686,7 +3737,16 @@
                     [self logMajorError:@"Invalid value for screening-sccp-plugin-trace-level. Should be 0...2"];
             }
         }
-
+        
+        if (cfg[@"tcap-sharing-trace-level"])
+        {
+            NSNumber *n = cfg[@"tcap-sharing-trace-level"];
+            _tcapSharingTraceLevel = (UMLogLevel)n.integerValue;
+        }
+        else
+        {
+            _tcapSharingTraceLevel = UMLOG_MAJOR;
+        }
     }
     _prometheusData = [[UMSCCP_PrometheusData alloc]initWithPrometheus:appContext.prometheus];
     [_prometheusData setSubname1:@"sccp" value:_layerName];

@@ -811,7 +811,8 @@
 
                 if(_dst.ssn.ssn!=SCCP_SSN_SCCP_MG)
                 {
-                    if([_sccpLayer routePacket:_packet] == NO)
+                    UMSCCP_RoutingState *state = [_sccpLayer routePacket:_packet];
+                    if(state.status!=UMSCCP_RoutingStatus_success)
                     {
                         if(_sccpLayer.unrouteablePacketsTraceDestination)
                         {
@@ -886,7 +887,9 @@
                         }
                         break;
                     default:
-                        if([_sccpLayer routePacket:_packet] == NO)
+                    {
+                        UMSCCP_RoutingState *state = [_sccpLayer routePacket:_packet];
+                        if(state.status!=UMSCCP_RoutingStatus_success)
                         {
                             if(_sccpLayer.unrouteablePacketsTraceDestination)
                             {
@@ -894,6 +897,7 @@
                             }
                         }
                         break;
+                    }
                 }
                 
                 if(_sccpLayer.statisticDb)

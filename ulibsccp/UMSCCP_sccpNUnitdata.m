@@ -394,6 +394,7 @@ static int segmentReferenceId;
                 else /* we have pure data only */
                 {
                     UMSCCP_Packet *packet = [[UMSCCP_Packet alloc]init];
+                    packet.tcapSharingTraceLevel = _sccpLayer.tcapSharingTraceLevel;
                     packet.sccp = _sccpLayer;
                     packet.logFeed = _sccpLayer.logFeed;
                     packet.logLevel = _sccpLayer.logLevel;

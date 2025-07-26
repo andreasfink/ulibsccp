@@ -232,6 +232,7 @@ typedef enum UMSCCP_Packet_Tag_enum
     UMSCCP_TcapSharingInstance  *_incomingLinksetTcapSharingOutside;
     SCCP_ReturnCause            _errorCauseValue;
     BOOL                        _candidateForTcapSharing;
+    UMLogLevel                  _tcapSharingTraceLevel;
 
 }
 
@@ -347,6 +348,8 @@ typedef enum UMSCCP_Packet_Tag_enum
 @property(readwrite,strong,atomic)  id<UMSCCP_UserProtocol>     forcedLocalUser;
 @property(readwrite,strong,atomic)  UMMTP3PointCode             *forcedDpc;
 @property(readwrite,assign,atomic)  BOOL                        candidateForTcapSharing;
+@property(readwrite,assign,atomic)  UMLogLevel                  tcapSharingTraceLevel;
+
 
 
 - (NSString *) incomingPacketType;
