@@ -2697,6 +2697,7 @@
                             sls:routingPacket.sls];
             break;
         case SCCP_LUDT:
+        {
             if(processSegmentedDelivery)
             {
                 if(self.logLevel <=UMLOG_DEBUG)
@@ -2747,11 +2748,13 @@
                        optionsData:routingPacket.outgoingOptionalData
                            options:routingPacket.outgoingOptions
                           provider:routingPacket.outgoingMtp3Layer
-                       routedToLinkset:&outgoingLinkset
+                   routedToLinkset:&outgoingLinkset
                                sls:routingPacket.sls];
             }
             break;
+        }
         case SCCP_LUDTS:
+        {
             e = [self sendLUDTS:routingPacket.outgoingSccpData
                         calling:routingPacket.outgoingCallingPartyAddress
                          called:routingPacket.outgoingCalledPartyAddress
@@ -2766,9 +2769,12 @@
                 routedToLinkset:&outgoingLinkset
                             sls:routingPacket.sls];
             break;
+        }
         default:
+        {
             e = UMMTP3_error_unsupported_pdu_type;
             break;
+        }
     }
     routingPacket.outgoingLinksetName = outgoingLinkset;
     routingState.mtp3DeliveryError = e;
