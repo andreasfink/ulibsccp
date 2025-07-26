@@ -92,8 +92,6 @@ typedef enum UMSCCP_Packet_Tag_enum
     UMSCCP_Packet_Tag_incomingGsmMapAsn1                            = 66,
     UMSCCP_Packet_Tag_incomingGsmMapOperations                      = 67,
     UMSCCP_Packet_Tag_incomingCategory                              = 68,
-  //  UMSCCP_Packet_Tag_incomingLocalTransactionId                    = 69,
-  //  UMSCCP_Packet_Tag_incomingRemoteTransactionId                   = 70,
     UMSCCP_Packet_Tag_canNotDecode                                  = 71,
     UMSCCP_Packet_Tag_tags                                          = 72,
     UMSCCP_Packet_Tag_vars                                          = 73,

@@ -2037,6 +2037,8 @@
 }
 
 
+
+
 - (void)processIncomingFiltering:(UMSCCP_RoutingState *)routingState
 {
     UMSCCP_Packet *packet = routingState.inboundReassembledPacket;
@@ -2052,7 +2054,7 @@
     {
         routingState.status = UMSCCP_RoutingStatus_failed;
     }
-    routingState.status = UMSCCP_RoutingStatus_success;
+    routingState.status = UMSCCP_RoutingStatus_success;    
 }
 
 - (void)processPreroutingTcapSharing:(UMSCCP_RoutingState *)routingState
@@ -2841,8 +2843,9 @@
 
 - (UMSCCP_RoutingState *)routePacket:(UMSCCP_Packet *)packet
 {
-    if(packet.tcapSharingTraceLevel <=UMLOG_DEBUG)
+    if((packet.tcapSharingTraceLevel <=UMLOG_DEBUG) || (_logLevel <=UMLOG_DEBUG))
     {
+        NSLog(@"Entering routePacket:");
         NSMutableString *s = [[NSMutableString alloc]init];
         [s appendFormat:@"incomingLinksetTcapSharingInsideName: %@\n",
             packet.incomingLinksetTcapSharingInsideName];
