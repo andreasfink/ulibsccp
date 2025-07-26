@@ -2113,6 +2113,8 @@
                 [self logDebug:s];
             }
             routingState.forcedLinkset = packet.forcedLinkset;
+           packet.outgoingLinksetName = packet.forcedLinkset;
+
         }
         if(packet.forcedDpc)
         {
@@ -2122,6 +2124,7 @@
                 [self logDebug:s];
             }
             routingState.forcedDpc = packet.forcedDpc;
+            packet.outgoingDpc = packet.forcedDpc;
         }
         if(packet.forcedDestinationGroup)
         {
@@ -3000,6 +3003,13 @@
     if(routingState.forceRouted==NO)
     {
         EXECUTE_AND_CHECK_ERROR(routingState,processRouting,@"processRouting")
+    }
+    else
+    {
+        if(self.logLevel <=UMLOG_DEBUG)
+        {
+            [self.logFeed debugText:@"skipping processRouting due to forceRouted"]
+        }
     }
     /* --------------------------------------------- */
     /* OUTBOUND TCAP SHARING                         */
