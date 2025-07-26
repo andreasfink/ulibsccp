@@ -161,6 +161,7 @@
             int param_called_party_address = 0;
             int param_calling_party_address = 0;
             int param_data = 0;
+            int param_long_data = 0;
             int param_optional = 0;
             int param_hop_counter = 0;
             NSString *type;
@@ -306,6 +307,11 @@
                     break;
                     
                 case SCCP_LUDT:
+                    if(_packet.logLevel <=UMLOG_DEBUG)
+                    {
+                        [_packet.logFeed debugText:@"LUDT"];
+                    }
+
                     if(len < (8+12))
                     {
                         @throw([NSException exceptionWithName:@"SCCP_TOO_SMALL_LUDT_PACKET_RECEIVED" reason:NULL userInfo:NULL] );
@@ -323,27 +329,34 @@
                         _packet.outgoingHandling = SCCP_HANDLING_RETURN_ON_ERROR;
                     }
                     _decodedJson[@"sccp-protocol-handling"]=@(_m_handling);
-                    param_hop_counter=d[i];
+                    param_hop_counter=d[i++];
                     _packet.incomingMaxHopCount = param_hop_counter;
                     i++;
-                    param_called_party_address = d[i] + (d[i+1]<<8) + i + 1;
-                    i +=2;
-                    param_calling_party_address = d[i] + (d[i+1]<<8) + i + 1 ;
-                    i +=2;
-                    param_data =  d[i] + (d[i+1]<<8) + i + 1 ;
-                    i +=2;
-                    if((d[i] != 0x00) && (d[i+1] != 0x00))
-                    {
-                        param_optional = d[i] + (d[i+1]<<8) + i + 1;
-                    }
-                    else
-                    {
-                        param_optional = -1;
-                    }
-                    i +=2;
+
+                    param_called_party_address   = d[i++];
+                    param_called_party_address  |= d[i++] <<8;
+                    param_called_party_address  += i;
+
+                    param_calling_party_address  = d[i++];
+                    param_calling_party_address |= d[i++] <<8;
+                    param_calling_party_address += i;
+
+                    param_long_data              = d[i++];
+                    param_long_data             |= d[i++] <<8;
+                    param_long_data             += i;
+
+                    param_optional               = d[i++];
+                    param_optional              |= d[i++] <<8;
+                    param_optional              += i;
+                    
                     break;
 
                 case SCCP_LUDTS:
+                    if(_packet.logLevel <=UMLOG_DEBUG)
+                    {
+                        [_packet.logFeed debugText:@"LUDTS"];
+                    }
+
                     if(len < (8+12))
                     {
                         @throw([NSException exceptionWithName:@"SCCP_TOO_SMALL_LUDTS_PACKET_RECEIVED" reason:NULL userInfo:NULL] );
@@ -356,21 +369,24 @@
                     _m_hopcounter = d[i++] & 0x0F;
                     _decodedJson[@"sccp-hop-counter"]=@(_m_hopcounter);
                     _packet.incomingMaxHopCount = _m_return_cause;
-                    param_called_party_address = d[i] + (d[i+1]<<8) + i + 1;
-                    i +=2;
-                    param_calling_party_address = d[i] + (d[i+1]<<8) + i + 1;
-                    i +=2;
-                    param_data =  d[i] + (d[i+1]<<8) + i + 1;
-                    i +=2;
-                    if((d[i] != 0x00) && (d[i+1] != 0x00))
-                    {
-                        param_optional = d[i] + (d[i+1]<<8) + i + 1;
-                    }
-                    else
-                    {
-                        param_optional = -1;
-                    }
-                    i +=2;
+                    
+                    
+                    param_called_party_address   = d[i++];
+                    param_called_party_address  |= d[i++] <<8;
+                    param_called_party_address  += i;
+
+                    param_calling_party_address  = d[i++];
+                    param_calling_party_address |= d[i++] <<8;
+                    param_calling_party_address += i;
+
+                    param_long_data              = d[i++];
+                    param_long_data             |= d[i++] <<8;
+                    param_long_data             += i;
+
+                    param_optional               = d[i++];
+                    param_optional              |= d[i++] <<8;
+                    param_optional              += i;
+
                     break;
                     
                 default:
@@ -393,7 +409,13 @@
                 @throw([NSException exceptionWithName:@"SCCP_PTR3_POINTS_BEYOND_END" reason:NULL userInfo:@{@"mtp3": [rawMtp3 hexString] }] );
                 return;
             }
-            if((param_optional > len) && (param_optional > 0))
+            if(param_long_data > len)
+            {
+                @throw([NSException exceptionWithName:@"SCCP_PTR3_POINTS_BEYOND_END" reason:NULL userInfo:@{@"mtp3": [rawMtp3 hexString] }] );
+                return;
+            }
+
+            if(param_optional > len)
             {
                 @throw([NSException exceptionWithName:@"SCCP_PTR4_POINTS_BEYOND_END" reason:NULL userInfo:@{@"mtp3": [rawMtp3 hexString] }] );
                 return;
@@ -473,6 +495,21 @@
             {
                 i = (int)d[param_data];
                 _sccp_pdu = [NSData dataWithBytes:&d[param_data+1] length:i];
+                _decodedJson[@"sccp-payload-bytes"]=[_sccp_pdu hexString];
+                if(decodeOnly)
+                {
+                    id<UMSCCP_UserProtocol> user = [_sccpLayer getUserForSubsystem:_dst.ssn number:_dst];
+                    id decodedUserPdu = [user decodePdu:_sccp_pdu];
+                    _decodedPdu = _sccp_pdu;
+                    _decodedJson[@"sccp-payload"]=decodedUserPdu;
+                }
+                _packet.incomingSccpData = _sccp_pdu;
+            }
+            if(param_long_data > 0)
+            {
+                i = (int)d[param_data];
+                i += (int)d[param_data+1]<<8;
+                _sccp_pdu = [NSData dataWithBytes:&d[param_data+2] length:i];
                 _decodedJson[@"sccp-payload-bytes"]=[_sccp_pdu hexString];
                 if(decodeOnly)
                 {

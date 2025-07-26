@@ -564,7 +564,7 @@
     {
         cga_number_translation_out = [_mtp3 callingPartyAddressTranslationOutForLinkset:*outgoingLinkset];
         cda_number_translation_out = [_mtp3 calledPartyAddressTranslationOutForLinkset:*outgoingLinkset];
-
+        
     }
     if(cga_number_translation_out)
     {
@@ -597,7 +597,7 @@
     
     NSData *srcEncoded = [src encode:_sccpVariant];
     NSData *dstEncoded = [dst encode:_sccpVariant];
-
+    
     
     NSMutableData *sccp_pdu = [[NSMutableData alloc]init];
     
@@ -610,23 +610,23 @@
         header[0] = SCCP_LUDT;
         header[1] = (pclass & 0x0F) | ((handling & 0x0F) << 4);
         header[2] = maxHopCount;
-        header[3] = ((7 + 0) >> 0) & 0xFF;
-        header[4] = ((7 + 0) >> 8) & 0xFF;
-        header[5] = ((6 + dstEncoded.length)>> 0) & 0xFF;
-        header[6] = ((6 + dstEncoded.length)>> 8) & 0xFF;
-        header[7] = ((4 + dstEncoded.length + srcEncoded.length) >> 0) & 0xFF;
-        header[8] = ((4 + dstEncoded.length + srcEncoded.length) >> 8) & 0xFF;
+        header[3] = ((sizeof(header) - 4) >> 0) & 0xFF;
+        header[4] = ((sizeof(header) - 4) >> 8) & 0xFF;
+        header[5] = ((sizeof(header) - 6 + 1 + dstEncoded.length) >> 0) & 0xFF;
+        header[6] = ((sizeof(header) - 6 + 1 + dstEncoded.length) >> 8) & 0xFF;
+        header[7] = ((sizeof(header) - 8 + 1 + dstEncoded.length + 1 + srcEncoded.length) >> 0) & 0xFF;
+        header[8] = ((sizeof(header) - 8 + 1 + dstEncoded.length + 1 + srcEncoded.length) >> 8) & 0xFF;
         if(xoptionsdata.length > 0)
         {
-            header[9]  = ((4 + dstEncoded.length + srcEncoded.length + data.length) >> 0) & 0xFF;
-            header[10] = ((4 + dstEncoded.length + srcEncoded.length + data.length) >> 8) & 0xFF;
+            header[9]  = ((sizeof(header) - 10 + 1 + dstEncoded.length + 1 + srcEncoded.length + 2 + data.length) >> 0) & 0xFF;
+            header[10] = ((sizeof(header) - 10 + 1 + dstEncoded.length + 1 + srcEncoded.length + 2 + data.length) >> 8) & 0xFF;
         }
         else
         {
             header[9] = 0;
             header[10] = 0;
         }
-        [sccp_pdu appendBytes:header length:11];
+        [sccp_pdu appendBytes:header length:sizeof(header)];
     }
     else
     {
@@ -645,21 +645,31 @@
         {
             header[6] = 0;
         }
-        [sccp_pdu appendBytes:header length:7];
+        [sccp_pdu appendBytes:header length:sizeof(header)];
     }
+    
     
     [sccp_pdu appendByte:dstEncoded.length];
     [sccp_pdu appendData:dstEncoded];
     [sccp_pdu appendByte:srcEncoded.length];
     [sccp_pdu appendData:srcEncoded];
-    [sccp_pdu appendByte:data.length];
-    [sccp_pdu appendData:data];
+    
+    if(isLUDT)
+    {
+        [sccp_pdu appendByte:((data.length >> 0) & 0xFF)];
+        [sccp_pdu appendByte:((data.length >> 8) & 0xFF)];
+        [sccp_pdu appendData:data];
+    }
+    else
+    {
+        [sccp_pdu appendByte:data.length];
+        [sccp_pdu appendData:data];
+    }
     if(xoptionsdata.length > 0)
     {
         [sccp_pdu appendData:xoptionsdata];
         [sccp_pdu appendByte:0x00]; /* end of optional parameters */
     }
-
     UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc options:options routedToLinkset:outgoingLinkset sls:sls];
 
     NSString *s;
@@ -2050,8 +2060,6 @@
     UMSCCP_Packet               *packet         = routingState.inboundReassembledPacket;
     UMSCCP_TcapSharingInstance  *inside_inst    = packet.incomingLinksetTcapSharingInside;
     UMSCCP_TcapSharingInstance  *outside_inst   = packet.incomingLinksetTcapSharingOutside;
-    
-    
     if(packet.tcapSharingTraceLevel <=UMLOG_DEBUG)
     {
         NSMutableString *s = [[NSMutableString alloc]init];
