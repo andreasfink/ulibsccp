@@ -63,8 +63,8 @@
     _traceReceiveDestinations =[[UMSynchronizedArray alloc]init];
     _traceDroppedDestinations =[[UMSynchronizedArray alloc]init];
     _sccpL3RoutingTable = [[SccpL3RoutingTable alloc]init];
-    _xudt_max_hop_count = 16;
-    _xudts_max_hop_count = 16;
+    _lxudt_max_hop_count = 16;
+    _lxudts_max_hop_count = 16;
     _gttSelectorRegistry = [[SccpGttRegistry alloc]init];
     _gttSelectorRegistry.logLevel = self.logLevel;
     _gttSelectorRegistry.logFeed = self.logFeed;
@@ -2321,26 +2321,6 @@
         routingPacket.outgoingToLocal = YES;
         routingPacket.outgoingLocalUser = localUser;
         routingPacket.outgoingLinksetName = @"local";
-        if((routingPacket.incomingServiceType == SCCP_UDTS) || (routingPacket.incomingServiceType == SCCP_XUDTS) || (routingPacket.incomingServiceType == SCCP_LUDTS))
-        {
-            [localUser sccpNNotice:routingPacket.outgoingSccpData
-                            callingLayer:self
-                                 calling:routingPacket.outgoingCallingPartyAddress
-                                  called:routingPacket.outgoingCalledPartyAddress
-                                  reason:routingPacket.outgoingReturnCause
-                                 options:routingPacket.outgoingOptions];
-        }
-        else
-        {
-            causeValue = [self localDeliverNUnitdata:routingPacket.outgoingSccpData
-                                              toUser:localUser
-                                             calling:routingPacket.outgoingCallingPartyAddress
-                                              called:routingPacket.outgoingCalledPartyAddress
-                                    qualityOfService:0
-                                               class:routingPacket.outgoingServiceClass
-                                            handling:routingPacket.outgoingHandling
-                                             options:routingPacket.outgoingOptions];
-        }
     }
 
     else if(grp)
@@ -2572,6 +2552,34 @@
         }
         routingState.packetSegmentsToDeliver = arr;
         routingState.packetToDeliver = NULL;
+    }
+}
+
+- (void)processLocalDelivery:(UMSCCP_RoutingState *)routingState
+{
+    UMSCCP_Packet   *routingPacket      = routingState.inboundReassembledPacket;
+    if(routingPacket.outgoingToLocal ==YES)
+    {
+        id<UMSCCP_UserProtocol> localUser = routingPacket.outgoingLocalUser;
+        
+        SCCP_ReturnCause causeValue = SCCP_ReturnCause_not_set;
+        causeValue = [self localDeliverNUnitdata:routingPacket.outgoingSccpData
+                                          toUser:localUser
+                                         calling:routingPacket.outgoingCallingPartyAddress
+                                          called:routingPacket.outgoingCalledPartyAddress
+                                qualityOfService:0
+                                           class:routingPacket.outgoingServiceClass
+                                        handling:routingPacket.outgoingHandling
+                                         options:routingPacket.outgoingOptions];
+        if(causeValue == SCCP_ReturnCause_not_set)
+        {
+            routingState.status = UMSCCP_RoutingStatus_success;
+        }
+        else
+        {
+            routingState.status = UMSCCP_RoutingStatus_failed;
+            routingState.cause = @(causeValue);
+        }
     }
 }
 
@@ -3022,11 +3030,23 @@
     /* split outbound packets if not split already   */
     /* --------------------------------------------- */
     EXECUTE_AND_CHECK_ERROR(routingState,processOutgoingSegmentation,@"processOutgoingSegmentation")
-    /* --------------------------------------------- */
-    /* DELIVERY TO MTP3                              */
-    /* send the packets to the wire                  */
-    /* --------------------------------------------- */
-    EXECUTE_AND_CHECK_ERROR(routingState,processDelivery,@"processDelivery")
+    if(routingState.deliverLocal)
+    {
+        /* --------------------------------------------- */
+        /* DELIVERY TO MTP3                              */
+        /* send the packets to the wire                  */
+        /* --------------------------------------------- */
+        EXECUTE_AND_CHECK_ERROR(routingState,processLocalDelivery,@"processLocalDelivery")
+
+    }
+    else
+    {
+        /* --------------------------------------------- */
+        /* DELIVERY TO MTP3                              */
+        /* send the packets to the wire                  */
+        /* --------------------------------------------- */
+        EXECUTE_AND_CHECK_ERROR(routingState,processDelivery,@"processDelivery")
+    }
     return routingState;
 }
 
@@ -4135,7 +4155,6 @@
                     i++;
                     break;
                 case SCCP_LUDT:
-                    /* FIXME. Somethings wrong here with segments */
                     m_protocol_class = d[i] & 0x0F;
                     m_handling = (d[i++]>>4) & 0x0F;
                     param_called_party_address = d[i] + (d[i+1]<<8) + i + 1;
@@ -5345,6 +5364,7 @@
     NSString *s = [d jsonString];
     return s;
 }
+
 - (SCCP_ReturnCause) localDeliverNUnitdata:(NSData *)data
                                     toUser:(id<UMSCCP_UserProtocol>)localUser
                                    calling:(SccpAddress *)callingPartyAddress

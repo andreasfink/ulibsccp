@@ -72,8 +72,8 @@ typedef enum UMSccpScreening_result
     UMSynchronizedArray         *_traceDroppedDestinations;
 
     SccpL3RoutingTable          *_sccpL3RoutingTable;
-    int                         _xudt_max_hop_count;
-    int                         _xudts_max_hop_count;
+    int                         _lxudt_max_hop_count;
+    int                         _lxudts_max_hop_count;
     BOOL                        _stpMode;
     NSArray<UMMTP3PointCode *>  *_next_pcs;  /* if STP mode is NO, all traffic is sent to next_pcs instead of using a routing table */
     SccpDestinationGroup        *_default_destination_group;
@@ -122,8 +122,8 @@ typedef enum UMSccpScreening_result
 @property(readwrite,strong) SccpGttRegistry *gttSelectorRegistry;
 @property(readwrite,strong) NSMutableDictionary *pendingSegments;
 @property(readwrite,strong) SccpL3RoutingTable *sccpL3RoutingTable;
-@property(readwrite,assign) int xudt_max_hop_count;
-@property(readwrite,assign) int xudts_max_hop_count;
+@property(readwrite,assign) int lxudt_max_hop_count;
+@property(readwrite,assign) int lxudts_max_hop_count;
 @property(readwrite,assign) BOOL stpMode;
 @property(readwrite,assign) BOOL statisticsReady;
 @property(readwrite,assign) BOOL routingDebug;
