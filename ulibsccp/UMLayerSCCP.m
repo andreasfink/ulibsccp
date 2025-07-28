@@ -2153,7 +2153,8 @@
     UMSCCP_TcapSharingInstance  *inside_inst    = packet.incomingLinksetTcapSharingInside;
     UMSCCP_TcapSharingInstance  *outside_inst   = packet.incomingLinksetTcapSharingOutside;
     
-    
+    NSLog(@"entering processPostroutingTcapSharing\npacket.incomingLinksetName=%@\npacket.outgoingLinksetName=%@",packet.incomingLinksetName,packet.outgoingLinksetName);
+
     if(packet.tcapSharingTraceLevel <=UMLOG_DEBUG)
     {
         NSMutableString *s = [[NSMutableString alloc]init];
@@ -2191,8 +2192,9 @@
         {
             [self.logFeed debugText:@"processPostroutingTcapSharing completed with success"];
         }
-        return;
     }
+    NSLog(@"entering processPostroutingTcapSharing *END* \npacket.incomingLinksetName=%@\npacket.outgoingLinksetName=%@",packet.incomingLinksetName,packet.outgoingLinksetName);
+
 }
 
 - (void)processForcedRouting:(UMSCCP_RoutingState *)routingState
