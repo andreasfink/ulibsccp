@@ -617,8 +617,8 @@
         header[8] = ((sizeof(header) - 8 + 1 + dstEncoded.length + 1 + srcEncoded.length) >> 8) & 0xFF;
         if(xoptionsdata.length > 0)
         {
-            header[9]  = ((sizeof(header) - 10 + 1 + dstEncoded.length + 1 + srcEncoded.length + 0 + data.length) >> 0) & 0xFF;
-            header[10] = ((sizeof(header) - 10 + 1 + dstEncoded.length + 1 + srcEncoded.length + 0 + data.length) >> 8) & 0xFF;
+            header[9]  = ((sizeof(header) - 10 + 1 + dstEncoded.length + 1 + srcEncoded.length + 3 + data.length) >> 0) & 0xFF;
+            header[10] = ((sizeof(header) - 10 + 1 + dstEncoded.length + 1 + srcEncoded.length + 3 + data.length) >> 8) & 0xFF;
         }
         else
         {
