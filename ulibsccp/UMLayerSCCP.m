@@ -491,8 +491,9 @@
     {
         uint8_t o[] = { 0x12,0x01,0x01 };
         /* lets add a importance header to see if it works */
-        xoptionsdata = [NSData dataWithBytes:&o[0] length:sizeof(o)];
+        xoptionsdata = [NSData dataWithBytes:&o[0] length:3];
     }
+    NSLog(@"options-data %@",xoptionsdata);
     return [self sendLXUDT:data
                    calling:src
                     called:dst
@@ -633,6 +634,7 @@
             header[10] = 0;
         }
         [sccp_pdu appendBytes:header length:sizeof(header)];
+        NSLog(@"PDULEN SO FAR: %d",sccp_pdu.length);
     }
     else
     {
@@ -657,14 +659,19 @@
     
     [sccp_pdu appendByte:dstEncoded.length];
     [sccp_pdu appendData:dstEncoded];
+    NSLog(@"PDULEN after dst: %d",sccp_pdu.length);
+
     [sccp_pdu appendByte:srcEncoded.length];
     [sccp_pdu appendData:srcEncoded];
-    
+    NSLog(@"PDULEN after src: %d",sccp_pdu.length);
+
     if(isLUDT)
     {
         [sccp_pdu appendByte:((data.length >> 0) & 0xFF)];
         [sccp_pdu appendByte:((data.length >> 8) & 0xFF)];
         [sccp_pdu appendData:data];
+        NSLog(@"PDULEN after data: %d",sccp_pdu.length);
+        NSLog(@"PDU %@",sccp_pdu);
     }
     else
     {
@@ -673,8 +680,11 @@
     }
     if(xoptionsdata.length > 0)
     {
+        NSLog(@"adding optionsdata %@",xoptionsdata);
         [sccp_pdu appendData:xoptionsdata];
         [sccp_pdu appendByte:0x00]; /* end of optional parameters */
+        NSLog(@"PDU %@",sccp_pdu);
+
     }
     UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc options:options routedToLinkset:outgoingLinkset sls:sls];
 
