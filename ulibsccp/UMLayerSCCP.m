@@ -382,11 +382,8 @@
     {
         [optionsData appendData:xoptionsdata];
     }
-    else
-    {
-        char data[3] = {0x12,0x01,0x01};
-        [optionsData appendData:[NSData dataWithBytes:data length:3]];
-    }
+    char data[3] = {0x12,0x01,0x01};
+    [optionsData appendData:[NSData dataWithBytes:data length:3]];
     
     /* The standard says
         – The SCCP shall place each segment of user data into separate LUDT messages, each with the same Called Party Address and identical MTP routing information (DPC, SLS).
