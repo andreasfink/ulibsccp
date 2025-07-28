@@ -378,6 +378,12 @@
     [optionsData appendByte:0x10]; /* optional parameter "segmentation" */
     [optionsData appendByte:0x04]; /* length of optional parameter */
     [optionsData appendData:[segment segmentationHeader]];
+    if(0) /* importance header */
+    {
+        [optionsData appendByte:0x12]; /* optional parameter "importance" */
+        [optionsData appendByte:0x01]; /* length of optional parameter */
+        [optionsData appendByte:0x01]; /* VIP 01 */
+    }
     if(xoptionsdata.length > 0)
     {
         [optionsData appendData:xoptionsdata];
@@ -422,6 +428,7 @@
     [optionsData appendByte:0x10]; /* optional parameter "segmentation" */
     [optionsData appendByte:0x04]; /* length of optional parameter */
     [optionsData appendData:[segment segmentationHeader]];
+
     if(xoptionsdata.length > 0)
     {
         [optionsData appendData:xoptionsdata];
@@ -2587,7 +2594,7 @@
     UMSCCP_Packet *routingPacket = routingState.inboundReassembledPacket;
     NSArray<UMSCCP_ReceivedSegment *>*segments = routingState.packetSegmentsToDeliver;
     BOOL processSegmentedDelivery = (segments.count > 0) ? YES : NO;
-    
+
     UMMTP3_Error e = UMMTP3_no_error;
     NSString *outgoingLinkset = routingPacket.outgoingLinksetName;
     if(routingPacket.forcedLinkset)
