@@ -385,7 +385,6 @@
     
     /* The standard says
         – The SCCP shall place each segment of user data into separate LUDT messages, each with the same Called Party Address and identical MTP routing information (DPC, SLS).
-       
         which means we need to collect all segments first, do a routing
         decision and then send all the segments down the same pipe with the same SLC.
      */
