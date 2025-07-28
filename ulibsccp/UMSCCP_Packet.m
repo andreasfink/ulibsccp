@@ -103,7 +103,7 @@ typedef enum UMTCAP_Command
 {
     _outgoingLocalUser              = _incomingLocalUser;
     _outgoingMtp3Layer              = _incomingMtp3Layer;
-    _outgoingLinksetName            = _incomingLinksetName;
+//  _outgoingLinksetName            = _incomingLinksetName;
     _outgoingOptions                = _incomingOptions;
     _outgoingOpc                    = _incomingOpc;
     _outgoingDpc                    = _incomingDpc;
