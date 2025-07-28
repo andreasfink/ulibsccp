@@ -368,6 +368,7 @@ static int segmentReferenceId;
                         }
                         packet.incomingFromLocal = YES;
                         packet.sls = -1;
+                        [SS7ApplicationDelegate sccpDecodeTcapGsmmap:packet];
                         [_sccpLayer.filterDelegate sccpDecodeTcapGsmmap:packet];
                         if(useLUDT)
                         {

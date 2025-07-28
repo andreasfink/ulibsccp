@@ -68,47 +68,49 @@ typedef enum UMTCAP_Command
 
 - (UMSCCP_TcapSharing_result)postroutingPacketInside:(UMSCCP_Packet *)packet
 {
-    if(packet.candidateForTcapSharing)
+    if((packet.incomingServiceType == SCCP_UDT) || (packet.incomingServiceType == SCCP_XUDT)|| (packet.incomingServiceType == SCCP_LUDT))
     {
-        if(packet.incomingTcapCommand == TCAP_TAG_ITU_UNIDIRECTIONAL)
+        if(packet.candidateForTcapSharing)
         {
-            return UMSCCP_TcapSharing_routeNormal;
-        }
-        else if(packet.incomingTcapCommand == TCAP_TAG_ITU_BEGIN)
-        {
-            NSString *key = [NSString stringWithFormat:@"%@:%@",packet.outgoingCallingPartyAddress.stringValueE164, packet.incoming_tcap_otid];
-            
-            UMSCCP_TcapSharingSession *session = [[UMSCCP_TcapSharingSession alloc]initWithTimeout:_timeout];
-            session.insideLocalTcapTransactionId = packet.incoming_tcap_otid;
-            session.callingAddress  = [packet.outgoingCallingPartyAddress copy];
-            session.calledAddress   = [packet.outgoingCalledPartyAddress copy];
-            session.insideLinkset   = packet.incomingLinksetName;
-            session.insideLocalUser = packet.incomingLocalUser;
-            session.insidePointcode = packet.incomingOpc;
-            session.insideRemoteTcapTransactionId = NULL;
-            _outsideBackRoutes[key] = session;
-        }
-        else if(packet.incomingTcapCommand == TCAP_TAG_ITU_CONTINUE)
-        {
-            
-            NSString *key = [NSString stringWithFormat:@"%@:%@",packet.outgoingCallingPartyAddress.stringValueE164, packet.incoming_tcap_otid];
-            UMSCCP_TcapSharingSession *session = _outsideBackRoutes[key];
-            if(session)
+            if(packet.incomingTcapCommand == TCAP_TAG_ITU_UNIDIRECTIONAL)
             {
-                [session touch];
-                packet.outgoing_tcap_otid = session.outsideLocalTcapTransactionId;
-                packet.outgoing_tcap_dtid = session.outsideRemoteTcapTransactionId;
+                return UMSCCP_TcapSharing_routeNormal;
             }
-        }
-        else if(   (packet.incomingTcapCommand == TCAP_TAG_ITU_END)
-                || (packet.incomingTcapCommand == TCAP_TAG_ITU_ABORT))
-        {
-            NSString *key = [NSString stringWithFormat:@"%@:%@",packet.outgoingCallingPartyAddress.stringValueE164, packet.incoming_tcap_otid];
-            UMSCCP_TcapSharingSession *session = _outsideBackRoutes[key];
-            if(session)
+            else if(packet.incomingTcapCommand == TCAP_TAG_ITU_BEGIN)
             {
-                [_outsideBackRoutes removeObjectForKey:key];
-                session = NULL; /* destroys session */
+                NSString *key = [NSString stringWithFormat:@"%@:%@",packet.outgoingCallingPartyAddress.stringValueE164, packet.incoming_tcap_otid];
+                
+                UMSCCP_TcapSharingSession *session = [[UMSCCP_TcapSharingSession alloc]initWithTimeout:_timeout];
+                session.insideLocalTcapTransactionId = packet.incoming_tcap_otid;
+                session.insideRemoteTcapTransactionId = NULL;
+                session.callingAddress  = [packet.outgoingCallingPartyAddress copy];
+                session.calledAddress   = [packet.outgoingCalledPartyAddress copy];
+                session.insideLinkset   = packet.incomingLinksetName;
+                session.insideLocalUser = packet.incomingLocalUser;
+                session.insidePointcode = packet.incomingOpc;
+                _outsideBackRoutes[key] = session;
+            }
+            else if(packet.incomingTcapCommand == TCAP_TAG_ITU_CONTINUE)
+            {
+                NSString *key = [NSString stringWithFormat:@"%@:%@",packet.outgoingCallingPartyAddress.stringValueE164, packet.incoming_tcap_otid];
+                UMSCCP_TcapSharingSession *session = _outsideBackRoutes[key];
+                if(session)
+                {
+                    [session touch];
+                    packet.outgoing_tcap_otid = session.outsideLocalTcapTransactionId;
+                    packet.outgoing_tcap_dtid = session.outsideRemoteTcapTransactionId;
+                }
+            }
+            else if(   (packet.incomingTcapCommand == TCAP_TAG_ITU_END)
+                    || (packet.incomingTcapCommand == TCAP_TAG_ITU_ABORT))
+            {
+                NSString *key = [NSString stringWithFormat:@"%@:%@",packet.outgoingCallingPartyAddress.stringValueE164, packet.incoming_tcap_otid];
+                UMSCCP_TcapSharingSession *session = _outsideBackRoutes[key];
+                if(session)
+                {
+                    [_outsideBackRoutes removeObjectForKey:key];
+                    session = NULL; /* destroys session */
+                }
             }
         }
     }

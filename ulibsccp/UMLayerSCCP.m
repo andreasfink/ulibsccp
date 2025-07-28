@@ -2215,8 +2215,8 @@
             {
                 [self.logFeed debugText:@" combined YES"];
             }
-            tid = [self extractTransactionNumber:payload];
-            op = [self extractOperation:payload applicationContext:&ac];
+            tid = [self transactionNumberFromHexString:routingPacket.incoming_tcap_dtid];
+            op  = [self extractOperation:payload applicationContext:&ac];
             if(self.logLevel <=UMLOG_DEBUG)
             {
                 NSLog(@"RoutingPacket: %@",routingPacket);
@@ -2895,7 +2895,7 @@
         routingState.linksetForErrors    = packet.incomingLinksetName;
         routingState.errorPacket         = packet;
         routingState.errorProcessing    = UMSCCP_RoutingErrorProcessing_Ignore;
-        
+
         if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
         {
             if(packet.incomingServiceType == SCCP_UDT)
@@ -2994,6 +2994,21 @@
     /* lets combine individual parts back together   */
     /* --------------------------------------------- */
     EXECUTE_AND_CHECK_ERROR(routingState,processIncomingReassembly,@"processIncomingReassembly")
+
+    
+    NSArray *transactionNumbers = [self extractTransactionNumbers:routingState.inboundReassembledPacket.incomingSccpData];
+    NSString *otid = transactionNumbers[0];
+    NSString *dtid = transactionNumbers[1];
+    if([otid isKindOfClass:[NSNull class]])
+    {
+        otid=NULL;
+    }
+    if([dtid isKindOfClass:[NSNull class]])
+    {
+        dtid=NULL;
+    }
+    routingState.inboundReassembledPacket.incoming_tcap_otid = otid;
+    routingState.inboundReassembledPacket.incoming_tcap_dtid = dtid;
 
     /* --------------------------------------------- */
     /* FILTERING                                     */
@@ -5457,6 +5472,153 @@
     return SCCP_ReturnCause_not_set;
 }
 
+- (NSNumber *) extractOrigTransactionNumber:(NSData *)data
+{
+    UMASN1Sequence *seq;
+    @try
+    {
+        seq = [[UMASN1Sequence alloc]initWithBerData:data];
+    }
+    @catch(NSException *e)
+    {
+        NSLog(@"can not extract transaction number. Exception %@",e);
+    }
+    switch(seq.asn1_tag.tagClass)
+    {
+        case UMASN1Class_Application:
+        {
+            switch(seq.asn1_tag.tagNumber)
+            {
+                case 2: /* BEGIN */
+                {
+                    int p=0;
+                    UMASN1Object *o = [seq getObjectAtPosition:p++];
+                    while(o)
+                    {
+                        if((o.asn1_tag.tagClass == UMASN1Class_Application) && (o.asn1_tag.tagNumber == 8)) /* orig transaction ID */
+                        {
+                            const uint8_t *bytes = o.asn1_data.bytes;
+                            unsigned long len = o.asn1_data.length;
+                            uint64_t value = 0;
+                            for(int i=0;i<len;i++)
+                            {
+                                value = (value << 8) | bytes[i];
+                            }
+                            return @(value);
+                        }
+                        o = [seq getObjectAtPosition:p++];
+                    }
+                    break;
+                }
+                case 4: /* END      */
+                case 5: /* CONTINUE */
+                case 7: /* ABORT    */
+                {
+                    int p=0;
+                    UMASN1Object *o = [seq getObjectAtPosition:p++];
+                    while(o)
+                    {
+                        if((o.asn1_tag.tagClass == UMASN1Class_Application) && (o.asn1_tag.tagNumber == 9))
+                        {
+                            const uint8_t *bytes = o.asn1_data.bytes;
+                            unsigned long len = o.asn1_data.length;
+                            uint64_t value = 0;
+                            for(int i=0;i<len;i++)
+                            {
+                                value = (value << 8) | bytes[i];
+                            }
+                            return @(value);
+                        }
+                        o = [seq getObjectAtPosition:p++];
+                    }
+                    break;
+                }
+                default:
+                    return NULL;
+            }
+            break;
+        }
+        default:
+            return NULL;
+    }
+    return NULL;
+}
+
+- (NSNumber *)transactionNumberFromHexString:(NSString *)str
+{
+    if (str.length==0)
+    {
+        return NULL;
+    }
+    NSData *d = str.unhexedData;
+    const uint8_t *bytes = d.bytes;
+    unsigned long len = d.length;
+    uint64_t value = 0;
+    for(int i=0;i<len;i++)
+    {
+        value = (value << 8) | bytes[i];
+    }
+    return @(value);
+}
+
+- (NSArray *) extractTransactionNumbers:(NSData *)data /* returns an array with otid/dtid as strings or NSNull placeholders */
+{
+    id otid = [NSNull null];
+    id dtid = [NSNull null];
+    
+    UMASN1Sequence *seq;
+    @try
+    {
+        seq = [[UMASN1Sequence alloc]initWithBerData:data];
+    }
+    @catch(NSException *e)
+    {
+        NSLog(@"can not extract transaction number. Exception %@",e);
+        return @[otid,dtid];
+    }
+    switch(seq.asn1_tag.tagClass)
+    {
+        case UMASN1Class_Application:
+        {
+            switch(seq.asn1_tag.tagNumber)
+            {
+                case 2: /* BEGIN */
+                case 4: /* END      */
+                case 5: /* CONTINUE */
+                case 7: /* ABORT    */
+                {
+                    int p=0;
+                    UMASN1Object *o = [seq getObjectAtPosition:p++];
+                    while(o)
+                    {
+                        if((o.asn1_tag.tagClass == UMASN1Class_Application) && (o.asn1_tag.tagNumber == 8)) /* orig transaction ID */
+                        {
+                            const uint8_t *bytes = o.asn1_data.bytes;
+                            unsigned long len = o.asn1_data.length;
+                            otid = o.asn1_data.hexString;
+                        }
+                        if((o.asn1_tag.tagClass == UMASN1Class_Application) && (o.asn1_tag.tagNumber == 9)) /* dest transaction ID */
+                        {
+                            const uint8_t *bytes = o.asn1_data.bytes;
+                            unsigned long len = o.asn1_data.length;
+                            dtid = o.asn1_data.hexString;
+                        }
+                        o = [seq getObjectAtPosition:p++];
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    return @[otid,dtid];
+}
+
+#if 0
 - (NSNumber *) extractTransactionNumber:(NSData *)data
 {
     UMASN1Sequence *seq;
@@ -5528,6 +5690,7 @@
     }    
     return NULL;
 }
+#endif
 
 - (NSNumber *) extractOperation:(NSData *)data applicationContext:(NSString **)acptr
 {
