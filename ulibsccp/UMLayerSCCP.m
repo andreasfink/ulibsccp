@@ -551,6 +551,12 @@
                      sls:(int)sls
                    isLUDT:(BOOL)isLUDT
 {
+    NSMutableData *optionsdata = [[NSMutableData alloc]init];
+    uint8_t pdata[3] = {0x12,0x01,0x01};
+    NSData *param = [NSData dataWithBytes:pdata length:sizeof(pdata)];
+    [optionsdata appendData:param];
+    [optionsdata appendData:xoptionsdata];
+
     SccpNumberTranslation *cga_number_translation_out = NULL;
     SccpNumberTranslation *cda_number_translation_out = NULL;
     
@@ -618,7 +624,7 @@
         header[7] = ((sizeof(header) - 8 + 1 + dstEncoded.length + 1 + srcEncoded.length) >> 0) & 0xFF;
         header[8] = ((sizeof(header) - 8 + 1 + dstEncoded.length + 1 + srcEncoded.length) >> 8) & 0xFF;
         int datalen = (int)data.length;
-        if(xoptionsdata.length > 0)
+        if(optionsdata.length > 0)
         {
             header[9]  = ((sizeof(header) - 10 + 1 + dstEncoded.length +1 + srcEncoded.length + 2 + datalen) >> 0) & 0xFF;
             header[10] = ((sizeof(header) - 10 + 1 + dstEncoded.length + 1 + srcEncoded.length + 2 + datalen) >> 8) & 0xFF;
@@ -639,7 +645,7 @@
         header[3] = 4;
         header[4] = 4 + dstEncoded.length;
         header[5] = 4 + dstEncoded.length + srcEncoded.length;
-        if(xoptionsdata.length > 0)
+        if(optionsdata.length > 0)
         {
             header[6] = 4 + dstEncoded.length + srcEncoded.length + data.length;
         }
@@ -667,9 +673,9 @@
         [sccp_pdu appendByte:data.length];
         [sccp_pdu appendData:data];
     }
-    if(xoptionsdata.length > 0)
+    if(optionsdata.length > 0)
     {
-        [sccp_pdu appendData:xoptionsdata];
+        [sccp_pdu appendData:optionsdata];
         [sccp_pdu appendByte:0x00]; /* end of optional parameters */
     }
     
