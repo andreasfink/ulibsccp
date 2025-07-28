@@ -375,6 +375,9 @@
 {
     /* we assume here the segmentation header is not included. So we add it here*/
     NSMutableData *optionsData = [[NSMutableData alloc]init];
+    uint8_t pdata[3] = {0x12,0x01,0x01};
+    NSData *param = [NSData dataWithBytes:pdata length:sizeof(pdata)];
+    [optionsData appendData:param];
     [optionsData appendByte:0x10]; /* optional parameter "segmentation" */
     [optionsData appendByte:0x04]; /* length of optional parameter */
     [optionsData appendData:[segment segmentationHeader]];
@@ -382,9 +385,6 @@
     {
         [optionsData appendData:xoptionsdata];
     }
-    char data[3] = {0x12,0x01,0x01};
-    [optionsData appendData:[NSData dataWithBytes:data length:3]];
-    
     /* The standard says
         – The SCCP shall place each segment of user data into separate LUDT messages, each with the same Called Party Address and identical MTP routing information (DPC, SLS).
         which means we need to collect all segments first, do a routing
