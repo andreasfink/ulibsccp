@@ -2732,7 +2732,6 @@
                     seg.dst = routingPacket.outgoingCalledPartyAddress;
                     seg.sls = routingPacket.sls;
                     seg.provider = routingPacket.outgoingMtp3Layer;
-                    NSLog(@"Calling sendLUDTsegment %@",seg);
                     e =  [self sendLUDTsegment:seg.segment
                                        calling:seg.src
                                         called:seg.dst
@@ -2754,6 +2753,7 @@
                 {
                     [self.logFeed debugText:@"Sending LUDT with no segments"];
                 }
+                NSLog(@"Calling sendLUDT");
                 e = [self sendLUDT:routingPacket.outgoingSccpData
                            calling:routingPacket.outgoingCallingPartyAddress
                             called:routingPacket.outgoingCalledPartyAddress
