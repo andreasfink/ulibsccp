@@ -3010,6 +3010,12 @@
     routingState.inboundReassembledPacket.incoming_tcap_otid = otid;
     routingState.inboundReassembledPacket.incoming_tcap_dtid = dtid;
 
+    if(self.logLevel <=UMLOG_DEBUG)
+    {
+        NSMutableString *s = [[NSMutableString alloc]init];
+        [s appendFormat:@" transaction numbers: %@\n",transactionNumbers];
+        [self.logFeed debugText:s];
+    }
     /* --------------------------------------------- */
     /* FILTERING                                     */
     /* lets pass it through the inbound filtering    */
