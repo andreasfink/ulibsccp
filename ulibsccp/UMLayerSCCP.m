@@ -3031,11 +3031,11 @@
     /* split outbound packets if not split already   */
     /* --------------------------------------------- */
     EXECUTE_AND_CHECK_ERROR(routingState,processOutgoingSegmentation,@"processOutgoingSegmentation")
-    if(routingState.outgoingToLocal)
+    if(routingState.deliverLocal)
     {
         /* --------------------------------------------- */
-        /* DELIVERY TO MTP3                              */
-        /* send the packets to the wire                  */
+        /* DELIVERY TO LOCAL STACK                       */
+        /* send the packets to the upper level           */
         /* --------------------------------------------- */
         EXECUTE_AND_CHECK_ERROR(routingState,processLocalDelivery,@"processLocalDelivery")
     }
