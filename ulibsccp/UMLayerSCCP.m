@@ -618,8 +618,8 @@
         int datalen = (int)data.length;
         if(xoptionsdata.length > 0)
         {
-            header[9]  = ((sizeof(header) - 10 + 1 + dstEncoded.length + 1 + srcEncoded.length + 2 + datalen) >> 0) & 0xFF;
-            header[10] = ((sizeof(header) - 10 + 1 + dstEncoded.length + 1 + srcEncoded.length + 2 + datalen) >> 8) & 0xFF;
+            header[9]  = ((sizeof(header) - 10 + 1 + dstEncoded.length +1 + srcEncoded.length + 1 + datalen) >> 0) & 0xFF;
+            header[10] = ((sizeof(header) - 10 + 1 + dstEncoded.length + 1 + srcEncoded.length + 1 + datalen) >> 8) & 0xFF;
         }
         else
         {
