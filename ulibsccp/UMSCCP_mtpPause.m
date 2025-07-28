@@ -50,7 +50,7 @@
                                  outboundLinkset:@""
                                              dpc:_affectedPointCode
                                           status:@"unavailable"
-                                          reason:s];
+                                          reason:@"mtpPause"];
         [_sccp.sccpL3RoutingTable setStatus:SccpL3RouteStatus_unavailable
                              forPointCode:_affectedPointCode];
     }
