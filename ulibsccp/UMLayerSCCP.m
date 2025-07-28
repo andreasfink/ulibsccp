@@ -670,6 +670,7 @@
         [sccp_pdu appendData:xoptionsdata];
         [sccp_pdu appendByte:0x00]; /* end of optional parameters */
     }
+    
     UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc options:options routedToLinkset:outgoingLinkset sls:sls];
 
     NSString *s;
@@ -2521,7 +2522,7 @@
         NSMutableArray *arr = [[NSMutableArray alloc]init];
         for(int i=0;i<count;i++)
         {
-            UMSCCP_Segment *ds           = dataSegments[i];
+            UMSCCP_Segment *ds        = dataSegments[i];
             UMSCCP_ReceivedSegment *s = [[UMSCCP_ReceivedSegment alloc]init];
             s.src = packet.outgoingCallingPartyAddress;
             s.dst = packet.outgoingCalledPartyAddress;
@@ -2593,7 +2594,7 @@
         case SCCP_UDT:
             if(self.logLevel <=UMLOG_DEBUG)
             {
-                [self.logFeed debugText:@"Sending UDT"];
+                [self.logFeed debugText:@"processDelivery: Sending UDT"];
             }
             e = [self sendUDT:routingPacket.outgoingSccpData
                       calling:routingPacket.outgoingCallingPartyAddress
@@ -2610,7 +2611,7 @@
         case SCCP_UDTS:
             if(self.logLevel <=UMLOG_DEBUG)
             {
-                [self.logFeed debugText:@"Sending UDTS"];
+                [self.logFeed debugText:@"processDelivery: sending UDTS"];
             }
             e = [self sendUDTS:routingPacket.outgoingSccpData
                        calling:routingPacket.outgoingCallingPartyAddress
@@ -2629,7 +2630,7 @@
             {
                 if(self.logLevel <=UMLOG_DEBUG)
                 {
-                    [self.logFeed debugText:[NSString stringWithFormat:@" Sending XUDT with %lu segments",segments.count]];
+                    [self.logFeed debugText:[NSString stringWithFormat:@"processDelivery: Sending XUDT with %lu segments",segments.count]];
                 }
                 int sls = routingPacket.sls % 16;
                 int no = 0;
@@ -2638,7 +2639,7 @@
                     no++;
                     if(self.logLevel <=UMLOG_DEBUG)
                     {
-                        [self.logFeed debugText:[NSString stringWithFormat:@"Sending XUDT segment #%d: %@",no,seg.description]];
+                        [self.logFeed debugText:[NSString stringWithFormat:@"processDelivery: Sending XUDT segment #%d: %@",no,seg.description]];
                     }
                     if(![seg isKindOfClass:[UMSCCP_ReceivedSegment class]])
                     {
@@ -2669,7 +2670,7 @@
             {
                 if(self.logLevel <=UMLOG_DEBUG)
                 {
-                    [self.logFeed debugText:@"Sending XUDT"];
+                    [self.logFeed debugText:@"processDelivery: sending XUDT"];
                 }
                 e = [self sendXUDT:routingPacket.outgoingSccpData
                            calling:routingPacket.outgoingCallingPartyAddress
@@ -2689,7 +2690,7 @@
         case SCCP_XUDTS:
             if(self.logLevel <=UMLOG_DEBUG)
             {
-                [self.logFeed debugText:@"Sending XUDTS"];
+                [self.logFeed debugText:@"processDelivery: sending XUDTS"];
             }
             e = [self sendXUDTS:routingPacket.outgoingSccpData
                         calling:routingPacket.outgoingCallingPartyAddress
@@ -2711,13 +2712,13 @@
             {
                 if(self.logLevel <=UMLOG_DEBUG)
                 {
-                    [self.logFeed debugText:@"Sending LUDT with multiple segments"];
+                    [self.logFeed debugText:@"processDelivery: sending LUDT with multiple segments"];
                 }
                 for(UMSCCP_ReceivedSegment *seg in routingState.packetSegmentsToDeliver)
                 {
                     if(self.logLevel <=UMLOG_DEBUG)
                     {
-                        [self.logFeed debugText:[NSString stringWithFormat:@"Sending LUDT with segment %@",seg.segment]];
+                        [self.logFeed debugText:[NSString stringWithFormat:@"processDelivery: sending LUDT with segment %@",seg.segment]];
                     }
                     seg.opc = routingPacket.outgoingMtp3Layer.opc;
                     seg.dpc = routingPacket.outgoingDpc;
@@ -2744,7 +2745,7 @@
             {
                 if(self.logLevel <=UMLOG_DEBUG)
                 {
-                    [self.logFeed debugText:@"Sending LUDT with no segments"];
+                    [self.logFeed debugText:@"processDelivery: sending LUDT with no segments"];
                 }
                 e = [self sendLUDT:routingPacket.outgoingSccpData
                            calling:routingPacket.outgoingCallingPartyAddress
