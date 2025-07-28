@@ -2589,12 +2589,12 @@
 - (void)processDelivery:(UMSCCP_RoutingState *)routingState
 {
     UMSCCP_Packet *routingPacket = routingState.inboundReassembledPacket;
-    
     NSArray<UMSCCP_ReceivedSegment *>*segments = routingState.packetSegmentsToDeliver;
     BOOL processSegmentedDelivery = (segments.count > 0) ? YES : NO;
     
     UMMTP3_Error e = UMMTP3_no_error;
     NSString *outgoingLinkset = routingPacket.outgoingLinksetName;
+    NSLog(@"routingPacket.outgoingLinksetName= outgoinglinkset = %@",outgoingLinkset);
     switch(routingPacket.outgoingServiceType)
     {
         case SCCP_UDT:
