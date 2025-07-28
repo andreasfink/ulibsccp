@@ -487,12 +487,6 @@
          routedToLinkset:(NSString **)outgoingLinkset
                      sls:(int)sls
 {
-    if(xoptionsdata.length==0)
-    {
-        uint8_t o[] = { 0x12,0x01,0x01 };
-        /* lets add a importance header to see if it works */
-        xoptionsdata = [NSData dataWithBytes:&o[0] length:3];
-    }
     return [self sendLXUDT:data
                    calling:src
                     called:dst
