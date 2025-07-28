@@ -384,7 +384,7 @@
     }
     else
     {
-        char data[3] = {0x14,0x01,0x01};
+        char data[3] = {0x12,0x01,0x01};
         [optionsData appendData:[NSData dataWithBytes:data length:3]];
     }
     
