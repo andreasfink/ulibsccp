@@ -24,6 +24,7 @@ typedef enum UMSCCP_TcapSharing_result
     NSString                    *_sccpName;
     UMLayerSCCP                 *_sccpInstance;
     UMSynchronizedDictionary    *_outsideBackRoutes;
+    UMLogLevel                  _logLevel;
     
 }
 @property(readwrite,assign,atomic)  NSTimeInterval  timeout;

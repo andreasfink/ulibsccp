@@ -44,4 +44,5 @@
 -(BOOL)isExpired;
 - (void)touch;
 
+- (UMSynchronizedSortedDictionary *)objectValue;
 @end

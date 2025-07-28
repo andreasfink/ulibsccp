@@ -45,6 +45,7 @@ typedef enum UMTCAP_Command
     if(self)
     {
         _timeout = 90;
+        _logLevel = UMLOG_MAJOR;
         NSNumber *timeoutNumber  = config[@"timeout"];
         if(timeoutNumber)
         {
@@ -55,6 +56,10 @@ typedef enum UMTCAP_Command
             _timeout = 90;
         }
         _sccpName = config[@"sccp"];
+        if(config[@"log-level"])
+        {
+            _logLevel = [config[@"log-level"] intValue];
+        }
         _outsideBackRoutes = [[UMSynchronizedDictionary alloc]init];
     }
     return self;
@@ -62,42 +67,71 @@ typedef enum UMTCAP_Command
 
 - (UMSCCP_TcapSharing_result)preroutingPacketInside:(UMSCCP_Packet *)packet
 {
+    if(_logLevel <= UMLOG_DEBUG)
+    {
+        [self.logFeed debugText:@"preroutingPacketInside: set candidateForTcapSharing=YES"];
+    }
     packet.candidateForTcapSharing = YES;
     return UMSCCP_TcapSharing_routeNormal;
 }
 
 - (UMSCCP_TcapSharing_result)postroutingPacketInside:(UMSCCP_Packet *)packet
 {
+    if(_logLevel <= UMLOG_DEBUG)
+    {
+        [self.logFeed debugText:@"postroutingPacketInside"];
+    }
+
     if((packet.incomingServiceType == SCCP_UDT) || (packet.incomingServiceType == SCCP_XUDT)|| (packet.incomingServiceType == SCCP_LUDT))
     {
         if(packet.candidateForTcapSharing)
         {
+            if(_logLevel <= UMLOG_DEBUG)
+            {
+                [self.logFeed debugText:@"preroutingPacketInside: candidateForTcapSharing is YES"];
+            }
+
             if(packet.incomingTcapCommand == TCAP_TAG_ITU_UNIDIRECTIONAL)
             {
                 return UMSCCP_TcapSharing_routeNormal;
             }
             else if(packet.incomingTcapCommand == TCAP_TAG_ITU_BEGIN)
             {
+
                 NSString *key = [NSString stringWithFormat:@"%@:%@",packet.outgoingCallingPartyAddress.stringValueE164, packet.incoming_tcap_otid];
-                
+                if(_logLevel <= UMLOG_DEBUG)
+                {
+                    [self.logFeed debugText:[NSString stringWithFormat:@"TCAP_TAG_ITU_BEGIN: key=%@",key]];
+                }
+
                 UMSCCP_TcapSharingSession *session = [[UMSCCP_TcapSharingSession alloc]initWithTimeout:_timeout];
-                session.insideLocalTcapTransactionId = packet.incoming_tcap_otid;
-                session.insideRemoteTcapTransactionId = NULL;
                 session.callingAddress  = [packet.outgoingCallingPartyAddress copy];
                 session.calledAddress   = [packet.outgoingCalledPartyAddress copy];
                 session.insideLinkset   = packet.incomingLinksetName;
                 session.insideLocalUser = packet.incomingLocalUser;
                 session.insidePointcode = packet.incomingOpc;
-                session.insideLocalTcapTransactionId = packet.incoming_tcap_otid;
-                session.insideRemoteTcapTransactionId = packet.incoming_tcap_dtid;
-                session.outsideLocalTcapTransactionId = packet.incoming_tcap_otid;
+                session.insideLocalTcapTransactionId   = packet.incoming_tcap_otid;
+                session.outsideLocalTcapTransactionId  = packet.incoming_tcap_otid;
+                session.insideRemoteTcapTransactionId  = packet.incoming_tcap_dtid;
                 session.outsideRemoteTcapTransactionId = packet.incoming_tcap_dtid;
                 _outsideBackRoutes[key] = session;
+                if(_logLevel <= UMLOG_DEBUG)
+                {
+                    [self.logFeed debugText:[NSString stringWithFormat:@"session = %@",(session ? session.description : @"NULL")]];
+                }
             }
             else if(packet.incomingTcapCommand == TCAP_TAG_ITU_CONTINUE)
             {
                 NSString *key = [NSString stringWithFormat:@"%@:%@",packet.outgoingCallingPartyAddress.stringValueE164, packet.incoming_tcap_otid];
+                if(_logLevel <= UMLOG_DEBUG)
+                {
+                    [self.logFeed debugText:[NSString stringWithFormat:@"TCAP_TAG_ITU_CONTINUE: key=%@",key]];
+                }
                 UMSCCP_TcapSharingSession *session = _outsideBackRoutes[key];
+                if(_logLevel <= UMLOG_DEBUG)
+                {
+                    [self.logFeed debugText:[NSString stringWithFormat:@"session = %@",(session ? session.description : @"NULL")]];
+                }
                 if(session)
                 {
                     [session touch];
@@ -109,10 +143,25 @@ typedef enum UMTCAP_Command
                     || (packet.incomingTcapCommand == TCAP_TAG_ITU_ABORT))
             {
                 NSString *key = [NSString stringWithFormat:@"%@:%@",packet.outgoingCallingPartyAddress.stringValueE164, packet.incoming_tcap_otid];
+                if(_logLevel <= UMLOG_DEBUG)
+                {
+                    [self.logFeed debugText:[NSString stringWithFormat:@"TCAP_TAG_ITU_END/ABORT: key=%@",key]];
+                }
                 UMSCCP_TcapSharingSession *session = _outsideBackRoutes[key];
+                if(_logLevel <= UMLOG_DEBUG)
+                {
+                    [self.logFeed debugText:[NSString stringWithFormat:@"session = %@",(session ? session.description : @"NULL")]];
+                }
+
                 if(session)
                 {
+                    packet.outgoing_tcap_otid = session.outsideLocalTcapTransactionId;
+                    packet.outgoing_tcap_dtid = session.outsideRemoteTcapTransactionId;
                     [_outsideBackRoutes removeObjectForKey:key];
+                    if(_logLevel <= UMLOG_DEBUG)
+                    {
+                        [self.logFeed debugText:[NSString stringWithFormat:@"destroyiong session key=%@",key]];
+                    }
                     session = NULL; /* destroys session */
                 }
             }
@@ -123,14 +172,28 @@ typedef enum UMTCAP_Command
 
 - (UMSCCP_TcapSharing_result)preroutingPacketOutside:(UMSCCP_Packet *)packet
 {
+    if(_logLevel <= UMLOG_DEBUG)
+    {
+        [self.logFeed debugText:@"postroutingPacketInside"];
+    }
+
     if((packet.incomingTcapCommand == TCAP_TAG_ITU_CONTINUE) ||
        (packet.incomingTcapCommand == TCAP_TAG_ITU_END) ||
        (packet.incomingTcapCommand == TCAP_TAG_ITU_ABORT))
     {
         NSString *key = [NSString stringWithFormat:@"%@:%@",packet.incomingCalledPartyAddress.stringValueE164, packet.incoming_tcap_dtid];
+        if(_logLevel <= UMLOG_DEBUG)
+        {
+            [self.logFeed debugText:[NSString stringWithFormat:@"TCAP_TAG_ITU_CONTINUE or TCAP_TAG_ITU_END or TCAP_TAG_ITU_ABORT key=%@",key]];
+        }
         UMSCCP_TcapSharingSession *session = _outsideBackRoutes[key];
+        if(_logLevel <= UMLOG_DEBUG)
+        {
+            [self.logFeed debugText:[NSString stringWithFormat:@"session = %@",(session ? session.description : @"NULL")]];
+        }
         if(session != NULL)
         {
+            
             if(packet.incomingTcapCommand == TCAP_TAG_ITU_CONTINUE)
             {
                 [session touch];
@@ -139,10 +202,19 @@ typedef enum UMTCAP_Command
             {
                 [_outsideBackRoutes removeObjectForKey:key];
             }
-            packet.forcedDpc        = session.insidePointcode;
+
             packet.forcedLinkset    = session.insideLinkset;
             packet.forcedLocalUser  = session.insideLocalUser;
             packet.forcedDpc        = session.insidePointcode;
+            
+            if(_logLevel <= UMLOG_DEBUG)
+            {
+                [self.logFeed debugText:[NSString stringWithFormat:@"forced routing to dpc=%@ linkset=%@ localUser=%@",
+                                         (session.insidePointcode ? session.insidePointcode.stringValue : @"NULL"),
+                                         (session.insideLinkset   ? session.insideLinkset : @"NULL"),
+                                         (session.insideLocalUser ? session.insideLocalUser.name : @"NULL")]];
+                [self.logFeed debugText:@"returning UMSCCP_TcapSharing_skipRouting"];
+            }
             return UMSCCP_TcapSharing_skipRouting;
         }
     }
@@ -191,6 +263,12 @@ typedef enum UMTCAP_Command
         }
     }
     return (int)a.count;
+}
+
+
+- (void)logDebug:(NSString *)s
+{
+    [self.logFeed debugText:s];
 }
 
 @end
