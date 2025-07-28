@@ -88,7 +88,7 @@ typedef enum UMTCAP_Command
         {
             if(_logLevel <= UMLOG_DEBUG)
             {
-                [self.logFeed debugText:@"preroutingPacketInside: candidateForTcapSharing is YES"];
+                [self.logFeed debugText:@"postroutingPacketInside: candidateForTcapSharing is YES"];
             }
 
             if(packet.incomingTcapCommand == TCAP_TAG_ITU_UNIDIRECTIONAL)
@@ -98,9 +98,15 @@ typedef enum UMTCAP_Command
             else if(packet.incomingTcapCommand == TCAP_TAG_ITU_BEGIN)
             {
 
+
+
                 NSString *key = [NSString stringWithFormat:@"%@:%@",packet.outgoingCallingPartyAddress.stringValueE164, packet.incoming_tcap_otid];
                 if(_logLevel <= UMLOG_DEBUG)
                 {
+                    [self.logFeed debugText:[NSString stringWithFormat:@"incoming_tcap_otid=%@",packet.incoming_tcap_otid]];
+                    [self.logFeed debugText:[NSString stringWithFormat:@"incoming_tcap_dtid=%@",packet.incoming_tcap_dtid]];
+                    [self.logFeed debugText:[NSString stringWithFormat:@"outgoing_tcap_otid=%@",packet.outgoing_tcap_otid]];
+                    [self.logFeed debugText:[NSString stringWithFormat:@"outgoing_tcap_dtid=%@",packet.outgoing_tcap_dtid]];
                     [self.logFeed debugText:[NSString stringWithFormat:@"TCAP_TAG_ITU_BEGIN: key=%@",key]];
                 }
 

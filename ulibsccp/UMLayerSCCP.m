@@ -2857,8 +2857,8 @@
 {
     if((packet.tcapSharingTraceLevel <=UMLOG_DEBUG) || (_logLevel <=UMLOG_DEBUG))
     {
-        NSLog(@"Entering routePacket:");
         NSMutableString *s = [[NSMutableString alloc]init];
+        [s appendString:@"entering routePacket:"];
         [s appendFormat:@"incomingLinksetTcapSharingInsideName: %@\n",
             packet.incomingLinksetTcapSharingInsideName];
         [s appendFormat:@"incomingLinksetTcapSharingOutsideName: %@",
@@ -3010,8 +3010,14 @@
     routingState.inboundReassembledPacket.incoming_tcap_otid = otid;
     routingState.inboundReassembledPacket.incoming_tcap_dtid = dtid;
 
+
     if(self.logLevel <=UMLOG_DEBUG)
     {
+        [self.logFeed debugText:[NSString stringWithFormat:@"incoming_tcap_otid=%@",routingState.inboundReassembledPacket.incoming_tcap_otid]];
+        [self.logFeed debugText:[NSString stringWithFormat:@"incoming_tcap_dtid=%@",routingState.inboundReassembledPacket.incoming_tcap_dtid]];
+        [self.logFeed debugText:[NSString stringWithFormat:@"outgoing_tcap_otid=%@",routingState.inboundReassembledPacket.outgoing_tcap_otid]];
+        [self.logFeed debugText:[NSString stringWithFormat:@"outgoing_tcap_dtid=%@",routingState.inboundReassembledPacket.outgoing_tcap_dtid]];
+
         NSMutableString *s = [[NSMutableString alloc]init];
         [s appendFormat:@" transaction numbers: %@\n",transactionNumbers];
         [self.logFeed debugText:s];
@@ -3025,7 +3031,19 @@
     /* INBOUND TCAP SHARING                          */
     /* tcap sharing inbound processing               */
     /* --------------------------------------------- */
+    
+    [self.logFeed debugText:[NSString stringWithFormat:@"incoming_tcap_otid=%@",routingState.inboundReassembledPacket.incoming_tcap_otid]];
+    [self.logFeed debugText:[NSString stringWithFormat:@"incoming_tcap_dtid=%@",routingState.inboundReassembledPacket.incoming_tcap_dtid]];
+    [self.logFeed debugText:[NSString stringWithFormat:@"outgoing_tcap_otid=%@",routingState.inboundReassembledPacket.outgoing_tcap_otid]];
+    [self.logFeed debugText:[NSString stringWithFormat:@"outgoing_tcap_dtid=%@",routingState.inboundReassembledPacket.outgoing_tcap_dtid]];
+
     EXECUTE_AND_CHECK_ERROR(routingState,processPreroutingTcapSharing,@"processPreroutingTcapSharing")
+    
+    [self.logFeed debugText:[NSString stringWithFormat:@"incoming_tcap_otid=%@",routingState.inboundReassembledPacket.incoming_tcap_otid]];
+    [self.logFeed debugText:[NSString stringWithFormat:@"incoming_tcap_dtid=%@",routingState.inboundReassembledPacket.incoming_tcap_dtid]];
+    [self.logFeed debugText:[NSString stringWithFormat:@"outgoing_tcap_otid=%@",routingState.inboundReassembledPacket.outgoing_tcap_otid]];
+    [self.logFeed debugText:[NSString stringWithFormat:@"outgoing_tcap_dtid=%@",routingState.inboundReassembledPacket.outgoing_tcap_dtid]];
+
     /* --------------------------------------------- */
     /* ROUTING                                       */
     /* find the corresponding route                  */
