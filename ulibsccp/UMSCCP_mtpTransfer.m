@@ -608,8 +608,7 @@
                         if((j+len)<m)
                         {
                             _optional_dict = [[NSMutableDictionary alloc]init];
-                            NSData *param = [NSData dataWithBytes:&bytes[j] length:len];
-                    
+                            NSData *param = [NSData dataWithBytes:&bytes[j-2] length:len+2];
                             j = j+len;
                             if((paramType != 0x10) && (paramType != 0x00)) /* not end of data and not segmentation header */
                             {
