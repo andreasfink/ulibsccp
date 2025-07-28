@@ -53,7 +53,7 @@ static int segmentReferenceId;
     }
     return self;
 }
- 
+
 - (UMSCCP_sccpNUnitdata *)initForSccp:(UMLayerSCCP *)sccp
                                  user:(id<UMSCCP_UserProtocol>)xuser
                      userDataSegments:(NSArray *)xdataSegments
@@ -105,10 +105,10 @@ static int segmentReferenceId;
         {
             /* int cls =0;*/
             _startOfProcessing = [NSDate date];
-
+            
             UMMTP3PointCode         *xopc = _sccpLayer.mtp3.opc;
             UMMTP3PointCode         *xdpc = _nextHop.dpc;
-
+            
             NSString *xopc_string = _options[@"opc"];
             NSString *xdpc_string = _options[@"dpc"];
             if((xdpc_string.length > 0) && (![xdpc_string isEqualToString:@"default"]))
@@ -132,7 +132,7 @@ static int segmentReferenceId;
             BOOL useSegments    = [_options[@"sccp-segment"] boolValue];
             int segmentSize    = [_options[@"sccp-segment-size"] intValue];
             NSArray *segmentSizes =  _options[@"sccp-segment-sizes"];
-
+            
             NSDictionary *sccp_options = _options[@"sccp-optional"];
             NSMutableData *optional_data;
             if(sccp_options)
@@ -230,7 +230,7 @@ static int segmentReferenceId;
                     useXUDT = YES;
                 }
             }
-
+            
             if(_data.length > 0)
             {
                 /* we have single data as input, no segments yet */
@@ -245,7 +245,7 @@ static int segmentReferenceId;
                     {
                         maxPdu = segmentSize;
                     }
-
+                    
                     if(_data.length > maxPdu)
                     {
                         /* no choice, we must segment */
@@ -325,12 +325,14 @@ static int segmentReferenceId;
                         segmentReferenceId = segmentReferenceId % 0xFFFFFF;
                         ref = segmentReferenceId;
                     }
-
-                    _dataSegments  = [_sccpLayer splitDataIntoSegments:_data
-                                                      withSegmentSizes:segmentSizes
-                                                             reference:ref
-                                                                maxPdu:maxPdu
-                                                         protocolClass:_protocolClass];
+                    
+                    _dataSegments  = [UMLayerSCCP splitDataIntoSegments:_data
+                                                       withSegmentSizes:segmentSizes
+                                                              reference:ref
+                                                                 maxPdu:maxPdu
+                                                          protocolClass:_protocolClass
+                                                                logFeed:_sccpLayer.logFeed
+                                                               logLevel:_sccpLayer.logLevel];
                     NSUInteger count = _dataSegments.count;
                     _data = NULL;
                     for(int i=0;i<count;i++)
@@ -446,7 +448,7 @@ static int segmentReferenceId;
                     {
                         NSString *callingPrefix = packet.incomingCallingPartyAddress.address;
                         NSString *calledPrefix = packet.incomingCalledPartyAddress.address;
-
+                        
                         if(packet.incomingCallingPartyAddress.npi.npi == SCCP_NPI_ISDN_MOBILE_E214)
                         {
                             callingPrefix =  [_sccpLayer.statisticDb e214prefixOf:packet.incomingCallingPartyAddress.address];
@@ -454,13 +456,13 @@ static int segmentReferenceId;
                         else if(packet.incomingCallingPartyAddress.npi.npi == SCCP_NPI_LAND_MOBILE_E212)
                         {
                             callingPrefix =  [_sccpLayer.statisticDb e212prefixOf:packet.incomingCallingPartyAddress.address];
-
+                            
                         }
                         else
                         {
                             callingPrefix =  [_sccpLayer.statisticDb e164prefixOf:packet.incomingCallingPartyAddress.address];
                         }
-
+                        
                         
                         if(packet.incomingCalledPartyAddress.npi.npi == SCCP_NPI_ISDN_MOBILE_E214)
                         {
@@ -469,13 +471,13 @@ static int segmentReferenceId;
                         else if(packet.incomingCalledPartyAddress.npi.npi == SCCP_NPI_LAND_MOBILE_E212)
                         {
                             calledPrefix =  [_sccpLayer.statisticDb e212prefixOf:packet.incomingCalledPartyAddress.address];
-
+                            
                         }
                         else
                         {
                             calledPrefix =  [_sccpLayer.statisticDb e164prefixOf:packet.incomingCalledPartyAddress.address];
                         }
-
+                        
                         NSString *gttSelector=packet.routingSelector;
                         NSString *incomingLinkset = @"local";
                         NSString *outgoingLinkset = packet.outgoingLinksetName;
@@ -513,110 +515,5 @@ static int segmentReferenceId;
         [_sccpLayer increaseThroughputCounter:_statisticsSection2];
     }
 }
-
-#if 0
-+ (NSArray <UMSCCP_Segment *>*)splitDataIntoSegments:(NSData *)data
-                                    withSegmentSizes:(NSArray<NSNumber *>*)segmentSizes
-                                           reference:(unsigned int)ref
-                                              maxPdu:(NSUInteger)maxPdu
-{
-    BOOL debug =( _sccpLayer.logLevel <=UMLOG_DEBUG);
-    if(debug)
-    {
-        NSMutableString *s = [[NSMutableString alloc]init];
-        [s appendFormat:@"Entering splitDataIntoSegments: %@\n",[data hexString]];
-        [s appendFormat:@"\twithSegmentSizes: {"];
-        for(int i=0;i<segmentSizes.count;i++)
-        {
-            NSNumber *num = segmentSizes[i];
-            int n = [num intValue];
-            if(i>0)
-            {
-                [s appendFormat:@", %d",n];
-            }
-            else
-            {
-                [s appendFormat:@"%d", n];
-            }
-        }
-        [s appendFormat:@"}\n"];
-        [s appendFormat:@"\treference:%u\n",ref];
-        [s appendFormat:@"\tmaxPdu:%ld\n",(long)maxPdu];
-        [_sccpLayer logDebug:s];
-    }
-    NSMutableArray<UMSCCP_Segment *> *segments = [[NSMutableArray alloc]init];
-
-    NSData *remainingData = [data copy];
-    
-    NSUInteger remainingLength = remainingData.length;
-    NSUInteger index=0;
-    while(remainingLength > 0)
-    {
-        NSUInteger currentLength = maxPdu;
-        if((segmentSizes!=NULL) && (segmentSizes.count < index))
-        {
-            NSNumber *n = segmentSizes[index];
-            currentLength = [n intValue];
-            if(currentLength > maxPdu)
-            {
-                currentLength = maxPdu;
-            }
-        }
-        else if((segmentSizes!=NULL) && (segmentSizes.count>0))
-        {
-            NSNumber *n = segmentSizes[segmentSizes.count -1];
-            currentLength = [n intValue];
-            if(currentLength > maxPdu)
-            {
-                currentLength = maxPdu;
-            }
-        }
-        else
-        {
-            currentLength = maxPdu;
-        }
-        if(currentLength > remainingLength)
-        {
-            currentLength = remainingLength;
-        }
-        UMSCCP_Segment *currentSegment = [[UMSCCP_Segment alloc]init];
-        if(index==0)
-        {
-            currentSegment.first = YES;
-        }
-        else
-        {
-            currentSegment.first = NO;
-        }
-        currentSegment.class1 = (_protocolClass == SCCP_CLASS_INSEQ_CL);
-        currentSegment.reference = ref;
-        currentSegment.data = [NSData dataWithBytes:remainingData.bytes length:currentLength];
-        [segments addObject:currentSegment];
-    
-        remainingData = [NSData dataWithBytes:&remainingData.bytes[currentLength] length:(remainingLength - currentLength)];
-        remainingLength = remainingData.length;
-        index++;
-    }
-    
-    for(int i=0;i<segments.count;i++)
-    {
-        UMSCCP_Segment *s = segments[i];
-        s.remainingSegment = (int)segments.count - i - 1;
-    }
-
-    if(debug)
-    {
-        NSMutableString *s = [[NSMutableString alloc]init];
-        [s appendFormat:@"returning segments:\n"];
-        for(int i=0;i<segments.count;i++)
-        {
-            UMSCCP_Segment *seg = segments[i];
-            [s appendFormat:@"\t%@\n",seg.description];
-        }
-        [_sccpLayer logDebug:s];
-    }
-    return segments;
-}
-#endif
 
 @end

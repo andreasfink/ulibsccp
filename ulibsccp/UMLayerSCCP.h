@@ -525,11 +525,12 @@ qualityOfService:(int)qos
 - (void)reloadPlugins;
 + (NSString *)causeValueToString:(SCCP_ReturnCause)causeValue;
 
-- (NSArray <UMSCCP_Segment *>*)splitDataIntoSegments:(NSData *)data
++ (NSArray <UMSCCP_Segment *>*)splitDataIntoSegments:(NSData *)data
                                     withSegmentSizes:(NSArray<NSNumber *>*)segmentSizes
                                            reference:(unsigned int)ref
                                               maxPdu:(NSUInteger)maxPdu
-                                       protocolClass:(SCCP_ServiceClass)pclass;
-
+                                       protocolClass:(SCCP_ServiceClass)pclass
+                                             logFeed:(UMLogFeed *)logFeed
+                                            logLevel:(UMLogLevel) logLevel;
 
 @end

@@ -487,6 +487,12 @@
          routedToLinkset:(NSString **)outgoingLinkset
                      sls:(int)sls
 {
+    if(xoptionsdata.length==0)
+    {
+        uint8_t o[] = { 0x12,0x01,0x10};
+        /* lets add a importance header to see if it works */
+        xoptionsdata = [NSData dataWithBytes:&o[0] length:sizeof(o)];
+    }
     return [self sendLXUDT:data
                    calling:src
                     called:dst
@@ -615,7 +621,7 @@
         header[6] = ((sizeof(header) - 6 + 1 + dstEncoded.length) >> 8) & 0xFF;
         header[7] = ((sizeof(header) - 8 + 1 + dstEncoded.length + 1 + srcEncoded.length) >> 0) & 0xFF;
         header[8] = ((sizeof(header) - 8 + 1 + dstEncoded.length + 1 + srcEncoded.length) >> 8) & 0xFF;
-        int datalen = data.length;
+        int datalen = (int)data.length;
         if(xoptionsdata.length > 0)
         {
             header[9]  = ((sizeof(header) - 10 + 1 + dstEncoded.length + 1 + srcEncoded.length + 1 + datalen) >> 0) & 0xFF;
@@ -2519,11 +2525,13 @@
             _segmentReferenceId = _segmentReferenceId % 0xFFFFFF;
             ref = _segmentReferenceId;
         }
-        NSArray *dataSegments  = [self splitDataIntoSegments:routingState.inboundReassembledPacket.outgoingSccpData
-                                            withSegmentSizes:NULL
-                                                   reference:ref
-                                                      maxPdu:(useXUDT ? maxPduXUDT : maxPduLUDT)
-                                               protocolClass:routingState.inboundReassembledPacket.outgoingServiceClass];
+        NSArray *dataSegments  = [UMLayerSCCP splitDataIntoSegments:routingState.inboundReassembledPacket.outgoingSccpData
+                                                   withSegmentSizes:NULL
+                                                          reference:ref
+                                                             maxPdu:(useXUDT ? maxPduXUDT : maxPduLUDT)
+                                                      protocolClass:routingState.inboundReassembledPacket.outgoingServiceClass
+                                                            logFeed:_logFeed
+                                                           logLevel:_logLevel];
 
         NSUInteger count = dataSegments.count;
         NSMutableArray *arr = [[NSMutableArray alloc]init];
@@ -6062,13 +6070,15 @@
     [self openSccpScreeningTraceFile];
 }
 
-- (NSArray <UMSCCP_Segment *>*)splitDataIntoSegments:(NSData *)data
++ (NSArray <UMSCCP_Segment *>*)splitDataIntoSegments:(NSData *)data
                                     withSegmentSizes:(NSArray<NSNumber *>*)segmentSizes
                                            reference:(unsigned int)ref
                                               maxPdu:(NSUInteger)maxPdu
                                        protocolClass:(SCCP_ServiceClass)pclass
+                                             logFeed:(UMLogFeed *)logFeed
+                                            logLevel:(UMLogLevel) logLevel
 {
-    BOOL debug =( _logLevel <=UMLOG_DEBUG);
+    BOOL debug =(logLevel <=UMLOG_DEBUG);
     if(debug)
     {
         NSMutableString *s = [[NSMutableString alloc]init];
@@ -6090,7 +6100,7 @@
         [s appendFormat:@"}\n"];
         [s appendFormat:@"\treference:%u\n",ref];
         [s appendFormat:@"\tmaxPdu:%ld\n",(long)maxPdu];
-        [self logDebug:s];
+        [logFeed debugText:s];
     }
     NSMutableArray<UMSCCP_Segment *> *segments = [[NSMutableArray alloc]init];
 
@@ -6145,7 +6155,6 @@
         remainingLength = remainingData.length;
         index++;
     }
-    
     for(int i=0;i<segments.count;i++)
     {
         UMSCCP_Segment *s = segments[i];
@@ -6161,7 +6170,7 @@
             UMSCCP_Segment *seg = segments[i];
             [s appendFormat:@"\t%@\n",seg.description];
         }
-        [self logDebug:s];
+        [logFeed debugText:s];
     }
     return segments;
 }
