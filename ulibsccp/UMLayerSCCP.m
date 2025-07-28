@@ -2270,7 +2270,7 @@
                                transactionNumber:tid
                                        operation:op
                                 applicationContext:ac];
-    
+    routingState.destinationGroup = grp;
     routingPacket.errorCauseValue = causeValue;
     
     if(self.logLevel <=UMLOG_DEBUG)
@@ -2321,6 +2321,7 @@
         routingPacket.outgoingToLocal = YES;
         routingPacket.outgoingLocalUser = localUser;
         routingPacket.outgoingLinksetName = @"local";
+        routingState.deliverLocal = YES;
     }
 
     else if(grp)
@@ -3030,14 +3031,13 @@
     /* split outbound packets if not split already   */
     /* --------------------------------------------- */
     EXECUTE_AND_CHECK_ERROR(routingState,processOutgoingSegmentation,@"processOutgoingSegmentation")
-    if(routingState.deliverLocal)
+    if(routingState.outgoingToLocal)
     {
         /* --------------------------------------------- */
         /* DELIVERY TO MTP3                              */
         /* send the packets to the wire                  */
         /* --------------------------------------------- */
         EXECUTE_AND_CHECK_ERROR(routingState,processLocalDelivery,@"processLocalDelivery")
-
     }
     else
     {
