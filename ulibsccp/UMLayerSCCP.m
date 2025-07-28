@@ -493,7 +493,6 @@
         /* lets add a importance header to see if it works */
         xoptionsdata = [NSData dataWithBytes:&o[0] length:3];
     }
-    //NSLog(@"options-data %@",xoptionsdata);
     return [self sendLXUDT:data
                    calling:src
                     called:dst
@@ -2152,9 +2151,6 @@
     UMSCCP_Packet               *packet         = routingState.inboundReassembledPacket;
     UMSCCP_TcapSharingInstance  *inside_inst    = packet.incomingLinksetTcapSharingInside;
     UMSCCP_TcapSharingInstance  *outside_inst   = packet.incomingLinksetTcapSharingOutside;
-    
-    NSLog(@"entering processPostroutingTcapSharing\npacket.incomingLinksetName=%@\npacket.outgoingLinksetName=%@",packet.incomingLinksetName,packet.outgoingLinksetName);
-
     if(packet.tcapSharingTraceLevel <=UMLOG_DEBUG)
     {
         NSMutableString *s = [[NSMutableString alloc]init];
@@ -2193,8 +2189,6 @@
             [self.logFeed debugText:@"processPostroutingTcapSharing completed with success"];
         }
     }
-    NSLog(@"entering processPostroutingTcapSharing *END* \npacket.incomingLinksetName=%@\npacket.outgoingLinksetName=%@",packet.incomingLinksetName,packet.outgoingLinksetName);
-
 }
 
 - (void)processForcedRouting:(UMSCCP_RoutingState *)routingState
@@ -2596,7 +2590,10 @@
     
     UMMTP3_Error e = UMMTP3_no_error;
     NSString *outgoingLinkset = routingPacket.outgoingLinksetName;
-    NSLog(@"routingPacket.outgoingLinksetName= outgoinglinkset = %@",outgoingLinkset);
+    if(routingPacket.forcedLinkset)
+    {
+        outgoingLinkset = routingPacket.forcedLinkset;
+    }
     switch(routingPacket.outgoingServiceType)
     {
         case SCCP_UDT:
@@ -2755,7 +2752,6 @@
                 {
                     [self.logFeed debugText:@"Sending LUDT with no segments"];
                 }
-                NSLog(@"Calling sendLUDT");
                 e = [self sendLUDT:routingPacket.outgoingSccpData
                            calling:routingPacket.outgoingCallingPartyAddress
                             called:routingPacket.outgoingCalledPartyAddress
@@ -3907,7 +3903,6 @@
             options:(NSDictionary *)options
         synchronous:(BOOL)sync
 {
-//  NSLog(@"sccpNInform not implemented");
 }
 
 /* connectionless primitives */
@@ -3942,7 +3937,6 @@
              called:(SccpAddress *)dst
             options:(NSDictionary *)options
 {
-//    NSLog(@"sccpNNotice not implemented");
 }
 
 - (void)sccpNState:(NSData *)data
@@ -3951,7 +3945,6 @@
             called:(SccpAddress *)dst
            options:(NSDictionary *)options
 {
-//    NSLog(@"sccpNState not implemented");
 }
 
 
@@ -3961,7 +3954,6 @@
             called:(SccpAddress *)dst
            options:(NSDictionary *)options
 {
-//    NSLog(@"sccpNCoord not implemented");
 }
 
 
@@ -3971,7 +3963,6 @@
               called:(SccpAddress *)dst
              options:(NSDictionary *)options
 {
-//    NSLog(@"sccpNTraffic not implemented");
 }
 
 
@@ -3981,7 +3972,6 @@
               called:(SccpAddress *)dst
              options:(NSDictionary *)options
 {
- //   NSLog(@"sccpNPcState not implemented");
 }
 
 
@@ -5605,14 +5595,10 @@
                     {
                         if((o.asn1_tag.tagClass == UMASN1Class_Application) && (o.asn1_tag.tagNumber == 8)) /* orig transaction ID */
                         {
-                            const uint8_t *bytes = o.asn1_data.bytes;
-                            unsigned long len = o.asn1_data.length;
                             otid = o.asn1_data.hexString;
                         }
                         if((o.asn1_tag.tagClass == UMASN1Class_Application) && (o.asn1_tag.tagNumber == 9)) /* dest transaction ID */
                         {
-                            const uint8_t *bytes = o.asn1_data.bytes;
-                            unsigned long len = o.asn1_data.length;
                             dtid = o.asn1_data.hexString;
                         }
                         o = [seq getObjectAtPosition:p++];
@@ -5629,80 +5615,6 @@
     }
     return @[otid,dtid];
 }
-
-#if 0
-- (NSNumber *) extractTransactionNumber:(NSData *)data
-{
-    UMASN1Sequence *seq;
-    @try
-    {
-        seq = [[UMASN1Sequence alloc]initWithBerData:data];
-    }
-    @catch(NSException *e)
-    {
-        //NSLog(@"can not extract transaction number. Exception %@",e);
-    }
-    switch(seq.asn1_tag.tagClass)
-    {
-        case UMASN1Class_Application:
-        {
-            switch(seq.asn1_tag.tagNumber)
-            {
-                case 2: /* BEGIN */
-                {
-                    int p=0;
-                    UMASN1Object *o = [seq getObjectAtPosition:p++];
-                    while(o)
-                    {
-                        if((o.asn1_tag.tagClass == UMASN1Class_Application) && (o.asn1_tag.tagNumber == 8)) /* orig transaction ID */
-                        {
-                            const uint8_t *bytes = o.asn1_data.bytes;
-                            unsigned long len = o.asn1_data.length;
-                            uint64_t value = 0;
-                            for(int i=0;i<len;i++)
-                            {
-                                value = (value << 8) | bytes[i];
-                            }
-                            return @(value);
-                        }
-                        o = [seq getObjectAtPosition:p++];
-                    }
-                    break;
-                }
-                case 4: /* END      */
-                case 5: /* CONTINUE */
-                case 7: /* ABORT    */
-                {
-                    int p=0;
-                    UMASN1Object *o = [seq getObjectAtPosition:p++];
-                    while(o)
-                    {
-                        if((o.asn1_tag.tagClass == UMASN1Class_Application) && (o.asn1_tag.tagNumber == 9))
-                        {
-                            const uint8_t *bytes = o.asn1_data.bytes;
-                            unsigned long len = o.asn1_data.length;
-                            uint64_t value = 0;
-                            for(int i=0;i<len;i++)
-                            {
-                                value = (value << 8) | bytes[i];
-                            }
-                            return @(value);
-                        }
-                        o = [seq getObjectAtPosition:p++];
-                    }
-                    break;
-                }
-                default:
-                    return NULL;
-            }
-            break;
-        }
-        default:
-            return NULL;
-    }    
-    return NULL;
-}
-#endif
 
 - (NSNumber *) extractOperation:(NSData *)data applicationContext:(NSString **)acptr
 {

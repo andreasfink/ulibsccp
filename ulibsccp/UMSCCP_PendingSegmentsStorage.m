@@ -74,7 +74,6 @@
     }
     if(keysToDelete.count > 0)
     {
-        NSLog(@"SCCP Multipart Keys to delete: %@",keysToDelete);
         for(NSString *key in keysToDelete)
         {
             [_receivedSegmentsByKey removeObjectForKey:key];
