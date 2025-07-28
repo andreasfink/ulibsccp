@@ -375,9 +375,6 @@
 {
     /* we assume here the segmentation header is not included. So we add it here*/
     NSMutableData *optionsData = [[NSMutableData alloc]init];
-    uint8_t pdata[3] = {0x12,0x01,0x01};
-    NSData *param = [NSData dataWithBytes:pdata length:sizeof(pdata)];
-    [optionsData appendData:param];
     [optionsData appendByte:0x10]; /* optional parameter "segmentation" */
     [optionsData appendByte:0x04]; /* length of optional parameter */
     [optionsData appendData:[segment segmentationHeader]];
@@ -2734,6 +2731,7 @@
                     seg.dst = routingPacket.outgoingCalledPartyAddress;
                     seg.sls = routingPacket.sls;
                     seg.provider = routingPacket.outgoingMtp3Layer;
+                    NSLog(@"seg = %@",seg);
                     e =  [self sendLUDTsegment:seg.segment
                                        calling:seg.src
                                         called:seg.dst
