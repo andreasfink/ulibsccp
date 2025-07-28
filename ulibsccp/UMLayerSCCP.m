@@ -493,7 +493,7 @@
         /* lets add a importance header to see if it works */
         xoptionsdata = [NSData dataWithBytes:&o[0] length:3];
     }
-    NSLog(@"options-data %@",xoptionsdata);
+    //NSLog(@"options-data %@",xoptionsdata);
     return [self sendLXUDT:data
                    calling:src
                     called:dst
@@ -634,7 +634,6 @@
             header[10] = 0;
         }
         [sccp_pdu appendBytes:header length:sizeof(header)];
-        NSLog(@"PDULEN SO FAR: %d",sccp_pdu.length);
     }
     else
     {
@@ -659,19 +658,14 @@
     
     [sccp_pdu appendByte:dstEncoded.length];
     [sccp_pdu appendData:dstEncoded];
-    NSLog(@"PDULEN after dst: %d",sccp_pdu.length);
-
     [sccp_pdu appendByte:srcEncoded.length];
     [sccp_pdu appendData:srcEncoded];
-    NSLog(@"PDULEN after src: %d",sccp_pdu.length);
 
     if(isLUDT)
     {
         [sccp_pdu appendByte:((data.length >> 0) & 0xFF)];
         [sccp_pdu appendByte:((data.length >> 8) & 0xFF)];
         [sccp_pdu appendData:data];
-        NSLog(@"PDULEN after data: %d",sccp_pdu.length);
-        NSLog(@"PDU %@",sccp_pdu);
     }
     else
     {
@@ -680,11 +674,8 @@
     }
     if(xoptionsdata.length > 0)
     {
-        NSLog(@"adding optionsdata %@",xoptionsdata);
         [sccp_pdu appendData:xoptionsdata];
         [sccp_pdu appendByte:0x00]; /* end of optional parameters */
-        NSLog(@"PDU %@",sccp_pdu);
-
     }
     UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc options:options routedToLinkset:outgoingLinkset sls:sls];
 
@@ -1991,8 +1982,6 @@
                     [combined appendData:s.segment.data];
                 }
             }
-            NSLog(@"firstsegment=%@",firstSegment);
-            NSLog(@"firstSegment.segmentedPacket=%@",firstSegment.segmentedPacket);
             UMSCCP_Packet *combinedPacket = [firstSegment.segmentedPacket copy];
             if(self.logLevel <=UMLOG_DEBUG)
             {
@@ -2233,11 +2222,6 @@
             }
             tid = [self transactionNumberFromHexString:routingPacket.incoming_tcap_dtid];
             op  = [self extractOperation:payload applicationContext:&ac];
-            if(self.logLevel <=UMLOG_DEBUG)
-            {
-                NSLog(@"RoutingPacket: %@",routingPacket);
-                NSLog(@"SLS: %d",routingPacket.sls);
-            }
         }
         else
         {
@@ -2748,6 +2732,7 @@
                     seg.dst = routingPacket.outgoingCalledPartyAddress;
                     seg.sls = routingPacket.sls;
                     seg.provider = routingPacket.outgoingMtp3Layer;
+                    NSLog(@"Calling sendLUDTsegment %@",seg);
                     e =  [self sendLUDTsegment:seg.segment
                                        calling:seg.src
                                         called:seg.dst
@@ -3920,7 +3905,7 @@
             options:(NSDictionary *)options
         synchronous:(BOOL)sync
 {
-    NSLog(@"sccpNInform not implemented");
+//  NSLog(@"sccpNInform not implemented");
 }
 
 /* connectionless primitives */
@@ -3984,7 +3969,7 @@
               called:(SccpAddress *)dst
              options:(NSDictionary *)options
 {
-    NSLog(@"sccpNTraffic not implemented");
+//    NSLog(@"sccpNTraffic not implemented");
 }
 
 
@@ -5506,7 +5491,7 @@
     }
     @catch(NSException *e)
     {
-        NSLog(@"can not extract transaction number. Exception %@",e);
+        // NSLog(@"can not extract transaction number. Exception %@",e);
     }
     switch(seq.asn1_tag.tagClass)
     {
@@ -5598,7 +5583,7 @@
     }
     @catch(NSException *e)
     {
-        NSLog(@"can not extract transaction number. Exception %@",e);
+        // NSLog(@"can not extract transaction number. Exception %@",e);
         return @[otid,dtid];
     }
     switch(seq.asn1_tag.tagClass)
@@ -5653,7 +5638,7 @@
     }
     @catch(NSException *e)
     {
-        NSLog(@"can not extract transaction number. Exception %@",e);
+        //NSLog(@"can not extract transaction number. Exception %@",e);
     }
     switch(seq.asn1_tag.tagClass)
     {
