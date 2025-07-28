@@ -2108,11 +2108,11 @@
        if(packet.forcedLinkset)
        {
            if((self.logLevel <=UMLOG_DEBUG) || (packet.tcapSharingTraceLevel <=UMLOG_DEBUG))
-            {
-                NSMutableString *s = [NSMutableString stringWithFormat:@"TCAP-SHARING: forcerouted to %@",packet.forcedLinkset];
-                [self logDebug:s];
-            }
-            routingState.forcedLinkset = packet.forcedLinkset;
+           {
+               NSMutableString *s = [NSMutableString stringWithFormat:@"TCAP-SHARING: forcerouted to %@",packet.forcedLinkset];
+               [self logDebug:s];
+           }
+           routingState.forcedLinkset = packet.forcedLinkset;
            packet.outgoingLinksetName = packet.forcedLinkset;
 
         }

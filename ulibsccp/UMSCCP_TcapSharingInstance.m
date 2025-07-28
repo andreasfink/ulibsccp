@@ -88,6 +88,10 @@ typedef enum UMTCAP_Command
                 session.insideLinkset   = packet.incomingLinksetName;
                 session.insideLocalUser = packet.incomingLocalUser;
                 session.insidePointcode = packet.incomingOpc;
+                session.insideLocalTcapTransactionId = packet.incoming_tcap_otid;
+                session.insideRemoteTcapTransactionId = packet.incoming_tcap_dtid;
+                session.outsideLocalTcapTransactionId = packet.incoming_tcap_otid;
+                session.outsideRemoteTcapTransactionId = packet.incoming_tcap_dtid;
                 _outsideBackRoutes[key] = session;
             }
             else if(packet.incomingTcapCommand == TCAP_TAG_ITU_CONTINUE)
