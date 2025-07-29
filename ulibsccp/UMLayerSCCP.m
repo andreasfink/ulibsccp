@@ -378,6 +378,10 @@
     [optionsData appendByte:0x10]; /* optional parameter "segmentation" */
     [optionsData appendByte:0x04]; /* length of optional parameter */
     [optionsData appendData:[segment segmentationHeader]];
+    
+    NSLog(@"SendXUDTsegment: optionsdata=%@",optionsData);
+    NSLog(@"Segment %@",segment);
+
     if(0) /* importance header */
     {
         [optionsData appendByte:0x12]; /* optional parameter "importance" */
@@ -428,7 +432,8 @@
     [optionsData appendByte:0x10]; /* optional parameter "segmentation" */
     [optionsData appendByte:0x04]; /* length of optional parameter */
     [optionsData appendData:[segment segmentationHeader]];
-
+    NSLog(@"SendXUDTsegment: optionsdata=%@",optionsData);
+    NSLog(@"Segment %@",segment);
     if(xoptionsdata.length > 0)
     {
         [optionsData appendData:xoptionsdata];
@@ -556,9 +561,6 @@
                    isLUDT:(BOOL)isLUDT
 {
     NSMutableData *optionsdata = [[NSMutableData alloc]init];
-    uint8_t pdata[3] = {0x12,0x01,0x01};
-    NSData *param = [NSData dataWithBytes:pdata length:sizeof(pdata)];
-    [optionsdata appendData:param];
     [optionsdata appendData:xoptionsdata];
 
     SccpNumberTranslation *cga_number_translation_out = NULL;
