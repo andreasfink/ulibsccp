@@ -57,6 +57,9 @@
 
 - (void)genericInitialisation
 {
+
+    _last_sls = 0;
+    _slsLock = [[UMMutex alloc]initWithName:@"sls-lock"];
     _subsystemUsers = [[UMSynchronizedDictionary alloc]init];
     _dpcAvailability = [[UMSynchronizedDictionary alloc]init];
     _traceSendDestinations =[[UMSynchronizedArray alloc]init];
@@ -2552,6 +2555,7 @@
             s.segment = ds;
             s.reference = packet.incomingSegment.reference;
             s.segmentedPacket = [packet copy];
+
             if(s.segment.first)
             {
                 s.combinedPacket = packet;
@@ -6094,5 +6098,15 @@
     return segments;
 }
 
+- (int)nextSLS
+{
+    int sls;
+    
+    ummutex_lock(_slsLock);
+    sls = _last_sls;
+    _last_sls = (_last_sls+1) % 16;
+    ummutex_unlock(_slsLock);
+    return sls;
+}
 
 @end

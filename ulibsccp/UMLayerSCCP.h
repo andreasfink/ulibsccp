@@ -114,7 +114,8 @@ typedef enum UMSccpScreening_result
     UMSCCP_PendingSegmentsStorage            *_pendingSegmentsStorage;
     BOOL                                     _routingDebug;
     UMLogLevel                              _tcapSharingTraceLevel;
-    
+    UMMutex                                 *_slsLock;
+    int                                     _last_sls;
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;
@@ -532,5 +533,7 @@ qualityOfService:(int)qos
                                        protocolClass:(SCCP_ServiceClass)pclass
                                              logFeed:(UMLogFeed *)logFeed
                                             logLevel:(UMLogLevel) logLevel;
+
+- (int)nextSLS;
 
 @end

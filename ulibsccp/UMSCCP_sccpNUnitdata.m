@@ -335,6 +335,7 @@ static int segmentReferenceId;
                                                                logLevel:_sccpLayer.logLevel];
                     NSUInteger count = _dataSegments.count;
                     _data = NULL;
+                    int sls = [_sccpLayer nextSLS];
                     for(int i=0;i<count;i++)
                     {
                         UMSCCP_Segment *s = _dataSegments[i];
@@ -369,8 +370,7 @@ static int segmentReferenceId;
                             packet.incomingServiceType = SCCP_XUDT;
                         }
                         packet.incomingFromLocal = YES;
-                        packet.sls = -1;
-                        [_sccpLayer.filterDelegate sccpDecodeTcapGsmmap:packet];
+                        packet.sls = sls;
                         if(useLUDT)
                         {
                             _statisticsSection2 = UMSCCP_StatisticSection_LUDT_TX;
@@ -380,16 +380,6 @@ static int segmentReferenceId;
                             _statisticsSection2 = UMSCCP_StatisticSection_XUDT_TX;
                         }
                         [packet copyIncomingToOutgoing];
-                        UMSCCP_FilterResult r = UMSCCP_FILTER_RESULT_UNMODIFIED;
-                        if(_sccpLayer.filterDelegate)
-                        {
-                            r =  [_sccpLayer.filterDelegate filterFromLocalSubsystem:packet];
-                        }
-                        if(r  & UMSCCP_FILTER_RESULT_DROP)
-                        {
-                            [_sccpLayer.logFeed debugText:@"fromLocalFilter returns DROP"];
-                            return;
-                        }
                         /* UMSCCP_RoutingState *routingState = */ [_sccpLayer routePacket:packet];
                     }
                 }

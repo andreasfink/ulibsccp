@@ -33,6 +33,7 @@
     NSDate                  *_firstPacket;
     UMMutex                 *_segmentsLock;
     NSMutableArray          *_preFirstSegments;
+    int                     _sls;
 }
 
 @property(readwrite,strong) NSDate      *create;
@@ -40,6 +41,7 @@
 @property(readwrite,strong) SccpAddress *dst;
 @property(readwrite,assign) unsigned int reference;
 @property(readwrite,assign) int         max;
+@property(readwrite,assign) int         sls;
 @property(readwrite,strong) NSDate      *firstPacket;
 
 - (NSString *)key;
