@@ -53,7 +53,7 @@ typedef enum UMTCAP_Command
             } \
             else \
             { \
-                //NSLog(@"Can  not convert field %@ (type=%@) to string",name,[ptr class]); \
+                NSLog(@"Can  not convert field %@ (type=%@) to string",name,[ptr class]); \
             } \
             if(s.length> 0) \
             { \
