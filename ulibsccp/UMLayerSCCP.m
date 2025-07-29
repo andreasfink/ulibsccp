@@ -564,7 +564,7 @@
                    isLUDT:(BOOL)isLUDT
 {
     NSMutableData *optionsdata = [[NSMutableData alloc]init];
-    if(xoptionsdata.length)
+    if(xoptionsdata.length > 0)
     {
         [optionsdata appendData:xoptionsdata];
     }
@@ -576,6 +576,8 @@
     {
         NSLog(@"sendLXUDT called with optionsdata.length = 0");
     }
+    NSLog(@"sendLXUDT payload length = %lu {%@}",data.length,data.hexString);
+
     SccpNumberTranslation *cga_number_translation_out = NULL;
     SccpNumberTranslation *cda_number_translation_out = NULL;
     
