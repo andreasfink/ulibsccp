@@ -382,9 +382,6 @@
     [optionsData appendByte:0x04]; /* length of optional parameter */
     [optionsData appendData:[segment segmentationHeader]];
     
-    NSLog(@"DEBUG: SendLUDTsegment: optionsdata=%@",optionsData);
-    NSLog(@"DEBUG: Segment %@",segment);
-
     if(0) /* importance header */
     {
         [optionsData appendByte:0x12]; /* optional parameter "importance" */
@@ -435,8 +432,6 @@
     [optionsData appendByte:0x10]; /* optional parameter "segmentation" */
     [optionsData appendByte:0x04]; /* length of optional parameter */
     [optionsData appendData:[segment segmentationHeader]];
-    NSLog(@"SendXUDTsegment: optionsdata=%@",optionsData);
-    NSLog(@"Segment %@",segment);
     if(xoptionsdata.length > 0)
     {
         [optionsData appendData:xoptionsdata];
@@ -568,16 +563,6 @@
     {
         [optionsdata appendData:xoptionsdata];
     }
-    if(optionsdata.length > 0)
-    {
-        NSLog(@"sendLXUDT called with optionsdata=%@",optionsdata.hexString);
-    }
-    else
-    {
-        NSLog(@"sendLXUDT called with optionsdata.length = 0");
-    }
-    NSLog(@"sendLXUDT payload length = %lu {%@}",data.length,data.hexString);
-
     SccpNumberTranslation *cga_number_translation_out = NULL;
     SccpNumberTranslation *cda_number_translation_out = NULL;
     
@@ -2609,13 +2594,9 @@
 
 - (void)processDelivery:(UMSCCP_RoutingState *)routingState
 {
-    NSLog(@"DEBUG: **** processDelivery: ****");
-    
     UMSCCP_Packet *routingPacket = routingState.inboundReassembledPacket;
     NSArray<UMSCCP_ReceivedSegment *>*segments = routingState.packetSegmentsToDeliver;
     BOOL processSegmentedDelivery = (segments.count > 0) ? YES : NO;
-    NSLog(@"DEBUG: **** processSegmentedDelivery %@ ****",@(processSegmentedDelivery));
-    NSLog(@"DEBUG: **** segments %@ ****",segments);
     UMMTP3_Error e = UMMTP3_no_error;
     NSString *outgoingLinkset = routingPacket.outgoingLinksetName;
     if(routingPacket.forcedLinkset)
@@ -2629,8 +2610,6 @@
             {
                 [self.logFeed debugText:@"processDelivery: Sending UDT"];
             }
-            NSLog(@"DEBUG: sending UDT");
-
             e = [self sendUDT:routingPacket.outgoingSccpData
                       calling:routingPacket.outgoingCallingPartyAddress
                        called:routingPacket.outgoingCalledPartyAddress
@@ -2648,8 +2627,6 @@
             {
                 [self.logFeed debugText:@"processDelivery: sending UDTS"];
             }
-            NSLog(@"DEBUG: sending UDTS");
-
             e = [self sendUDTS:routingPacket.outgoingSccpData
                        calling:routingPacket.outgoingCallingPartyAddress
                         called:routingPacket.outgoingCalledPartyAddress
@@ -2681,7 +2658,7 @@
                     }
                     if(![seg isKindOfClass:[UMSCCP_ReceivedSegment class]])
                     {
-                        NSLog(@"wront object type: %@",seg.className);
+                        NSLog(@"wrong object type: %@",seg.className);
                     }
                     seg.opc = routingPacket.outgoingMtp3Layer.opc;
                     seg.dpc = routingPacket.outgoingDpc;
@@ -2689,7 +2666,6 @@
                     seg.dst = routingPacket.outgoingCalledPartyAddress;
                     seg.provider = routingPacket.outgoingMtp3Layer;
                     seg.sls = sls;
-                    NSLog(@"DEBUG: sending XUDT segment seg.segment=%@",seg.segment);
                     e =  [self sendXUDTsegment:seg.segment
                                        calling:routingPacket.outgoingCallingPartyAddress
                                         called:routingPacket.outgoingCalledPartyAddress
@@ -2711,7 +2687,6 @@
                 {
                     [self.logFeed debugText:@"processDelivery: sending XUDT"];
                 }
-                NSLog(@"DEBUG: sending XUDT no segments");
                 e = [self sendXUDT:routingPacket.outgoingSccpData
                            calling:routingPacket.outgoingCallingPartyAddress
                             called:routingPacket.outgoingCalledPartyAddress
@@ -2732,7 +2707,6 @@
             {
                 [self.logFeed debugText:@"processDelivery: sending XUDTS"];
             }
-            NSLog(@"DEBUG: sending XUDTS");
             e = [self sendXUDTS:routingPacket.outgoingSccpData
                         calling:routingPacket.outgoingCallingPartyAddress
                          called:routingPacket.outgoingCalledPartyAddress
@@ -2767,7 +2741,6 @@
                     seg.dst = routingPacket.outgoingCalledPartyAddress;
                     seg.sls = routingPacket.sls;
                     seg.provider = routingPacket.outgoingMtp3Layer;
-                    NSLog(@"DEBUG: sending LUDT segment seg.segment=%@",seg.segment);
                     e =  [self sendLUDTsegment:seg.segment
                                        calling:seg.src
                                         called:seg.dst
@@ -2789,7 +2762,6 @@
                 {
                     [self.logFeed debugText:@"processDelivery: sending LUDT with no segments"];
                 }
-                NSLog(@"DEBUG: sending LUDT no segments");
                 e = [self sendLUDT:routingPacket.outgoingSccpData
                            calling:routingPacket.outgoingCallingPartyAddress
                             called:routingPacket.outgoingCalledPartyAddress
@@ -2808,7 +2780,6 @@
         }
         case SCCP_LUDTS:
         {
-            NSLog(@"DEBUG: sending LUDTS");
             e = [self sendLUDTS:routingPacket.outgoingSccpData
                         calling:routingPacket.outgoingCallingPartyAddress
                          called:routingPacket.outgoingCalledPartyAddress
@@ -4919,7 +4890,7 @@
             }
             else
             {
-                NSLog(@"Can't understand %@",words);
+                //NSLog(@"Can't understand %@",words);
             }
             i++;
         }
@@ -5089,7 +5060,7 @@
             NSString *s = [NSString stringWithFormat:@"Can not read file %@. Error %@",fn,err];
             if(errIgnore == YES)
             {
-                NSLog(@"%@",s);
+                //NSLog(@"%@",s);
             }
             else
             {
@@ -5133,7 +5104,7 @@
                         NSString *s = [NSString stringWithFormat:@"Can not read file %@. Error %@",fn,err];
                         if(errIgnore == YES)
                         {
-                            NSLog(@"%@",s);
+                            //NSLog(@"%@",s);
                         }
                         else
                         {

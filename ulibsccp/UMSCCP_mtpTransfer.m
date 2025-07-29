@@ -665,7 +665,6 @@
                                     break;
                                 case 0x10:
                                 {
-                                    NSLog(@"DEBUG: segmentation param =%@",param.hexString);
                                     _optional_dict[@"segmentation"] = param;
                                     _packet.incomingSegment = [[UMSCCP_Segment alloc]initWithHeaderData:param];
                                     _packet.incomingSegment.data = _packet.incomingSccpData;
