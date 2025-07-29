@@ -2885,18 +2885,7 @@
 {
     if((packet.tcapSharingTraceLevel <=UMLOG_DEBUG) || (_logLevel <=UMLOG_DEBUG))
     {
-        NSMutableString *s = [[NSMutableString alloc]init];
-        [s appendString:@"entering routePacket:"];
-        [s appendFormat:@"incomingLinksetTcapSharingInsideName: %@\n",
-            packet.incomingLinksetTcapSharingInsideName];
-        [s appendFormat:@"incomingLinksetTcapSharingOutsideName: %@",
-            packet.incomingLinksetTcapSharingOutsideName];
-
-        [s appendFormat:@"incomingLinksetTcapSharingInside: %@\n",
-            packet.incomingLinksetTcapSharingInside.name];
-        [s appendFormat:@"incomingLinksetTcapSharingOutside: %@",
-            packet.incomingLinksetTcapSharingOutside.name];
-        [self.logFeed debugText:s];
+        [self.logFeed debugText:@"Entering routePacket:"];
     }
     if((packet.incomingLinksetTcapSharingInsideName.length > 0) && (packet.incomingLinksetTcapSharingInside==NULL))
     {
@@ -2943,7 +2932,6 @@
     if(self.logLevel <=UMLOG_DEBUG)
     {
         NSMutableString *s = [[NSMutableString alloc]init];
-        [s appendFormat:@"Entering routePacket:\n"];
         if(packet.incomingFromLocal)
         {
             routingState.errorDestinationLocal = YES;
@@ -2960,6 +2948,7 @@
         [s appendFormat:@"  DataLen: %d\n",(int)packet.incomingSccpData.length];
         [s appendFormat:@"  Data: %@\n",packet.incomingSccpData];
         [s appendFormat:@"  Segment: %@\n",packet.incomingSegment];
+        [s appendFormat:@"  Options: %@\n",packet.incomingOptions];
         [self.logFeed debugText:s];
     }
     
