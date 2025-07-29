@@ -615,11 +615,11 @@
         header[6] = ((sizeof(header) - 6 + 1 + dstEncoded.length) >> 8) & 0xFF;
         header[7] = ((sizeof(header) - 8 + 1 + dstEncoded.length + 1 + srcEncoded.length) >> 0) & 0xFF;
         header[8] = ((sizeof(header) - 8 + 1 + dstEncoded.length + 1 + srcEncoded.length) >> 8) & 0xFF;
-        int datalen = data.length;
+        int datalen = (int)data.length;
         if(xoptionsdata.length > 0)
         {
-            header[9]  = ((sizeof(header) - 10 + 1 + dstEncoded.length + 1 + srcEncoded.length + 1 + datalen) >> 0) & 0xFF;
-            header[10] = ((sizeof(header) - 10 + 1 + dstEncoded.length + 1 + srcEncoded.length + 1 + datalen) >> 8) & 0xFF;
+            header[9]  = ((sizeof(header) - 10 + 1 + dstEncoded.length + 1 + srcEncoded.length + 2 + datalen) >> 0) & 0xFF;
+            header[10] = ((sizeof(header) - 10 + 1 + dstEncoded.length + 1 + srcEncoded.length + 2 + datalen) >> 8) & 0xFF;
         }
         else
         {
@@ -836,32 +836,33 @@
     
     NSData *srcEncoded = [src encode:_sccpVariant];
     NSData *dstEncoded = [dst encode:_sccpVariant];
-
     NSMutableData *sccp_pdu = [[NSMutableData alloc]init];
     
+
     if(isLUDTS)
     {
         uint8_t header[11];
         header[0] = SCCP_LUDTS;
         header[1] = returnCause;
         header[2] = hopCounter;
-        header[3] = ((8 + 0) >> 0) & 0xFF;
-        header[4] = ((8 + 0) >> 8) & 0xFF;
-        header[5] = ((8 + dstEncoded.length)>> 0) & 0xFF;
-        header[6] = ((8 + dstEncoded.length)>> 8) & 0xFF;
-        header[7] = ((8 + dstEncoded.length + srcEncoded.length) >> 0) & 0xFF;
-        header[8] = ((8 + dstEncoded.length + srcEncoded.length) >> 8) & 0xFF;
+        header[3] = ((sizeof(header) - 4) >> 0) & 0xFF;
+        header[4] = ((sizeof(header) - 4) >> 8) & 0xFF;
+        header[5] = ((sizeof(header) - 6 + 1 + dstEncoded.length) >> 0) & 0xFF;
+        header[6] = ((sizeof(header) - 6 + 1 + dstEncoded.length) >> 8) & 0xFF;
+        header[7] = ((sizeof(header) - 8 + 1 + dstEncoded.length + 1 + srcEncoded.length) >> 0) & 0xFF;
+        header[8] = ((sizeof(header) - 8 + 1 + dstEncoded.length + 1 + srcEncoded.length) >> 8) & 0xFF;
+        int datalen = (int)data.length;
         if(xoptionsdata.length > 0)
         {
-            header[9]  = ((8 + dstEncoded.length + srcEncoded.length + data.length) >> 0) & 0xFF;
-            header[10] = ((8 + dstEncoded.length + srcEncoded.length + data.length) >> 8) & 0xFF;
+            header[9]  = ((sizeof(header) - 10 + 1 + dstEncoded.length + 1 + srcEncoded.length + 2 + datalen) >> 0) & 0xFF;
+            header[10] = ((sizeof(header) - 10 + 1 + dstEncoded.length + 1 + srcEncoded.length + 2 + datalen) >> 8) & 0xFF;
         }
         else
         {
             header[9] = 0;
             header[10] = 0;
         }
-        [sccp_pdu appendBytes:header length:11];
+        [sccp_pdu appendBytes:header length:sizeof(header)];
     }
     else
     {
@@ -2586,11 +2587,16 @@
 
 - (void)processDelivery:(UMSCCP_RoutingState *)routingState
 {
+    NSLog(@"DEBUG: **** processDelivery: ****");
+    
     UMSCCP_Packet *routingPacket = routingState.inboundReassembledPacket;
     
     NSArray<UMSCCP_ReceivedSegment *>*segments = routingState.packetSegmentsToDeliver;
     BOOL processSegmentedDelivery = (segments.count > 0) ? YES : NO;
     
+    NSLog(@"DEBUG: **** processSegmentedDelivery %@ ****",@(processSegmentedDelivery));
+    NSLog(@"DEBUG: **** segments %@ ****",segments);
+
     UMMTP3_Error e = UMMTP3_no_error;
     NSString *outgoingLinkset = routingPacket.outgoingLinksetName;
     switch(routingPacket.outgoingServiceType)
@@ -2600,6 +2606,8 @@
             {
                 [self.logFeed debugText:@"Sending UDT"];
             }
+            NSLog(@"DEBUG: sending UDT");
+
             e = [self sendUDT:routingPacket.outgoingSccpData
                       calling:routingPacket.outgoingCallingPartyAddress
                        called:routingPacket.outgoingCalledPartyAddress
@@ -2617,6 +2625,8 @@
             {
                 [self.logFeed debugText:@"Sending UDTS"];
             }
+            NSLog(@"DEBUG: sending UDTS");
+
             e = [self sendUDTS:routingPacket.outgoingSccpData
                        calling:routingPacket.outgoingCallingPartyAddress
                         called:routingPacket.outgoingCalledPartyAddress
@@ -2630,6 +2640,7 @@
                            sls:routingPacket.sls];
             break;
         case SCCP_XUDT:
+
             if(processSegmentedDelivery)
             {
                 if(self.logLevel <=UMLOG_DEBUG)
@@ -2655,6 +2666,7 @@
                     seg.dst = routingPacket.outgoingCalledPartyAddress;
                     seg.provider = routingPacket.outgoingMtp3Layer;
                     seg.sls = sls;
+                    NSLog(@"DEBUG: sending XUDT segment seg.segment=%@",seg.segment);
                     e =  [self sendXUDTsegment:seg.segment
                                        calling:routingPacket.outgoingCallingPartyAddress
                                         called:routingPacket.outgoingCalledPartyAddress
@@ -2676,6 +2688,7 @@
                 {
                     [self.logFeed debugText:@"Sending XUDT"];
                 }
+                NSLog(@"DEBUG: sending XUDT no segments");
                 e = [self sendXUDT:routingPacket.outgoingSccpData
                            calling:routingPacket.outgoingCallingPartyAddress
                             called:routingPacket.outgoingCalledPartyAddress
@@ -2696,6 +2709,7 @@
             {
                 [self.logFeed debugText:@"Sending XUDTS"];
             }
+            NSLog(@"DEBUG: sending XUDTS");
             e = [self sendXUDTS:routingPacket.outgoingSccpData
                         calling:routingPacket.outgoingCallingPartyAddress
                          called:routingPacket.outgoingCalledPartyAddress
@@ -2730,6 +2744,7 @@
                     seg.dst = routingPacket.outgoingCalledPartyAddress;
                     seg.sls = routingPacket.sls;
                     seg.provider = routingPacket.outgoingMtp3Layer;
+                    NSLog(@"DEBUG: sending LUDT segment seg.segment=%@",seg.segment);
                     e =  [self sendLUDTsegment:seg.segment
                                        calling:seg.src
                                         called:seg.dst
@@ -2751,6 +2766,7 @@
                 {
                     [self.logFeed debugText:@"Sending LUDT with no segments"];
                 }
+                NSLog(@"DEBUG: sending LUDT no segments");
                 e = [self sendLUDT:routingPacket.outgoingSccpData
                            calling:routingPacket.outgoingCallingPartyAddress
                             called:routingPacket.outgoingCalledPartyAddress
@@ -2769,6 +2785,7 @@
         }
         case SCCP_LUDTS:
         {
+            NSLog(@"DEBUG: sending LUDTS");
             e = [self sendLUDTS:routingPacket.outgoingSccpData
                         calling:routingPacket.outgoingCallingPartyAddress
                          called:routingPacket.outgoingCalledPartyAddress
