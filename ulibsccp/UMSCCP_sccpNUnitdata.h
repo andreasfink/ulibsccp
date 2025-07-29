@@ -34,7 +34,7 @@
     BOOL                    _returnOnError;
     SCCP_ServiceClass       _protocolClass;
     int                     _handling;
-
+    int                     _sls;
     NSDate                  *_created;
     NSDate                  *_startOfProcessing;
     NSDate                  *_endOfProcessing;

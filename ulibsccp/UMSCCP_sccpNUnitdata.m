@@ -43,6 +43,7 @@ static int segmentReferenceId;
         _data = xdata;
         _src = xsrc;
         _dst = xdst;
+        _sls = [_sccpLayer nextSLS];
         _options = xoptions;
         _qos = xqos;
         _maxHopCount = 255;
@@ -80,6 +81,7 @@ static int segmentReferenceId;
         _qos = xqos;
         _protocolClass = pclass;
         _handling = handling;
+        _sls = [_sccpLayer nextSLS];
         if(_options)
         {
             NSString *s = _options[@"hop-counter"];
@@ -127,10 +129,10 @@ static int segmentReferenceId;
             NSUInteger cds = dstEncoded.length;
             NSUInteger maxPdu = 0;
             //BOOL useUDT         = [_options[@"sccp-udt"] boolValue];
-            BOOL useXUDT        = [_options[@"sccp-xudt"] boolValue];
-            BOOL useLUDT        = [_options[@"sccp-ludt"] boolValue];
-            BOOL useSegments    = [_options[@"sccp-segment"] boolValue];
-            int segmentSize    = [_options[@"sccp-segment-size"] intValue];
+            BOOL useXUDT          = [_options[@"sccp-xudt"] boolValue];
+            BOOL useLUDT          = [_options[@"sccp-ludt"] boolValue];
+            BOOL useSegments      = [_options[@"sccp-segment"] boolValue];
+            int segmentSize       = [_options[@"sccp-segment-size"] intValue];
             NSArray *segmentSizes =  _options[@"sccp-segment-sizes"];
             
             NSDictionary *sccp_options = _options[@"sccp-optional"];
@@ -335,7 +337,6 @@ static int segmentReferenceId;
                                                                logLevel:_sccpLayer.logLevel];
                     NSUInteger count = _dataSegments.count;
                     _data = NULL;
-                    int sls = [_sccpLayer nextSLS];
                     for(int i=0;i<count;i++)
                     {
                         UMSCCP_Segment *s = _dataSegments[i];
@@ -370,7 +371,7 @@ static int segmentReferenceId;
                             packet.incomingServiceType = SCCP_XUDT;
                         }
                         packet.incomingFromLocal = YES;
-                        packet.sls = sls;
+                        packet.sls = _sls;
                         if(useLUDT)
                         {
                             _statisticsSection2 = UMSCCP_StatisticSection_LUDT_TX;
@@ -405,7 +406,7 @@ static int segmentReferenceId;
                     packet.incomingMaxHopCount = _maxHopCount;
                     packet.incomingOptionalData = optional_data;
                     packet.incomingFromLocal = YES;
-                    packet.sls = -1;
+                    packet.sls = _sls;
                     if(useXUDT)
                     {
                         packet.incomingServiceType = SCCP_XUDT;
