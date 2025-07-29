@@ -45,7 +45,6 @@
             NSString *s =  [NSString stringWithFormat:@"mtpResume: AffectedPointCode: %@",_affectedPointCode];
             [_sccp logDebug:s];
         }
-        NSLog(@"mtpResume: AffectedPointCode: %@",_affectedPointCode);
         [_mtp3.routingUpdateDb logInboundLinkset:@"sccp"
                                  outboundLinkset:@""
                                              dpc:_affectedPointCode

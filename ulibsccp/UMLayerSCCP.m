@@ -57,6 +57,9 @@
 
 - (void)genericInitialisation
 {
+
+    _last_sls = 0;
+    _slsLock = [[UMMutex alloc]initWithName:@"sls-lock"];
     _subsystemUsers = [[UMSynchronizedDictionary alloc]init];
     _dpcAvailability = [[UMSynchronizedDictionary alloc]init];
     _traceSendDestinations =[[UMSynchronizedArray alloc]init];
@@ -378,11 +381,20 @@
     [optionsData appendByte:0x10]; /* optional parameter "segmentation" */
     [optionsData appendByte:0x04]; /* length of optional parameter */
     [optionsData appendData:[segment segmentationHeader]];
+    
+    NSLog(@"SendXUDTsegment: optionsdata=%@",optionsData);
+    NSLog(@"Segment %@",segment);
+
+    if(0) /* importance header */
+    {
+        [optionsData appendByte:0x12]; /* optional parameter "importance" */
+        [optionsData appendByte:0x01]; /* length of optional parameter */
+        [optionsData appendByte:0x01]; /* VIP 01 */
+    }
     if(xoptionsdata.length > 0)
     {
         [optionsData appendData:xoptionsdata];
     }
-    
     /* The standard says
         – The SCCP shall place each segment of user data into separate LUDT messages, each with the same Called Party Address and identical MTP routing information (DPC, SLS).
         which means we need to collect all segments first, do a routing
@@ -423,6 +435,8 @@
     [optionsData appendByte:0x10]; /* optional parameter "segmentation" */
     [optionsData appendByte:0x04]; /* length of optional parameter */
     [optionsData appendData:[segment segmentationHeader]];
+    NSLog(@"SendXUDTsegment: optionsdata=%@",optionsData);
+    NSLog(@"Segment %@",segment);
     if(xoptionsdata.length > 0)
     {
         [optionsData appendData:xoptionsdata];
@@ -549,6 +563,9 @@
                      sls:(int)sls
                    isLUDT:(BOOL)isLUDT
 {
+    NSMutableData *optionsdata = [[NSMutableData alloc]init];
+    [optionsdata appendData:xoptionsdata];
+
     SccpNumberTranslation *cga_number_translation_out = NULL;
     SccpNumberTranslation *cda_number_translation_out = NULL;
     
@@ -597,7 +614,6 @@
     NSData *srcEncoded = [src encode:_sccpVariant];
     NSData *dstEncoded = [dst encode:_sccpVariant];
     
-    
     NSMutableData *sccp_pdu = [[NSMutableData alloc]init];
     
     /* The pointer value (in binary) gives the number of octets between the most significant octet of pointer
@@ -616,7 +632,7 @@
         header[7] = ((sizeof(header) - 8 + 1 + dstEncoded.length + 1 + srcEncoded.length) >> 0) & 0xFF;
         header[8] = ((sizeof(header) - 8 + 1 + dstEncoded.length + 1 + srcEncoded.length) >> 8) & 0xFF;
         int datalen = (int)data.length;
-        if(xoptionsdata.length > 0)
+        if(optionsdata.length > 0)
         {
             header[9]  = ((sizeof(header) - 10 + 1 + dstEncoded.length + 1 + srcEncoded.length + 2 + datalen) >> 0) & 0xFF;
             header[10] = ((sizeof(header) - 10 + 1 + dstEncoded.length + 1 + srcEncoded.length + 2 + datalen) >> 8) & 0xFF;
@@ -637,7 +653,7 @@
         header[3] = 4;
         header[4] = 4 + dstEncoded.length;
         header[5] = 4 + dstEncoded.length + srcEncoded.length;
-        if(xoptionsdata.length > 0)
+        if(optionsdata.length > 0)
         {
             header[6] = 4 + dstEncoded.length + srcEncoded.length + data.length;
         }
@@ -653,7 +669,7 @@
     [sccp_pdu appendData:dstEncoded];
     [sccp_pdu appendByte:srcEncoded.length];
     [sccp_pdu appendData:srcEncoded];
-    
+
     if(isLUDT)
     {
         [sccp_pdu appendByte:((data.length >> 0) & 0xFF)];
@@ -665,11 +681,12 @@
         [sccp_pdu appendByte:data.length];
         [sccp_pdu appendData:data];
     }
-    if(xoptionsdata.length > 0)
+    if(optionsdata.length > 0)
     {
-        [sccp_pdu appendData:xoptionsdata];
+        [sccp_pdu appendData:optionsdata];
         [sccp_pdu appendByte:0x00]; /* end of optional parameters */
     }
+    
     UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc options:options routedToLinkset:outgoingLinkset sls:sls];
 
     NSString *s;
@@ -1976,8 +1993,6 @@
                     [combined appendData:s.segment.data];
                 }
             }
-            NSLog(@"firstsegment=%@",firstSegment);
-            NSLog(@"firstSegment.segmentedPacket=%@",firstSegment.segmentedPacket);
             UMSCCP_Packet *combinedPacket = [firstSegment.segmentedPacket copy];
             if(self.logLevel <=UMLOG_DEBUG)
             {
@@ -2148,8 +2163,6 @@
     UMSCCP_Packet               *packet         = routingState.inboundReassembledPacket;
     UMSCCP_TcapSharingInstance  *inside_inst    = packet.incomingLinksetTcapSharingInside;
     UMSCCP_TcapSharingInstance  *outside_inst   = packet.incomingLinksetTcapSharingOutside;
-    
-    
     if(packet.tcapSharingTraceLevel <=UMLOG_DEBUG)
     {
         NSMutableString *s = [[NSMutableString alloc]init];
@@ -2187,7 +2200,6 @@
         {
             [self.logFeed debugText:@"processPostroutingTcapSharing completed with success"];
         }
-        return;
     }
 }
 
@@ -2218,11 +2230,6 @@
             }
             tid = [self transactionNumberFromHexString:routingPacket.incoming_tcap_dtid];
             op  = [self extractOperation:payload applicationContext:&ac];
-            if(self.logLevel <=UMLOG_DEBUG)
-            {
-                NSLog(@"RoutingPacket: %@",routingPacket);
-                NSLog(@"SLS: %d",routingPacket.sls);
-            }
         }
         else
         {
@@ -2520,17 +2527,19 @@
             _segmentReferenceId = _segmentReferenceId % 0xFFFFFF;
             ref = _segmentReferenceId;
         }
-        NSArray *dataSegments  = [self splitDataIntoSegments:routingState.inboundReassembledPacket.outgoingSccpData
-                                            withSegmentSizes:NULL
-                                                   reference:ref
-                                                      maxPdu:(useXUDT ? maxPduXUDT : maxPduLUDT)
-                                               protocolClass:routingState.inboundReassembledPacket.outgoingServiceClass];
+        NSArray *dataSegments  = [UMLayerSCCP splitDataIntoSegments:routingState.inboundReassembledPacket.outgoingSccpData
+                                                   withSegmentSizes:NULL
+                                                          reference:ref
+                                                             maxPdu:(useXUDT ? maxPduXUDT : maxPduLUDT)
+                                                      protocolClass:routingState.inboundReassembledPacket.outgoingServiceClass
+                                                            logFeed:_logFeed
+                                                           logLevel:_logLevel];
 
         NSUInteger count = dataSegments.count;
         NSMutableArray *arr = [[NSMutableArray alloc]init];
         for(int i=0;i<count;i++)
         {
-            UMSCCP_Segment *ds           = dataSegments[i];
+            UMSCCP_Segment *ds        = dataSegments[i];
             UMSCCP_ReceivedSegment *s = [[UMSCCP_ReceivedSegment alloc]init];
             s.src = packet.outgoingCallingPartyAddress;
             s.dst = packet.outgoingCalledPartyAddress;
@@ -2546,6 +2555,7 @@
             s.segment = ds;
             s.reference = packet.incomingSegment.reference;
             s.segmentedPacket = [packet copy];
+
             if(s.segment.first)
             {
                 s.combinedPacket = packet;
@@ -2590,21 +2600,22 @@
     NSLog(@"DEBUG: **** processDelivery: ****");
     
     UMSCCP_Packet *routingPacket = routingState.inboundReassembledPacket;
-    
     NSArray<UMSCCP_ReceivedSegment *>*segments = routingState.packetSegmentsToDeliver;
     BOOL processSegmentedDelivery = (segments.count > 0) ? YES : NO;
-    
     NSLog(@"DEBUG: **** processSegmentedDelivery %@ ****",@(processSegmentedDelivery));
     NSLog(@"DEBUG: **** segments %@ ****",segments);
-
     UMMTP3_Error e = UMMTP3_no_error;
     NSString *outgoingLinkset = routingPacket.outgoingLinksetName;
+    if(routingPacket.forcedLinkset)
+    {
+        outgoingLinkset = routingPacket.forcedLinkset;
+    }
     switch(routingPacket.outgoingServiceType)
     {
         case SCCP_UDT:
             if(self.logLevel <=UMLOG_DEBUG)
             {
-                [self.logFeed debugText:@"Sending UDT"];
+                [self.logFeed debugText:@"processDelivery: Sending UDT"];
             }
             NSLog(@"DEBUG: sending UDT");
 
@@ -2623,7 +2634,7 @@
         case SCCP_UDTS:
             if(self.logLevel <=UMLOG_DEBUG)
             {
-                [self.logFeed debugText:@"Sending UDTS"];
+                [self.logFeed debugText:@"processDelivery: sending UDTS"];
             }
             NSLog(@"DEBUG: sending UDTS");
 
@@ -2645,7 +2656,7 @@
             {
                 if(self.logLevel <=UMLOG_DEBUG)
                 {
-                    [self.logFeed debugText:[NSString stringWithFormat:@" Sending XUDT with %lu segments",segments.count]];
+                    [self.logFeed debugText:[NSString stringWithFormat:@"processDelivery: Sending XUDT with %lu segments",segments.count]];
                 }
                 int sls = routingPacket.sls % 16;
                 int no = 0;
@@ -2654,7 +2665,7 @@
                     no++;
                     if(self.logLevel <=UMLOG_DEBUG)
                     {
-                        [self.logFeed debugText:[NSString stringWithFormat:@"Sending XUDT segment #%d: %@",no,seg.description]];
+                        [self.logFeed debugText:[NSString stringWithFormat:@"processDelivery: Sending XUDT segment #%d: %@",no,seg.description]];
                     }
                     if(![seg isKindOfClass:[UMSCCP_ReceivedSegment class]])
                     {
@@ -2686,7 +2697,7 @@
             {
                 if(self.logLevel <=UMLOG_DEBUG)
                 {
-                    [self.logFeed debugText:@"Sending XUDT"];
+                    [self.logFeed debugText:@"processDelivery: sending XUDT"];
                 }
                 NSLog(@"DEBUG: sending XUDT no segments");
                 e = [self sendXUDT:routingPacket.outgoingSccpData
@@ -2707,7 +2718,7 @@
         case SCCP_XUDTS:
             if(self.logLevel <=UMLOG_DEBUG)
             {
-                [self.logFeed debugText:@"Sending XUDTS"];
+                [self.logFeed debugText:@"processDelivery: sending XUDTS"];
             }
             NSLog(@"DEBUG: sending XUDTS");
             e = [self sendXUDTS:routingPacket.outgoingSccpData
@@ -2730,13 +2741,13 @@
             {
                 if(self.logLevel <=UMLOG_DEBUG)
                 {
-                    [self.logFeed debugText:@"Sending LUDT with multiple segments"];
+                    [self.logFeed debugText:@"processDelivery: sending LUDT with multiple segments"];
                 }
                 for(UMSCCP_ReceivedSegment *seg in routingState.packetSegmentsToDeliver)
                 {
                     if(self.logLevel <=UMLOG_DEBUG)
                     {
-                        [self.logFeed debugText:[NSString stringWithFormat:@"Sending LUDT with segment %@",seg.segment]];
+                        [self.logFeed debugText:[NSString stringWithFormat:@"processDelivery: sending LUDT with segment %@",seg.segment]];
                     }
                     seg.opc = routingPacket.outgoingMtp3Layer.opc;
                     seg.dpc = routingPacket.outgoingDpc;
@@ -2764,7 +2775,7 @@
             {
                 if(self.logLevel <=UMLOG_DEBUG)
                 {
-                    [self.logFeed debugText:@"Sending LUDT with no segments"];
+                    [self.logFeed debugText:@"processDelivery: sending LUDT with no segments"];
                 }
                 NSLog(@"DEBUG: sending LUDT no segments");
                 e = [self sendLUDT:routingPacket.outgoingSccpData
@@ -3919,7 +3930,6 @@
             options:(NSDictionary *)options
         synchronous:(BOOL)sync
 {
-    NSLog(@"sccpNInform not implemented");
 }
 
 /* connectionless primitives */
@@ -3954,7 +3964,6 @@
              called:(SccpAddress *)dst
             options:(NSDictionary *)options
 {
-//    NSLog(@"sccpNNotice not implemented");
 }
 
 - (void)sccpNState:(NSData *)data
@@ -3963,7 +3972,6 @@
             called:(SccpAddress *)dst
            options:(NSDictionary *)options
 {
-//    NSLog(@"sccpNState not implemented");
 }
 
 
@@ -3973,7 +3981,6 @@
             called:(SccpAddress *)dst
            options:(NSDictionary *)options
 {
-//    NSLog(@"sccpNCoord not implemented");
 }
 
 
@@ -3983,7 +3990,6 @@
               called:(SccpAddress *)dst
              options:(NSDictionary *)options
 {
-    NSLog(@"sccpNTraffic not implemented");
 }
 
 
@@ -3993,7 +3999,6 @@
               called:(SccpAddress *)dst
              options:(NSDictionary *)options
 {
- //   NSLog(@"sccpNPcState not implemented");
 }
 
 
@@ -5505,7 +5510,7 @@
     }
     @catch(NSException *e)
     {
-        NSLog(@"can not extract transaction number. Exception %@",e);
+        // NSLog(@"can not extract transaction number. Exception %@",e);
     }
     switch(seq.asn1_tag.tagClass)
     {
@@ -5597,7 +5602,7 @@
     }
     @catch(NSException *e)
     {
-        NSLog(@"can not extract transaction number. Exception %@",e);
+        // NSLog(@"can not extract transaction number. Exception %@",e);
         return @[otid,dtid];
     }
     switch(seq.asn1_tag.tagClass)
@@ -5617,14 +5622,10 @@
                     {
                         if((o.asn1_tag.tagClass == UMASN1Class_Application) && (o.asn1_tag.tagNumber == 8)) /* orig transaction ID */
                         {
-                            const uint8_t *bytes = o.asn1_data.bytes;
-                            unsigned long len = o.asn1_data.length;
                             otid = o.asn1_data.hexString;
                         }
                         if((o.asn1_tag.tagClass == UMASN1Class_Application) && (o.asn1_tag.tagNumber == 9)) /* dest transaction ID */
                         {
-                            const uint8_t *bytes = o.asn1_data.bytes;
-                            unsigned long len = o.asn1_data.length;
                             dtid = o.asn1_data.hexString;
                         }
                         o = [seq getObjectAtPosition:p++];
@@ -5641,80 +5642,6 @@
     }
     return @[otid,dtid];
 }
-
-#if 0
-- (NSNumber *) extractTransactionNumber:(NSData *)data
-{
-    UMASN1Sequence *seq;
-    @try
-    {
-        seq = [[UMASN1Sequence alloc]initWithBerData:data];
-    }
-    @catch(NSException *e)
-    {
-        NSLog(@"can not extract transaction number. Exception %@",e);
-    }
-    switch(seq.asn1_tag.tagClass)
-    {
-        case UMASN1Class_Application:
-        {
-            switch(seq.asn1_tag.tagNumber)
-            {
-                case 2: /* BEGIN */
-                {
-                    int p=0;
-                    UMASN1Object *o = [seq getObjectAtPosition:p++];
-                    while(o)
-                    {
-                        if((o.asn1_tag.tagClass == UMASN1Class_Application) && (o.asn1_tag.tagNumber == 8)) /* orig transaction ID */
-                        {
-                            const uint8_t *bytes = o.asn1_data.bytes;
-                            unsigned long len = o.asn1_data.length;
-                            uint64_t value = 0;
-                            for(int i=0;i<len;i++)
-                            {
-                                value = (value << 8) | bytes[i];
-                            }
-                            return @(value);
-                        }
-                        o = [seq getObjectAtPosition:p++];
-                    }
-                    break;
-                }
-                case 4: /* END      */
-                case 5: /* CONTINUE */
-                case 7: /* ABORT    */
-                {
-                    int p=0;
-                    UMASN1Object *o = [seq getObjectAtPosition:p++];
-                    while(o)
-                    {
-                        if((o.asn1_tag.tagClass == UMASN1Class_Application) && (o.asn1_tag.tagNumber == 9))
-                        {
-                            const uint8_t *bytes = o.asn1_data.bytes;
-                            unsigned long len = o.asn1_data.length;
-                            uint64_t value = 0;
-                            for(int i=0;i<len;i++)
-                            {
-                                value = (value << 8) | bytes[i];
-                            }
-                            return @(value);
-                        }
-                        o = [seq getObjectAtPosition:p++];
-                    }
-                    break;
-                }
-                default:
-                    return NULL;
-            }
-            break;
-        }
-        default:
-            return NULL;
-    }    
-    return NULL;
-}
-#endif
 
 - (NSNumber *) extractOperation:(NSData *)data applicationContext:(NSString **)acptr
 {
@@ -6079,13 +6006,15 @@
     [self openSccpScreeningTraceFile];
 }
 
-- (NSArray <UMSCCP_Segment *>*)splitDataIntoSegments:(NSData *)data
++ (NSArray <UMSCCP_Segment *>*)splitDataIntoSegments:(NSData *)data
                                     withSegmentSizes:(NSArray<NSNumber *>*)segmentSizes
                                            reference:(unsigned int)ref
                                               maxPdu:(NSUInteger)maxPdu
                                        protocolClass:(SCCP_ServiceClass)pclass
+                                             logFeed:(UMLogFeed *)logFeed
+                                            logLevel:(UMLogLevel) logLevel
 {
-    BOOL debug =( _logLevel <=UMLOG_DEBUG);
+    BOOL debug =(logLevel <=UMLOG_DEBUG);
     if(debug)
     {
         NSMutableString *s = [[NSMutableString alloc]init];
@@ -6107,7 +6036,7 @@
         [s appendFormat:@"}\n"];
         [s appendFormat:@"\treference:%u\n",ref];
         [s appendFormat:@"\tmaxPdu:%ld\n",(long)maxPdu];
-        [self logDebug:s];
+        [logFeed debugText:s];
     }
     NSMutableArray<UMSCCP_Segment *> *segments = [[NSMutableArray alloc]init];
 
@@ -6162,7 +6091,6 @@
         remainingLength = remainingData.length;
         index++;
     }
-    
     for(int i=0;i<segments.count;i++)
     {
         UMSCCP_Segment *s = segments[i];
@@ -6178,10 +6106,20 @@
             UMSCCP_Segment *seg = segments[i];
             [s appendFormat:@"\t%@\n",seg.description];
         }
-        [self logDebug:s];
+        [logFeed debugText:s];
     }
     return segments;
 }
 
+- (int)nextSLS
+{
+    int sls;
+    
+    ummutex_lock(_slsLock);
+    sls = _last_sls;
+    _last_sls = (_last_sls+1) % 16;
+    ummutex_unlock(_slsLock);
+    return sls;
+}
 
 @end

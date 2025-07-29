@@ -201,12 +201,12 @@
             int param_optional = 0;
             int param_hop_counter = 0;
             NSString *type;
-
+            
             _packet.incomingServiceType = m_type;
             _packet.outgoingServiceType = m_type;
             _packet.incomingHandling = SCCP_HANDLING_NO_SPECIAL_OPTIONS;
             _packet.outgoingHandling = SCCP_HANDLING_NO_SPECIAL_OPTIONS;
-
+            
             switch(m_type)
             {
                 case SCCP_UDT:
@@ -440,7 +440,7 @@
                     if(param_optional !=0)
                     {
                         param_optional          += i - 1;
-                    }                    
+                    }
                     break;
                 }
                 default:
@@ -448,6 +448,7 @@
                     NSString *s = @"SCCP_UNKNOWN_PACKET_TYPE";
                     [_sccpLayer.logFeed debugText:s];
                     @throw([NSException exceptionWithName:s reason:NULL userInfo:NULL] );
+                    break;
                 }
             }
             if(param_called_party_address > len)
@@ -608,8 +609,7 @@
                         if((j+len)<m)
                         {
                             _optional_dict = [[NSMutableDictionary alloc]init];
-                            NSData *param = [NSData dataWithBytes:&bytes[j] length:len];
-                    
+                            NSData *param = [NSData dataWithBytes:&bytes[j-2] length:len+2];
                             j = j+len;
                             if((paramType != 0x10) && (paramType != 0x00)) /* not end of data and not segmentation header */
                             {
@@ -768,6 +768,7 @@
                 switch(m_type)
                 {
                     case SCCP_UDT:
+                    {
                         if(_dst.ssn.ssn==SCCP_SSN_SCCP_MG)
                         {
                             if([self process_udt_sccp_mg])
@@ -795,7 +796,9 @@
                             }
                         }
                         break;
+                    }
                     case SCCP_UDTS:
+                    {
                         if(_packet.outgoingToLocal)
                         {
                             _statsSection = UMSCCP_StatisticSection_RX;
@@ -807,7 +810,9 @@
                             _statsSection2 = UMSCCP_StatisticSection_UDTS_TRANSIT;
                         }
                         break;
+                    }
                     case SCCP_XUDT:
+                    {
                         if(_packet.outgoingToLocal)
                         {
                             _statsSection = UMSCCP_StatisticSection_RX;
@@ -819,7 +824,9 @@
                             _statsSection2 = UMSCCP_StatisticSection_XUDT_TRANSIT;
                         }
                         break;
+                    }
                     case SCCP_XUDTS:
+                    {
                         if(_packet.outgoingToLocal)
                         {
                             _statsSection = UMSCCP_StatisticSection_RX;
@@ -831,15 +838,32 @@
                             _statsSection2 = UMSCCP_StatisticSection_XUDTS_TRANSIT;
                         }
                         break;
-                    default:
+                    }
+                    case SCCP_LUDT:
                     {
-                        UMSCCP_RoutingState *state = [_sccpLayer routePacket:_packet];
-                        if(state.status!=UMSCCP_RoutingStatus_success)
+                        if(_packet.outgoingToLocal)
                         {
-                            if(_sccpLayer.unrouteablePacketsTraceDestination)
-                            {
-                                [_sccpLayer.unrouteablePacketsTraceDestination logPacket:_packet];
-                            }
+                            _statsSection = UMSCCP_StatisticSection_RX;
+                            _statsSection2 = UMSCCP_StatisticSection_LUDT_RX;
+                        }
+                        else
+                        {
+                            _statsSection = UMSCCP_StatisticSection_TRANSIT;
+                            _statsSection2 = UMSCCP_StatisticSection_LUDT_TRANSIT;
+                        }
+                        break;
+                    }
+                    case SCCP_LUDTS:
+                    {
+                        if(_packet.outgoingToLocal)
+                        {
+                            _statsSection = UMSCCP_StatisticSection_RX;
+                            _statsSection2 = UMSCCP_StatisticSection_LUDTS_RX;
+                        }
+                        else
+                        {
+                            _statsSection = UMSCCP_StatisticSection_TRANSIT;
+                            _statsSection2 = UMSCCP_StatisticSection_LUDTS_TRANSIT;
                         }
                         break;
                     }

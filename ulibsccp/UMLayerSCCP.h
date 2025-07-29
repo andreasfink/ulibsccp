@@ -114,7 +114,8 @@ typedef enum UMSccpScreening_result
     UMSCCP_PendingSegmentsStorage            *_pendingSegmentsStorage;
     BOOL                                     _routingDebug;
     UMLogLevel                              _tcapSharingTraceLevel;
-    
+    UMMutex                                 *_slsLock;
+    int                                     _last_sls;
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;
@@ -525,11 +526,14 @@ qualityOfService:(int)qos
 - (void)reloadPlugins;
 + (NSString *)causeValueToString:(SCCP_ReturnCause)causeValue;
 
-- (NSArray <UMSCCP_Segment *>*)splitDataIntoSegments:(NSData *)data
++ (NSArray <UMSCCP_Segment *>*)splitDataIntoSegments:(NSData *)data
                                     withSegmentSizes:(NSArray<NSNumber *>*)segmentSizes
                                            reference:(unsigned int)ref
                                               maxPdu:(NSUInteger)maxPdu
-                                       protocolClass:(SCCP_ServiceClass)pclass;
+                                       protocolClass:(SCCP_ServiceClass)pclass
+                                             logFeed:(UMLogFeed *)logFeed
+                                            logLevel:(UMLogLevel) logLevel;
 
+- (int)nextSLS;
 
 @end
