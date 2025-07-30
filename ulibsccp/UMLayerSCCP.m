@@ -59,6 +59,7 @@
 {
 
     _last_sls = 0;
+    _tcapSharingTraceLevel = UMLOG_PANIC;
     _slsLock = [[UMMutex alloc]initWithName:@"sls-lock"];
     _subsystemUsers = [[UMSynchronizedDictionary alloc]init];
     _dpcAvailability = [[UMSynchronizedDictionary alloc]init];
@@ -81,7 +82,6 @@
                                                    name:@"housekeeping"
                                                 repeats:YES
                                         runInForeground:YES];
-
 }
 
 - (void)initializeStatistics
@@ -2934,7 +2934,7 @@
         [s appendFormat:@"  Options: %@\n",packet.incomingOptions];
         [self.logFeed debugText:s];
     }
-    
+
     routingState.status = UMSCCP_RoutingStatus_success;
     
 #define EXECUTE_AND_CHECK_ERROR(routingState,method,sectionname)        \
@@ -2995,28 +2995,29 @@
     /* --------------------------------------------- */
     EXECUTE_AND_CHECK_ERROR(routingState,processIncomingReassembly,@"processIncomingReassembly")
 
-    
-    NSArray *transactionNumbers = [self extractTransactionNumbers:routingState.inboundReassembledPacket.incomingSccpData];
-    NSString *otid = transactionNumbers[0];
-    NSString *dtid = transactionNumbers[1];
-    if([otid isKindOfClass:[NSNull class]])
+    if(routingState.inboundReassembledPacket.incomingSccpData.length > 0)
     {
-        otid=NULL;
+        NSArray *transactionNumbers = [self extractTransactionNumbers:routingState.inboundReassembledPacket];
+        NSString *otid = transactionNumbers[0];
+        NSString *dtid = transactionNumbers[1];
+        if([otid isKindOfClass:[NSNull class]])
+        {
+            otid=NULL;
+        }
+        if([dtid isKindOfClass:[NSNull class]])
+        {
+            dtid=NULL;
+        }
+        routingState.inboundReassembledPacket.incoming_tcap_otid = otid;
+        routingState.inboundReassembledPacket.incoming_tcap_dtid = dtid;
+        if(self.logLevel <=UMLOG_DEBUG)
+        {
+            NSMutableString *s = [[NSMutableString alloc]init];
+            [s appendFormat:@" transaction numbers: %@\n",transactionNumbers];
+            [self.logFeed debugText:s];
+        }
     }
-    if([dtid isKindOfClass:[NSNull class]])
-    {
-        dtid=NULL;
-    }
-    routingState.inboundReassembledPacket.incoming_tcap_otid = otid;
-    routingState.inboundReassembledPacket.incoming_tcap_dtid = dtid;
 
-
-    if(self.logLevel <=UMLOG_DEBUG)
-    {
-        NSMutableString *s = [[NSMutableString alloc]init];
-        [s appendFormat:@" transaction numbers: %@\n",transactionNumbers];
-        [self.logFeed debugText:s];
-    }
     /* --------------------------------------------- */
     /* FILTERING                                     */
     /* lets pass it through the inbound filtering    */
@@ -5562,11 +5563,11 @@
     return @(value);
 }
 
-- (NSArray *) extractTransactionNumbers:(NSData *)data /* returns an array with otid/dtid as strings or NSNull placeholders */
+- (NSArray *)extractTransactionNumbers:(UMSCCP_Packet *)packet /* returns an array with otid/dtid as strings or NSNull placeholders */
 {
+    NSData *data = packet.outgoingSccpData;
     id otid = [NSNull null];
     id dtid = [NSNull null];
-    
     UMASN1Sequence *seq;
     @try
     {
@@ -5574,7 +5575,8 @@
     }
     @catch(NSException *e)
     {
-        // NSLog(@"can not extract transaction number. Exception %@",e);
+        NSLog(@"can not extract transaction number from bytes %@",data.hexString);
+        [_problematicTraceDestination logPacket:packet];
         return @[otid,dtid];
     }
     switch(seq.asn1_tag.tagClass)
