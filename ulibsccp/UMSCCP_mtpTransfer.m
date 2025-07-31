@@ -759,10 +759,7 @@
                     UMSCCP_RoutingState *state = [_sccpLayer routePacket:_packet];
                     if(state.status!=UMSCCP_RoutingStatus_success)
                     {
-                        if(_sccpLayer.unrouteablePacketsTraceDestination)
-                        {
-                            [_sccpLayer.unrouteablePacketsTraceDestination logPacket:_packet];
-                        }
+                        [_sccpLayer.unrouteablePacketsTraceDestination logPacket:_packet];
                     }
                 }
                 switch(m_type)

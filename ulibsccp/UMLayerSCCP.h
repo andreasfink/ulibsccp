@@ -30,6 +30,7 @@
 @class UMSCCP_Statistics;
 @class UMSCCP_PrometheusData;
 @class UMSCCP_PendingSegmentsStorage;
+@class UMSS7TraceFile;
 
 typedef enum SccpGtFileSection
 {
@@ -89,8 +90,8 @@ typedef enum UMSccpScreening_result
     UMSCCP_StatisticDb          *_statisticDb;
     NSString                    *_statisticDbInstance;
 
-    id<UMSCCP_TracefileProtocol>        _problematicTraceDestination;
-    id<UMSCCP_TracefileProtocol>        _unrouteablePacketsTraceDestination;
+    UMObject<UMSCCP_TracefileProtocol>  *_problematicTraceDestination;
+    UMObject<UMSCCP_TracefileProtocol>  *_unrouteablePacketsTraceDestination;
     BOOL                                _routeErrorsBackToOriginatingPointCode;
     id<UMSCCP_FilterDelegateProtocol>   _filterDelegate;
     id<UMLayerSCCPApplicationContextProtocol>_appDelegate;
@@ -140,9 +141,9 @@ typedef enum UMSccpScreening_result
 @property(readwrite,strong,atomic)  NSNumber                    *conversion_e212_tt;
 @property(readwrite,strong,atomic) id<sccp_tcapDecoder>         tcapDecoder;
 
-@property(readwrite,strong,atomic) id<UMSCCP_TracefileProtocol>    problematicTraceDestination;
-@property(readwrite,strong,atomic) id<UMSCCP_TracefileProtocol>    unrouteablePacketsTraceDestination;
-@property(readwrite,assign,atomic) BOOL                            routeErrorsBackToSource;
+@property(readwrite,strong,atomic) UMObject<UMSCCP_TracefileProtocol>   *problematicTraceDestination;
+@property(readwrite,strong,atomic) UMObject<UMSCCP_TracefileProtocol>   *unrouteablePacketsTraceDestination;
+@property(readwrite,assign,atomic) BOOL                         routeErrorsBackToSource;
 
 @property(readwrite,strong,atomic) NSString                     *sccp_screeningPluginName;
 @property(readwrite,strong,atomic) NSString                     *sccp_screeningPluginConfig;
