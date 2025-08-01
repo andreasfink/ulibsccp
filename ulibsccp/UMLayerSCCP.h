@@ -30,7 +30,6 @@
 @class UMSCCP_Statistics;
 @class UMSCCP_PrometheusData;
 @class UMSCCP_PendingSegmentsStorage;
-@class UMSS7TraceFile;
 
 typedef enum SccpGtFileSection
 {
