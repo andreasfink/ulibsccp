@@ -12,6 +12,9 @@
 @protocol UMSCCP_TracefileProtocol
 
 - (void)logPacket:(UMSCCP_Packet *)packet;
+- (void)open;
+- (void)close;
+- (void)rotate;
 
 @end
 
