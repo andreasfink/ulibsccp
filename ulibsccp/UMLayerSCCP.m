@@ -2936,7 +2936,7 @@
     }
 
     routingState.status = UMSCCP_RoutingStatus_success;
-    
+    routingState.inboundPacket = packet;
 #define EXECUTE_AND_CHECK_ERROR(routingState,method,sectionname)        \
     if(routingState.status == UMSCCP_RoutingStatus_success)             \
     {                                                                   \
