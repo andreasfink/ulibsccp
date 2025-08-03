@@ -12,6 +12,7 @@
 @protocol UMSCCP_TracefileProtocol
 
 - (void)logPacket:(UMSCCP_Packet *)packet;
+- (void)logMtp3Pdu:(NSData *)pdu timestamp:(NSDate *)date linkset:(NSString *)linkset;
 - (void)open;
 - (void)close;
 - (void)rotate;

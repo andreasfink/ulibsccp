@@ -4407,7 +4407,7 @@
     for (NSInteger i=0;i<n;i++)
     {
         id a = [_traceDroppedDestinations objectAtIndex:i];
-        [a sccpTraceReceivedPdu:pdu options:o];
+        [a traceDroppedPacket:pdu options:o];
     }
 }
 
