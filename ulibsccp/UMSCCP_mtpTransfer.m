@@ -747,10 +747,6 @@
                 if(_dst.ssn.ssn!=SCCP_SSN_SCCP_MG)
                 {
                     UMSCCP_RoutingState *state = [_sccpLayer routePacket:_packet];
-                    if(state.status!=UMSCCP_RoutingStatus_success)
-                    {
-                        [_sccpLayer traceUnroutable:raw options:@{ @"error":s, @"timestamp" : [NSDate date], @"linkset" : xlinkset }];
-                    }
                 }
                 switch(m_type)
                 {
@@ -922,19 +918,13 @@
         }
         @catch(NSException *e)
         {
-            if(_mtp3Layer.problematicPacketDumper)
-            {
-                [_mtp3Layer.problematicPacketDumper logRawPacket:_rawMtp3];
-            }
-            if(_sccpLayer.problematicTraceDestination)
-            {
-                [_sccpLayer.problematicTraceDestination logPacket:_packet];
-            }
             [self.logFeed majorErrorText:[NSString stringWithFormat:@"Error: %@",e]];
             if(decodeOnly)
             {
                 _decodedJson[@"decode-error"] = e.description;
             }
+            [_mtp3Layer.problematicPacketDumper logRawPacket:_rawMtp3];
+            [_sccpLayer traceProblematicPdu:_rawMtp3 options:@{@"error":e.description,@"timestamp" : [NSDate date],@"linkset":_incomingLinksetName }];
         }
 
         _endOfProcessing = [NSDate date];

@@ -5597,8 +5597,10 @@
     }
     @catch(NSException *e)
     {
-        NSLog(@"can not extract transaction number from bytes %@",data.hexString);
-        [_problematicTraceDestination logPacket:packet];
+        [self traceProblematicPdu:packet.incomingMtp3Data
+                          options:@{@"error":@"can not extract transaction number" ,
+                                    @"timestamp": [NSDate date],
+                                    @"linkset":packet.incomingLinksetName }];
         return @[otid,dtid];
     }
     switch(seq.asn1_tag.tagClass)

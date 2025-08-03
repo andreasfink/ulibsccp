@@ -147,6 +147,11 @@ typedef enum UMSccpScreening_result
 @property(readwrite,strong,atomic) UMPlugin<UMMTP3SCCPScreeningPluginProtocol>   *sccp_screeningPlugin;
 @property(readwrite,strong,atomic) UMSCCP_PrometheusData        *prometheusData;
 @property(readwrite,assign,atomic) UMLogLevel                   tcapSharingTraceLevel;
+@property(readwrite,strong,atomic) UMSynchronizedArray         *traceSendDestinations;
+@property(readwrite,strong,atomic) UMSynchronizedArray         *traceReceiveDestinations;
+@property(readwrite,strong,atomic) UMSynchronizedArray         *traceDroppedDestinations;
+@property(readwrite,strong,atomic) UMSynchronizedArray         *traceUnroutableDestinations;
+@property(readwrite,strong,atomic) UMSynchronizedArray         *traceProblematicDestinations;
 
 - (void)increaseThroughputCounter:(UMSCCP_StatisticSection)section;
 
@@ -481,7 +486,7 @@ sls:(int)sls;
 
 - (id)decodePdu:(NSData *)data;
 - (void)traceSentPdu:(NSData *)mtp3pdu          options:(NSDictionary *)dict;
-- (void)traceReceivedPdu:(NSData *)mtp3pdu      options:(NSDictionary *)o;
+- (void)traceReceivedPdu:(NSData *)mtp3pdu      options:(NSDictionary *)dict;
 - (void)traceDroppedPdu:(NSData *)mtp3pdu       options:(NSDictionary *)dict;
 - (void)traceUnroutablePdu:(NSData *)mtp3pdu    options:(NSDictionary *)dict;
 - (void)traceProblematicPdu:(NSData *)mtp3pdu   options:(NSDictionary *)dict;

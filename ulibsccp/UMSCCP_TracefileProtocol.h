@@ -11,8 +11,12 @@
 
 @protocol UMSCCP_TracefileProtocol
 
-- (void)logPacket:(UMSCCP_Packet *)packet;
-- (void)logMtp3Pdu:(NSData *)pdu timestamp:(NSDate *)date linkset:(NSString *)linkset;
+
+- (void)traceSentPdu:(NSData *)mtp3pdu          options:(NSDictionary *)dict;
+- (void)traceReceivedPdu:(NSData *)mtp3pdu      options:(NSDictionary *)dict;
+- (void)traceDroppedPdu:(NSData *)mtp3pdu       options:(NSDictionary *)dict;
+- (void)traceUnroutablePdu:(NSData *)mtp3pdu    options:(NSDictionary *)dict;
+- (void)traceProblematicPdu:(NSData *)mtp3pdu   options:(NSDictionary *)dict;
 - (void)open;
 - (void)close;
 - (void)rotate;
