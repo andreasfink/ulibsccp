@@ -67,9 +67,12 @@ typedef enum UMSccpScreening_result
     NSString                    *_mtp3_name;
     UMLayerMTP3                 *_mtp3;
     UMSynchronizedDictionary    *_dpcAvailability;
+    
     UMSynchronizedArray         *_traceSendDestinations;
     UMSynchronizedArray         *_traceReceiveDestinations;
     UMSynchronizedArray         *_traceDroppedDestinations;
+    UMSynchronizedArray         *_traceUnroutableDestinations;
+    UMSynchronizedArray         *_traceProblematicDestinations;
 
     SccpL3RoutingTable          *_sccpL3RoutingTable;
     int                         _lxudt_max_hop_count;
@@ -88,9 +91,6 @@ typedef enum UMSccpScreening_result
     NSNumber                    *_statisticDbAutoCreate;
     UMSCCP_StatisticDb          *_statisticDb;
     NSString                    *_statisticDbInstance;
-
-    UMObject<UMSCCP_TracefileProtocol>  *_problematicTraceDestination;
-    UMObject<UMSCCP_TracefileProtocol>  *_unrouteablePacketsTraceDestination;
     BOOL                                _routeErrorsBackToOriginatingPointCode;
     id<UMSCCP_FilterDelegateProtocol>   _filterDelegate;
     id<UMLayerSCCPApplicationContextProtocol>_appDelegate;
@@ -139,9 +139,6 @@ typedef enum UMSccpScreening_result
 @property(readwrite,strong,atomic)  NSNumber                    *conversion_e164_tt;
 @property(readwrite,strong,atomic)  NSNumber                    *conversion_e212_tt;
 @property(readwrite,strong,atomic) id<sccp_tcapDecoder>         tcapDecoder;
-
-@property(readwrite,strong,atomic) UMObject<UMSCCP_TracefileProtocol>   *problematicTraceDestination;
-@property(readwrite,strong,atomic) UMObject<UMSCCP_TracefileProtocol>   *unrouteablePacketsTraceDestination;
 @property(readwrite,assign,atomic) BOOL                         routeErrorsBackToSource;
 
 @property(readwrite,strong,atomic) NSString                     *sccp_screeningPluginName;
@@ -483,12 +480,12 @@ sls:(int)sls;
 - (void)startUp;
 
 - (id)decodePdu:(NSData *)data;
-- (void)traceSentPdu:(NSData *)pdu options:(NSDictionary *)dict;
-- (void)traceSentPacket:(UMSCCP_Packet *)packet options:(NSDictionary *)dict;
-- (void)traceReceivedPdu:(NSData *)pdu options:(NSDictionary *)dict;
-- (void)traceReceivedPacket:(UMSCCP_Packet *)packet options:(NSDictionary *)o;
-- (void)traceDroppedPdu:(NSData *)pdu options:(NSDictionary *)dict;
-- (void)traceDroppedPacket:(UMSCCP_Packet *)packet options:(NSDictionary *)dict;
+- (void)traceSentPdu:(NSData *)mtp3pdu          options:(NSDictionary *)dict;
+- (void)traceReceivedPdu:(NSData *)mtp3pdu      options:(NSDictionary *)o;
+- (void)traceDroppedPdu:(NSData *)mtp3pdu       options:(NSDictionary *)dict;
+- (void)traceUnroutablePdu:(NSData *)mtp3pdu    options:(NSDictionary *)dict;
+- (void)traceProblematicPdu:(NSData *)mtp3pdu   options:(NSDictionary *)dict;
+
 - (NSDictionary *)apiStatus;
 - (UMSynchronizedSortedDictionary *)routeStatus;
 - (UMSynchronizedSortedDictionary *)routingTableStatus;
@@ -535,5 +532,6 @@ qualityOfService:(int)qos
                                             logLevel:(UMLogLevel) logLevel;
 
 - (int)nextSLS;
++ (NSData *)mtp3Wrap:(NSData *)sccp_data opc:(UMMTP3PointCode *)opc dpc:(UMMTP3PointCode *)dpc ni:(int)ni si:(int)si;
 
 @end

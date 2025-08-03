@@ -64,8 +64,10 @@
     _subsystemUsers = [[UMSynchronizedDictionary alloc]init];
     _dpcAvailability = [[UMSynchronizedDictionary alloc]init];
     _traceSendDestinations =[[UMSynchronizedArray alloc]init];
-    _traceReceiveDestinations =[[UMSynchronizedArray alloc]init];
-    _traceDroppedDestinations =[[UMSynchronizedArray alloc]init];
+    _traceReceiveDestinations = [[UMSynchronizedArray alloc]init];
+    _traceDroppedDestinations = [[UMSynchronizedArray alloc]init];
+    _traceProblematicDestinations = [[UMSynchronizedArray alloc]init];
+    _traceUnroutableDestinations  = [[UMSynchronizedArray alloc]init];
     _sccpL3RoutingTable = [[SccpL3RoutingTable alloc]init];
     _lxudt_max_hop_count = 16;
     _lxudts_max_hop_count = 16;
@@ -715,14 +717,16 @@
     if(result == UMMTP3_no_error)
     {
         id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-tx-destination"];
-        [ u sccpTraceSentPdu:sccp_pdu options:o];
-        [ self traceSentPdu:sccp_pdu options:o];
+        NSData *mtp3pdu = [UMLayerSCCP mtp3Wrap:sccp_pdu opc:opc dpc:dpc ni:_mtp3.networkIndicator si:MTP3_SERVICE_INDICATOR_SCCP];
+        [ u sccpTraceSentPdu:mtp3pdu options:o];
+        [ self traceSentPdu:mtp3pdu options:o];
     }
     else
     {
         id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-dropped-destination"];
-        [ u sccpTraceDroppedPdu:sccp_pdu options:o];
-        [ self traceDroppedPdu:sccp_pdu options:o];
+        NSData *mtp3pdu = [UMLayerSCCP mtp3Wrap:sccp_pdu opc:opc dpc:dpc ni:_mtp3.networkIndicator si:MTP3_SERVICE_INDICATOR_SCCP];
+        [ u sccpTraceDroppedPdu:mtp3pdu options:o];
+        [ self traceDroppedPdu:mtp3pdu options:o];
     }
     return result;
 }
@@ -2171,7 +2175,6 @@
         [self.logFeed debugText:s];
     }
 
-    UMSCCP_TcapSharing_result r = UMSCCP_TcapSharing_routeNormal;
     if(outside_inst)
     {
         if((self.logLevel <=UMLOG_DEBUG) || (packet.tcapSharingTraceLevel <=UMLOG_DEBUG))
@@ -2179,7 +2182,7 @@
             NSMutableString *s = [NSMutableString stringWithFormat:@"TCAP-SHARING-POSTROUTING-OUTSIDE %@",outside_inst.name];
             [self logDebug:s];
         }
-        r = [outside_inst postroutingPacketOutside:packet];
+        routingState.tcapSharingResult = [outside_inst postroutingPacketOutside:packet];
     }
     else if(inside_inst)
     {
@@ -2188,7 +2191,7 @@
             NSMutableString *s = [NSMutableString stringWithFormat:@"TCAP-SHARING-POSTROUTING-INSIDE %@",inside_inst.name];
             [self logDebug:s];
         }
-        r = [inside_inst postroutingPacketInside:packet];
+        routingState.tcapSharingResult = [inside_inst postroutingPacketInside:packet];
     }
     else
     {
@@ -2318,7 +2321,8 @@
                        routingPacket.incomingSccpData,
                        causeValue];
         [self logMinorError:s];
-        [_unrouteablePacketsTraceDestination logPacket:routingPacket];
+        [self traceDroppedPdu:routingPacket.incomingMtp3Data options:@{ @"timestamp" : [NSDate date],
+                                                                        @"linkset"   : routingPacket.incomingLinksetName }];
     }
 
     else if(localUser)
@@ -2416,7 +2420,8 @@
                            routingPacket.outgoingCalledPartyAddress,
                            routingPacket.outgoingSccpData];
             [self logMinorError:s];
-            [_unrouteablePacketsTraceDestination logPacket:routingPacket];
+            [self traceDroppedPdu:routingPacket.incomingMtp3Data options:@{ @"timestamp" : [NSDate date],
+                                                                            @"linkset"   : routingPacket.incomingLinksetName }];
         }
     }
 }
@@ -2803,7 +2808,11 @@
     }
     routingPacket.outgoingLinksetName = outgoingLinkset;
     routingState.mtp3DeliveryError = e;
-
+    routingPacket.outgoingMtp3Data = [UMLayerSCCP mtp3Wrap:routingPacket.outgoingSccpData
+                                                       opc:routingPacket.outgoingOpc
+                                                       dpc:routingPacket.outgoingDpc
+                                                       ni:routingPacket.outgoingMtp3Layer.networkIndicator
+                                                        si:MTP3_SERVICE_INDICATOR_SCCP];
     /* error postprocessing */
     NSString *s= NULL;
     switch(e)
@@ -2835,34 +2844,43 @@
             [self logMinorError:s];
             [self logMinorError:[NSString stringWithFormat:@"Packet:\n%@\n",routingPacket.description]];
         }
+
         switch(e)
         {
+                
             case UMMTP3_error_no_route_to_destination:
                 routingState.cause = @(SCCP_ReturnCause_MTPFailure);
                 routingState.status = UMSCCP_RoutingStatus_failed;
-                [_unrouteablePacketsTraceDestination logPacket:routingPacket];
+                [self traceDroppedPdu:routingPacket.outgoingMtp3Data options:@{@"error":s}];
                 break;
             case UMMTP3_error_pdu_too_big:
                 routingState.cause = @(SCCP_ReturnCause_ErrorInMessageTransport);
                 routingState.status = UMSCCP_RoutingStatus_failed;
-                [_problematicTraceDestination logPacket:routingPacket];
+                [self traceProblematicPdu:routingPacket.outgoingMtp3Data options:@{ @"error":s,
+                                                                                    @"timestamp" : [NSDate date],
+                                                                                    @"linkset" : routingPacket.incomingLinksetName }];
                 break;
             case UMMTP3_error_invalid_variant:
                 routingState.cause = @(SCCP_ReturnCause_ErrorInLocalProcessing);
                 routingState.status = UMSCCP_RoutingStatus_failed;
-                [_problematicTraceDestination logPacket:routingPacket];
+                [self traceDroppedPdu:routingPacket.outgoingMtp3Data options:@{@"error":s}];
+                [self traceProblematicPdu:routingPacket.outgoingMtp3Data options:@{ @"error":s,
+                                                                                    @"timestamp" : [NSDate date],
+                                                                                    @"linkset" : routingPacket.incomingLinksetName }];
                 break;
             case UMMTP3_error_unsupported_pdu_type:
                 routingState.cause = @(SCCP_ReturnCause_Unqualified);
                 routingState.status = UMSCCP_RoutingStatus_failed;
-                [_problematicTraceDestination logPacket:routingPacket];
+                [self traceDroppedPdu:routingPacket.outgoingMtp3Data options:@{@"error":s}];
+                [self traceProblematicPdu:routingPacket.outgoingMtp3Data options:@{ @"error":s,
+                                                                                    @"timestamp" : [NSDate date],
+                                                                                    @"linkset" : routingPacket.incomingLinksetName }];
                 break;
             default:
                 break;
         }
     }
 }
-
 
 - (UMSCCP_RoutingState *)routePacket:(UMSCCP_Packet *)packet
 {
@@ -4347,7 +4365,6 @@
     }
 }
 
-
 - (void)addSendTraceDestination:(id<UMSCCP_TraceProtocol>)destination
 {
     [_traceSendDestinations addObject:destination];
@@ -4368,53 +4385,58 @@
     [_traceReceiveDestinations removeObject:destination];
 }
 
-- (void)traceSentPdu:(NSData *)pdu
+- (void)traceSentPdu:(NSData *)mtp3pdu
              options:(NSDictionary *)o
 {
     NSInteger n = [_traceSendDestinations count];
     for (NSInteger i=0;i<n;i++)
     {
         id a = [_traceSendDestinations objectAtIndex:i];
-        [a sccpTraceSentPdu:pdu options:o];
+        [a sccpTraceSentPdu:mtp3pdu options:o];
     }
 }
 
-- (void)traceSentPacket:(UMSCCP_Packet *)packet
-                options:(NSDictionary *)o
-{
-}
-
-- (void)traceReceivedPdu:(NSData *)pdu
+- (void)traceReceivedPdu:(NSData *)mtp3pdu
                  options:(NSDictionary *)o
 {
     NSInteger n = [_traceReceiveDestinations count];
     for (NSInteger i=0;i<n;i++)
     {
         id a = [_traceReceiveDestinations objectAtIndex:i];
-        [a sccpTraceReceivedPdu:pdu options:o];
+        [a sccpTraceReceivedPdu:mtp3pdu options:o];
     }
 }
 
-- (void)traceReceivedPacket:(UMSCCP_Packet *)packet
-                    options:(NSDictionary *)o
-{
-}
-
-
-- (void)traceDroppedPdu:(NSData *)pdu options:(NSDictionary *)o
+- (void)traceDroppedPdu:(NSData *)mtp3pdu options:(NSDictionary *)o
 {
     NSInteger n = [_traceDroppedDestinations count];
     for (NSInteger i=0;i<n;i++)
     {
         id a = [_traceDroppedDestinations objectAtIndex:i];
-        [a traceDroppedPacket:pdu options:o];
+        [a traceDroppedPdu:mtp3pdu options:o];
     }
 }
 
-- (void)traceDroppedPacket:(UMSCCP_Packet *)packet
-                   options:(NSDictionary *)o
+- (void)traceProblematicPdu:(NSData *)mtp3pdu options:(NSDictionary *)o
 {
+    NSInteger n = [_traceProblematicDestinations count];
+    for (NSInteger i=0;i<n;i++)
+    {
+        id a = [_traceProblematicDestinations objectAtIndex:i];
+        [a traceProblematicPdu:mtp3pdu options:o];
+    }
 }
+
+- (void)traceUnrouteablePdu:(NSData *)mtp3pdu options:(NSDictionary *)o
+{
+    NSInteger n = [_traceUnroutableDestinations count];
+    for (NSInteger i=0;i<n;i++)
+    {
+        id a = [_traceUnroutableDestinations objectAtIndex:i];
+        [a traceUnrouteablePdu:mtp3pdu options:o];
+    }
+}
+
 
 - (NSDictionary *)apiStatus
 {
@@ -6096,4 +6118,16 @@
     return sls;
 }
 
++ (NSData *)mtp3Wrap:(NSData *)sccp_data opc:(UMMTP3PointCode *)opc dpc:(UMMTP3PointCode *)dpc ni:(int)ni si:(int)si
+{
+    UMMTP3Label *label = [[UMMTP3Label alloc]init];
+    label.opc = opc;
+    label.dpc = dpc;
+    NSMutableData *rawMtp3 = [[NSMutableData alloc]init];
+    int sio = ((ni & 0x03) << 6) | (si & 0x0F);
+    [rawMtp3 appendByte:sio];
+    [label appendToMutableData:rawMtp3];
+    [rawMtp3 appendData:sccp_data];
+    return rawMtp3;
+}
 @end

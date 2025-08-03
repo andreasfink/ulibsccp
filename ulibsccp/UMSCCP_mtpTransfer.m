@@ -143,7 +143,7 @@
 { \
     NSLog(@"%@",a); \
     NSString *s = a; \
-    [_sccpLayer.problematicTraceDestination logMtp3Pdu:raw timestamp:[NSDate date] linkset:xlinkset];\
+    [_sccpLayer traceProblematicPdu:raw options:@{ @"error":s, @"timestamp" : [NSDate date], @"linkset" : xlinkset }]; \
     @throw([NSException exceptionWithName:s reason:NULL userInfo:@{@"raw": [raw hexString] }] ); \
 }
 
@@ -157,12 +157,17 @@
         UMMTP3Label *label = [[UMMTP3Label alloc]init];
         label.opc = _opc;
         label.dpc = _dpc;
+        
+        _rawMtp3 = [UMLayerSCCP mtp3Wrap:_data opc:_opc dpc:_dpc ni:_ni si:_si];
+        _packet.incomingMtp3Data = _rawMtp3;
+
+        /*
         NSMutableData *_rawMtp3 = [[NSMutableData alloc]init];
         int sio = ((_ni & 0x03) << 6) | (_si & 0x0F);
         [_rawMtp3 appendByte:sio];
         [label appendToMutableData:_rawMtp3];
         [_rawMtp3 appendData:_data];
-        _packet.incomingMtp3Data = _rawMtp3;
+         */
 
         if(_options==NULL)
         {
@@ -694,9 +699,7 @@
                                 @"dpc"  : _dpc.stringValue,
                                 @"mtp3" : (_mtp3Layer ? _mtp3Layer.layerName : @"")
                                 };
-            [_sccpLayer traceReceivedPdu:_data options:o];
-            [_sccpLayer traceReceivedPacket:_packet options:o];
-
+            [_sccpLayer traceReceivedPdu:_rawMtp3 options:o];
             _options[@"sccp-calling-address"]       = _src;
             _options[@"sccp-called-address"]        = _dst;
             _packet.incomingCallingPartyAddress     = _src;
@@ -746,7 +749,7 @@
                     UMSCCP_RoutingState *state = [_sccpLayer routePacket:_packet];
                     if(state.status!=UMSCCP_RoutingStatus_success)
                     {
-                        [_sccpLayer.unrouteablePacketsTraceDestination logPacket:_packet];
+                        [_sccpLayer traceUnroutable:raw options:@{ @"error":s, @"timestamp" : [NSDate date], @"linkset" : xlinkset }];
                     }
                 }
                 switch(m_type)
@@ -970,7 +973,7 @@
     /* Management Message */
     if(len<1)
     {
-        THROW_EXCEPTION(@"SCCP_MGMT_MESSAGE_TOO_SHORT",_rawMtp3Pdu,_incomingLinksetName);
+        THROW_EXCEPTION(@"SCCP_MGMT_MESSAGE_TOO_SHORT",_rawMtp3,_incomingLinksetName);
     }
     scgm_format = dat[0];
     
@@ -984,7 +987,7 @@
         {
             if(len<5)
             {
-                THROW_EXCEPTION(@"SCCP_MGMT_MESSAGE_TOO_SHORT",_rawMtp3Pdu,_incomingLinksetName);
+                THROW_EXCEPTION(@"SCCP_MGMT_MESSAGE_TOO_SHORT",_rawMtp3,_incomingLinksetName);
             }
             
             affected_ssn = dat[1];
@@ -1000,7 +1003,7 @@
         {
             if(len<6)
             {
-                THROW_EXCEPTION(@"SCCP_MGMT_MESSAGE_TOO_SHORT(subsystem-congested)",_rawMtp3Pdu,_incomingLinksetName);
+                THROW_EXCEPTION(@"SCCP_MGMT_MESSAGE_TOO_SHORT(subsystem-congested)",_rawMtp3,_incomingLinksetName);
             }
             affected_ssn = dat[1];
             affected_pc = dat[2] | ((dat[3] << 8) & 0x3F);
@@ -1010,7 +1013,7 @@
             break;
         default:
             /* we dont know what to do with this */
-            THROW_EXCEPTION(@"SCCP_MGMT_UNKNOWN_MESSAGE",_rawMtp3Pdu,_incomingLinksetName);
+            THROW_EXCEPTION(@"SCCP_MGMT_UNKNOWN_MESSAGE",_rawMtp3,_incomingLinksetName);
             break;
     }
     
