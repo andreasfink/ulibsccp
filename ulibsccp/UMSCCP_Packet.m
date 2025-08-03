@@ -222,7 +222,6 @@ typedef enum UMTCAP_Command
     cpy.forcedDpc                               = _forcedDpc;
     cpy.forcedLocalUser                         = _forcedLocalUser;
     cpy.tcapSharingTraceLevel                   = _tcapSharingTraceLevel;
-
     return cpy;
 }
 
