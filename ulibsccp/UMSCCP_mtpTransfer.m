@@ -50,10 +50,10 @@
 		_packet.incomingOpc = xopc;
 		_packet.incomingDpc = xdpc;
         _packet.sls = sls;
-        _packet.called_number_translation_in = called_number_translation;
-        _packet.calling_number_translation_in = calling_number_translation;
-        _packet.called_number_translation_out = NULL;
-        _packet.calling_number_translation_out = NULL;
+        _packet.cga_number_translation_in = calling_number_translation;
+        _packet.cda_number_translation_in = called_number_translation;
+        _packet.cga_number_translation_out = NULL;
+        _packet.cda_number_translation_out = NULL;
         _called_ttmap = called_ttmap;
         _calling_ttmap = calling_ttmap;
         _data = xdata;

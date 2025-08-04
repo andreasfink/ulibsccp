@@ -604,19 +604,18 @@ typedef enum UMTCAP_Command
     BOOL translationWasApplied = NO;
 
     _incomingCallingPartyAddressBeforeTranslation = [_incomingCallingPartyAddress copy];
-    _incomingCalledPartyAddressBeforeTranslation  = [_incomingCalledPartyAddress copy];
+    _incomingCalledPartyAddressBeforeTranslation = [_incomingCalledPartyAddress copy];
     
-    if(_calling_number_translation_in)
+    if(_cga_number_translation_in)
     {
         translationWasApplied = YES;
         if(self.logLevel <=UMLOG_DEBUG)
         {
-            [self.logFeed debugText:[NSString stringWithFormat:@"applying calling_number_translation_in=%@",_calling_number_translation_in.name]];
+            [self.logFeed debugText:[NSString stringWithFormat:@"applying cga_number_translation_in=%@",_cga_number_translation_in.name]];
         }
-    
         NSNumber *newCallingTT = NULL;
         NSNumber *newCalledTT = NULL;
-        _incomingCallingPartyAddress = [_calling_number_translation_in translateAddress:_incomingCallingPartyAddressBeforeTranslation
+        _incomingCallingPartyAddress = [_cga_number_translation_in translateAddress:_incomingCallingPartyAddressBeforeTranslation
                                                                        newCallingTT:&newCallingTT
                                                                         newCalledTT:&newCalledTT];
         if(newCallingTT)
@@ -628,17 +627,16 @@ typedef enum UMTCAP_Command
             _incomingCalledPartyAddress.tt.tt = newCalledTT.intValue;
         }
     }
-
-    if(_called_number_translation_in)
+    if(_cda_number_translation_in)
     {
         translationWasApplied = YES;
         if(self.logLevel <=UMLOG_DEBUG)
         {
-            [self.logFeed debugText:[NSString stringWithFormat:@"applying called_number_translation_in=%@",_called_number_translation_in.name]];
+            [self.logFeed debugText:[NSString stringWithFormat:@"applying cda_number_translation_in=%@",_cda_number_translation_in.name]];
         }
         NSNumber *newCallingTT = NULL;
         NSNumber *newCalledTT = NULL;
-        _incomingCalledPartyAddress = [_called_number_translation_in translateAddress:_incomingCalledPartyAddressBeforeTranslation
+        _incomingCalledPartyAddress = [_cda_number_translation_in translateAddress:_incomingCalledPartyAddressBeforeTranslation
                                                                       newCallingTT:&newCallingTT
                                                                        newCalledTT:&newCalledTT];
         if(newCallingTT)
@@ -650,6 +648,7 @@ typedef enum UMTCAP_Command
             _incomingCalledPartyAddress.tt.tt = newCalledTT.intValue;
         }
     }
+    
     if(self.logLevel <=UMLOG_DEBUG)
     {
         if(translationWasApplied == YES)
@@ -667,17 +666,16 @@ typedef enum UMTCAP_Command
     }
 }
 
-
 - (void)applyOutgoingNumberTranslation
 {
     _outgoingCallingPartyAddressBeforeTranslation = [_outgoingCallingPartyAddress copy];
-    _outgoingCalledPartyAddressBeforeTranslation  = [_outgoingCalledPartyAddress copy];
+    _outgoingCalledPartyAddressBeforeTranslation = [_outgoingCalledPartyAddress copy];
     
-    if(_calling_number_translation_out)
+    if(_cga_number_translation_out)
     {
         NSNumber *newCallingTT = NULL;
         NSNumber *newCalledTT = NULL;
-        _outgoingCallingPartyAddress = [_calling_number_translation_out translateAddress:_outgoingCallingPartyAddressBeforeTranslation
+        _outgoingCallingPartyAddress = [_cga_number_translation_out translateAddress:_outgoingCallingPartyAddressBeforeTranslation
                                                                         newCallingTT:&newCallingTT
                                                                          newCalledTT:&newCalledTT];
         if(newCalledTT)
@@ -689,11 +687,11 @@ typedef enum UMTCAP_Command
             _outgoingCallingPartyAddress.tt.tt = newCallingTT.intValue;
         }
     }
-    if(_called_number_translation_out)
+    if(_cda_number_translation_out)
     {
         NSNumber *newCallingTT = NULL;
         NSNumber *newCalledTT = NULL;
-        _outgoingCalledPartyAddress = [_called_number_translation_out translateAddress:_outgoingCalledPartyAddressBeforeTranslation
+        _outgoingCalledPartyAddress = [_cda_number_translation_out translateAddress:_outgoingCalledPartyAddressBeforeTranslation
                                                                       newCallingTT:&newCallingTT
                                                                        newCalledTT:&newCalledTT];
         if(newCalledTT)

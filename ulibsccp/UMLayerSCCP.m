@@ -1378,42 +1378,6 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
         }
         else
         {
-<<<<<<< HEAD
-            if(ls.calling_number_translation_in_name)
-            {
-                dict[@"incoming-linkset-cga-translation-in"] = ls.calling_number_translation_in_name;
-                if(ls.calling_number_translation_in==NULL)
-                {
-                    ls.calling_number_translation_in = [_mtp3.appContext getSccpNumberTransationByName:ls.calling_number_translation_in_name];
-                }
-                packet.calling_number_translation_in = ls.calling_number_translation_in;
-            }
-            if(ls.called_number_translation_in_name)
-            {
-                dict[@"incoming-linkset-cda-translation-in"] = ls.called_number_translation_in_name;
-                if(ls.called_number_translation_in==NULL)
-                {
-                    ls.called_number_translation_in = [_mtp3.appContext getSccpNumberTransationByName:ls.called_number_translation_in_name];
-                }
-                packet.called_number_translation_in = ls.called_number_translation_in;
-
-            }
-            [packet applyIncomingNumberTranslation];
-            if((ls.calling_number_translation_in_name) || (ls.called_number_translation_in_name))
-            {
-                dict[@"incoming-calling-address-before-translation"] = packet.incomingCallingPartyAddressBeforeTranslation.address;
-                dict[@"incoming-calling-nai-before-translation"] = @(packet.incomingCallingPartyAddressBeforeTranslation.nai.nai);
-                dict[@"incoming-calling-npi-before-translation"] = @(packet.incomingCallingPartyAddressBeforeTranslation.npi.npi);
-                dict[@"incoming-calling-ssn-before-translation"] = @(packet.incomingCallingPartyAddressBeforeTranslation.ssn.ssn);
-                dict[@"incoming-calling-tt-before-translation"] = @(packet.incomingCallingPartyAddressBeforeTranslation.tt.tt);
-
-                dict[@"incoming-called-address-before-translation"] = packet.incomingCalledPartyAddressBeforeTranslation.address;
-                dict[@"incoming-called-nai-before-translation"] = @(packet.incomingCalledPartyAddressBeforeTranslation.nai.nai);
-                dict[@"incoming-called-npi-before-translation"] = @(packet.incomingCalledPartyAddressBeforeTranslation.npi.npi);
-                dict[@"incoming-called-ssn-before-translation"] = @(packet.incomingCalledPartyAddressBeforeTranslation.ssn.ssn);
-                dict[@"incoming-called-tt-before-translation"] = @(packet.incomingCalledPartyAddressBeforeTranslation.tt.tt);
-
-=======
             packet.incomingLinksetTcapSharingInsideName    = ls.tcapSharingInsideName;
             packet.incomingLinksetTcapSharingOutsideName   = ls.tcapSharingOutsideName;
             packet.incomingLinksetTcapSharingPriority      = ls.tcapSharingPriority;
@@ -1453,7 +1417,6 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                 dict[@"incoming-called-ssn-before-translation"]         = @(packet.incomingCalledPartyAddressBeforeTranslation.ssn.ssn);
                 dict[@"incoming-called-tt-before-translation"]          = @(packet.incomingCalledPartyAddressBeforeTranslation.tt.tt);
                 dst = [packet.incomingCalledPartyAddress copy];
->>>>>>> release-2.1
             }
 
             dict[@"incoming-calling-address"]   = packet.incomingCallingPartyAddress.address;
@@ -1639,28 +1602,28 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
         UMMTP3LinkSet *ls = [_mtp3 getLinkSetByName:packet.outgoingLinksetName];
         if(ls)
         {
-            if(ls.calling_number_translation_in_name)
+            if(ls.cga_number_translation_in_name)
             {
-                dict[@"outgoing-linkset-cga-translation-out"] = ls.calling_number_translation_out_name;
-                if(ls.calling_number_translation_out==NULL)
+                dict[@"outgoing-linkset-cga-translation-out"] = ls.cga_number_translation_out_name;
+                if(ls.cga_number_translation_out==NULL)
                 {
-                    ls.calling_number_translation_out = [_mtp3.appContext getSccpNumberTransationByName:ls.calling_number_translation_out_name];
+                    ls.cga_number_translation_out = [_mtp3.appContext getSccpNumberTransationByName:ls.cga_number_translation_out_name];
                 }
-                packet.calling_number_translation_out = ls.calling_number_translation_out;
+                packet.cga_number_translation_out = ls.cga_number_translation_out;
             }
-            if(ls.called_number_translation_out_name)
+            if(ls.cda_number_translation_out_name)
             {
-                dict[@"outgoing-linkset-cda-translation-out"] = ls.called_number_translation_out_name;
-                if(ls.called_number_translation_out==NULL)
+                dict[@"outgoing-linkset-cda-translation-out"] = ls.cda_number_translation_out_name;
+                if(ls.cda_number_translation_out==NULL)
                 {
-                    ls.called_number_translation_out = [_mtp3.appContext getSccpNumberTransationByName:ls.called_number_translation_out_name];
+                    ls.cda_number_translation_out = [_mtp3.appContext getSccpNumberTransationByName:ls.cda_number_translation_out_name];
                 }
-                packet.called_number_translation_out = ls.called_number_translation_out;
+                packet.cda_number_translation_out = ls.cda_number_translation_out;
 
             }
             [packet applyOutgoingNumberTranslation];
             
-            if((ls.calling_number_translation_out_name) || (ls.called_number_translation_out_name))
+            if((ls.cga_number_translation_out_name) || (ls.cda_number_translation_out_name))
             {
                 dict[@"outgoing-calling-address-before-translation"] = packet.outgoingCallingPartyAddressBeforeTranslation.address;
                 dict[@"outgoing-calling-nai-before-translation"] = @(packet.outgoingCallingPartyAddressBeforeTranslation.nai.nai);
