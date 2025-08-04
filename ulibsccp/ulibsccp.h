@@ -29,3 +29,5 @@
 #import <ulibsccp/UMSCCP_mtpPause.h>
 #import <ulibsccp/UMSCCP_mtpResume.h>
 #import <ulibsccp/UMSCCP_mtpStatus.h>
+#import <ulibsccp/UMSCCP_TcapSharingInstance.h>
+#import <ulibsccp/UMSCCP_TcapSharingSession.h>

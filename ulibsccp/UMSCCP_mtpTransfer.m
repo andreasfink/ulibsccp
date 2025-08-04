@@ -58,6 +58,37 @@
         _calling_ttmap = calling_ttmap;
         _data = xdata;
 
+        UMMTP3LinkSet *ls = [_packet.sccp.mtp3 getLinkSetByName:linksetName];
+        if(ls)
+        {
+            _packet.incomingLinksetTcapSharingPriority      = ls.tcapSharingPriority;
+            
+            if(ls.tcapSharingInsideInstance)
+            {
+                _packet.incomingLinksetTcapSharingInside =   (UMSCCP_TcapSharingInstance *) ls.tcapSharingInsideInstance;
+                _packet.incomingLinksetTcapSharingInsideName = _packet.incomingLinksetTcapSharingInside.name;
+            }
+            else if(ls.tcapSharingInsideName.length >0 )
+            {
+                _packet.incomingLinksetTcapSharingInsideName = ls.tcapSharingInsideName;
+                UMSCCP_TcapSharingInstance *inst = [_sccpLayer.appDelegate getTcapSharingInstance:_packet.incomingLinksetTcapSharingInsideName];
+                _packet.incomingLinksetTcapSharingInside = inst;
+                ls.tcapSharingInsideInstance = inst;
+                
+            }
+            if(ls.tcapSharingOutsideInstance)
+            {
+                _packet.incomingLinksetTcapSharingOutside =   (UMSCCP_TcapSharingInstance *) ls.tcapSharingOutsideInstance;
+                _packet.incomingLinksetTcapSharingOutsideName = _packet.incomingLinksetTcapSharingOutside.name;
+            }
+            else if(ls.tcapSharingOutsideName.length >0 )
+            {
+                _packet.incomingLinksetTcapSharingOutsideName = ls.tcapSharingOutsideName;
+                UMSCCP_TcapSharingInstance *inst = [_sccpLayer.appDelegate getTcapSharingInstance:_packet.incomingLinksetTcapSharingOutsideName];
+                _packet.incomingLinksetTcapSharingOutside = inst;
+                ls.tcapSharingInsideInstance = inst;
+            }
+        }
         if(xoptions)
         {
             _options = [xoptions mutableCopy];
@@ -69,7 +100,7 @@
         _options[@"mtp3-opc"] = xopc;
         _options[@"mtp3-dpc"] = xdpc;
 		_packet.incomingMtp3Layer = mtp3;
-        _incomingLinksetName = linksetName;
+        _incomingLinksetName        = linksetName;
         _packet.incomingLinksetName = linksetName;
 		_created = [NSDate date];
         _statsSection = UMSCCP_StatisticSection_TRANSIT;
@@ -83,37 +114,48 @@
     return self;
 }
 
+#define THROW_EXCEPTION(a,raw,xlinkset) \
+{ \
+    NSLog(@"%@",a); \
+    NSString *s = a; \
+    [_sccpLayer traceProblematicPdu:raw options:@{ @"error":s, @"timestamp" : [NSDate date], @"linkset" : xlinkset }]; \
+    @throw([NSException exceptionWithName:s reason:NULL userInfo:@{@"raw": [raw hexString] }] ); \
+}
+
+
 - (void)main
 {
     @autoreleasepool
     {
-        NSString *outgoingLinkset=NULL;
-
         _startOfProcessing = [NSDate date];
         /* we build a pseudo MTP3 raw packet for debugging /tracing and logging */
         UMMTP3Label *label = [[UMMTP3Label alloc]init];
         label.opc = _opc;
         label.dpc = _dpc;
-        NSMutableData *rawMtp3 = [[NSMutableData alloc]init];
-        int sio = ((_ni & 0x03) << 6) | (_si & 0x0F);
-        [rawMtp3 appendByte:sio];
-        [label appendToMutableData:rawMtp3];
-        [rawMtp3 appendData:_data];
-        _packet.incomingMtp3Data = rawMtp3;
+        
+        _rawMtp3 = [UMLayerSCCP mtp3Wrap:_data opc:_opc dpc:_dpc ni:_ni si:_si];
+        _packet.incomingMtp3Data = _rawMtp3;
 
+        /*
+        NSMutableData *_rawMtp3 = [[NSMutableData alloc]init];
+        int sio = ((_ni & 0x03) << 6) | (_si & 0x0F);
+        [_rawMtp3 appendByte:sio];
+        [label appendToMutableData:_rawMtp3];
+        [_rawMtp3 appendData:_data];
+         */
 
         if(_options==NULL)
         {
             _options = [[NSMutableDictionary alloc]init];
         }
-        _options[@"mtp3-pdu"] = rawMtp3;
+        _options[@"mtp3-pdu"] = _rawMtp3;
         _options[@"sccp-pdu"] = [_data hexString];
         _packet.incomingSccpData = _data;
         
         
         if(_packet.logLevel <=UMLOG_DEBUG)
         {
-            [_packet.logFeed debugText:[NSString stringWithFormat:@"Entering mtpTransfer for packet %@",rawMtp3]];
+            [_packet.logFeed debugText:[NSString stringWithFormat:@"Entering mtpTransfer for packet %@",_rawMtp3]];
         }
 
         BOOL decodeOnly = [_options[@"decode-only"] boolValue];
@@ -125,10 +167,10 @@
         _packet.incomingServiceClass = SCCP_CLASS_UNDEFINED;
         @try
         {
-            NSUInteger len = _data.length;
+            NSInteger len = _data.length;
             if(len < 6)
             {
-                @throw([NSException exceptionWithName:@"SCCP_TOO_SMALL_PACKET_RECEIVED" reason:NULL userInfo:NULL] );
+                THROW_EXCEPTION(@"SCCP_TOO_SMALL_PACKET_RECEIVED",_rawMtp3,_incomingLinksetName);
             }
             const uint8_t *d = _data.bytes;
             int i = 0;
@@ -136,32 +178,33 @@
             int param_called_party_address = 0;
             int param_calling_party_address = 0;
             int param_data = 0;
+            int param_long_data = 0;
             int param_optional = 0;
             int param_hop_counter = 0;
             NSString *type;
-
+            
             _packet.incomingServiceType = m_type;
             _packet.outgoingServiceType = m_type;
             _packet.incomingHandling = SCCP_HANDLING_NO_SPECIAL_OPTIONS;
             _packet.outgoingHandling = SCCP_HANDLING_NO_SPECIAL_OPTIONS;
-
+            
             switch(m_type)
             {
                 case SCCP_UDT:
+                {
                     if(_packet.logLevel <=UMLOG_DEBUG)
                     {
                         [_packet.logFeed debugText:@"UDT"];
                     }
-
                     if(len < 8)
                     {
-                        @throw([NSException exceptionWithName:@"SCCP_TOO_SMALL_UDT_PACKET_RECEIVED" reason:NULL userInfo:NULL] );
+                        THROW_EXCEPTION(@"SCCP_TOO_SMALL_UDT_PACKET_RECEIVED",_rawMtp3,_incomingLinksetName);
                     }
                     type = @"UDT";
                     _decodedJson[@"sccp-pdu-type"]=type;
                     _m_protocol_class = d[i] & 0x0F;
                     _m_handling = (d[i++]>>4) & 0x0F;
-
+                    
                     _packet.incomingServiceClass = _m_protocol_class;
                     _packet.outgoingServiceClass = _m_protocol_class;
                     if(_m_handling & 0x08)
@@ -177,17 +220,18 @@
                     i++;
                     param_data = d[i] + i;
                     i++;
-                    param_optional = -1;
+                    param_optional = 0;
                     break;
-                    
+                }
                 case SCCP_UDTS:
+                {
                     if(_packet.logLevel <=UMLOG_DEBUG)
                     {
                         [_packet.logFeed debugText:@"UDTS"];
                     }
                     if(len < (3+10))
                     {
-                        @throw([NSException exceptionWithName:@"SCCP_TOO_SMALL_UDTS_PACKET_RECEIVED" reason:NULL userInfo:NULL] );
+                        THROW_EXCEPTION(@"SCCP_TOO_SMALL_UDTS_PACKET_RECEIVED",_rawMtp3,_incomingLinksetName);
                     }
                     type=@"UDTS";
                     _decodedJson[@"sccp-pdu-type"]=type;
@@ -200,17 +244,18 @@
                     i++;
                     param_data      = d[i] + i;
                     i++;
-                    param_optional   = -1;
+                    param_optional   = 0;
                     break;
-                    
+                }
                 case SCCP_XUDT:
+                {
                     if(_packet.logLevel <=UMLOG_DEBUG)
                     {
                         [_packet.logFeed debugText:@"XUDTS"];
                     }
                     if(len < (4+11))
                     {
-                        @throw([NSException exceptionWithName:@"SCCP_TOO_SMALL_XUDT_PACKET_RECEIVED" reason:NULL userInfo:NULL] );
+                        THROW_EXCEPTION(@"SCCP_TOO_SMALL_XUDT_PACKET_RECEIVED",_rawMtp3,_incomingLinksetName);
                     }
                     type=@"XUDT";
                     _decodedJson[@"sccp-pdu-type"]=type;
@@ -236,7 +281,7 @@
                     i++;
                     if(d[i]==0)
                     {
-                        param_optional = -1;
+                        param_optional = 0;
                     }
                     else
                     {
@@ -244,16 +289,17 @@
                     }
                     i++;
                     break;
-
+                }
                 case SCCP_XUDTS:
+                {
                     if(_packet.logLevel <=UMLOG_DEBUG)
                     {
                         [_packet.logFeed debugText:@"XUDTS"];
                     }
-
+                    
                     if(len < (4+11))
                     {
-                        @throw([NSException exceptionWithName:@"SCCP_TOO_SMALL_XUDTS_PACKET_RECEIVED" reason:NULL userInfo:NULL] );
+                        THROW_EXCEPTION(@"SCCP_TOO_SMALL_XUDTS_PACKET_RECEIVED",_rawMtp3,_incomingLinksetName);
                     }
                     type=@"XUDTS";
                     _decodedJson[@"sccp-pdu-type"]=type;
@@ -271,7 +317,7 @@
                     i++;
                     if(d[i]==0)
                     {
-                        param_optional = -1;
+                        param_optional = 0;
                     }
                     else
                     {
@@ -279,11 +325,17 @@
                     }
                     i++;
                     break;
-                    
+                }
                 case SCCP_LUDT:
+                {
+                    if(_packet.logLevel <=UMLOG_DEBUG)
+                    {
+                        [_packet.logFeed debugText:@"LUDT"];
+                    }
+                    
                     if(len < (8+12))
                     {
-                        @throw([NSException exceptionWithName:@"SCCP_TOO_SMALL_LUDT_PACKET_RECEIVED" reason:NULL userInfo:NULL] );
+                        THROW_EXCEPTION(@"SCCP_TOO_SMALL_LUDT_PACKET_RECEIVED",_rawMtp3,_incomingLinksetName);
                     }
                     type=@"LUDT";
                     _decodedJson[@"sccp-pdu-type"]=type;
@@ -298,30 +350,39 @@
                         _packet.outgoingHandling = SCCP_HANDLING_RETURN_ON_ERROR;
                     }
                     _decodedJson[@"sccp-protocol-handling"]=@(_m_handling);
-                    param_hop_counter=d[i];
+                    param_hop_counter=d[i++];
                     _packet.incomingMaxHopCount = param_hop_counter;
-                    i++;
-                    param_called_party_address = d[i] + (d[i+1]<<8) + i + 1;
-                    i +=2;
-                    param_calling_party_address = d[i] + (d[i+1]<<8) + i + 1 ;
-                    i +=2;
-                    param_data =  d[i] + (d[i+1]<<8) + i + 1 ;
-                    i +=2;
-                    if((d[i] != 0x00) && (d[i+1] != 0x00))
+                    
+                    param_called_party_address   = d[i++];
+                    param_called_party_address  |= d[i++] <<8;
+                    param_called_party_address  += i - 1 ;
+                    
+                    param_calling_party_address  = d[i++];
+                    param_calling_party_address |= d[i++] <<8;
+                    param_calling_party_address += i - 1;
+                    
+                    param_long_data              = d[i++];
+                    param_long_data             |= d[i++] <<8;
+                    param_long_data             += i - 1;
+                    
+                    param_optional               = d[i++];
+                    param_optional              |= d[i++] <<8;
+                    if(param_optional !=0)
                     {
-                        param_optional = d[i] + (d[i+1]<<8) + i + 1;
+                        param_optional          += i - 1;
                     }
-                    else
-                    {
-                        param_optional = -1;
-                    }
-                    i +=2;
                     break;
-
+                }
                 case SCCP_LUDTS:
+                {
+                    if(_packet.logLevel <=UMLOG_DEBUG)
+                    {
+                        [_packet.logFeed debugText:@"LUDTS"];
+                    }
+                    
                     if(len < (8+12))
                     {
-                        @throw([NSException exceptionWithName:@"SCCP_TOO_SMALL_LUDTS_PACKET_RECEIVED" reason:NULL userInfo:NULL] );
+                        THROW_EXCEPTION(@"SCCP_TOO_SMALL_LUDTS_PACKET_RECEIVED",_rawMtp3,_incomingLinksetName);
                     }
                     type=@"LUDTS";
                     _decodedJson[@"sccp-pdu-type"]=type;
@@ -331,55 +392,66 @@
                     _m_hopcounter = d[i++] & 0x0F;
                     _decodedJson[@"sccp-hop-counter"]=@(_m_hopcounter);
                     _packet.incomingMaxHopCount = _m_return_cause;
-                    param_called_party_address = d[i] + (d[i+1]<<8) + i + 1;
-                    i +=2;
-                    param_calling_party_address = d[i] + (d[i+1]<<8) + i + 1;
-                    i +=2;
-                    param_data =  d[i] + (d[i+1]<<8) + i + 1;
-                    i +=2;
-                    if((d[i] != 0x00) && (d[i+1] != 0x00))
-                    {
-                        param_optional = d[i] + (d[i+1]<<8) + i + 1;
-                    }
-                    else
-                    {
-                        param_optional = -1;
-                    }
-                    i +=2;
-                    break;
                     
+                    
+                    param_called_party_address   = d[i++];
+                    param_called_party_address  |= d[i++] <<8;
+                    param_called_party_address  += i - 1 ;
+                    
+                    param_calling_party_address  = d[i++];
+                    param_calling_party_address |= d[i++] <<8;
+                    param_calling_party_address += i - 1;
+                    
+                    param_long_data              = d[i++];
+                    param_long_data             |= d[i++] <<8;
+                    param_long_data             += i - 1;
+                    
+                    param_optional               = d[i++];
+                    param_optional              |= d[i++] <<8;
+                    if(param_optional !=0)
+                    {
+                        param_optional          += i - 1;
+                    }
+                    break;
+                }
                 default:
-                    @throw([NSException exceptionWithName:@"SCCP_UNKNOWN_PACKET_TYPE" reason:NULL
-                                                 userInfo:@{@"mtp3": [rawMtp3 hexString] } ]);
+                {
+                    NSString *s = @"SCCP_UNKNOWN_PACKET_TYPE";
+                    [_sccpLayer.logFeed debugText:s];
+                    @throw([NSException exceptionWithName:s reason:NULL userInfo:NULL] );
+                    break;
+                }
             }
             if(param_called_party_address > len)
             {
-                @throw([NSException exceptionWithName:@"SCCP_PTR1_POINTS_BEYOND_END" reason:NULL userInfo:@{@"mtp3": [rawMtp3 hexString] }] );
-                return;
+                THROW_EXCEPTION(@"SCCP_PTR1_POINTS_BEYOND_END",_rawMtp3,_incomingLinksetName);
             }
 
             if(param_calling_party_address > len)
             {
-                @throw([NSException exceptionWithName:@"SCCP_PTR2_POINTS_BEYOND_END" reason:NULL userInfo:@{@"mtp3": [rawMtp3 hexString] }] );
-                return;
+                THROW_EXCEPTION(@"SCCP_PTR2_POINTS_BEYOND_END",_rawMtp3,_incomingLinksetName);
             }
             if(param_data > len)
             {
-                @throw([NSException exceptionWithName:@"SCCP_PTR3_POINTS_BEYOND_END" reason:NULL userInfo:@{@"mtp3": [rawMtp3 hexString] }] );
-                return;
+                THROW_EXCEPTION(@"SCCP_PTR3_POINTS_BEYOND_END (DATA)",_rawMtp3,_incomingLinksetName);
             }
-            if((param_optional > len) && (param_optional > 0))
+            if(param_long_data > len)
             {
-                @throw([NSException exceptionWithName:@"SCCP_PTR4_POINTS_BEYOND_END" reason:NULL userInfo:@{@"mtp3": [rawMtp3 hexString] }] );
-                return;
+                THROW_EXCEPTION(@"SCCP_PTR3_POINTS_BEYOND_END (LONG_DATA)",_rawMtp3,_incomingLinksetName);
+            }
+
+            if(param_optional > len)
+            {
+                THROW_EXCEPTION(@"SCCP_PTR4_POINTS_BEYOND_END (OPTIONAL)",_rawMtp3,_incomingLinksetName);
             }
             NSData *dstData = NULL;
             NSData *srcData = NULL;
             
             if(param_called_party_address>0)
             {
-                i = (int)d[param_called_party_address];
-                dstData = [NSData dataWithBytes:&d[param_called_party_address+1] length:i];
+                const uint8_t *dptr = &d[param_called_party_address];
+                i = (uint8_t)dptr[0];
+                dstData = [NSData dataWithBytes:&dptr[1] length:i];
                 if(_sccpLayer.sccpVariant == SCCP_VARIANT_ANSI)
                 {
 #if defined(SCCP_DECODING_DEBUG)
@@ -419,8 +491,9 @@
 
             if(param_calling_party_address>0)
             {
-                i = (int)d[param_calling_party_address];
-                srcData = [NSData dataWithBytes:&d[param_calling_party_address+1] length:i];
+                const uint8_t *dptr = &d[param_calling_party_address];
+                i = (uint8_t)dptr[0];
+                srcData = [NSData dataWithBytes:&dptr[1] length:i];
                 if(_sccpLayer.sccpVariant == SCCP_VARIANT_ANSI)
                 {
 #if defined(SCCP_DECODING_DEBUG)
@@ -462,13 +535,27 @@
                 }
                 _packet.incomingSccpData = _sccp_pdu;
             }
+            else if(param_long_data > 0)
+            {
+                i  = (int)d[param_long_data];
+                i += (int)d[param_long_data+1]<<8;
+                _sccp_pdu = [NSData dataWithBytes:&d[param_long_data+2] length:i];
+                _decodedJson[@"sccp-payload-bytes"]=[_sccp_pdu hexString];
+                if(decodeOnly)
+                {
+                    id<UMSCCP_UserProtocol> user = [_sccpLayer getUserForSubsystem:_dst.ssn number:_dst];
+                    id decodedUserPdu = [user decodePdu:_sccp_pdu];
+                    _decodedPdu = _sccp_pdu;
+                    _decodedJson[@"sccp-payload"]=decodedUserPdu;
+                }
+                _packet.incomingSccpData = _sccp_pdu;
+            }
             if(_packet.logLevel <=UMLOG_DEBUG)
             {
                 [_packet.logFeed debugText:[NSString stringWithFormat:@"DATA:%@",_packet.incomingSccpData]];
             }
             if(param_optional > 0)
             {
-                
                 NSData *sccp_optional = [NSData dataWithBytes:&d[param_optional] length:len-param_optional];
                 _decodedJson[@"sccp-optional-raw"] = sccp_optional.hexString;
                 if(_packet.logLevel <=UMLOG_DEBUG)
@@ -493,8 +580,8 @@
                         if((j+len)<m)
                         {
                             _optional_dict = [[NSMutableDictionary alloc]init];
+                            //NSData *paramWithHeader = [NSData dataWithBytes:&bytes[j-2] length:len+2];
                             NSData *param = [NSData dataWithBytes:&bytes[j] length:len];
-                    
                             j = j+len;
                             if((paramType != 0x10) && (paramType != 0x00)) /* not end of data and not segmentation header */
                             {
@@ -578,13 +665,12 @@
             }
             if(_src == NULL)
             {
-                @throw([NSException exceptionWithName:@"SCCP_MISSING_CALLING_PARTY_ADDRESS" reason:NULL userInfo:@{@"mtp3": [rawMtp3 hexString] }] );
+                THROW_EXCEPTION(@"SCCP_MISSING_CALLING_PARTY_ADDRESS",_rawMtp3,_incomingLinksetName);
             }
             if(_dst==NULL)
             {
-                @throw([NSException exceptionWithName:@"SCCP_MISSING_CALLED_PARTY_ADDRESS" reason:NULL userInfo:@{@"mtp3": [rawMtp3 hexString] }] );
+                THROW_EXCEPTION(@"SCCP_MISSING_CALLED_PARTY_ADDRESS",_rawMtp3,_incomingLinksetName);
             }
-
             NSDictionary *o = @{
                                 @"type" : type,
                                 @"action" : @"rx",
@@ -592,9 +678,7 @@
                                 @"dpc"  : _dpc.stringValue,
                                 @"mtp3" : (_mtp3Layer ? _mtp3Layer.layerName : @"")
                                 };
-            [_sccpLayer traceReceivedPdu:_data options:o];
-            [_sccpLayer traceReceivedPacket:_packet options:o];
-
+            [_sccpLayer traceReceivedPdu:_rawMtp3 options:o];
             _options[@"sccp-calling-address"]       = _src;
             _options[@"sccp-called-address"]        = _dst;
             _packet.incomingCallingPartyAddress     = _src;
@@ -602,6 +686,8 @@
             _packet.incomingCallingPartyCountry     = [_packet.incomingCallingPartyAddress country];
             _packet.incomingCalledPartyCountry      = [_packet.incomingCalledPartyAddress country];
             [_packet applyIncomingNumberTranslation];
+            _src = _packet.incomingCallingPartyAddress;
+            _dst = _packet.incomingCalledPartyAddress;
             if(!decodeOnly)
             {
                 [_packet copyIncomingToOutgoing];
@@ -636,169 +722,15 @@
                         _options[@"sccp-xudts"] = @(YES);
                         break;
                 }
-
                 _packet.incomingOptions = _options;
-
-                UMSCCP_FilterResult r =  UMSCCP_FILTER_RESULT_UNMODIFIED;
-                if((_sccpLayer.filterDelegate) && (!_packet.incomingSegment))
-                {
-                    /* segments are filtered once reassembled */
-                    r = [_sccpLayer.filterDelegate filterInbound:_packet];
-                }
-                if(r & UMSCCP_FILTER_RESULT_DROP)
-                {
-                    [_sccpLayer.logFeed debugText:@"Filter returns DROP"];
-                    return;
-                }
-                if(r & UMSCCP_FILTER_RESULT_STATUS)
-                {
-                    SCCP_ServiceType st = SCCP_UDTS;
-                    switch(_packet.outgoingServiceType)
-                    {
-                        case SCCP_UDT:
-                        case SCCP_UDTS:
-                            st = SCCP_UDTS;
-                            break;
-                        case SCCP_XUDT:
-                        case SCCP_XUDTS:
-                            st = SCCP_XUDTS;
-                            break;
-                        case SCCP_LUDT:
-                        case SCCP_LUDTS:
-                            st = SCCP_LUDTS;
-                            break;
-                        default:
-                            switch(_packet.incomingServiceType)
-                        {
-                            case SCCP_UDT:
-                            case SCCP_UDTS:
-                                st = SCCP_UDTS;
-                                break;
-                            case SCCP_XUDT:
-                            case SCCP_XUDTS:
-                                st = SCCP_XUDTS;
-                                break;
-                            case SCCP_LUDT:
-                            case SCCP_LUDTS:
-                                st = SCCP_LUDTS;
-                                break;
-                        }
-                    }
-                    switch(st)
-                    {
-                        case SCCP_UDTS:
-                            if(_sccpLayer.routeErrorsBackToSource)
-                            {
-                                [_sccpLayer sendUDTS:_packet.incomingSccpData
-                                                 calling:_packet.incomingCalledPartyAddress
-                                                  called:_packet.incomingCallingPartyAddress
-                                                   class:_packet.incomingServiceClass
-                                             returnCause:_packet.outgoingReturnCause
-                                                     opc:_sccpLayer.mtp3.opc /* errors are always sent from this instance */
-                                                     dpc:_packet.incomingOpc
-                                                 options:@{}
-                                                provider:_sccpLayer.mtp3
-                                         routedToLinkset:&outgoingLinkset
-                                                     sls:_packet.sls];
-                                _packet.outgoingLinksetName = outgoingLinkset;
-                            }
-                            else
-                            {
-                                [_sccpLayer generateUDTS:_packet.incomingSccpData
-                                                 calling:_packet.incomingCalledPartyAddress
-                                                  called:_packet.incomingCallingPartyAddress
-                                                   class:_packet.incomingServiceClass
-                                             returnCause:_packet.outgoingReturnCause
-                                                     opc:_sccpLayer.mtp3.opc /* errors are always sent from this instance */
-                                                     dpc:_packet.incomingOpc
-                                                 options:@{}
-                                                provider:_sccpLayer.mtp3
-                                                     sls:_packet.sls];
-                            }
-                            break;
-                        case SCCP_XUDTS:
-                            if(_sccpLayer.routeErrorsBackToSource)
-                            {
-                                [_sccpLayer sendXUDTS:_packet.incomingSccpData
-                                              calling:_packet.incomingCalledPartyAddress
-                                               called:_packet.incomingCallingPartyAddress
-                                                class:_packet.incomingServiceClass
-                                             hopCount:0x0F
-                                          returnCause:_packet.outgoingReturnCause
-                                                  opc:_sccpLayer.mtp3.opc /* errors are always sent from this instance */
-                                                  dpc:_packet.incomingOpc
-                                          optionsData:_packet.incomingOptionalData
-                                              options:@{}
-                                             provider:_sccpLayer.mtp3
-                                      routedToLinkset:&outgoingLinkset
-                                                  sls:_packet.sls];
-                                _packet.outgoingLinksetName = outgoingLinkset;
-                            }
-                            else
-                            {
-                                [_sccpLayer generateXUDTS:_packet.incomingSccpData
-                                                  calling:_packet.incomingCalledPartyAddress
-                                                   called:_packet.incomingCallingPartyAddress
-                                                    class:_packet.incomingServiceClass
-                                              returnCause:_packet.outgoingReturnCause
-                                                      opc:_sccpLayer.mtp3.opc /* errors are always sent from this instance */
-                                                      dpc:_packet.incomingOpc
-                                                  options:@{}
-                                                 provider:_sccpLayer.mtp3
-                                                      sls:_packet.sls];
-                            }
-                            break;
-                        case SCCP_LUDTS:
-                            if(_sccpLayer.routeErrorsBackToSource)
-                            {
-                                [_sccpLayer sendLUDTS:_packet.incomingSccpData
-                                              calling:_packet.incomingCalledPartyAddress
-                                               called:_packet.incomingCallingPartyAddress
-                                                class:_packet.incomingServiceClass
-                                             hopCount:0x0F
-                                          returnCause:_packet.outgoingReturnCause
-                                                  opc:_sccpLayer.mtp3.opc /* errors are always sent from this instance */
-                                                  dpc:_packet.incomingOpc
-                                          optionsData:_packet.incomingOptionalData
-                                              options:@{}
-                                             provider:_sccpLayer.mtp3
-                                      routedToLinkset:&outgoingLinkset
-                                                  sls:_packet.sls];
-                                _packet.outgoingLinksetName = outgoingLinkset;
-                            }
-                            else
-                            {
-                                [_sccpLayer generateLUDTS:_packet.incomingSccpData
-                                                  calling:_packet.incomingCalledPartyAddress
-                                                   called:_packet.incomingCallingPartyAddress
-                                                    class:_packet.incomingServiceClass
-                                              returnCause:_packet.outgoingReturnCause
-                                                      opc:_sccpLayer.mtp3.opc /* errors are always sent from this instance */
-                                                      dpc:_packet.incomingOpc
-                                                  options:@{}
-                                                 provider:_sccpLayer.mtp3
-                                                      sls:_packet.sls];
-                            }
-                            break;
-                        default:
-                            break;
-                    }
-                    return;
-                }
-
                 if(_dst.ssn.ssn!=SCCP_SSN_SCCP_MG)
                 {
-                    if([_sccpLayer routePacket:_packet] == NO)
-                    {
-                        if(_sccpLayer.unrouteablePacketsTraceDestination)
-                        {
-                            [_sccpLayer.unrouteablePacketsTraceDestination logPacket:_packet];
-                        }
-                    }
+                    UMSCCP_RoutingState *state = [_sccpLayer routePacket:_packet];
                 }
                 switch(m_type)
                 {
                     case SCCP_UDT:
+                    {
                         if(_dst.ssn.ssn==SCCP_SSN_SCCP_MG)
                         {
                             if([self process_udt_sccp_mg])
@@ -826,7 +758,9 @@
                             }
                         }
                         break;
+                    }
                     case SCCP_UDTS:
+                    {
                         if(_packet.outgoingToLocal)
                         {
                             _statsSection = UMSCCP_StatisticSection_RX;
@@ -838,7 +772,9 @@
                             _statsSection2 = UMSCCP_StatisticSection_UDTS_TRANSIT;
                         }
                         break;
+                    }
                     case SCCP_XUDT:
+                    {
                         if(_packet.outgoingToLocal)
                         {
                             _statsSection = UMSCCP_StatisticSection_RX;
@@ -850,7 +786,9 @@
                             _statsSection2 = UMSCCP_StatisticSection_XUDT_TRANSIT;
                         }
                         break;
+                    }
                     case SCCP_XUDTS:
+                    {
                         if(_packet.outgoingToLocal)
                         {
                             _statsSection = UMSCCP_StatisticSection_RX;
@@ -862,15 +800,35 @@
                             _statsSection2 = UMSCCP_StatisticSection_XUDTS_TRANSIT;
                         }
                         break;
-                    default:
-                        if([_sccpLayer routePacket:_packet] == NO)
+                    }
+                    case SCCP_LUDT:
+                    {
+                        if(_packet.outgoingToLocal)
                         {
-                            if(_sccpLayer.unrouteablePacketsTraceDestination)
-                            {
-                                [_sccpLayer.unrouteablePacketsTraceDestination logPacket:_packet];
-                            }
+                            _statsSection = UMSCCP_StatisticSection_RX;
+                            _statsSection2 = UMSCCP_StatisticSection_LUDT_RX;
+                        }
+                        else
+                        {
+                            _statsSection = UMSCCP_StatisticSection_TRANSIT;
+                            _statsSection2 = UMSCCP_StatisticSection_LUDT_TRANSIT;
                         }
                         break;
+                    }
+                    case SCCP_LUDTS:
+                    {
+                        if(_packet.outgoingToLocal)
+                        {
+                            _statsSection = UMSCCP_StatisticSection_RX;
+                            _statsSection2 = UMSCCP_StatisticSection_LUDTS_RX;
+                        }
+                        else
+                        {
+                            _statsSection = UMSCCP_StatisticSection_TRANSIT;
+                            _statsSection2 = UMSCCP_StatisticSection_LUDTS_TRANSIT;
+                        }
+                        break;
+                    }
                 }
                 
                 if(_sccpLayer.statisticDb)
@@ -939,19 +897,13 @@
         }
         @catch(NSException *e)
         {
-            if(_mtp3Layer.problematicPacketDumper)
-            {
-                [_mtp3Layer.problematicPacketDumper logRawPacket:rawMtp3];
-            }
-            if(_sccpLayer.problematicTraceDestination)
-            {
-                [_sccpLayer.problematicTraceDestination logPacket:_packet];
-            }
             [self.logFeed majorErrorText:[NSString stringWithFormat:@"Error: %@",e]];
             if(decodeOnly)
             {
                 _decodedJson[@"decode-error"] = e.description;
             }
+            [_mtp3Layer.problematicPacketDumper logRawPacket:_rawMtp3];
+            [_sccpLayer traceProblematicPdu:_rawMtp3 options:@{@"error":e.description,@"timestamp" : [NSDate date],@"linkset":_incomingLinksetName }];
         }
 
         _endOfProcessing = [NSDate date];
@@ -990,7 +942,7 @@
     /* Management Message */
     if(len<1)
     {
-        @throw([NSException exceptionWithName:@"SCCP_MGMT_MESSAGE_TOO_SHORT" reason:NULL userInfo:@{@"backtrace": UMBacktrace(NULL,0)}] );
+        THROW_EXCEPTION(@"SCCP_MGMT_MESSAGE_TOO_SHORT",_rawMtp3,_incomingLinksetName);
     }
     scgm_format = dat[0];
     
@@ -1004,7 +956,7 @@
         {
             if(len<5)
             {
-                @throw([NSException exceptionWithName:@"SCCP_MGMT_MESSAGE_TOO_SHORT" reason:NULL userInfo:@{@"backtrace": UMBacktrace(NULL,0)}] );
+                THROW_EXCEPTION(@"SCCP_MGMT_MESSAGE_TOO_SHORT",_rawMtp3,_incomingLinksetName);
             }
             
             affected_ssn = dat[1];
@@ -1020,7 +972,7 @@
         {
             if(len<6)
             {
-                @throw([NSException exceptionWithName:@"SCCP_MGMT_MESSAGE_TOO_SHORT" reason:NULL userInfo:@{@"backtrace": UMBacktrace(NULL,0)}] );
+                THROW_EXCEPTION(@"SCCP_MGMT_MESSAGE_TOO_SHORT(subsystem-congested)",_rawMtp3,_incomingLinksetName);
             }
             affected_ssn = dat[1];
             affected_pc = dat[2] | ((dat[3] << 8) & 0x3F);
@@ -1030,7 +982,7 @@
             break;
         default:
             /* we dont know what to do with this */
-            @throw([NSException exceptionWithName:@"SCCP_MGMT_UNKNOWN_MESSAGE" reason:NULL userInfo:@{@"backtrace": UMBacktrace(NULL,0)}] );
+            THROW_EXCEPTION(@"SCCP_MGMT_UNKNOWN_MESSAGE",_rawMtp3,_incomingLinksetName);
             break;
     }
     

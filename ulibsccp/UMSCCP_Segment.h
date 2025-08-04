@@ -13,7 +13,7 @@
 
 @interface UMSCCP_Segment : UMObject
 {
-    //int                 _segmentIndex;
+    //int               _segmentIndex;
     BOOL                _first;
     BOOL                _class1;
     int                 _remainingSegment;
@@ -30,5 +30,5 @@
 - (NSData *)segmentationHeader;
 - (UMSCCP_Segment *)initWithHeaderData:(NSData *)d;
 - (NSString *)description;
-
+- (UMSynchronizedSortedDictionary *)objectValue;
 @end

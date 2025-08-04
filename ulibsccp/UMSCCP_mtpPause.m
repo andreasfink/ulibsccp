@@ -41,17 +41,16 @@
 {
     @autoreleasepool
     {
-        NSString *s =  [NSString stringWithFormat:@"mtpPause AffectedPointCode: %@",_affectedPointCode];
         if(_sccp.logLevel <= UMLOG_DEBUG)
         {
+            NSString *s =  [NSString stringWithFormat:@"mtpPause AffectedPointCode: %@",_affectedPointCode];
             [_sccp logDebug:s];
         }
-        NSLog(@"mtpPause: AffectedPointCode: %@ is now unavailable",_affectedPointCode);
         [_mtp3.routingUpdateDb logInboundLinkset:@"sccp"
                                  outboundLinkset:@""
                                              dpc:_affectedPointCode
                                           status:@"unavailable"
-                                          reason:s];
+                                          reason:@"mtpPause"];
         [_sccp.sccpL3RoutingTable setStatus:SccpL3RouteStatus_unavailable
                              forPointCode:_affectedPointCode];
     }

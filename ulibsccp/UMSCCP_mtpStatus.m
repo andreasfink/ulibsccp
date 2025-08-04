@@ -48,7 +48,6 @@
             NSString *s =  [NSString stringWithFormat:@"mtpStatus AffectedPointCode: %@",_affectedPointCode];
             [_sccp logDebug:s];
         }
-        NSLog(@"mtpStatus: AffectedPointCode: %@ is now restricted",_affectedPointCode);
         [_mtp3.routingUpdateDb logInboundLinkset:@"sccp"
                                  outboundLinkset:@""
                                              dpc:_affectedPointCode

@@ -30,6 +30,7 @@
 #import "UMSCCP_ReceivedSegment.h"
 #import "UMSCCP_ReceivedSegments.h"
 #import "UMSCCP_PendingSegmentsStorage.h"
+#import "UMSCCP_RoutingState.h"
 
 @implementation UMLayerSCCP
 
@@ -56,14 +57,20 @@
 
 - (void)genericInitialisation
 {
+
+    _last_sls = 0;
+    _tcapSharingTraceLevel = UMLOG_PANIC;
+    _slsLock = [[UMMutex alloc]initWithName:@"sls-lock"];
     _subsystemUsers = [[UMSynchronizedDictionary alloc]init];
     _dpcAvailability = [[UMSynchronizedDictionary alloc]init];
     _traceSendDestinations =[[UMSynchronizedArray alloc]init];
-    _traceReceiveDestinations =[[UMSynchronizedArray alloc]init];
-    _traceDroppedDestinations =[[UMSynchronizedArray alloc]init];
+    _traceReceiveDestinations = [[UMSynchronizedArray alloc]init];
+    _traceDroppedDestinations = [[UMSynchronizedArray alloc]init];
+    _traceProblematicDestinations = [[UMSynchronizedArray alloc]init];
+    _traceUnroutableDestinations  = [[UMSynchronizedArray alloc]init];
     _sccpL3RoutingTable = [[SccpL3RoutingTable alloc]init];
-    _xudt_max_hop_count = 16;
-    _xudts_max_hop_count = 16;
+    _lxudt_max_hop_count = 16;
+    _lxudts_max_hop_count = 16;
     _gttSelectorRegistry = [[SccpGttRegistry alloc]init];
     _gttSelectorRegistry.logLevel = self.logLevel;
     _gttSelectorRegistry.logFeed = self.logFeed;
@@ -77,7 +84,6 @@
                                                    name:@"housekeeping"
                                                 repeats:YES
                                         runInForeground:YES];
-
 }
 
 - (void)initializeStatistics
@@ -354,14 +360,19 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     [optionsData appendByte:0x10]; /* optional parameter "segmentation" */
     [optionsData appendByte:0x04]; /* length of optional parameter */
     [optionsData appendData:[segment segmentationHeader]];
+    
+    if(0) /* importance header */
+    {
+        [optionsData appendByte:0x12]; /* optional parameter "importance" */
+        [optionsData appendByte:0x01]; /* length of optional parameter */
+        [optionsData appendByte:0x01]; /* VIP 01 */
+    }
     if(xoptionsdata.length > 0)
     {
         [optionsData appendData:xoptionsdata];
     }
-    
     /* The standard says
         – The SCCP shall place each segment of user data into separate LUDT messages, each with the same Called Party Address and identical MTP routing information (DPC, SLS).
-       
         which means we need to collect all segments first, do a routing
         decision and then send all the segments down the same pipe with the same SLC.
      */
@@ -526,6 +537,11 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                      sls:(int)sls
                    isLUDT:(BOOL)isLUDT
 {
+    NSMutableData *optionsdata = [[NSMutableData alloc]init];
+    if(xoptionsdata.length > 0)
+    {
+        [optionsdata appendData:xoptionsdata];
+    }
     SccpNumberTranslation *cga_number_translation_out = NULL;
     SccpNumberTranslation *cda_number_translation_out = NULL;
     
@@ -540,7 +556,7 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     {
         cga_number_translation_out = [_mtp3 callingPartyAddressTranslationOutForLinkset:*outgoingLinkset];
         cda_number_translation_out = [_mtp3 calledPartyAddressTranslationOutForLinkset:*outgoingLinkset];
-
+        
     }
     if(cga_number_translation_out)
     {
@@ -573,7 +589,6 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     
     NSData *srcEncoded = [src encode:_sccpVariant];
     NSData *dstEncoded = [dst encode:_sccpVariant];
-
     
     NSMutableData *sccp_pdu = [[NSMutableData alloc]init];
     
@@ -586,23 +601,24 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
         header[0] = SCCP_LUDT;
         header[1] = (pclass & 0x0F) | ((handling & 0x0F) << 4);
         header[2] = maxHopCount;
-        header[3] = ((7 + 0) >> 0) & 0xFF;
-        header[4] = ((7 + 0) >> 8) & 0xFF;
-        header[5] = ((6 + dstEncoded.length)>> 0) & 0xFF;
-        header[6] = ((6 + dstEncoded.length)>> 8) & 0xFF;
-        header[7] = ((4 + dstEncoded.length + srcEncoded.length) >> 0) & 0xFF;
-        header[8] = ((4 + dstEncoded.length + srcEncoded.length) >> 8) & 0xFF;
-        if(xoptionsdata.length > 0)
+        header[3] = ((sizeof(header) - 4) >> 0) & 0xFF;
+        header[4] = ((sizeof(header) - 4) >> 8) & 0xFF;
+        header[5] = ((sizeof(header) - 6 + 1 + dstEncoded.length) >> 0) & 0xFF;
+        header[6] = ((sizeof(header) - 6 + 1 + dstEncoded.length) >> 8) & 0xFF;
+        header[7] = ((sizeof(header) - 8 + 1 + dstEncoded.length + 1 + srcEncoded.length) >> 0) & 0xFF;
+        header[8] = ((sizeof(header) - 8 + 1 + dstEncoded.length + 1 + srcEncoded.length) >> 8) & 0xFF;
+        int datalen = (int)data.length;
+        if(optionsdata.length > 0)
         {
-            header[9]  = ((4 + dstEncoded.length + srcEncoded.length + data.length) >> 0) & 0xFF;
-            header[10] = ((4 + dstEncoded.length + srcEncoded.length + data.length) >> 8) & 0xFF;
+            header[9]  = ((sizeof(header) - 10 + 1 + dstEncoded.length + 1 + srcEncoded.length + 2 + datalen) >> 0) & 0xFF;
+            header[10] = ((sizeof(header) - 10 + 1 + dstEncoded.length + 1 + srcEncoded.length + 2 + datalen) >> 8) & 0xFF;
         }
         else
         {
             header[9] = 0;
             header[10] = 0;
         }
-        [sccp_pdu appendBytes:header length:11];
+        [sccp_pdu appendBytes:header length:sizeof(header)];
     }
     else
     {
@@ -613,7 +629,7 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
         header[3] = 4;
         header[4] = 4 + dstEncoded.length;
         header[5] = 4 + dstEncoded.length + srcEncoded.length;
-        if(xoptionsdata.length > 0)
+        if(optionsdata.length > 0)
         {
             header[6] = 4 + dstEncoded.length + srcEncoded.length + data.length;
         }
@@ -621,21 +637,32 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
         {
             header[6] = 0;
         }
-        [sccp_pdu appendBytes:header length:7];
+        [sccp_pdu appendBytes:header length:sizeof(header)];
     }
+    
     
     [sccp_pdu appendByte:dstEncoded.length];
     [sccp_pdu appendData:dstEncoded];
     [sccp_pdu appendByte:srcEncoded.length];
     [sccp_pdu appendData:srcEncoded];
-    [sccp_pdu appendByte:data.length];
-    [sccp_pdu appendData:data];
-    if(xoptionsdata.length > 0)
+
+    if(isLUDT)
     {
-        [sccp_pdu appendData:xoptionsdata];
+        [sccp_pdu appendByte:((data.length >> 0) & 0xFF)];
+        [sccp_pdu appendByte:((data.length >> 8) & 0xFF)];
+        [sccp_pdu appendData:data];
+    }
+    else
+    {
+        [sccp_pdu appendByte:data.length];
+        [sccp_pdu appendData:data];
+    }
+    if(optionsdata.length > 0)
+    {
+        [sccp_pdu appendData:optionsdata];
         [sccp_pdu appendByte:0x00]; /* end of optional parameters */
     }
-
+    
     UMMTP3_Error result = [self sendPDU:sccp_pdu opc:opc dpc:dpc options:options routedToLinkset:outgoingLinkset sls:sls];
 
     NSString *s;
@@ -667,14 +694,16 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     if(result == UMMTP3_no_error)
     {
         id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-tx-destination"];
-        [ u sccpTraceSentPdu:sccp_pdu options:o];
-        [ self traceSentPdu:sccp_pdu options:o];
+        NSData *mtp3pdu = [UMLayerSCCP mtp3Wrap:sccp_pdu opc:opc dpc:dpc ni:_mtp3.networkIndicator si:MTP3_SERVICE_INDICATOR_SCCP];
+        [ u sccpTraceSentPdu:mtp3pdu options:o];
+        [ self traceSentPdu:mtp3pdu options:o];
     }
     else
     {
         id <UMSCCP_TraceProtocol> u = options[@"sccp-trace-dropped-destination"];
-        [ u sccpTraceDroppedPdu:sccp_pdu options:o];
-        [ self traceDroppedPdu:sccp_pdu options:o];
+        NSData *mtp3pdu = [UMLayerSCCP mtp3Wrap:sccp_pdu opc:opc dpc:dpc ni:_mtp3.networkIndicator si:MTP3_SERVICE_INDICATOR_SCCP];
+        [ u sccpTraceDroppedPdu:mtp3pdu options:o];
+        [ self traceDroppedPdu:mtp3pdu options:o];
     }
     return result;
 }
@@ -802,32 +831,33 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     
     NSData *srcEncoded = [src encode:_sccpVariant];
     NSData *dstEncoded = [dst encode:_sccpVariant];
-
     NSMutableData *sccp_pdu = [[NSMutableData alloc]init];
     
+
     if(isLUDTS)
     {
         uint8_t header[11];
         header[0] = SCCP_LUDTS;
         header[1] = returnCause;
         header[2] = hopCounter;
-        header[3] = ((8 + 0) >> 0) & 0xFF;
-        header[4] = ((8 + 0) >> 8) & 0xFF;
-        header[5] = ((8 + dstEncoded.length)>> 0) & 0xFF;
-        header[6] = ((8 + dstEncoded.length)>> 8) & 0xFF;
-        header[7] = ((8 + dstEncoded.length + srcEncoded.length) >> 0) & 0xFF;
-        header[8] = ((8 + dstEncoded.length + srcEncoded.length) >> 8) & 0xFF;
+        header[3] = ((sizeof(header) - 4) >> 0) & 0xFF;
+        header[4] = ((sizeof(header) - 4) >> 8) & 0xFF;
+        header[5] = ((sizeof(header) - 6 + 1 + dstEncoded.length) >> 0) & 0xFF;
+        header[6] = ((sizeof(header) - 6 + 1 + dstEncoded.length) >> 8) & 0xFF;
+        header[7] = ((sizeof(header) - 8 + 1 + dstEncoded.length + 1 + srcEncoded.length) >> 0) & 0xFF;
+        header[8] = ((sizeof(header) - 8 + 1 + dstEncoded.length + 1 + srcEncoded.length) >> 8) & 0xFF;
+        int datalen = (int)data.length;
         if(xoptionsdata.length > 0)
         {
-            header[9]  = ((8 + dstEncoded.length + srcEncoded.length + data.length) >> 0) & 0xFF;
-            header[10] = ((8 + dstEncoded.length + srcEncoded.length + data.length) >> 8) & 0xFF;
+            header[9]  = ((sizeof(header) - 10 + 1 + dstEncoded.length + 1 + srcEncoded.length + 2 + datalen) >> 0) & 0xFF;
+            header[10] = ((sizeof(header) - 10 + 1 + dstEncoded.length + 1 + srcEncoded.length + 2 + datalen) >> 8) & 0xFF;
         }
         else
         {
             header[9] = 0;
             header[10] = 0;
         }
-        [sccp_pdu appendBytes:header length:11];
+        [sccp_pdu appendBytes:header length:sizeof(header)];
     }
     else
     {
@@ -1305,13 +1335,13 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                                       transactionNumber:(NSNumber *)tid
                                               operation:(NSNumber *)op
                                      applicationContext:(NSString *)ac
-                                        incomingLinkset:(NSString *)linkset
+                                        incomingLinkset:(NSString *)linksetName
                                           sourceAddress:(NSString *)source
 {
     UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
     int causeValue = -1;
     id<UMSCCP_UserProtocol> localUser = NULL;
-    UMMTP3PointCode *pc = NULL;
+    UMMTP3PointCode *pc             = NULL;
     
     dict[@"original-number"]        = msisdn;
     dict[@"original-tt"]            = @(tt);
@@ -1319,7 +1349,7 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     dict[@"transaction-id"]         = tid ? tid : @"<null>";
     dict[@"operation"]              = op ? op : @"<null>";
     dict[@"application-context"]    = ac  ? ac : @"<null>";
-    dict[@"incoming-linkset"]       = linkset ? linkset : @"<null>";
+    dict[@"incoming-linkset"]       = linksetName ? linksetName : @"<null>";
     dict[@"source-address"]         = source ? source : @"<null>";
     
     SccpAddress *dst = [[SccpAddress alloc]initWithHumanReadableString:msisdn variant:_mtp3.variant];
@@ -1332,21 +1362,23 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     NSString *usedSelector=@"";
     
     UMSCCP_Packet *packet = [[UMSCCP_Packet alloc]init];
+    packet.tcapSharingTraceLevel = _tcapSharingTraceLevel;
     packet.instance = _appDelegate.instanceName;
-    packet.incomingLinksetName = linkset;
+    packet.incomingLinksetName = linksetName;
+
     packet.incomingCallingPartyAddress = [[SccpAddress alloc]initWithHumanReadableString:source sccpVariant:_sccpVariant mtp3Variant:_mtp3.variant];
     packet.incomingCalledPartyAddress = [[SccpAddress alloc]initWithHumanReadableString:msisdn sccpVariant:_sccpVariant mtp3Variant:_mtp3.variant];
     packet.incomingCalledPartyAddress.tt.tt = tt;
-    if(linkset.length > 0)
+    if(linksetName.length > 0)
     {
-        UMMTP3LinkSet *ls = [_mtp3 getLinkSetByName:linkset];
-        
+        UMMTP3LinkSet *ls = [_mtp3 getLinkSetByName:linksetName];
         if(ls == NULL)
         {
-            dict[@"incoming-linkset-error"]   = [NSString stringWithFormat:@"linkset %@ not found in mtp3 %@",linkset, _mtp3.layerName];
+            dict[@"incoming-linkset-error"]   = [NSString stringWithFormat:@"linkset %@ not found in mtp3 %@",linksetName, _mtp3.layerName];
         }
         else
         {
+<<<<<<< HEAD
             if(ls.calling_number_translation_in_name)
             {
                 dict[@"incoming-linkset-cga-translation-in"] = ls.calling_number_translation_in_name;
@@ -1381,19 +1413,62 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                 dict[@"incoming-called-ssn-before-translation"] = @(packet.incomingCalledPartyAddressBeforeTranslation.ssn.ssn);
                 dict[@"incoming-called-tt-before-translation"] = @(packet.incomingCalledPartyAddressBeforeTranslation.tt.tt);
 
+=======
+            packet.incomingLinksetTcapSharingInsideName    = ls.tcapSharingInsideName;
+            packet.incomingLinksetTcapSharingOutsideName   = ls.tcapSharingOutsideName;
+            packet.incomingLinksetTcapSharingPriority      = ls.tcapSharingPriority;
+            if(packet.incomingLinksetTcapSharingInsideName.length > 0)
+            {
+                UMSCCP_TcapSharingInstance *inst = [_appDelegate getTcapSharingInstance:packet.incomingLinksetTcapSharingInsideName];
+                packet.incomingLinksetTcapSharingInside = inst;
             }
-            dict[@"incoming-calling-address"] = packet.incomingCallingPartyAddress.address;
-            dict[@"incoming-calling-nai"] = @(packet.incomingCallingPartyAddress.nai.nai);
-            dict[@"incoming-calling-npi"] = @(packet.incomingCallingPartyAddress.npi.npi);
-            dict[@"incoming-calling-ssn"] = @(packet.incomingCallingPartyAddress.ssn.ssn);
-            dict[@"incoming-calling-tt"] = @(packet.incomingCallingPartyAddress.tt.tt);
+            if(packet.incomingLinksetTcapSharingOutsideName.length > 0)
+            {
+                UMSCCP_TcapSharingInstance *inst = [_appDelegate getTcapSharingInstance:packet.incomingLinksetTcapSharingOutsideName];
+                packet.incomingLinksetTcapSharingOutside = inst;
 
-            dict[@"incoming-called-address"] = packet.incomingCalledPartyAddress.address;
-            dict[@"incoming-called-nai"] = @(packet.incomingCalledPartyAddress.nai.nai);
-            dict[@"incoming-called-npi"] = @(packet.incomingCalledPartyAddress.npi.npi);
-            dict[@"incoming-called-ssn"] = @(packet.incomingCalledPartyAddress.ssn.ssn);
-            dict[@"incoming-called-tt"] = @(packet.incomingCalledPartyAddress.tt.tt);
+            }
+            if(ls.cga_number_translation_in)
+            {
+                packet.cga_number_translation_in = ls.cga_number_translation_in;
+                dict[@"incoming-linkset-calling-number-translation-in"] = ls.cga_number_translation_in.name;
+            }
+            if(ls.cda_number_translation_in)
+            {
+                packet.cda_number_translation_in = ls.cda_number_translation_in;
+                dict[@"incoming-linkset-called-number-translation-in"] = ls.cda_number_translation_in.name;
+
+            }
+            [packet applyIncomingNumberTranslation];
+            if((ls.cga_number_translation_in) || (ls.cda_number_translation_in))
+            {
+                dict[@"incoming-calling-address-before-translation"]    = packet.incomingCallingPartyAddressBeforeTranslation.address;
+                dict[@"incoming-calling-nai-before-translation"]        = @(packet.incomingCallingPartyAddressBeforeTranslation.nai.nai);
+                dict[@"incoming-calling-npi-before-translation"]        = @(packet.incomingCallingPartyAddressBeforeTranslation.npi.npi);
+                dict[@"incoming-calling-ssn-before-translation"]        = @(packet.incomingCallingPartyAddressBeforeTranslation.ssn.ssn);
+                dict[@"incoming-calling-tt-before-translation"]         = @(packet.incomingCallingPartyAddressBeforeTranslation.tt.tt);
+                dict[@"incoming-called-address-before-translation"]     = packet.incomingCalledPartyAddressBeforeTranslation.address;
+                dict[@"incoming-called-nai-before-translation"]         = @(packet.incomingCalledPartyAddressBeforeTranslation.nai.nai);
+                dict[@"incoming-called-npi-before-translation"]         = @(packet.incomingCalledPartyAddressBeforeTranslation.npi.npi);
+                dict[@"incoming-called-ssn-before-translation"]         = @(packet.incomingCalledPartyAddressBeforeTranslation.ssn.ssn);
+                dict[@"incoming-called-tt-before-translation"]          = @(packet.incomingCalledPartyAddressBeforeTranslation.tt.tt);
+                dst = [packet.incomingCalledPartyAddress copy];
+>>>>>>> release-2.1
+            }
+
+            dict[@"incoming-calling-address"]   = packet.incomingCallingPartyAddress.address;
+            dict[@"incoming-calling-nai"]       = @(packet.incomingCallingPartyAddress.nai.nai);
+            dict[@"incoming-calling-npi"]       = @(packet.incomingCallingPartyAddress.npi.npi);
+            dict[@"incoming-calling-ssn"]       = @(packet.incomingCallingPartyAddress.ssn.ssn);
+            dict[@"incoming-calling-tt"]        = @(packet.incomingCallingPartyAddress.tt.tt);
+
+            dict[@"incoming-called-address"]    = packet.incomingCalledPartyAddress.address;
+            dict[@"incoming-called-nai"]        = @(packet.incomingCalledPartyAddress.nai.nai);
+            dict[@"incoming-called-npi"]        = @(packet.incomingCalledPartyAddress.npi.npi);
+            dict[@"incoming-called-ssn"]        = @(packet.incomingCalledPartyAddress.ssn.ssn);
+            dict[@"incoming-called-tt"]         = @(packet.incomingCalledPartyAddress.tt.tt);
         }
+        
         if(ls.sccp_screeningPluginName)
         {
             if(ls.sccp_screeningPlugin==NULL)
@@ -1555,8 +1630,8 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     {
         dict[@"sccp-statistic-prefix"] = s;
     }
-    BOOL routingResult = [self routePacket:packet];
-    dict[@"routing-result"] = @(routingResult);
+    UMSCCP_RoutingState *routingState   = [self routePacket:packet];
+    dict[@"routing-result"]             = routingState.objectValue;
     if(packet.outgoingLinksetName)
     {
         dict[@"outgoing-linkset"] = packet.outgoingLinksetName;
@@ -1679,59 +1754,144 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
         case SCCP_ReturnCause_SegmentationFailure:
             return @"Segmentation failure";
             break;
+            /*
         default:
             return [NSString stringWithFormat:@"Unknown Cause Value (%d)",causeValue];
             break;
+             */
     }
 }
-- (BOOL)routePacket:(UMSCCP_Packet *)packet
+
+
+
+
+- (void)sendStatusBack:(UMSCCP_RoutingState *)routingState
 {
-    UMSCCP_ReceivedSegment *firstSegment = NULL;
-
-    UMSCCP_Packet *routingPacket = packet;
+    NSString *outgoingLinkset = routingState.outgoingLinksetName;
     
-    if(packet.incomingOpc==NULL)
+    if(routingState.errorProcessing == UMSCCP_RoutingErrorProcessing_Ignore)
     {
-        packet.incomingOpc = _mtp3.opc;
+        return;
     }
-    packet.outgoingOpc = _mtp3.opc;
+    BOOL isLUDT = (routingState.errorProcessing==UMSCCP_RoutingErrorProcessing_LUDTS);
+    BOOL isXUDT = (routingState.errorProcessing==UMSCCP_RoutingErrorProcessing_XUDTS);
+    BOOL isUDT  = (routingState.errorProcessing==UMSCCP_RoutingErrorProcessing_UDTS);
 
-    if(self.logLevel <=UMLOG_DEBUG)
+    NSArray *packetsToSend;
+    if(routingState.errorPacketSegments.count > 0)
     {
-        NSMutableString *s = [[NSMutableString alloc]init];
-        [s appendFormat:@"Entering routePacket:\n"];
-        if(packet.incomingFromLocal)
+        packetsToSend = routingState.errorPacketSegments;
+    }
+    else
+    {
+        packetsToSend = @[routingState.errorPacket];
+    }
+
+    for(UMSCCP_Packet *packet in packetsToSend)
+    {
+        if(_routeErrorsBackToSource) /* we always send the error back on the linkset and slc where it came from */
         {
-            [s appendFormat:@"  SCCP %@   from local\n",packet.incomingPacketType];
+            if(isXUDT || isLUDT)
+            {
+                [self sendLXUDTS:packet.incomingSccpData
+                         calling:packet.incomingCalledPartyAddress
+                          called:packet.incomingCallingPartyAddress
+                           class:packet.incomingServiceClass
+                        hopCount:0x0F
+                     returnCause:routingState.cause.intValue
+                             opc:routingState.opcForErrors
+                             dpc:routingState.dpcForErrors
+                     optionsData:packet.incomingOptionalData
+                         options:@{}
+                        provider:_mtp3
+                 routedToLinkset:&outgoingLinkset
+                             sls:packet.sls
+                         isLUDTS:isLUDT];
+                routingState.outgoingLinksetName = outgoingLinkset;
+            }
+            else if(isUDT)
+            {
+                [self sendUDTS:packet.incomingSccpData
+                       calling:packet.incomingCalledPartyAddress
+                        called:packet.incomingCallingPartyAddress
+                         class:packet.incomingServiceClass
+                   returnCause:routingState.cause.intValue
+                           opc:routingState.opcForErrors
+                           dpc:routingState.dpcForErrors
+                       options:@{}
+                      provider:_mtp3
+               routedToLinkset:&outgoingLinkset
+                           sls:packet.sls];
+                routingState.outgoingLinksetName = outgoingLinkset;
+            }
         }
         else
         {
-            [s appendFormat:@"  SCCP %@   from linksetLS: %@\n",packet.incomingPacketType,packet.incomingLinksetName];
+            if(isLUDT)
+            {
+                [self generateLUDTS:packet.incomingSccpData
+                            calling:packet.incomingCalledPartyAddress
+                             called:packet.incomingCallingPartyAddress
+                              class:packet.incomingServiceClass
+                        returnCause:routingState.cause.intValue
+                                opc:routingState.opcForErrors
+                                dpc:routingState.dpcForErrors
+                            options:@{}
+                           provider:_mtp3
+                                sls:routingState.slcForErrors.intValue];
+            }
+            else if(isXUDT)
+            {
+                [self generateXUDTS:packet.incomingSccpData
+                            calling:packet.incomingCalledPartyAddress
+                             called:packet.incomingCallingPartyAddress
+                              class:packet.incomingServiceClass
+                        returnCause:routingState.cause.intValue
+                                opc:routingState.opcForErrors
+                                dpc:routingState.dpcForErrors
+                            options:@{}
+                           provider:_mtp3
+                                sls:routingState.slcForErrors.intValue];
+            }
+            else if(isUDT)
+            {
+                [self generateUDTS:packet.incomingSccpData
+                           calling:packet.incomingCalledPartyAddress
+                            called:packet.incomingCallingPartyAddress
+                             class:packet.incomingServiceClass
+                       returnCause:routingState.cause.intValue
+                               opc:routingState.opcForErrors
+                               dpc:routingState.dpcForErrors
+                           options:@{}
+                          provider:_mtp3
+                               sls:routingState.slcForErrors.intValue];
+            }
         }
-        [s appendFormat:@"  OPC: %@\n",packet.incomingOpc];
-        [s appendFormat:@"  DPC: %@\n",packet.incomingDpc];
-        [s appendFormat:@"  CgPA: %@\n",packet.incomingCallingPartyAddress];
-        [s appendFormat:@"  CdPA: %@\n",packet.incomingCalledPartyAddress];
-        [s appendFormat:@"  DataLen: %d\n",(int)packet.incomingSccpData.length];
-        [s appendFormat:@"  Data: %@\n",packet.incomingSccpData];
-        [s appendFormat:@"  Segment: %@\n",packet.incomingSegment];
-        [self.logFeed debugText:s];
     }
+}
 
-    /* lets pass through screening first */
-    BOOL returnValue = NO;
-    BOOL doSendStatus = NO;
-    SCCP_ReturnCause causeValue = SCCP_ReturnCause_not_set;
-    NSError *err = NULL;
-    UMSccpScreening_result r = UMSccpScreening_undefined;
-    UMMTP3LinkSet *ls = [packet.incomingMtp3Layer getLinkSetByName:packet.incomingLinksetName];
+
+
+- (void)processIncomingScreening:(UMSCCP_RoutingState *)routingState
+{
+    UMSCCP_Packet *packet = routingState.inboundPacket;
+    routingState.status = UMSCCP_RoutingStatus_success;
+
+    /* can only return UMSCCP_RoutingStatus_failedSendError or UMSCCP_RoutingStatus_success */
+    /* lets pass through screening */
+    NSError *err                    = NULL;
+    UMSccpScreening_result r        = UMSccpScreening_undefined;
+    UMMTP3LinkSet *ls               = [packet.incomingMtp3Layer getLinkSetByName:packet.incomingLinksetName];
     if(packet.incomingMtp3Layer)
     {
         if(ls)
         {
             if(self.logLevel <=UMLOG_DEBUG)
             {
-                [self logDebug:[NSString stringWithFormat:@"SCCP-SCREENING: calling screenSccpPacketInbound(packet,error,plugin=%@(%@),traceDestination=%@",ls.sccp_screeningPlugin,ls.sccp_screeningPluginName,ls.name]];
+                [self logDebug:[NSString stringWithFormat:@"SCCP-SCREENING: calling screenSccpPacketInbound(packet,error,plugin=%@(%@),traceDestination=%@",
+                                ls.sccp_screeningPlugin,
+                                ls.sccp_screeningPluginName,
+                                ls.name]];
             }
             r = [self screenSccpPacketInbound:packet
                                         error:&err
@@ -1744,8 +1904,9 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
             if((r==UMSccpScreening_explicitlyDenied)||(r==UMSccpScreening_implicitlyDenied))
             {
                 [self logMajorError:[NSString stringWithFormat:@"sccp-linkset-screening failed with error %@",err]];
+                routingState.status = UMSCCP_RoutingStatus_failed;
+                routingState.cause = @(SCCP_ReturnCause_ErrorInLocalProcessing);
             }
-            
             if((r==UMSccpScreening_undefined) && (_sccp_screeningPlugin))
             {
                 r = [self screenSccpPacketInbound:packet
@@ -1759,8 +1920,11 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                 if((r==UMSccpScreening_explicitlyDenied)||(r==UMSccpScreening_implicitlyDenied))
                 {
                     [self logMajorError:[NSString stringWithFormat:@"sccp-linkset-screening failed with error %@",err]];
+                    routingState.status = UMSCCP_RoutingStatus_failed;
+                    routingState.cause = @(SCCP_ReturnCause_ErrorInLocalProcessing);
                 }
             }
+
         }
         else
         {
@@ -1773,24 +1937,24 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     else if(self.logLevel <=UMLOG_DEBUG)
     {
         [self logDebug:@"SCCP-SCREENING: packet.incomingMtp3Layer is not set"];
+        routingState.status = UMSCCP_RoutingStatus_failed;
     }
+}
 
-    NSArray <UMSCCP_ReceivedSegment *> *segs =  NULL;
-    BOOL processSinglePdu = NO;
-    BOOL processMultipleSegments = NO;
-    BOOL processScreening = NO;
-    BOOL processRouting = NO;
-    BOOL processSingleDelivery = NO;
-    BOOL processSegmentedDelivery = NO;
-    BOOL isLUDT = (packet.incomingServiceType==SCCP_LUDT);
-    NSMutableData *combined = NULL;
+- (void)processIncomingReassembly:(UMSCCP_RoutingState *)routingState
+{
+    UMSCCP_Packet *packet = routingState.inboundPacket;
+
+    routingState.status = UMSCCP_RoutingStatus_success;
+    UMSCCP_ReceivedSegment              *firstSegment = NULL;
+    NSArray <UMSCCP_ReceivedSegment *>  *segs;
     if(packet.incomingSegment)
     {
-        processSinglePdu = NO;
-        processScreening = NO;
-        processRouting = NO;
-        processSingleDelivery = NO;
-        processSegmentedDelivery = NO;
+        if(_logLevel <=UMLOG_DEBUG)
+        {
+            [self logDebug:[NSString stringWithFormat:@"packet.incomingSegment=%@",packet.incomingSegment]];
+        }
+        routingState.status = UMSCCP_RoutingStatus_awaitingSegments;
         UMSCCP_ReceivedSegment *s = [[UMSCCP_ReceivedSegment alloc]init];
         s.src = packet.outgoingCallingPartyAddress;
         s.dst = packet.outgoingCalledPartyAddress;
@@ -1812,33 +1976,25 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
         }
         if(self.logLevel <=UMLOG_DEBUG)
         {
-            [self.logFeed debugText:[NSString stringWithFormat:@"calling processReceivedSegment:%@",s.segment]];
+            [self.logFeed debugText:[NSString stringWithFormat:@"calling processReceivedSegment:%@",s]];
         }
-
         segs = [ _pendingSegmentsStorage processReceivedSegment:s];
         /* returns an ordered array of segments */
         if(segs)
         {
-
             if(self.logLevel <=UMLOG_DEBUG)
             {
-
-                [self.logFeed debugText:@"processReceivedSegment returns Array:"];
+                [self.logFeed debugText:@"all segments received. processReceivedSegment returns Array:"];
                 NSInteger i=0;
                 for(UMSCCP_ReceivedSegment *s in segs)
                 {
                     [self.logFeed debugText:[NSString stringWithFormat:@"[%ld]: %@",i++,s.segment]];
                 }
             }
-            processMultipleSegments = YES;
-            processRouting = YES;
-            processSingleDelivery = NO;
-            processSegmentedDelivery = YES;
-
             /* the segments are already in order here. */
             /* combine the segments */
             firstSegment = NULL;
-            combined = [[NSMutableData alloc]init];
+            NSMutableData *combined = [[NSMutableData alloc]init];
             NSInteger i=0;
             for(UMSCCP_ReceivedSegment *s in segs)
             {
@@ -1852,797 +2008,1118 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                     [combined appendData:s.segment.data];
                 }
             }
-            firstSegment.combinedPacket = [firstSegment.segmentedPacket copy];
+            UMSCCP_Packet *combinedPacket = [firstSegment.segmentedPacket copy];
             if(self.logLevel <=UMLOG_DEBUG)
             {
                 [self.logFeed debugText:[NSString stringWithFormat:@"combined Data: %@",combined]];
                 [self.logFeed debugText:[NSString stringWithFormat:@"firstSegment: %@",firstSegment]];
             }
-
+            
             /* at this point "combined" should have the reassembled PDU */
-            firstSegment.combinedPacket.incomingSccpData = combined;
-            firstSegment.combinedPacket.outgoingSccpData = combined;
-            processScreening = YES;
-            processRouting = YES;
-            processSegmentedDelivery = YES;
-            processSingleDelivery = YES;
-
-			if(self.logLevel <=UMLOG_DEBUG)
-   			{
+            combinedPacket.incomingSccpData = combined;
+            combinedPacket.outgoingSccpData = combined;
+            
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
                 NSString *s = [NSString stringWithFormat:@"combined PDU %@",firstSegment.combinedPacket.incomingSccpData];
                 [self.logFeed debugText:s];
-    		}
-            /* filtering of combined packets */
-            UMSCCP_FilterResult r =  UMSCCP_FILTER_RESULT_UNMODIFIED;
-            r = [_filterDelegate filterInbound:firstSegment.combinedPacket];
-            if(r & UMSCCP_FILTER_RESULT_DROP)
-            {
-                [_logFeed debugText:@"Filter returns DROP for combined packet"];
-                return NO;
             }
-            if(r & UMSCCP_FILTER_RESULT_STATUS)
+            /* all segments received */
+            routingState.status  = UMSCCP_RoutingStatus_success;
+            routingState.inboundReassembledPacket = combinedPacket;
+            if(self.logLevel <=UMLOG_DEBUG)
             {
-                NSString *outgoingLinkset;
-                if(_routeErrorsBackToSource)
-                {
-                    [self sendLXUDTS:firstSegment.combinedPacket.incomingSccpData
-                            calling:firstSegment.combinedPacket.incomingCalledPartyAddress
-                             called:firstSegment.combinedPacket.incomingCallingPartyAddress
-                              class:firstSegment.combinedPacket.incomingServiceClass
-                           hopCount:0x0F
-                        returnCause:firstSegment.combinedPacket.outgoingReturnCause
-                                opc:_mtp3.opc /* errors are always sent from this instance */
-                                dpc:firstSegment.combinedPacket.incomingOpc
-                        optionsData:firstSegment.combinedPacket.incomingOptionalData
-                            options:@{}
-                           provider:_mtp3
-                    routedToLinkset:&outgoingLinkset
-                                sls:firstSegment.combinedPacket.sls
-                             isLUDTS:isLUDT];
-                    
-                }
-                else
-                {
-                    if(isLUDT)
-                    {
-                        [self generateLUDTS:firstSegment.combinedPacket.incomingSccpData
-                                          calling:firstSegment.combinedPacket.incomingCalledPartyAddress
-                                           called:firstSegment.combinedPacket.incomingCallingPartyAddress
-                                            class:firstSegment.combinedPacket.incomingServiceClass
-                                      returnCause:firstSegment.combinedPacket.outgoingReturnCause
-                                              opc:_mtp3.opc /* errors are always sent from this instance */
-                                              dpc:firstSegment.combinedPacket.incomingOpc
-                                          options:@{}
-                                         provider:_mtp3
-                                              sls:firstSegment.combinedPacket.sls];
+                [self.logFeed debugText:[NSString stringWithFormat:@"inboundReassembledPacket is set to  %@",routingState.inboundReassembledPacket]];
+            }
 
-                    }
-                    else
-                    {
-                        [self generateXUDTS:firstSegment.combinedPacket.incomingSccpData
-                                          calling:firstSegment.combinedPacket.incomingCalledPartyAddress
-                                           called:firstSegment.combinedPacket.incomingCallingPartyAddress
-                                            class:firstSegment.combinedPacket.incomingServiceClass
-                                      returnCause:firstSegment.combinedPacket.outgoingReturnCause
-                                              opc:_mtp3.opc /* errors are always sent from this instance */
-                                              dpc:firstSegment.combinedPacket.incomingOpc
-                                          options:@{}
-                                         provider:_mtp3
-                                              sls:firstSegment.combinedPacket.sls];
-
-                    }
-                }
-                return NO;
+            NSMutableArray *arr =  [[NSMutableArray alloc]init];
+            for(UMSCCP_ReceivedSegment *s in segs)
+            {
+                [arr addObject:s];
+            }
+            routingState.inboundPacketSegments = arr;
+            routingState.packetSegmentsToDeliver = arr;
+            routingState.packetToDeliver = routingState.inboundReassembledPacket;
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                [self.logFeed debugText:[NSString stringWithFormat:@"inboundPacketSegments is set to  %@",routingState.inboundPacketSegments]];
             }
         }
         else
         {
             if(self.logLevel <=UMLOG_DEBUG)
             {
-                [self.logFeed debugText:[NSString stringWithFormat:@"calling processReceivedSegment returns NULL"]];
+                [self.logFeed debugText:@"  not all segments received yet"];
             }
-            processMultipleSegments = NO;
-            processRouting = NO;
-            processSingleDelivery = NO;
-            processSegmentedDelivery = NO;
+            /* some segments received */
+            routingState.status  = UMSCCP_RoutingStatus_awaitingSegments;
+            routingState.inboundReassembledPacket = NULL;
+            routingState.packetSegmentsToDeliver = NULL;
+            routingState.packetToDeliver = NULL;
         }
     }
     else
     {
-        processSinglePdu = YES;
-        processMultipleSegments = NO;
-        processScreening = YES;
-        processRouting = YES;
-        processSingleDelivery = YES;
-        processSegmentedDelivery = NO;
+        routingState.status  = UMSCCP_RoutingStatus_success;
+        routingState.inboundReassembledPacket = [packet copy]; /* single packet */
+        routingState.packetSegmentsToDeliver = NULL;
+        routingState.packetToDeliver = routingState.inboundReassembledPacket;
+    }
+}
+
+
+
+
+- (void)processIncomingFiltering:(UMSCCP_RoutingState *)routingState
+{
+    UMSCCP_Packet *packet = routingState.inboundReassembledPacket;
+    /* filtering of combined packets */
+    UMSCCP_FilterResult r =  UMSCCP_FILTER_RESULT_UNMODIFIED;
+    r = [_filterDelegate filterInbound:packet];
+    if(r & UMSCCP_FILTER_RESULT_DROP)
+    {
+        [_logFeed debugText:@"Filter returns DROP for combined packet"];
+        routingState.status = UMSCCP_RoutingStatus_dropPacket;
+    }
+    if(r & UMSCCP_FILTER_RESULT_STATUS)
+    {
+        routingState.status = UMSCCP_RoutingStatus_failed;
+    }
+    routingState.status = UMSCCP_RoutingStatus_success;    
+}
+
+- (void)processPreroutingTcapSharing:(UMSCCP_RoutingState *)routingState
+{
+    UMSCCP_Packet               *packet         = routingState.inboundReassembledPacket;
+    UMSCCP_TcapSharingInstance  *inside_inst    = packet.incomingLinksetTcapSharingInside;
+    UMSCCP_TcapSharingInstance  *outside_inst   = packet.incomingLinksetTcapSharingOutside;
+    if(packet.tcapSharingTraceLevel <=UMLOG_DEBUG)
+    {
+        NSMutableString *s = [[NSMutableString alloc]init];
+        [s appendString:@"processPreroutingTcapSharing:\n"];
+        [s appendFormat:@"\tincomingLinksetTcapSharingInsideName: %@\n",
+            packet.incomingLinksetTcapSharingInsideName];
+        [s appendFormat:@"\tincomingLinksetTcapSharingOutsideName: %@",
+            packet.incomingLinksetTcapSharingOutsideName];
+
+        [s appendFormat:@"\tincomingLinksetTcapSharingInside: %@\n",
+            packet.incomingLinksetTcapSharingInside.name];
+        [s appendFormat:@"\tincomingLinksetTcapSharingOutside: %@",
+            packet.incomingLinksetTcapSharingOutside.name];
+        [self.logFeed debugText:s];
+    }
+    
+    UMSCCP_TcapSharing_result r = UMSCCP_TcapSharing_routeNormal;
+    if(outside_inst)
+    {
+        if((self.logLevel <=UMLOG_DEBUG) || (packet.tcapSharingTraceLevel <=UMLOG_DEBUG))
+        {
+            NSMutableString *s = [NSMutableString stringWithFormat:@"TCAP-SHARING-PREROUTING-OUTSIDE %@",outside_inst.name];
+            [self logDebug:s];
+        }
+        r = [outside_inst preroutingPacketOutside:packet];
+    }
+    else if(inside_inst)
+    {
+        if((self.logLevel <=UMLOG_DEBUG) || (packet.tcapSharingTraceLevel <=UMLOG_DEBUG))
+        {
+            NSMutableString *s = [NSMutableString stringWithFormat:@"TCAP-SHARING-PREROUTING-INSIDE %@",inside_inst.name];
+            [self logDebug:s];
+        }
+        r = [inside_inst preroutingPacketInside:packet];
+    }
+    else
+    {
+        routingState.status = UMSCCP_RoutingStatus_success;
+        return;
+    }
+    if(r == UMSCCP_TcapSharing_skipRouting)
+    {
+       routingState.skipRouting = YES;
+       if(packet.forcedLinkset)
+       {
+           if((self.logLevel <=UMLOG_DEBUG) || (packet.tcapSharingTraceLevel <=UMLOG_DEBUG))
+           {
+               NSMutableString *s = [NSMutableString stringWithFormat:@"TCAP-SHARING: forcerouted to %@",packet.forcedLinkset];
+               [self logDebug:s];
+           }
+           routingState.forcedLinkset = packet.forcedLinkset;
+           packet.outgoingLinksetName = packet.forcedLinkset;
+
+        }
+        if(packet.forcedDpc)
+        {
+            if((self.logLevel <=UMLOG_DEBUG) || (packet.tcapSharingTraceLevel <=UMLOG_DEBUG))
+            {
+                NSMutableString *s = [NSMutableString stringWithFormat:@"TCAP-SHARING: forcerouted to DPC %@",packet.forcedDpc];
+                [self logDebug:s];
+            }
+            routingState.forcedDpc = packet.forcedDpc;
+            packet.outgoingDpc = packet.forcedDpc;
+        }
+        if(packet.forcedDestinationGroup)
+        {
+            if((self.logLevel <=UMLOG_DEBUG) || (packet.tcapSharingTraceLevel <=UMLOG_DEBUG))
+            {
+                NSMutableString *s = [NSMutableString stringWithFormat:@"TCAP-SHARING: forcerouted to Destination %@",packet.forcedDestinationGroup.name];
+                [self logDebug:s];
+            }
+            routingState.forcedDestinationGroup = packet.forcedDestinationGroup;
+        }
+    }
+    if(packet.tcapSharingTraceLevel <=UMLOG_DEBUG)
+    {
+        [self.logFeed debugText:@"processPreroutingTcapSharing completed"];
+    }
+}
+
+- (void) processPostroutingTcapSharing:(UMSCCP_RoutingState *)routingState
+{
+    UMSCCP_Packet               *packet         = routingState.inboundReassembledPacket;
+    UMSCCP_TcapSharingInstance  *inside_inst    = packet.incomingLinksetTcapSharingInside;
+    UMSCCP_TcapSharingInstance  *outside_inst   = packet.incomingLinksetTcapSharingOutside;
+    if(packet.tcapSharingTraceLevel <=UMLOG_DEBUG)
+    {
+        NSMutableString *s = [[NSMutableString alloc]init];
+        [s appendString:@"processPostroutingTcapSharing:\n"];
+        [s appendFormat:@"\tincomingLinksetTcapSharingInside: %@\n",
+            packet.incomingLinksetTcapSharingInside.name];
+        [s appendFormat:@"\tincomingLinksetTcapSharingOutside: %@",
+            packet.incomingLinksetTcapSharingOutside.name];
+        [self.logFeed debugText:s];
     }
 
+    if(outside_inst)
+    {
+        if((self.logLevel <=UMLOG_DEBUG) || (packet.tcapSharingTraceLevel <=UMLOG_DEBUG))
+        {
+            NSMutableString *s = [NSMutableString stringWithFormat:@"TCAP-SHARING-POSTROUTING-OUTSIDE %@",outside_inst.name];
+            [self logDebug:s];
+        }
+        routingState.tcapSharingResult = [outside_inst postroutingPacketOutside:packet];
+    }
+    else if(inside_inst)
+    {
+        if((self.logLevel <=UMLOG_DEBUG) || (packet.tcapSharingTraceLevel <=UMLOG_DEBUG))
+        {
+            NSMutableString *s = [NSMutableString stringWithFormat:@"TCAP-SHARING-POSTROUTING-INSIDE %@",inside_inst.name];
+            [self logDebug:s];
+        }
+        routingState.tcapSharingResult = [inside_inst postroutingPacketInside:packet];
+    }
+    else
+    {
+        routingState.status = UMSCCP_RoutingStatus_success;
+        if(packet.tcapSharingTraceLevel <=UMLOG_DEBUG)
+        {
+            [self.logFeed debugText:@"processPostroutingTcapSharing completed with success"];
+        }
+    }
+}
+
+- (void)processForcedRouting:(UMSCCP_RoutingState *)routingState
+{
+}
+
+- (void)processRouting:(UMSCCP_RoutingState *)routingState
+{
+    UMSCCP_Packet   *routingPacket      = routingState.inboundReassembledPacket;
+    NSData          *payload            = routingPacket.incomingSccpData;
+    id<UMSCCP_UserProtocol> localUser   = NULL;
+    UMMTP3PointCode *pc                 = NULL;
+    SccpAddress *dst                    = routingPacket.incomingCalledPartyAddress;
+    SccpAddress *called_out             = NULL;
+    NSString *usedSelector              = NULL;
+    NSNumber *tid                       = NULL;
+    NSString *ac                        = NULL;
+    NSNumber *op                        = NULL;
+    
+    @try
+    {
+        if(payload)
+        {
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                [self.logFeed debugText:@" combined YES"];
+            }
+            tid = [self transactionNumberFromHexString:routingPacket.incoming_tcap_dtid];
+            op  = [self extractOperation:payload applicationContext:&ac];
+        }
+        else
+        {
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                [self.logFeed debugText:@" we do not have a payload. WTF?"];
+                routingState.status = UMSCCP_RoutingStatus_failed;
+                routingState.cause =  @(SCCP_ReturnCause_DestinationCannotPerformReassembly);
+            }
+        }
+        if(self.logLevel <=UMLOG_DEBUG)
+        {
+            if(tid)
+            {
+                [self.logFeed debugText:[NSString stringWithFormat:@" extracted TID %@",tid]];
+            }
+            if(op)
+            {
+                [self.logFeed debugText:[NSString stringWithFormat:@" extracted op %@",op]];
+            }
+            if(ac)
+            {
+                [self.logFeed debugText:[NSString stringWithFormat:@" extracted ac %@",ac]];
+            }
+        }
+
+    }
+    @catch(NSException *e)
+    {
+        [self.logFeed majorErrorText:[NSString stringWithFormat:@"Exception:%@",e]];
+    }
+    
     if(self.logLevel <=UMLOG_DEBUG)
     {
-        [self.logFeed debugText:[NSString stringWithFormat:@" processSinglePdu %@",processSinglePdu ? @"YES":@"NO"]];
-        [self.logFeed debugText:[NSString stringWithFormat:@" processMultipleSegments %@",processMultipleSegments ? @"YES":@"NO"]];
-        [self.logFeed debugText:[NSString stringWithFormat:@" processScreening %@",processScreening ? @"YES":@"NO"]];
-        [self.logFeed debugText:[NSString stringWithFormat:@" processRouting %@",processRouting ? @"YES":@"NO"]];
-        [self.logFeed debugText:[NSString stringWithFormat:@" processSingleDelivery %@",processSingleDelivery ? @"YES":@"NO"]];
-        [self.logFeed debugText:[NSString stringWithFormat:@" processSegmentedDelivery %@",processSegmentedDelivery ? @"YES":@"NO"]];
+        [self.logFeed debugText:@" calling find routes"];
     }
-    if(processScreening)
+    
+    SCCP_ReturnCause causeValue = SCCP_ReturnCause_not_set;
+    
+    SccpDestinationGroup *grp = [self findRoutes:dst
+                                           cause:&causeValue
+                                newCalledAddress:&called_out
+                                       localUser:&localUser
+                                   fromLocalUser:routingPacket.incomingFromLocal
+                                    usedSelector:&usedSelector
+                               transactionNumber:tid
+                                       operation:op
+                                applicationContext:ac];
+    routingState.destinationGroup = grp;
+    routingPacket.errorCauseValue = causeValue;
+    
+    if(self.logLevel <=UMLOG_DEBUG)
     {
-        if(self.logLevel <=UMLOG_DEBUG)
-        {
-            [self.logFeed debugText:@"processing screening"];
-        }
-        if(_sccp_screeningPlugin)
-        {
-            if(combined!=NULL)
-            {
-                firstSegment.combinedPacket.incomingSccpData = combined;
-                firstSegment.combinedPacket.outgoingSccpData = combined;
-                /* we do screening of segmented pakcet after reassembly */
-                r = [self screenSccpPacketInbound:firstSegment.combinedPacket
-                                            error:&err
-                                           plugin:_sccp_screeningPlugin
-                                 traceDestination:ls];
-            }
-            else
-            {
-                /* we do screening of segmented pakcet after reassembly */
-                r = [self screenSccpPacketInbound:packet
-                                            error:&err
-                                           plugin:_sccp_screeningPlugin
-                                 traceDestination:ls];
-            }
-            if(err)
-            {
-                [self logMajorError:[NSString stringWithFormat:@"sccp-instance-screening failed with error %@",err]];
-            }
-        }
-        if((r==UMSccpScreening_explicitlyDenied)||(r==UMSccpScreening_implicitlyDenied))
-        {
-            if(self.logLevel <=UMLOG_DEBUG)
-            {
-                [self.logFeed debugText:@"screening denied"];
-            }
-            causeValue = SCCP_ReturnCause_ErrorInMessageTransport;
-            if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
-            {
-                doSendStatus = YES;
-            }
-        }
-        else if(r==UMSccpScreening_errorResult)
-        {
-            if(self.logLevel <=UMLOG_DEBUG)
-            {
-                [self.logFeed debugText:@"screening error result"];
-            }
-            causeValue = SCCP_ReturnCause_ErrorInLocalProcessing;
-            if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
-            {
-                doSendStatus = YES;
-            }
-        }
+        [self.logFeed debugText:[NSString stringWithFormat:@" returns %@",grp]];
     }
 
-    if(processRouting)
+    routingPacket.routingSelector = usedSelector;
+    if(self.logLevel <=UMLOG_DEBUG)
     {
-        if(self.logLevel <=UMLOG_DEBUG)
+        NSMutableString *s = [[NSMutableString alloc]init];
+        [s appendFormat:@"findRoutes(%@) returns:\n", dst];
+        NSString *s1 = [grp descriptionWithRt:_sccpL3RoutingTable];
+        if(s1)
         {
-            [self.logFeed debugText:@"processRouting"];
+            [s appendString:s1];
         }
-
-        id<UMSCCP_UserProtocol> localUser = NULL;
-        UMMTP3PointCode *pc = NULL;
-        UMLayerMTP3 *provider = _mtp3;
-        NSString *outgoingLinkset = NULL;
-        SccpAddress *dst = packet.incomingCalledPartyAddress;
-        SccpAddress *called_out = NULL;
-        NSString *usedSelector=NULL;
-        NSNumber *tid = NULL;
-        NSString *ac = NULL;
-        NSNumber *op = NULL;
-
-        @try
+        if(causeValue !=SCCP_ReturnCause_not_set)
         {
-            if(combined)
-            {
-                if(self.logLevel <=UMLOG_DEBUG)
-                {
-                    [self.logFeed debugText:@" combined YES"];
-                }
-
-                tid = [self extractTransactionNumber:combined];
-                op = [self extractOperation:combined applicationContext:&ac];
-
-                routingPacket = firstSegment.combinedPacket;
-
-                if(self.logLevel <=UMLOG_DEBUG)
-                {
-                    NSLog(@"firstSegment: %@",firstSegment);
-                    NSLog(@"firstSegment.combinedPacket: %@",firstSegment.combinedPacket);
-                    NSLog(@"firstSegment.segmentedPacket: %@",firstSegment.segmentedPacket);
-                    NSLog(@"RoutingPacket: %@",routingPacket);
-                    NSLog(@"SLS: %d",routingPacket.sls);
-                }
-            }
-            else
-            {
-                if(self.logLevel <=UMLOG_DEBUG)
-                {
-                    [self.logFeed debugText:@" combined NO"];
-                }
-                /* we might not be able to extract tid/opcode/ac number from a single segment */
-                tid = [self extractTransactionNumber:packet.incomingSccpData];
-                op = [self extractOperation:packet.incomingSccpData applicationContext:&ac];
-                routingPacket = packet;
-            }
-            if(self.logLevel <=UMLOG_DEBUG)
-            {
-                if(tid)
-                {
-                    [self.logFeed debugText:[NSString stringWithFormat:@" extracted TID %@",tid]];
-                }
-                if(op)
-                {
-                    [self.logFeed debugText:[NSString stringWithFormat:@" extracted op %@",op]];
-                }
-                if(ac)
-                {
-                    [self.logFeed debugText:[NSString stringWithFormat:@" extracted ac %@",ac]];
-                }
-            }
-
+            [s appendFormat:@"    causeValue: %d %@\n",causeValue,[UMLayerSCCP causeValueToString:causeValue]];
         }
-        @catch(NSException *e)
-        {
-            [self.logFeed majorErrorText:[NSString stringWithFormat:@"Exception:%@",e]];
-        }
-        
-        
-        
-        if(self.logLevel <=UMLOG_DEBUG)
-        {
-            [self.logFeed debugText:@" calling find routes"];
-        }
+        [s appendFormat:@"    newCalledAddress: %@\n",called_out ? called_out : @"(null)"];
+        [s appendFormat:@"    localUser: %@\n", localUser ? localUser.name : @"(null)"];
+        [s appendFormat:@"    fromLocal: %@\n",routingPacket.incomingFromLocal ? @"YES" : @"NO"];
+        [self logDebug:s];
+    }
 
-        SccpDestinationGroup *grp = [self findRoutes:dst
-                                               cause:&causeValue
-                                    newCalledAddress:&called_out
-                                           localUser:&localUser
-                                       fromLocalUser:routingPacket.incomingFromLocal
-                                        usedSelector:&usedSelector
-                                   transactionNumber:tid
-                                           operation:op
-                                    applicationContext:ac];
+    if(called_out!=NULL)
+    {
+        routingPacket.outgoingCalledPartyAddress = called_out;
+    }
+    
+    if(causeValue != SCCP_ReturnCause_not_set)
+    {
+        NSString *s = [NSString stringWithFormat:@"Can not forward %@. Sending no route to destination to PC=%@. SRC=%@ DST=%@ DATA=%@ cause=%d",
+                       routingPacket.incomingPacketType,
+                       routingPacket.outgoingDpc,
+                       routingPacket.incomingCallingPartyAddress,
+                       routingPacket.incomingCalledPartyAddress,
+                       routingPacket.incomingSccpData,
+                       causeValue];
+        [self logMinorError:s];
+        [self traceDroppedPdu:routingPacket.incomingMtp3Data options:@{ @"timestamp" : [NSDate date],
+                                                                        @"linkset"   : routingPacket.incomingLinksetName }];
+    }
 
-        if(self.logLevel <=UMLOG_DEBUG)
-        {
-            [self.logFeed debugText:[NSString stringWithFormat:@" returns %@",grp]];
-        }
+    else if(localUser)
+    {
+        routingPacket.outgoingToLocal = YES;
+        routingPacket.outgoingLocalUser = localUser;
+        routingPacket.outgoingLinksetName = @"local";
+        routingState.deliverLocal = YES;
+    }
 
-        routingPacket.routingSelector = usedSelector;
+    else if(grp)
+    {
+        /* routing to */
+        routingPacket.outgoingDestination = grp.name;
+        SccpDestinationEntry *dest = [grp chooseNextHopWithRoutingTable:_sccpL3RoutingTable];
         if(self.logLevel <=UMLOG_DEBUG)
         {
             NSMutableString *s = [[NSMutableString alloc]init];
-            [s appendFormat:@"findRoutes(%@) returns:\n", dst];
-            NSString *s1 = [grp descriptionWithRt:_sccpL3RoutingTable];
-            if(s1)
-            {
-                [s appendString:s1];
-            }
-            [s appendFormat:@"    causeValue: %d %@\n",causeValue,[UMLayerSCCP causeValueToString:causeValue]];
-            [s appendFormat:@"    newCalledAddress: %@\n",called_out ? called_out : @"(null)"];
-            [s appendFormat:@"    localUser: %@\n", localUser ? localUser.name : @"(null)"];
-            [s appendFormat:@"    fromLocal: %@\n",routingPacket.incomingFromLocal ? @"YES" : @"NO"];
-            [self logDebug:s];
+            [s appendFormat:@"[grp  chooseNextHopWithRoutingTable:_mtp3RoutingTable] returns:\n %@",dest];
+            [self.logFeed debugText:s];
         }
 
-        if(called_out!=NULL)
+        if(dest.overrideCalledTT)
         {
-            routingPacket.outgoingCalledPartyAddress = called_out;
-        }
-        
-        if(causeValue != SCCP_ReturnCause_not_set)
-        {
-            NSString *s = [NSString stringWithFormat:@"Can not forward %@. Sending no route to destination to PC=%@. SRC=%@ DST=%@ DATA=%@ cause=%d",
-                           routingPacket.incomingPacketType,
-                           routingPacket.outgoingDpc,
-                           routingPacket.incomingCallingPartyAddress,
-                           routingPacket.incomingCalledPartyAddress,
-                           routingPacket.incomingSccpData,
-                           causeValue];
-            [self logMinorError:s];
-            if(routingPacket.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
-            {
-                doSendStatus = YES;
-            }
-            [_unrouteablePacketsTraceDestination logPacket:routingPacket];
-        }
-
-        else if(localUser)
-        {
-            routingPacket.outgoingToLocal = YES;
-            routingPacket.outgoingLocalUser = localUser;
-            routingPacket.outgoingLinksetName = @"local";
-            if((routingPacket.incomingServiceType == SCCP_UDTS) || (routingPacket.incomingServiceType == SCCP_XUDTS) || (routingPacket.incomingServiceType == SCCP_LUDTS))
-            {
-                [localUser sccpNNotice:routingPacket.outgoingSccpData
-                                callingLayer:self
-                                     calling:routingPacket.outgoingCallingPartyAddress
-                                      called:routingPacket.outgoingCalledPartyAddress
-                                      reason:routingPacket.outgoingReturnCause
-                                     options:routingPacket.outgoingOptions];
-            }
-            else
-            {
-                causeValue = [self localDeliverNUnitdata:routingPacket.outgoingSccpData
-                                                  toUser:localUser
-                                                 calling:routingPacket.outgoingCallingPartyAddress
-                                                  called:routingPacket.outgoingCalledPartyAddress
-                                        qualityOfService:0
-                                                   class:routingPacket.outgoingServiceClass
-                                                handling:routingPacket.outgoingHandling
-                                                 options:routingPacket.outgoingOptions];
-                if(causeValue != SCCP_ReturnCause_not_set)
-                {
-                    doSendStatus = YES;
-                }
-            }
-            returnValue = YES;
-        }
-
-        else if(grp)
-        {
-            /* routing to */
-            routingPacket.outgoingDestination = grp.name;
-            SccpDestinationEntry *dest = [grp chooseNextHopWithRoutingTable:_sccpL3RoutingTable];
             if(self.logLevel <=UMLOG_DEBUG)
             {
                 NSMutableString *s = [[NSMutableString alloc]init];
-                [s appendFormat:@"[grp  chooseNextHopWithRoutingTable:_mtp3RoutingTable] returns:\n %@",dest];
+                [s appendFormat:@"override-called-tt to %@",dest.overrideCalledTT];
                 [self.logFeed debugText:s];
             }
-
-            if(dest.overrideCalledTT)
-            {
-                if(self.logLevel <=UMLOG_DEBUG)
-                {
-                    NSMutableString *s = [[NSMutableString alloc]init];
-                    [s appendFormat:@"override-called-tt to %@",dest.overrideCalledTT];
-                    [self.logFeed debugText:s];
-                }
-                routingPacket.outgoingCalledPartyAddress.tt.tt = [dest.overrideCalledTT intValue];
-            }
-            
-            if(dest.overrideCallingTT)
-            {
-                if(self.logLevel <=UMLOG_DEBUG)
-                {
-                    NSMutableString *s = [[NSMutableString alloc]init];
-                    [s appendFormat:@"override-calling-tt to %@",dest.overrideCallingTT];
-                    [self.logFeed debugText:s];
-                }
-                routingPacket.outgoingCallingPartyAddress.tt.tt = [dest.overrideCallingTT intValue];
-            }
-            
-            if(_overrideCalledTT)
-            {
-                if(self.logLevel <=UMLOG_DEBUG)
-                {
-                    NSMutableString *s = [[NSMutableString alloc]init];
-                    [s appendFormat:@"sccp-instance override-called-tt to %d",_overrideCalledTT.tt];
-                    [self.logFeed debugText:s];
-                }
-                routingPacket.outgoingCalledPartyAddress.tt.tt = _overrideCalledTT.tt;
-            }
-            
-            if(_overrideCallingTT)
-            {
-                if(self.logLevel <=UMLOG_DEBUG)
-                {
-                    NSMutableString *s = [[NSMutableString alloc]init];
-                    [s appendFormat:@"sccp-instance override-calling-tt to %d",_overrideCallingTT.tt];
-                    [self.logFeed debugText:s];
-                }
-                routingPacket.outgoingCallingPartyAddress.tt.tt = _overrideCallingTT.tt;
-            }
-
-            if(dest.dpc)
-            {
-                if(self.logLevel <=UMLOG_DEBUG)
-                {
-                    NSString * s = [NSString stringWithFormat:@"Set DPC=%@",dest.dpc];
-                    [self.logFeed debugText:s];
-                }
-                pc = dest.dpc;
-            }
-            routingPacket.outgoingOpc = _mtp3.opc;
-            routingPacket.outgoingDpc = pc;
-            if(pc==NULL)
-            {
-                if(grp == NULL)
-                {
-                    /* if we have no destination defined in the routing table, we return no translaction */
-                    causeValue = SCCP_ReturnCause_NoTranslationForThisSpecificAddress;
-                }
-                else
-                {
-                    /* if we have a group defined but the MTP3 point code is not available we return MTP failure */
-                    causeValue = SCCP_ReturnCause_MTPFailure;
-                }
-                NSString *s = [NSString stringWithFormat:@"Can not forward %@ (NoTranslationForThisSpecificAddress). No route to destination DPC=%@ SRC=%@ DST=%@ DATA=%@",
-                               routingPacket.incomingPacketType,
-                               routingPacket.outgoingDpc,
-                               routingPacket.outgoingCallingPartyAddress,
-                               routingPacket.outgoingCalledPartyAddress,
-                               routingPacket.outgoingSccpData];
-                [self logMinorError:s];
-                if(routingPacket.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
-                {
-                    doSendStatus = YES;
-                }
-                [_unrouteablePacketsTraceDestination logPacket:routingPacket];
-            }
-            else
-            {
-                UMMTP3_Error e = UMMTP3_error_internal_error;
-                if(self.logLevel <=UMLOG_DEBUG)
-                {
-                    [self.logFeed debugText:[NSString stringWithFormat:@"Sending %@,%@ (%d)/%@(%d), processSegmentedDelivery=%@, processSingleDelivery=%@",
-                                             routingPacket ? @"PACKET" : @"NULL",
-                                             routingPacket.incomingPacketType,
-                                             routingPacket.incomingServiceType,
-                                             routingPacket.outgoingPacketType,
-                                             routingPacket.outgoingServiceType,
-                                             processSegmentedDelivery ? @"YES" : @"NO",
-                                             processSingleDelivery ? @"YES" : @"NO"]];
-                }
-
-                switch(routingPacket.outgoingServiceType)
-                {
-                    case SCCP_UDT:
-                        if(self.logLevel <=UMLOG_DEBUG)
-                        {
-                            [self.logFeed debugText:@"Sending UDT"];
-                        }
-
-                        e = [self sendUDT:routingPacket.outgoingSccpData
-                                  calling:routingPacket.outgoingCallingPartyAddress
-                                   called:routingPacket.outgoingCalledPartyAddress
-                                    class:routingPacket.outgoingServiceClass
-                                 handling:routingPacket.outgoingHandling
-                                      opc:routingPacket.outgoingOpc
-                                      dpc:routingPacket.outgoingDpc
-                                  options:routingPacket.outgoingOptions
-                                 provider:provider
-                          routedToLinkset:&outgoingLinkset
-                                      sls:routingPacket.sls];
-                        packet.outgoingLinksetName = outgoingLinkset;
-                        break;
-                    case SCCP_UDTS:
-                        if(self.logLevel <=UMLOG_DEBUG)
-                        {
-                            [self.logFeed debugText:@"Sending UDTS"];
-                        }
-                        e = [self sendUDTS:routingPacket.outgoingSccpData
-                                   calling:routingPacket.outgoingCallingPartyAddress
-                                    called:routingPacket.outgoingCalledPartyAddress
-                                     class:routingPacket.outgoingServiceClass
-                               returnCause:routingPacket.outgoingReturnCause
-                                       opc:routingPacket.outgoingOpc
-                                       dpc:routingPacket.outgoingDpc
-                                   options:routingPacket.outgoingOptions
-                                  provider:provider
-                           routedToLinkset:&outgoingLinkset
-                                       sls:routingPacket.sls];
-                           packet.outgoingLinksetName = outgoingLinkset;
-                        break;
-                    case SCCP_XUDT:
-                        if(self.logLevel <=UMLOG_DEBUG)
-                        {
-                            [self.logFeed debugText:@"Sending XUDT"];
-                        }
-
-                        if(processSegmentedDelivery)
-                        {
-                            if(self.logLevel <=UMLOG_DEBUG)
-                            {
-                                [self.logFeed debugText:@"Sending XUDT processSegmentedDelivery"];
-                            }
-                            BOOL first=YES;
-                            int sls = routingPacket.sls % 16;
-
-                            for(UMSCCP_ReceivedSegment *seg in segs)
-                            {
-                                if(self.logLevel <=UMLOG_DEBUG)
-                                {
-                                    [self.logFeed debugText:[NSString stringWithFormat:@"Sending XUDT with segment %@",seg.segment]];
-                                }
-                                if(first)
-                                {
-                                    packet.outgoingLinksetName = outgoingLinkset;
-
-                                }
-                                seg.opc = routingPacket.outgoingMtp3Layer.opc;
-                                seg.dpc = routingPacket.outgoingDpc;
-                                seg.src = routingPacket.outgoingCallingPartyAddress;
-                                seg.dst = routingPacket.outgoingCalledPartyAddress;
-                                seg.provider = routingPacket.outgoingMtp3Layer;
-                                seg.sls = sls;
-                                e =  [self sendXUDTsegment:seg.segment
-                                                   calling:routingPacket.outgoingCallingPartyAddress
-                                                    called:routingPacket.outgoingCalledPartyAddress
-                                              serviceClass:seg.pclass
-                                                  handling:seg.handling
-                                                  hopCount:seg.hopCount
-                                                       opc:routingPacket.outgoingOpc
-                                                       dpc:routingPacket.outgoingDpc
-                                               optionsData:seg.optionsData
-                                                   options:seg.options
-                                                  provider:seg.provider
-                                           routedToLinkset:&outgoingLinkset
-                                                       sls:sls];
-                                first=NO;
-                            }
-                        }
-                        else if(processSingleDelivery)
-                        {
-                            if(self.logLevel <=UMLOG_DEBUG)
-                            {
-                                [self.logFeed debugText:@"Sending XUDT processSingleDelivery"];
-                            }
-                            e = [self sendXUDT:routingPacket.outgoingSccpData
-                                       calling:routingPacket.outgoingCallingPartyAddress
-                                        called:routingPacket.outgoingCalledPartyAddress
-                                         class:routingPacket.outgoingServiceClass
-                                      handling:routingPacket.outgoingHandling
-                                      hopCount:routingPacket.outgoingMaxHopCount
-                                           opc:routingPacket.outgoingOpc
-                                           dpc:routingPacket.outgoingDpc
-                                   optionsData:routingPacket.outgoingOptionalData
-                                       options:routingPacket.outgoingOptions
-                                      provider:provider
-                                   routedToLinkset:&outgoingLinkset
-                                           sls:packet.sls];
-                             packet.outgoingLinksetName = outgoingLinkset;
-                        }
-                        else
-                        {
-                            if(self.logLevel <=UMLOG_DEBUG)
-                            {
-                                [self.logFeed debugText:@"Neither  processSingleDelivery nor processSegmentedDelivery"];
-                            }
-                            e = UMMTP3_no_error;
-                        }
-                        break;
-                    case SCCP_XUDTS:
-                        if(packet.logLevel <=UMLOG_DEBUG)
-                        {
-                            [packet.logFeed debugText:@"Sending XUDTS"];
-                        }
-                        e = [self sendXUDTS:packet.outgoingSccpData
-                                    calling:packet.outgoingCallingPartyAddress
-                                     called:packet.outgoingCalledPartyAddress
-                                      class:packet.outgoingServiceClass
-                                   hopCount:packet.outgoingMaxHopCount
-                                returnCause:packet.outgoingReturnCause
-                                        opc:packet.outgoingOpc
-                                        dpc:packet.outgoingDpc
-                                optionsData:packet.outgoingOptionalData
-                                    options:packet.outgoingOptions
-                                   provider:provider
-                            routedToLinkset:&outgoingLinkset
-                                        sls:packet.sls];
-                          packet.outgoingLinksetName = outgoingLinkset;
-                        break;
-                    case SCCP_LUDT:
-                        if(self.logLevel <=UMLOG_DEBUG)
-                        {
-                            [self.logFeed debugText:@"Sending LUDT"];
-                        }
-                        if(processSegmentedDelivery)
-                        {
-                            if(packet.logLevel <=UMLOG_DEBUG)
-                            {
-                                [packet.logFeed debugText:@"Sending LUDT processSegmentedDelivery"];
-                            }
-                            for(UMSCCP_ReceivedSegment *seg in segs)
-                            {
-                                if(self.logLevel <=UMLOG_DEBUG)
-                                {
-                                    [self.logFeed debugText:[NSString stringWithFormat:@"Sending LUDT with segment %@",seg.segment]];
-                                }
-                                seg.opc = routingPacket.outgoingMtp3Layer.opc;
-                                seg.dpc = routingPacket.outgoingDpc;
-                                seg.src = routingPacket.outgoingCallingPartyAddress;
-                                seg.dst = routingPacket.outgoingCalledPartyAddress;
-                                seg.sls = routingPacket.sls;
-                                seg.provider = routingPacket.outgoingMtp3Layer;
-                                e =  [self sendLUDTsegment:seg.segment
-                                                   calling:seg.src
-                                                    called:seg.dst
-                                              serviceClass:seg.pclass
-                                                  handling:seg.handling
-                                                  hopCount:seg.hopCount
-                                                       opc:seg.opc
-                                                       dpc:seg.dpc
-                                               optionsData:seg.optionsData
-                                                   options:seg.options
-                                                  provider:seg.provider
-                                           routedToLinkset:&outgoingLinkset
-                                                       sls:seg.sls];
-                            }
-                        }
-                        else if(processSingleDelivery)
-                        {
-                            if(packet.logLevel <=UMLOG_DEBUG)
-                            {
-                                [packet.logFeed debugText:@"Sending LUDT processSingleDelivery"];
-                            }
-                            e = [self sendLUDT:routingPacket.outgoingSccpData
-                                       calling:routingPacket.outgoingCallingPartyAddress
-                                        called:routingPacket.outgoingCalledPartyAddress
-                                         class:routingPacket.outgoingServiceClass
-                                      handling:routingPacket.outgoingHandling
-                                      hopCount:routingPacket.outgoingMaxHopCount
-                                           opc:routingPacket.outgoingOpc
-                                           dpc:routingPacket.outgoingDpc
-                                   optionsData:routingPacket.outgoingOptionalData
-                                       options:routingPacket.outgoingOptions
-                                      provider:provider
-                                   routedToLinkset:&outgoingLinkset
-                                           sls:packet.sls];
-                             packet.outgoingLinksetName = outgoingLinkset;
-                        }
-                        else
-                        {
-                            e = UMMTP3_no_error;
-                        }
-                        break;
-                    case SCCP_LUDTS:
-                        if(packet.logLevel <=UMLOG_DEBUG)
-                        {
-                            [packet.logFeed debugText:@"Sending SCCP_LUDTS"];
-                        }
-                        e = [self sendLUDTS:packet.outgoingSccpData
-                                    calling:packet.outgoingCallingPartyAddress
-                                     called:packet.outgoingCalledPartyAddress
-                                      class:packet.outgoingServiceClass
-                                   hopCount:packet.outgoingMaxHopCount
-                                returnCause:packet.outgoingReturnCause
-                                        opc:packet.outgoingOpc
-                                        dpc:packet.outgoingDpc
-                                optionsData:packet.outgoingOptionalData
-                                    options:packet.outgoingOptions
-                                   provider:provider
-                            routedToLinkset:&outgoingLinkset
-                                        sls:packet.sls];
-                          packet.outgoingLinksetName = outgoingLinkset;
-                        break;                        break;
-                }
-                NSString *s= NULL;
-                switch(e)
-                {
-                    case UMMTP3_error_internal_error:
-                        s = [NSString stringWithFormat:@"Can not forward %@. internal error SRC=%@ DST=%@ DATA=%@",packet.outgoingPacketType,packet.outgoingOpc,packet.outgoingDpc,packet.outgoingSccpData];
-                        break;
-                    case UMMTP3_no_error:
-                        break;
-                    case UMMTP3_error_pdu_too_big:
-                        
-                        s = [NSString stringWithFormat:@"Can not forward %@. PDU too big. SRC=%@ DST=%@ DATA=%@",packet.outgoingPacketType,packet.outgoingOpc,packet.outgoingDpc,packet.outgoingSccpData];
-                        break;
-                    case UMMTP3_error_no_route_to_destination:
-                        s = [NSString stringWithFormat:@"Can not forward %@. No route to destination DPC=%@ SRC=%@ DST=%@ DATA=%@",packet.outgoingPacketType,packet.outgoingDpc,packet.outgoingCallingPartyAddress,packet.outgoingCalledPartyAddress,packet.outgoingSccpData];
-                        break;
-                    case UMMTP3_error_invalid_variant:
-                        s = [NSString stringWithFormat:@"Can not forward %@. Invalid variant. SRC=%@ DST=%@ DATA=%@",packet.outgoingPacketType,packet.outgoingOpc,packet.outgoingDpc,packet.outgoingSccpData];
-                        break;
-                }
-                if(s)
-                {
-                    [self logMinorError:s];
-              		[self logMinorError:[NSString stringWithFormat:@"Packet:\n%@\n",packet.description]];
-                }
-                if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
-                {
-                    doSendStatus = YES;
-                    switch(e)
-                    {
-                        case UMMTP3_error_no_route_to_destination:
-                            causeValue = SCCP_ReturnCause_MTPFailure;
-                            [_unrouteablePacketsTraceDestination logPacket:packet];
-                            break;
-                        case UMMTP3_error_pdu_too_big:
-                            causeValue = SCCP_ReturnCause_ErrorInMessageTransport;
-                            [_problematicTraceDestination logPacket:packet];
-                            break;
-                        case UMMTP3_error_invalid_variant:
-                            causeValue = SCCP_ReturnCause_ErrorInLocalProcessing;
-                            [_problematicTraceDestination logPacket:packet];
-                            break;
-                        default:
-                            doSendStatus = NO;
-                            break;
-                    }
-                }
-            }
+            routingPacket.outgoingCalledPartyAddress.tt.tt = [dest.overrideCalledTT intValue];
         }
-    }
-
-    if(doSendStatus)
-    {
-        if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
+        
+        if(dest.overrideCallingTT)
         {
-            if(packet.incomingServiceType==SCCP_UDT)
+            if(self.logLevel <=UMLOG_DEBUG)
             {
-                [self generateUDTS:packet.incomingSccpData
-                           calling:packet.incomingCalledPartyAddress
-                            called:packet.incomingCallingPartyAddress
-                             class:packet.incomingServiceClass
-                       returnCause:causeValue
-                               opc:_mtp3.opc /* errors are always sent from this instance */
-                               dpc:packet.incomingOpc
-                           options:@{}
-                          provider:_mtp3
-                               sls:packet.sls];
+                NSMutableString *s = [[NSMutableString alloc]init];
+                [s appendFormat:@"override-calling-tt to %@",dest.overrideCallingTT];
+                [self.logFeed debugText:s];
             }
-            else if(packet.incomingServiceType==SCCP_XUDT)
+            routingPacket.outgoingCallingPartyAddress.tt.tt = [dest.overrideCallingTT intValue];
+        }
+        
+        if(_overrideCalledTT)
+        {
+            if(self.logLevel <=UMLOG_DEBUG)
             {
-                [self generateXUDTS:packet.incomingSccpData
-                            calling:packet.incomingCalledPartyAddress
-                             called:packet.incomingCallingPartyAddress
-                              class:packet.incomingServiceClass
-                        returnCause:causeValue
-                                opc:_mtp3.opc /* errors are always sent from this instance */
-                                dpc:packet.incomingOpc
-                            options:@{}
-                           provider:_mtp3
-                                sls:packet.sls];
+                NSMutableString *s = [[NSMutableString alloc]init];
+                [s appendFormat:@"sccp-instance override-called-tt to %d",_overrideCalledTT.tt];
+                [self.logFeed debugText:s];
             }
-            else if(packet.incomingServiceType==SCCP_LUDT)
+            routingPacket.outgoingCalledPartyAddress.tt.tt = _overrideCalledTT.tt;
+        }
+        
+        if(_overrideCallingTT)
+        {
+            if(self.logLevel <=UMLOG_DEBUG)
             {
-                [self generateLUDTS:packet.incomingSccpData
-                            calling:packet.incomingCalledPartyAddress
-                             called:packet.incomingCallingPartyAddress
-                              class:packet.incomingServiceClass
-                        returnCause:causeValue
-                                opc:_mtp3.opc /* errors are always sent from this instance */
-                                dpc:packet.incomingOpc
-                            options:@{}
-                           provider:_mtp3
-                                sls:packet.sls];
+                NSMutableString *s = [[NSMutableString alloc]init];
+                [s appendFormat:@"sccp-instance override-calling-tt to %d",_overrideCallingTT.tt];
+                [self.logFeed debugText:s];
+            }
+            routingPacket.outgoingCallingPartyAddress.tt.tt = _overrideCallingTT.tt;
+        }
+
+        if(dest.dpc)
+        {
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                NSString * s = [NSString stringWithFormat:@"Set DPC=%@",dest.dpc];
+                [self.logFeed debugText:s];
+            }
+            pc = dest.dpc;
+        }
+        routingPacket.outgoingOpc = _mtp3.opc;
+        routingPacket.outgoingDpc = pc;
+
+        if(pc==NULL)
+        {
+            if(grp == NULL)
+            {
+                /* if we have no destination defined in the routing table, we return no translaction */
+                causeValue = SCCP_ReturnCause_NoTranslationForThisSpecificAddress;
             }
             else
             {
-                [self generateUDTS:packet.incomingSccpData
-                           calling:packet.incomingCalledPartyAddress
-                            called:packet.incomingCallingPartyAddress
-                             class:packet.incomingServiceClass
-                       returnCause:causeValue
-                               opc:_mtp3.opc /* errors are always sent from this instance */
-                               dpc:packet.incomingOpc
-                           options:@{}
-                          provider:_mtp3
-                               sls:packet.sls];
+                /* if we have a group defined but the MTP3 point code is not available we return MTP failure */
+                causeValue = SCCP_ReturnCause_MTPFailure;
             }
-            [_unrouteablePacketsTraceDestination logPacket:packet];
+            NSString *s = [NSString stringWithFormat:@"Can not forward %@ (NoTranslationForThisSpecificAddress). No route to destination DPC=%@ SRC=%@ DST=%@ DATA=%@",
+                           routingPacket.incomingPacketType,
+                           routingPacket.outgoingDpc,
+                           routingPacket.outgoingCallingPartyAddress,
+                           routingPacket.outgoingCalledPartyAddress,
+                           routingPacket.outgoingSccpData];
+            [self logMinorError:s];
+            [self traceDroppedPdu:routingPacket.incomingMtp3Data options:@{ @"timestamp" : [NSDate date],
+                                                                            @"linkset"   : routingPacket.incomingLinksetName }];
         }
     }
-    packet.routed = [[NSDate alloc]init];
-    return returnValue;
 }
 
+- (void)processOutgoingTcapSharing:(UMSCCP_RoutingState *)routingState
+{
+//        UMSCCP_TcapSharingInstance *inst = packet.outgoingLinksetTcapSharingOutside;
+//        UMSCCP_TcapSharing_result r      = [inst postroutingPacketOutside:packet];
+}
+
+- (void)processOutgoingSegmentation:(UMSCCP_RoutingState *)routingState
+{
+    /* if we have one big packet, we split it into segments here if needed */
+    /* right now this is not done as we forward segmented packets. Outbound upper level packets
+     also split before submitting. This would only apply if we resize packets to smaller ones and thus resplit
+     the already existing packets for some reason. But thats not currently done... YET.
+     */
+    
+    /* if mustSegment is set, we must recreate the outgoing segments, not just use them 1:1  */
+    /* this can happen if a filter has to modify the reassembled PDU and it might get longer */
+    /* or if the outbound maximum packet size is smaller */
+    
+    UMSCCP_Packet *packet = routingState.inboundReassembledPacket;
+    
+    NSData *srcEncoded = [packet.outgoingCallingPartyAddress encode:_sccpVariant];
+    NSData *dstEncoded = [packet.outgoingCalledPartyAddress encode:_sccpVariant];
+    NSUInteger cas = srcEncoded.length;
+    NSUInteger cds = dstEncoded.length;
+    
+    BOOL useUDT         = (packet.outgoingServiceType == SCCP_UDT);
+    BOOL useXUDT        = (packet.outgoingServiceType == SCCP_XUDT);
+    BOOL useLUDT        = (packet.outgoingServiceType == SCCP_LUDT);
+    BOOL hasSegments    = (routingState.packetSegmentsToDeliver.count > 0);
+    
+    NSInteger   maxPduUDT = [self maxPayloadSizeForServiceType:SCCP_UDT
+                                            callingAddressSize:cas
+                                             calledAddressSize:cds
+                                                 usingSegments:hasSegments
+                                                      provider:_mtp3];
+    
+    NSInteger   maxPduXUDT = [self maxPayloadSizeForServiceType:SCCP_XUDT
+                                             callingAddressSize:cas
+                                              calledAddressSize:cds
+                                                  usingSegments:hasSegments
+                                                       provider:_mtp3];
+    NSInteger   maxPduLUDT = [self maxPayloadSizeForServiceType:SCCP_LUDT
+                                             callingAddressSize:cas
+                                              calledAddressSize:cds
+                                                  usingSegments:hasSegments
+                                                       provider:_mtp3];
+    
+    /* we have single data as input, no segments yet */
+    if(useUDT)
+    {
+        if(packet.outgoingSccpData.length > maxPduUDT)
+        {
+            /* no choice, we must segment */
+            routingState.mustResegment=YES;
+            useXUDT = YES;
+        }
+    }
+    else if(useXUDT)
+    {
+        if(packet.outgoingSccpData.length > maxPduXUDT)
+        {
+            /* no choice, we must segment */
+            routingState.mustResegment=YES;
+            useXUDT = YES;
+        }
+    }
+    else if(useLUDT)
+    {
+        if(packet.outgoingSccpData.length > maxPduLUDT)
+        {
+            /* no choice, we must segment */
+            routingState.mustResegment=YES;
+            useLUDT = YES;
+        }
+    }
+    
+    if(useXUDT)
+    {
+        if(packet.outgoingSccpData.length > maxPduXUDT)
+        {
+            /* no choice, we must segment */
+            routingState.mustResegment = YES;
+        }
+    }
+    else if(useLUDT)/* use XUDT is set */
+    {
+        if(packet.outgoingSccpData.length > maxPduLUDT)
+        {
+            routingState.mustResegment = YES;
+        }
+    }
+    
+    static int _segmentReferenceId;
+    
+    if(routingState.mustResegment)
+    {
+        unsigned int ref;
+        @synchronized(self)
+        {
+            _segmentReferenceId = _segmentReferenceId + 1;
+            _segmentReferenceId = _segmentReferenceId % 0xFFFFFF;
+            ref = _segmentReferenceId;
+        }
+        NSArray *dataSegments  = [UMLayerSCCP splitDataIntoSegments:routingState.inboundReassembledPacket.outgoingSccpData
+                                                   withSegmentSizes:NULL
+                                                          reference:ref
+                                                             maxPdu:(useXUDT ? maxPduXUDT : maxPduLUDT)
+                                                      protocolClass:routingState.inboundReassembledPacket.outgoingServiceClass
+                                                            logFeed:_logFeed
+                                                           logLevel:_logLevel];
+
+        NSUInteger count = dataSegments.count;
+        NSMutableArray *arr = [[NSMutableArray alloc]init];
+        for(int i=0;i<count;i++)
+        {
+            UMSCCP_Segment *ds        = dataSegments[i];
+            UMSCCP_ReceivedSegment *s = [[UMSCCP_ReceivedSegment alloc]init];
+            s.src = packet.outgoingCallingPartyAddress;
+            s.dst = packet.outgoingCalledPartyAddress;
+            s.pclass = packet.outgoingServiceClass;
+            s.handling = packet.outgoingHandling;
+            s.hopCount = packet.outgoingMaxHopCount;
+            s.opc = packet.outgoingOpc;
+            s.dpc = packet.outgoingDpc;
+            s.optionsData = packet.outgoingOptionalData;
+            s.options = packet.outgoingOptions;
+            s.provider = _mtp3;
+            s.sls = packet.sls;
+            s.segment = ds;
+            s.reference = packet.incomingSegment.reference;
+            s.segmentedPacket = [packet copy];
+
+            if(s.segment.first)
+            {
+                s.combinedPacket = packet;
+            }
+            [arr addObject:s];
+        }
+        routingState.packetSegmentsToDeliver = arr;
+        routingState.packetToDeliver = NULL;
+    }
+}
+
+- (void)processLocalDelivery:(UMSCCP_RoutingState *)routingState
+{
+    UMSCCP_Packet   *routingPacket      = routingState.inboundReassembledPacket;
+    if(routingPacket.outgoingToLocal ==YES)
+    {
+        id<UMSCCP_UserProtocol> localUser = routingPacket.outgoingLocalUser;
+        
+        SCCP_ReturnCause causeValue = SCCP_ReturnCause_not_set;
+        causeValue = [self localDeliverNUnitdata:routingPacket.outgoingSccpData
+                                          toUser:localUser
+                                         calling:routingPacket.outgoingCallingPartyAddress
+                                          called:routingPacket.outgoingCalledPartyAddress
+                                qualityOfService:0
+                                           class:routingPacket.outgoingServiceClass
+                                        handling:routingPacket.outgoingHandling
+                                         options:routingPacket.outgoingOptions];
+        if(causeValue == SCCP_ReturnCause_not_set)
+        {
+            routingState.status = UMSCCP_RoutingStatus_success;
+        }
+        else
+        {
+            routingState.status = UMSCCP_RoutingStatus_failed;
+            routingState.cause = @(causeValue);
+        }
+    }
+}
+
+- (void)processDelivery:(UMSCCP_RoutingState *)routingState
+{
+    UMSCCP_Packet *routingPacket = routingState.inboundReassembledPacket;
+    NSArray<UMSCCP_ReceivedSegment *>*segments = routingState.packetSegmentsToDeliver;
+    BOOL processSegmentedDelivery = (segments.count > 0) ? YES : NO;
+    UMMTP3_Error e = UMMTP3_no_error;
+    NSString *outgoingLinkset = routingPacket.outgoingLinksetName;
+    if(routingPacket.forcedLinkset)
+    {
+        outgoingLinkset = routingPacket.forcedLinkset;
+    }
+    switch(routingPacket.outgoingServiceType)
+    {
+        case SCCP_UDT:
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                [self.logFeed debugText:@"processDelivery: Sending UDT"];
+            }
+            e = [self sendUDT:routingPacket.outgoingSccpData
+                      calling:routingPacket.outgoingCallingPartyAddress
+                       called:routingPacket.outgoingCalledPartyAddress
+                        class:routingPacket.outgoingServiceClass
+                     handling:routingPacket.outgoingHandling
+                          opc:routingPacket.outgoingOpc
+                          dpc:routingPacket.outgoingDpc
+                      options:routingPacket.outgoingOptions
+                     provider:routingPacket.outgoingMtp3Layer
+              routedToLinkset:&outgoingLinkset
+                          sls:routingPacket.sls];
+            break;
+        case SCCP_UDTS:
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                [self.logFeed debugText:@"processDelivery: sending UDTS"];
+            }
+            e = [self sendUDTS:routingPacket.outgoingSccpData
+                       calling:routingPacket.outgoingCallingPartyAddress
+                        called:routingPacket.outgoingCalledPartyAddress
+                         class:routingPacket.outgoingServiceClass
+                   returnCause:routingPacket.outgoingReturnCause
+                           opc:routingPacket.outgoingOpc
+                           dpc:routingPacket.outgoingDpc
+                       options:routingPacket.outgoingOptions
+                      provider:routingPacket.outgoingMtp3Layer
+               routedToLinkset:&outgoingLinkset
+                           sls:routingPacket.sls];
+            break;
+        case SCCP_XUDT:
+
+            if(processSegmentedDelivery)
+            {
+                if(self.logLevel <=UMLOG_DEBUG)
+                {
+                    [self.logFeed debugText:[NSString stringWithFormat:@"processDelivery: Sending XUDT with %lu segments",segments.count]];
+                }
+                int sls = routingPacket.sls % 16;
+                int no = 0;
+                for(UMSCCP_ReceivedSegment *seg in segments)
+                {
+                    no++;
+                    if(self.logLevel <=UMLOG_DEBUG)
+                    {
+                        [self.logFeed debugText:[NSString stringWithFormat:@"processDelivery: Sending XUDT segment #%d: %@",no,seg.description]];
+                    }
+                    if(![seg isKindOfClass:[UMSCCP_ReceivedSegment class]])
+                    {
+                        NSLog(@"wrong object type: %@",seg.className);
+                    }
+                    seg.opc = routingPacket.outgoingMtp3Layer.opc;
+                    seg.dpc = routingPacket.outgoingDpc;
+                    seg.src = routingPacket.outgoingCallingPartyAddress;
+                    seg.dst = routingPacket.outgoingCalledPartyAddress;
+                    seg.provider = routingPacket.outgoingMtp3Layer;
+                    seg.sls = sls;
+                    e =  [self sendXUDTsegment:seg.segment
+                                       calling:routingPacket.outgoingCallingPartyAddress
+                                        called:routingPacket.outgoingCalledPartyAddress
+                                  serviceClass:seg.pclass
+                                      handling:seg.handling
+                                      hopCount:seg.hopCount
+                                           opc:routingPacket.outgoingOpc
+                                           dpc:routingPacket.outgoingDpc
+                                   optionsData:seg.optionsData
+                                       options:seg.options
+                                      provider:seg.provider
+                               routedToLinkset:&outgoingLinkset
+                                           sls:sls];
+                }
+            }
+            else
+            {
+                if(self.logLevel <=UMLOG_DEBUG)
+                {
+                    [self.logFeed debugText:@"processDelivery: sending XUDT"];
+                }
+                e = [self sendXUDT:routingPacket.outgoingSccpData
+                           calling:routingPacket.outgoingCallingPartyAddress
+                            called:routingPacket.outgoingCalledPartyAddress
+                             class:routingPacket.outgoingServiceClass
+                          handling:routingPacket.outgoingHandling
+                          hopCount:routingPacket.outgoingMaxHopCount
+                               opc:routingPacket.outgoingOpc
+                               dpc:routingPacket.outgoingDpc
+                       optionsData:routingPacket.outgoingOptionalData
+                           options:routingPacket.outgoingOptions
+                          provider:routingPacket.outgoingMtp3Layer
+                       routedToLinkset:&outgoingLinkset
+                               sls:routingPacket.sls];
+            }
+            break;
+        case SCCP_XUDTS:
+            if(self.logLevel <=UMLOG_DEBUG)
+            {
+                [self.logFeed debugText:@"processDelivery: sending XUDTS"];
+            }
+            e = [self sendXUDTS:routingPacket.outgoingSccpData
+                        calling:routingPacket.outgoingCallingPartyAddress
+                         called:routingPacket.outgoingCalledPartyAddress
+                          class:routingPacket.outgoingServiceClass
+                       hopCount:routingPacket.outgoingMaxHopCount
+                    returnCause:routingPacket.outgoingReturnCause
+                            opc:routingPacket.outgoingOpc
+                            dpc:routingPacket.outgoingDpc
+                    optionsData:routingPacket.outgoingOptionalData
+                        options:routingPacket.outgoingOptions
+                       provider:routingPacket.outgoingMtp3Layer
+                routedToLinkset:&outgoingLinkset
+                            sls:routingPacket.sls];
+            break;
+        case SCCP_LUDT:
+        {
+            if(processSegmentedDelivery)
+            {
+                if(self.logLevel <=UMLOG_DEBUG)
+                {
+                    [self.logFeed debugText:@"processDelivery: sending LUDT with multiple segments"];
+                }
+                for(UMSCCP_ReceivedSegment *seg in routingState.packetSegmentsToDeliver)
+                {
+                    if(self.logLevel <=UMLOG_DEBUG)
+                    {
+                        [self.logFeed debugText:[NSString stringWithFormat:@"processDelivery: sending LUDT with segment %@",seg.segment]];
+                    }
+                    seg.opc = routingPacket.outgoingMtp3Layer.opc;
+                    seg.dpc = routingPacket.outgoingDpc;
+                    seg.src = routingPacket.outgoingCallingPartyAddress;
+                    seg.dst = routingPacket.outgoingCalledPartyAddress;
+                    seg.sls = routingPacket.sls;
+                    seg.provider = routingPacket.outgoingMtp3Layer;
+                    e =  [self sendLUDTsegment:seg.segment
+                                       calling:seg.src
+                                        called:seg.dst
+                                  serviceClass:seg.pclass
+                                      handling:seg.handling
+                                      hopCount:seg.hopCount
+                                           opc:seg.opc
+                                           dpc:seg.dpc
+                                   optionsData:seg.optionsData
+                                       options:seg.options
+                                      provider:seg.provider
+                               routedToLinkset:&outgoingLinkset
+                                           sls:seg.sls];
+                }
+            }
+            else
+            {
+                if(self.logLevel <=UMLOG_DEBUG)
+                {
+                    [self.logFeed debugText:@"processDelivery: sending LUDT with no segments"];
+                }
+                e = [self sendLUDT:routingPacket.outgoingSccpData
+                           calling:routingPacket.outgoingCallingPartyAddress
+                            called:routingPacket.outgoingCalledPartyAddress
+                             class:routingPacket.outgoingServiceClass
+                          handling:routingPacket.outgoingHandling
+                          hopCount:routingPacket.outgoingMaxHopCount
+                               opc:routingPacket.outgoingOpc
+                               dpc:routingPacket.outgoingDpc
+                       optionsData:routingPacket.outgoingOptionalData
+                           options:routingPacket.outgoingOptions
+                          provider:routingPacket.outgoingMtp3Layer
+                   routedToLinkset:&outgoingLinkset
+                               sls:routingPacket.sls];
+            }
+            break;
+        }
+        case SCCP_LUDTS:
+        {
+            e = [self sendLUDTS:routingPacket.outgoingSccpData
+                        calling:routingPacket.outgoingCallingPartyAddress
+                         called:routingPacket.outgoingCalledPartyAddress
+                          class:routingPacket.outgoingServiceClass
+                       hopCount:routingPacket.outgoingMaxHopCount
+                    returnCause:routingPacket.outgoingReturnCause
+                            opc:routingPacket.outgoingOpc
+                            dpc:routingPacket.outgoingDpc
+                    optionsData:routingPacket.outgoingOptionalData
+                        options:routingPacket.outgoingOptions
+                       provider:routingPacket.outgoingMtp3Layer
+                routedToLinkset:&outgoingLinkset
+                            sls:routingPacket.sls];
+            break;
+        }
+        default:
+        {
+            e = UMMTP3_error_unsupported_pdu_type;
+            break;
+        }
+    }
+    routingPacket.outgoingLinksetName = outgoingLinkset;
+    routingState.mtp3DeliveryError = e;
+    routingPacket.outgoingMtp3Data = [UMLayerSCCP mtp3Wrap:routingPacket.outgoingSccpData
+                                                       opc:routingPacket.outgoingOpc
+                                                       dpc:routingPacket.outgoingDpc
+                                                       ni:routingPacket.outgoingMtp3Layer.networkIndicator
+                                                        si:MTP3_SERVICE_INDICATOR_SCCP];
+    /* error postprocessing */
+    NSString *s= NULL;
+    switch(e)
+    {
+        case UMMTP3_no_error:
+            break;
+            
+        case UMMTP3_error_internal_error:
+            s = [NSString stringWithFormat:@"Can not forward %@. internal error SRC=%@ DST=%@ DATA=%@",routingPacket.outgoingPacketType,routingPacket.outgoingOpc,routingPacket.outgoingDpc,routingPacket.outgoingSccpData];
+            break;
+        case UMMTP3_error_pdu_too_big:
+            s = [NSString stringWithFormat:@"Can not forward %@. PDU too big. SRC=%@ DST=%@ DATA=%@",routingPacket.outgoingPacketType,routingPacket.outgoingOpc,routingPacket.outgoingDpc,routingPacket.outgoingSccpData];
+            break;
+        case UMMTP3_error_no_route_to_destination:
+            s = [NSString stringWithFormat:@"Can not forward %@. No route to destination DPC=%@ SRC=%@ DST=%@ DATA=%@",routingPacket.outgoingPacketType,routingPacket.outgoingDpc,routingPacket.outgoingCallingPartyAddress,routingPacket.outgoingCalledPartyAddress,routingPacket.outgoingSccpData];
+            break;
+        case UMMTP3_error_invalid_variant:
+            s = [NSString stringWithFormat:@"Can not forward %@. Invalid variant. SRC=%@ DST=%@ DATA=%@",routingPacket.outgoingPacketType,routingPacket.outgoingOpc,routingPacket.outgoingDpc,routingPacket.outgoingSccpData];
+            break;
+        case UMMTP3_error_unsupported_pdu_type:
+            s = [NSString stringWithFormat:@"Can not forward %@. Unsupported PDU type. SRC=%@ DST=%@ DATA=%@",routingPacket.outgoingPacketType,routingPacket.outgoingOpc,routingPacket.outgoingDpc,routingPacket.outgoingSccpData];
+            break;
+
+    }
+    if(e != UMMTP3_no_error)
+    {
+        if(s)
+        {
+            [self logMinorError:s];
+            [self logMinorError:[NSString stringWithFormat:@"Packet:\n%@\n",routingPacket.description]];
+        }
+
+        switch(e)
+        {
+                
+            case UMMTP3_error_no_route_to_destination:
+                routingState.cause = @(SCCP_ReturnCause_MTPFailure);
+                routingState.status = UMSCCP_RoutingStatus_failed;
+                [self traceDroppedPdu:routingPacket.outgoingMtp3Data options:@{@"error":s}];
+                break;
+            case UMMTP3_error_pdu_too_big:
+                routingState.cause = @(SCCP_ReturnCause_ErrorInMessageTransport);
+                routingState.status = UMSCCP_RoutingStatus_failed;
+                [self traceProblematicPdu:routingPacket.outgoingMtp3Data options:@{ @"error":s,
+                                                                                    @"timestamp" : [NSDate date],
+                                                                                    @"linkset" : routingPacket.incomingLinksetName }];
+                break;
+            case UMMTP3_error_invalid_variant:
+                routingState.cause = @(SCCP_ReturnCause_ErrorInLocalProcessing);
+                routingState.status = UMSCCP_RoutingStatus_failed;
+                [self traceDroppedPdu:routingPacket.outgoingMtp3Data options:@{@"error":s}];
+                [self traceProblematicPdu:routingPacket.outgoingMtp3Data options:@{ @"error":s,
+                                                                                    @"timestamp" : [NSDate date],
+                                                                                    @"linkset" : routingPacket.incomingLinksetName }];
+                break;
+            case UMMTP3_error_unsupported_pdu_type:
+                routingState.cause = @(SCCP_ReturnCause_Unqualified);
+                routingState.status = UMSCCP_RoutingStatus_failed;
+                [self traceDroppedPdu:routingPacket.outgoingMtp3Data options:@{@"error":s}];
+                [self traceProblematicPdu:routingPacket.outgoingMtp3Data options:@{ @"error":s,
+                                                                                    @"timestamp" : [NSDate date],
+                                                                                    @"linkset" : routingPacket.incomingLinksetName }];
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+- (UMSCCP_RoutingState *)routePacket:(UMSCCP_Packet *)packet
+{
+    if((packet.tcapSharingTraceLevel <=UMLOG_DEBUG) || (_logLevel <=UMLOG_DEBUG))
+    {
+        [self.logFeed debugText:@"Entering routePacket:"];
+    }
+    if((packet.incomingLinksetTcapSharingInsideName.length > 0) && (packet.incomingLinksetTcapSharingInside==NULL))
+    {
+        UMSCCP_TcapSharingInstance *inst = [_appDelegate getTcapSharingInstance:packet.incomingLinksetTcapSharingInsideName];
+        packet.incomingLinksetTcapSharingInside = inst;
+    }
+    if((packet.incomingLinksetTcapSharingOutsideName.length > 0) && (packet.incomingLinksetTcapSharingOutside==NULL))
+    {
+        UMSCCP_TcapSharingInstance *inst = [_appDelegate getTcapSharingInstance:packet.incomingLinksetTcapSharingOutsideName];
+        packet.incomingLinksetTcapSharingOutside = inst;
+    }
+
+    if(packet.incomingOpc==NULL)
+    {
+        packet.incomingOpc = _mtp3.opc;
+    }
+    packet.outgoingOpc = _mtp3.opc;
+    UMSCCP_RoutingState *routingState = [[UMSCCP_RoutingState alloc]init];
+    if(packet.incomingHandling & SCCP_HANDLING_RETURN_ON_ERROR)
+    {
+        routingState.inboundPacket = packet;
+        routingState.dpcForErrors        = packet.incomingOpc;
+        routingState.opcForErrors        = _mtp3.opc;
+        routingState.linksetForErrors    = packet.incomingLinksetName;
+        routingState.errorPacket         = packet;
+        routingState.errorProcessing    = UMSCCP_RoutingErrorProcessing_Ignore;
+
+        if(packet.incomingHandling == SCCP_HANDLING_RETURN_ON_ERROR)
+        {
+            if(packet.incomingServiceType == SCCP_UDT)
+            {
+                routingState.errorProcessing    = UMSCCP_RoutingErrorProcessing_UDTS;
+            }
+            if(packet.incomingServiceType == SCCP_XUDT)
+            {
+                routingState.errorProcessing    = UMSCCP_RoutingErrorProcessing_XUDTS;
+            }
+            if(packet.incomingServiceType == SCCP_LUDT)
+            {
+                routingState.errorProcessing    = UMSCCP_RoutingErrorProcessing_LUDTS;
+            }
+        }
+    }
+    if(self.logLevel <=UMLOG_DEBUG)
+    {
+        NSMutableString *s = [[NSMutableString alloc]init];
+        if(packet.incomingFromLocal)
+        {
+            routingState.errorDestinationLocal = YES;
+            [s appendFormat:@"  SCCP %@   from local\n",packet.incomingPacketType];
+        }
+        else
+        {
+            [s appendFormat:@"  SCCP %@   from linksetLS: %@\n",packet.incomingPacketType,packet.incomingLinksetName];
+        }
+        [s appendFormat:@"  OPC: %@\n",packet.incomingOpc];
+        [s appendFormat:@"  DPC: %@\n",packet.incomingDpc];
+        [s appendFormat:@"  CgPA: %@\n",packet.incomingCallingPartyAddress];
+        [s appendFormat:@"  CdPA: %@\n",packet.incomingCalledPartyAddress];
+        [s appendFormat:@"  DataLen: %d\n",(int)packet.incomingSccpData.length];
+        [s appendFormat:@"  Data: %@\n",packet.incomingSccpData];
+        [s appendFormat:@"  Segment: %@\n",packet.incomingSegment];
+        [s appendFormat:@"  Options: %@\n",packet.incomingOptions];
+        [self.logFeed debugText:s];
+    }
+
+    routingState.status = UMSCCP_RoutingStatus_success;
+    routingState.inboundPacket = packet;
+#define EXECUTE_AND_CHECK_ERROR(routingState,method,sectionname)        \
+    if(routingState.status == UMSCCP_RoutingStatus_success)             \
+    {                                                                   \
+        if(self.logLevel <=UMLOG_DEBUG)                                 \
+        {                                                               \
+            [self.logFeed debugText:[NSString stringWithFormat:@"entering %@",sectionname]];       \
+        }                                                               \
+        [self method:routingState];                                     \
+        switch(routingState.status)                                     \
+        {                                                               \
+            case UMSCCP_RoutingStatus_failed:                           \
+            {                                                           \
+                if(self.logLevel <=UMLOG_DEBUG)                         \
+                {                                                       \
+                    [self.logFeed debugText:@" failed"];                \
+                }                                                       \
+                [self sendStatusBack:routingState];                     \
+                break;                                                  \
+            }                                                           \
+            case UMSCCP_RoutingStatus_dropPacket:                       \
+            {                                                           \
+                if(self.logLevel <=UMLOG_DEBUG)                         \
+                {                                                       \
+                    [self.logFeed debugText:@" drop"];                  \
+                }                                                       \
+                break;                                                  \
+            }                                                           \
+            case UMSCCP_RoutingStatus_awaitingSegments:                 \
+            {                                                           \
+                if(self.logLevel <=UMLOG_DEBUG)                         \
+                {                                                       \
+                    [self.logFeed debugText:@" awaiting segments"];     \
+                }                                                       \
+                break;                                                  \
+            }                                                           \
+            case UMSCCP_RoutingStatus_success:                          \
+            {                                                           \
+                if(self.logLevel <=UMLOG_DEBUG)                         \
+                {                                                       \
+                    [self.logFeed debugText:@" success"];               \
+                }                                                       \
+                break;                                                  \
+            }                                                           \
+        }                                                               \
+    }
+
+    /* --------------------------------------------- */
+    /* SCREENING                                     */
+    /* lets verify if the sender is allowed to send  */
+    /* --------------------------------------------- */
+
+    EXECUTE_AND_CHECK_ERROR(routingState,processIncomingScreening,@"processIncomingScreening")
+    /* --------------------------------------------- */
+    /* REASSEMBLY                                    */
+    /* lets combine individual parts back together   */
+    /* --------------------------------------------- */
+    EXECUTE_AND_CHECK_ERROR(routingState,processIncomingReassembly,@"processIncomingReassembly")
+
+    if(routingState.inboundReassembledPacket.incomingSccpData.length > 0)
+    {
+        NSArray *transactionNumbers = [self extractTransactionNumbers:routingState.inboundReassembledPacket];
+        NSString *otid = transactionNumbers[0];
+        NSString *dtid = transactionNumbers[1];
+        if([otid isKindOfClass:[NSNull class]])
+        {
+            otid=NULL;
+        }
+        if([dtid isKindOfClass:[NSNull class]])
+        {
+            dtid=NULL;
+        }
+        routingState.inboundReassembledPacket.incoming_tcap_otid = otid;
+        routingState.inboundReassembledPacket.incoming_tcap_dtid = dtid;
+        if(self.logLevel <=UMLOG_DEBUG)
+        {
+            NSMutableString *s = [[NSMutableString alloc]init];
+            [s appendFormat:@" transaction numbers: %@\n",transactionNumbers];
+            [self.logFeed debugText:s];
+        }
+    }
+
+    /* --------------------------------------------- */
+    /* FILTERING                                     */
+    /* lets pass it through the inbound filtering    */
+    /* --------------------------------------------- */
+    EXECUTE_AND_CHECK_ERROR(routingState,processIncomingFiltering,@"processIncomingFiltering")
+    /* --------------------------------------------- */
+    /* INBOUND TCAP SHARING                          */
+    /* tcap sharing inbound processing               */
+    /* --------------------------------------------- */
+    EXECUTE_AND_CHECK_ERROR(routingState,processPreroutingTcapSharing,@"processPreroutingTcapSharing")
+    /* --------------------------------------------- */
+    /* ROUTING                                       */
+    /* find the corresponding route                  */
+    /* --------------------------------------------- */
+    if(routingState.forceRouted==NO)
+    {
+        EXECUTE_AND_CHECK_ERROR(routingState,processRouting,@"processRouting")
+    }
+    else
+    {
+        if(self.logLevel <=UMLOG_DEBUG)
+        {
+            [self.logFeed debugText:@"skipping processRouting due to forceRouted"];
+        }
+    }
+    /* --------------------------------------------- */
+    /* OUTBOUND TCAP SHARING                         */
+    /* tcap sharing outbound processing              */
+    /* --------------------------------------------- */
+    EXECUTE_AND_CHECK_ERROR(routingState,processPostroutingTcapSharing,@"processPostroutingTcapSharing")
+
+    /* --------------------------------------------- */
+    /* OUTBOUND SEGMENTATION                         */
+    /* split outbound packets if not split already   */
+    /* --------------------------------------------- */
+    EXECUTE_AND_CHECK_ERROR(routingState,processOutgoingSegmentation,@"processOutgoingSegmentation")
+    if(routingState.deliverLocal)
+    {
+        /* --------------------------------------------- */
+        /* DELIVERY TO LOCAL STACK                       */
+        /* send the packets to the upper level           */
+        /* --------------------------------------------- */
+        EXECUTE_AND_CHECK_ERROR(routingState,processLocalDelivery,@"processLocalDelivery")
+    }
+    else
+    {
+        /* --------------------------------------------- */
+        /* DELIVERY TO MTP3                              */
+        /* send the packets to the wire                  */
+        /* --------------------------------------------- */
+        EXECUTE_AND_CHECK_ERROR(routingState,processDelivery,@"processDelivery")
+    }
+    return routingState;
+}
+
+#undef EXECUTE_AND_CHECK_ERROR
+
+
+        
 - (UMMTP3_Error) sendUDT:(NSData *)data
-                 calling:(SccpAddress *)src
-                  called:(SccpAddress *)dst
-                   class:(SCCP_ServiceClass)pclass   /* MGMT is class 0 */
-                handling:(SCCP_Handling)handling
-                     opc:(UMMTP3PointCode *)opc
-                     dpc:(UMMTP3PointCode *)dpc
-                 options:(NSDictionary *)options
-                provider:(UMLayerMTP3 *)provider
-         routedToLinkset:(NSString **)outgoingLinkset
-                     sls:(int)sls
+         calling:(SccpAddress *)src
+          called:(SccpAddress *)dst
+           class:(SCCP_ServiceClass)pclass   /* MGMT is class 0 */
+        handling:(SCCP_Handling)handling
+             opc:(UMMTP3PointCode *)opc
+             dpc:(UMMTP3PointCode *)dpc
+         options:(NSDictionary *)options
+        provider:(UMLayerMTP3 *)provider
+ routedToLinkset:(NSString **)outgoingLinkset
+             sls:(int)sls
 {
     if(_automaticAnsiItuConversion==YES)
     {
@@ -3119,8 +3596,8 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     }
     else
     {
-        BOOL routingResult = [self routePacket:packet];
-        if(routingResult==YES) /* success */ 
+        UMSCCP_RoutingState *routingState   = [self routePacket:packet];
+        if(routingState.status==UMSCCP_RoutingStatus_success)
         {
             return UMMTP3_no_error;
         }
@@ -3170,9 +3647,9 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
 {
     @autoreleasepool
     {
+        [self readLayerConfig:cfg];
         _filterDelegate = appContext;
         _appDelegate =appContext;
-        [self readLayerConfig:cfg];
         if(cfg[@"attach-to"])
         {
             _mtp3_name =  [cfg[@"attach-to"] stringValue];
@@ -3362,7 +3839,16 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                     [self logMajorError:@"Invalid value for screening-sccp-plugin-trace-level. Should be 0...2"];
             }
         }
-
+        
+        if (cfg[@"tcap-sharing-trace-level"])
+        {
+            NSNumber *n = cfg[@"tcap-sharing-trace-level"];
+            _tcapSharingTraceLevel = (UMLogLevel)n.integerValue;
+        }
+        else
+        {
+            _tcapSharingTraceLevel = UMLOG_MAJOR;
+        }
     }
     _prometheusData = [[UMSCCP_PrometheusData alloc]initWithPrometheus:appContext.prometheus];
     [_prometheusData setSubname1:@"sccp" value:_layerName];
@@ -3449,7 +3935,6 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
             options:(NSDictionary *)options
         synchronous:(BOOL)sync
 {
-    NSLog(@"sccpNInform not implemented");
 }
 
 /* connectionless primitives */
@@ -3484,7 +3969,6 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
              called:(SccpAddress *)dst
             options:(NSDictionary *)options
 {
-//    NSLog(@"sccpNNotice not implemented");
 }
 
 - (void)sccpNState:(NSData *)data
@@ -3493,7 +3977,6 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
             called:(SccpAddress *)dst
            options:(NSDictionary *)options
 {
-//    NSLog(@"sccpNState not implemented");
 }
 
 
@@ -3503,7 +3986,6 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
             called:(SccpAddress *)dst
            options:(NSDictionary *)options
 {
-//    NSLog(@"sccpNCoord not implemented");
 }
 
 
@@ -3513,7 +3995,6 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
               called:(SccpAddress *)dst
              options:(NSDictionary *)options
 {
-    NSLog(@"sccpNTraffic not implemented");
 }
 
 
@@ -3523,7 +4004,6 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
               called:(SccpAddress *)dst
              options:(NSDictionary *)options
 {
- //   NSLog(@"sccpNPcState not implemented");
 }
 
 
@@ -3628,64 +4108,6 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     }
 }
 
-+ (NSString *)reasonString:(SCCP_ReturnCause)reason
-{
-    NSString *e;
-    switch(reason)
-    {
-        case SCCP_ReturnCause_NoTranslationForAnAddressOfSuchNature:
-            e = @"No translation for an address of such nature";
-            break;
-        case SCCP_ReturnCause_NoTranslationForThisSpecificAddress:
-            e = @"No translation for this specific address";
-            break;
-        case SCCP_ReturnCause_SubsystemCongestion:
-            e = @"Subsystem congestion";
-            break;
-        case SCCP_ReturnCause_SubsystemFailure:
-            e = @"Subsystem Failure";
-            break;
-        case SCCP_ReturnCause_Unequipped:
-            e = @"Unequipped";
-            break;
-        case SCCP_ReturnCause_MTPFailure:
-            e = @"MTP failure";
-            break;
-        case SCCP_ReturnCause_NetworkCongestion:
-            e = @"Network congestion";
-            break;
-        case SCCP_ReturnCause_Unqualified:
-            e = @"Unqualified";
-            break;
-        case SCCP_ReturnCause_ErrorInMessageTransport:
-            e = @"Error in message transport";
-            break;
-        case SCCP_ReturnCause_ErrorInLocalProcessing:
-            e = @"Error in local processing";
-            break;
-        case SCCP_ReturnCause_DestinationCannotPerformReassembly:
-            e = @"Destination cannot perform reassembly";
-            break;
-        case SCCP_ReturnCause_SCCPFailure:
-            e = @"SCCP Failure";
-            break;
-        case SCCP_ReturnCause_HopCounterViolation:
-            e = @"SCCP Hop counter violation";
-            break;
-        case SCCP_ReturnCause_SegmentationNotSupported:
-            e = @"Segmentation not supported";
-            break;
-        case SCCP_ReturnCause_SegmentationFailure:
-            e = @"Segmentation failure";
-            break;
-        default:
-            e = [NSString stringWithFormat:@"Unknown SCCP error code %d",reason];
-            break;
-    }
-    return e;
-}
-
-
 - (id)decodePdu:(NSData *)data /* should return a type which can be converted to json */
 {
     UMSynchronizedSortedDictionary *dict;
@@ -3782,7 +4204,6 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                     i++;
                     break;
                 case SCCP_LUDT:
-                    /* FIXME. Somethings wrong here with segments */
                     m_protocol_class = d[i] & 0x0F;
                     m_handling = (d[i++]>>4) & 0x0F;
                     param_called_party_address = d[i] + (d[i+1]<<8) + i + 1;
@@ -3958,7 +4379,6 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     }
 }
 
-
 - (void)addSendTraceDestination:(id<UMSCCP_TraceProtocol>)destination
 {
     [_traceSendDestinations addObject:destination];
@@ -3979,53 +4399,58 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     [_traceReceiveDestinations removeObject:destination];
 }
 
-- (void)traceSentPdu:(NSData *)pdu
+- (void)traceSentPdu:(NSData *)mtp3pdu
              options:(NSDictionary *)o
 {
     NSInteger n = [_traceSendDestinations count];
     for (NSInteger i=0;i<n;i++)
     {
         id a = [_traceSendDestinations objectAtIndex:i];
-        [a sccpTraceSentPdu:pdu options:o];
+        [a sccpTraceSentPdu:mtp3pdu options:o];
     }
 }
 
-- (void)traceSentPacket:(UMSCCP_Packet *)packet
-                options:(NSDictionary *)o
-{
-}
-
-- (void)traceReceivedPdu:(NSData *)pdu
+- (void)traceReceivedPdu:(NSData *)mtp3pdu
                  options:(NSDictionary *)o
 {
     NSInteger n = [_traceReceiveDestinations count];
     for (NSInteger i=0;i<n;i++)
     {
         id a = [_traceReceiveDestinations objectAtIndex:i];
-        [a sccpTraceReceivedPdu:pdu options:o];
+        [a sccpTraceReceivedPdu:mtp3pdu options:o];
     }
 }
 
-- (void)traceReceivedPacket:(UMSCCP_Packet *)packet
-                    options:(NSDictionary *)o
-{
-}
-
-
-- (void)traceDroppedPdu:(NSData *)pdu options:(NSDictionary *)o
+- (void)traceDroppedPdu:(NSData *)mtp3pdu options:(NSDictionary *)o
 {
     NSInteger n = [_traceDroppedDestinations count];
     for (NSInteger i=0;i<n;i++)
     {
         id a = [_traceDroppedDestinations objectAtIndex:i];
-        [a sccpTraceReceivedPdu:pdu options:o];
+        [a traceDroppedPdu:mtp3pdu options:o];
     }
 }
 
-- (void)traceDroppedPacket:(UMSCCP_Packet *)packet
-                   options:(NSDictionary *)o
+- (void)traceProblematicPdu:(NSData *)mtp3pdu options:(NSDictionary *)o
 {
+    NSInteger n = [_traceProblematicDestinations count];
+    for (NSInteger i=0;i<n;i++)
+    {
+        id a = [_traceProblematicDestinations objectAtIndex:i];
+        [a traceProblematicPdu:mtp3pdu options:o];
+    }
 }
+
+- (void)traceUnrouteablePdu:(NSData *)mtp3pdu options:(NSDictionary *)o
+{
+    NSInteger n = [_traceUnroutableDestinations count];
+    for (NSInteger i=0;i<n;i++)
+    {
+        id a = [_traceUnroutableDestinations objectAtIndex:i];
+        [a traceUnrouteablePdu:mtp3pdu options:o];
+    }
+}
+
 
 - (NSDictionary *)apiStatus
 {
@@ -4502,7 +4927,7 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
             }
             else
             {
-                NSLog(@"Can't understand %@",words);
+                //NSLog(@"Can't understand %@",words);
             }
             i++;
         }
@@ -4672,7 +5097,7 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
             NSString *s = [NSString stringWithFormat:@"Can not read file %@. Error %@",fn,err];
             if(errIgnore == YES)
             {
-                NSLog(@"%@",s);
+                //NSLog(@"%@",s);
             }
             else
             {
@@ -4716,7 +5141,7 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                         NSString *s = [NSString stringWithFormat:@"Can not read file %@. Error %@",fn,err];
                         if(errIgnore == YES)
                         {
-                            NSLog(@"%@",s);
+                            //NSLog(@"%@",s);
                         }
                         else
                         {
@@ -4992,6 +5417,7 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     NSString *s = [d jsonString];
     return s;
 }
+
 - (SCCP_ReturnCause) localDeliverNUnitdata:(NSData *)data
                                     toUser:(id<UMSCCP_UserProtocol>)localUser
                                    calling:(SccpAddress *)callingPartyAddress
@@ -5084,7 +5510,7 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     return SCCP_ReturnCause_not_set;
 }
 
-- (NSNumber *) extractTransactionNumber:(NSData *)data
+- (NSNumber *) extractOrigTransactionNumber:(NSData *)data
 {
     UMASN1Sequence *seq;
     @try
@@ -5093,7 +5519,7 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     }
     @catch(NSException *e)
     {
-        NSLog(@"can not extract transaction number. Exception %@",e);
+        // NSLog(@"can not extract transaction number. Exception %@",e);
     }
     switch(seq.asn1_tag.tagClass)
     {
@@ -5152,8 +5578,81 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
         }
         default:
             return NULL;
-    }    
+    }
     return NULL;
+}
+
+- (NSNumber *)transactionNumberFromHexString:(NSString *)str
+{
+    if (str.length==0)
+    {
+        return NULL;
+    }
+    NSData *d = str.unhexedData;
+    const uint8_t *bytes = d.bytes;
+    unsigned long len = d.length;
+    uint64_t value = 0;
+    for(int i=0;i<len;i++)
+    {
+        value = (value << 8) | bytes[i];
+    }
+    return @(value);
+}
+
+- (NSArray *)extractTransactionNumbers:(UMSCCP_Packet *)packet /* returns an array with otid/dtid as strings or NSNull placeholders */
+{
+    NSData *data = packet.outgoingSccpData;
+    id otid = [NSNull null];
+    id dtid = [NSNull null];
+    UMASN1Sequence *seq;
+    @try
+    {
+        seq = [[UMASN1Sequence alloc]initWithBerData:data];
+    }
+    @catch(NSException *e)
+    {
+        [self traceProblematicPdu:packet.incomingMtp3Data
+                          options:@{@"error":@"can not extract transaction number" ,
+                                    @"timestamp": [NSDate date],
+                                    @"linkset":packet.incomingLinksetName }];
+        return @[otid,dtid];
+    }
+    switch(seq.asn1_tag.tagClass)
+    {
+        case UMASN1Class_Application:
+        {
+            switch(seq.asn1_tag.tagNumber)
+            {
+                case 2: /* BEGIN */
+                case 4: /* END      */
+                case 5: /* CONTINUE */
+                case 7: /* ABORT    */
+                {
+                    int p=0;
+                    UMASN1Object *o = [seq getObjectAtPosition:p++];
+                    while(o)
+                    {
+                        if((o.asn1_tag.tagClass == UMASN1Class_Application) && (o.asn1_tag.tagNumber == 8)) /* orig transaction ID */
+                        {
+                            otid = o.asn1_data.hexString;
+                        }
+                        if((o.asn1_tag.tagClass == UMASN1Class_Application) && (o.asn1_tag.tagNumber == 9)) /* dest transaction ID */
+                        {
+                            dtid = o.asn1_data.hexString;
+                        }
+                        o = [seq getObjectAtPosition:p++];
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    return @[otid,dtid];
 }
 
 - (NSNumber *) extractOperation:(NSData *)data applicationContext:(NSString **)acptr
@@ -5519,5 +6018,132 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     [self openSccpScreeningTraceFile];
 }
 
++ (NSArray <UMSCCP_Segment *>*)splitDataIntoSegments:(NSData *)data
+                                    withSegmentSizes:(NSArray<NSNumber *>*)segmentSizes
+                                           reference:(unsigned int)ref
+                                              maxPdu:(NSUInteger)maxPdu
+                                       protocolClass:(SCCP_ServiceClass)pclass
+                                             logFeed:(UMLogFeed *)logFeed
+                                            logLevel:(UMLogLevel) logLevel
+{
+    BOOL debug =(logLevel <=UMLOG_DEBUG);
+    if(debug)
+    {
+        NSMutableString *s = [[NSMutableString alloc]init];
+        [s appendFormat:@"Entering splitDataIntoSegments: %@\n",[data hexString]];
+        [s appendFormat:@"\twithSegmentSizes: {"];
+        for(int i=0;i<segmentSizes.count;i++)
+        {
+            NSNumber *num = segmentSizes[i];
+            int n = [num intValue];
+            if(i>0)
+            {
+                [s appendFormat:@", %d",n];
+            }
+            else
+            {
+                [s appendFormat:@"%d", n];
+            }
+        }
+        [s appendFormat:@"}\n"];
+        [s appendFormat:@"\treference:%u\n",ref];
+        [s appendFormat:@"\tmaxPdu:%ld\n",(long)maxPdu];
+        [logFeed debugText:s];
+    }
+    NSMutableArray<UMSCCP_Segment *> *segments = [[NSMutableArray alloc]init];
 
+    NSData *remainingData = [data copy];
+    
+    NSUInteger remainingLength = remainingData.length;
+    NSUInteger index=0;
+    while(remainingLength > 0)
+    {
+        NSUInteger currentLength = maxPdu;
+        if((segmentSizes!=NULL) && (segmentSizes.count < index))
+        {
+            NSNumber *n = segmentSizes[index];
+            currentLength = [n intValue];
+            if(currentLength > maxPdu)
+            {
+                currentLength = maxPdu;
+            }
+        }
+        else if((segmentSizes!=NULL) && (segmentSizes.count>0))
+        {
+            NSNumber *n = segmentSizes[segmentSizes.count -1];
+            currentLength = [n intValue];
+            if(currentLength > maxPdu)
+            {
+                currentLength = maxPdu;
+            }
+        }
+        else
+        {
+            currentLength = maxPdu;
+        }
+        if(currentLength > remainingLength)
+        {
+            currentLength = remainingLength;
+        }
+        UMSCCP_Segment *currentSegment = [[UMSCCP_Segment alloc]init];
+        if(index==0)
+        {
+            currentSegment.first = YES;
+        }
+        else
+        {
+            currentSegment.first = NO;
+        }
+        currentSegment.class1 = (pclass == SCCP_CLASS_INSEQ_CL);
+        currentSegment.reference = ref;
+        currentSegment.data = [NSData dataWithBytes:remainingData.bytes length:currentLength];
+        [segments addObject:currentSegment];
+    
+        remainingData = [NSData dataWithBytes:&remainingData.bytes[currentLength] length:(remainingLength - currentLength)];
+        remainingLength = remainingData.length;
+        index++;
+    }
+    for(int i=0;i<segments.count;i++)
+    {
+        UMSCCP_Segment *s = segments[i];
+        s.remainingSegment = (int)segments.count - i - 1;
+    }
+
+    if(debug)
+    {
+        NSMutableString *s = [[NSMutableString alloc]init];
+        [s appendFormat:@"returning segments:\n"];
+        for(int i=0;i<segments.count;i++)
+        {
+            UMSCCP_Segment *seg = segments[i];
+            [s appendFormat:@"\t%@\n",seg.description];
+        }
+        [logFeed debugText:s];
+    }
+    return segments;
+}
+
+- (int)nextSLS
+{
+    int sls;
+    
+    ummutex_lock(_slsLock);
+    sls = _last_sls;
+    _last_sls = (_last_sls+1) % 16;
+    ummutex_unlock(_slsLock);
+    return sls;
+}
+
++ (NSData *)mtp3Wrap:(NSData *)sccp_data opc:(UMMTP3PointCode *)opc dpc:(UMMTP3PointCode *)dpc ni:(int)ni si:(int)si
+{
+    UMMTP3Label *label = [[UMMTP3Label alloc]init];
+    label.opc = opc;
+    label.dpc = dpc;
+    NSMutableData *rawMtp3 = [[NSMutableData alloc]init];
+    int sio = ((ni & 0x03) << 6) | (si & 0x0F);
+    [rawMtp3 appendByte:sio];
+    [label appendToMutableData:rawMtp3];
+    [rawMtp3 appendData:sccp_data];
+    return rawMtp3;
+}
 @end

@@ -25,6 +25,7 @@
 #import <ulibsccp/UMSCCP_Packet.h>
 #import <ulibsccp/UMSCCP_TracefileProtocol.h>
 #import <ulibsccp/UMSCCP_StatisticDb.h>
+#import <ulibsccp/UMSCCP_RoutingState.h>
 
 @class UMSCCP_Statistics;
 @class UMSCCP_PrometheusData;
@@ -50,6 +51,7 @@ typedef enum UMSccpScreening_result
 } UMSccpScreening_result;
 
 
+
 @protocol sccp_tcapDecoder<NSObject>
 - (NSString *) getAppContextFromDialogPortion:(UMASN1Object *)o;
 - (NSNumber *) getOperationFromComponentPortion:(UMASN1Object *)o;
@@ -65,13 +67,16 @@ typedef enum UMSccpScreening_result
     NSString                    *_mtp3_name;
     UMLayerMTP3                 *_mtp3;
     UMSynchronizedDictionary    *_dpcAvailability;
+    
     UMSynchronizedArray         *_traceSendDestinations;
     UMSynchronizedArray         *_traceReceiveDestinations;
     UMSynchronizedArray         *_traceDroppedDestinations;
+    UMSynchronizedArray         *_traceUnroutableDestinations;
+    UMSynchronizedArray         *_traceProblematicDestinations;
 
     SccpL3RoutingTable          *_sccpL3RoutingTable;
-    int                         _xudt_max_hop_count;
-    int                         _xudts_max_hop_count;
+    int                         _lxudt_max_hop_count;
+    int                         _lxudts_max_hop_count;
     BOOL                        _stpMode;
     NSArray<UMMTP3PointCode *>  *_next_pcs;  /* if STP mode is NO, all traffic is sent to next_pcs instead of using a routing table */
     SccpDestinationGroup        *_default_destination_group;
@@ -86,16 +91,13 @@ typedef enum UMSccpScreening_result
     NSNumber                    *_statisticDbAutoCreate;
     UMSCCP_StatisticDb          *_statisticDb;
     NSString                    *_statisticDbInstance;
-
-    id<UMSCCP_TracefileProtocol>    _problematicTraceDestination;
-    id<UMSCCP_TracefileProtocol>    _unrouteablePacketsTraceDestination;
-    BOOL                         _routeErrorsBackToOriginatingPointCode;
-    id<UMSCCP_FilterDelegateProtocol> _filterDelegate;
+    BOOL                                _routeErrorsBackToOriginatingPointCode;
+    id<UMSCCP_FilterDelegateProtocol>   _filterDelegate;
     id<UMLayerSCCPApplicationContextProtocol>_appDelegate;
-    UMTimer                     *_housekeepingTimer;
-    BOOL                        _automaticAnsiItuConversion;
-    NSNumber                    *_conversion_e164_tt;
-    NSNumber                    *_conversion_e212_tt;
+    UMTimer                                 *_housekeepingTimer;
+    BOOL                                    _automaticAnsiItuConversion;
+    NSNumber                                *_conversion_e164_tt;
+    NSNumber                                *_conversion_e212_tt;
     
     NSString                                *_sccp_screeningPluginName;
     NSString                                *_sccp_screeningPluginConfigFileName;
@@ -111,6 +113,9 @@ typedef enum UMSccpScreening_result
     id<sccp_tcapDecoder>                     _tcapDecodeDelegate; /* a delegate which decodes opcode and appcontext for us */
     UMSCCP_PendingSegmentsStorage            *_pendingSegmentsStorage;
     BOOL                                     _routingDebug;
+    UMLogLevel                              _tcapSharingTraceLevel;
+    UMMutex                                 *_slsLock;
+    int                                     _last_sls;
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;
@@ -118,8 +123,8 @@ typedef enum UMSccpScreening_result
 @property(readwrite,strong) SccpGttRegistry *gttSelectorRegistry;
 @property(readwrite,strong) NSMutableDictionary *pendingSegments;
 @property(readwrite,strong) SccpL3RoutingTable *sccpL3RoutingTable;
-@property(readwrite,assign) int xudt_max_hop_count;
-@property(readwrite,assign) int xudts_max_hop_count;
+@property(readwrite,assign) int lxudt_max_hop_count;
+@property(readwrite,assign) int lxudts_max_hop_count;
 @property(readwrite,assign) BOOL stpMode;
 @property(readwrite,assign) BOOL statisticsReady;
 @property(readwrite,assign) BOOL routingDebug;
@@ -134,17 +139,19 @@ typedef enum UMSccpScreening_result
 @property(readwrite,strong,atomic)  NSNumber                    *conversion_e164_tt;
 @property(readwrite,strong,atomic)  NSNumber                    *conversion_e212_tt;
 @property(readwrite,strong,atomic) id<sccp_tcapDecoder>         tcapDecoder;
+@property(readwrite,assign,atomic) BOOL                         routeErrorsBackToSource;
 
-@property(readwrite,strong,atomic) id<UMSCCP_TracefileProtocol>    problematicTraceDestination;
-@property(readwrite,strong,atomic) id<UMSCCP_TracefileProtocol>    unrouteablePacketsTraceDestination;
-@property(readwrite,assign,atomic) BOOL    routeErrorsBackToSource;
-
-@property(readwrite,strong,atomic) NSString                    *sccp_screeningPluginName;
-@property(readwrite,strong,atomic) NSString                    *sccp_screeningPluginConfig;
-@property(readwrite,strong,atomic) NSString                    *sccp_screeningPluginTraceFile;
+@property(readwrite,strong,atomic) NSString                     *sccp_screeningPluginName;
+@property(readwrite,strong,atomic) NSString                     *sccp_screeningPluginConfig;
+@property(readwrite,strong,atomic) NSString                     *sccp_screeningPluginTraceFile;
 @property(readwrite,strong,atomic) UMPlugin<UMMTP3SCCPScreeningPluginProtocol>   *sccp_screeningPlugin;
-@property(readwrite,strong,atomic) UMSCCP_PrometheusData    *prometheusData;
-
+@property(readwrite,strong,atomic) UMSCCP_PrometheusData        *prometheusData;
+@property(readwrite,assign,atomic) UMLogLevel                   tcapSharingTraceLevel;
+@property(readwrite,strong,atomic) UMSynchronizedArray         *traceSendDestinations;
+@property(readwrite,strong,atomic) UMSynchronizedArray         *traceReceiveDestinations;
+@property(readwrite,strong,atomic) UMSynchronizedArray         *traceDroppedDestinations;
+@property(readwrite,strong,atomic) UMSynchronizedArray         *traceUnroutableDestinations;
+@property(readwrite,strong,atomic) UMSynchronizedArray         *traceProblematicDestinations;
 
 - (void)increaseThroughputCounter:(UMSCCP_StatisticSection)section;
 
@@ -409,19 +416,19 @@ sls:(int)sls;
                 routedToLinkset:(NSString **)outgoingLinkset
                             sls:(int)sls;
 
--(UMMTP3_Error) sendLUDTsegment:(UMSCCP_Segment *)pdu
-                        calling:(SccpAddress *)src
-                         called:(SccpAddress *)dst
-                   serviceClass:(SCCP_ServiceClass)pclass
-                       handling:(SCCP_Handling)handling
-                       hopCount:(int)hopCount
-                            opc:(UMMTP3PointCode *)opc
-                            dpc:(UMMTP3PointCode *)dpc
-                    optionsData:(NSData *)xoptionsdata
-                        options:(NSDictionary *)options
-                       provider:(UMLayerMTP3 *)provider
-                routedToLinkset:(NSString **)outgoingLinkset
-                            sls:(int)sls;
+- (UMMTP3_Error) sendLUDTsegment:(UMSCCP_Segment *)pdu
+                         calling:(SccpAddress *)src
+                          called:(SccpAddress *)dst
+                    serviceClass:(SCCP_ServiceClass)pclass
+                        handling:(SCCP_Handling)handling
+                        hopCount:(int)hopCount
+                             opc:(UMMTP3PointCode *)opc
+                             dpc:(UMMTP3PointCode *)dpc
+                     optionsData:(NSData *)xoptionsdata
+                         options:(NSDictionary *)options
+                        provider:(UMLayerMTP3 *)provider
+                 routedToLinkset:(NSString **)outgoingLinkset
+                             sls:(int)sls;
 
 -(UMMTP3_Error) sendXUDTS:(NSData *)data
                   calling:(SccpAddress *)src
@@ -464,7 +471,8 @@ sls:(int)sls;
                                           sourceAddress:(NSString *)source;
 
 
-- (BOOL)routePacket:(UMSCCP_Packet *)packet; /* returns YES if sucessfully forwarded, NO if it wasn able to route it */
+- (UMSCCP_RoutingState *)routePacket:(UMSCCP_Packet *)packet;
+
 /* Note: this doesnt work if all packets dont have the same routing destination ! */
 
 
@@ -478,14 +486,13 @@ sls:(int)sls;
 - (NSDictionary *)config;
 - (void)startUp;
 
-+ (NSString *)reasonString:(SCCP_ReturnCause)reason;
 - (id)decodePdu:(NSData *)data;
-- (void)traceSentPdu:(NSData *)pdu options:(NSDictionary *)dict;
-- (void)traceSentPacket:(UMSCCP_Packet *)packet options:(NSDictionary *)dict;
-- (void)traceReceivedPdu:(NSData *)pdu options:(NSDictionary *)dict;
-- (void)traceReceivedPacket:(UMSCCP_Packet *)packet options:(NSDictionary *)o;
-- (void)traceDroppedPdu:(NSData *)pdu options:(NSDictionary *)dict;
-- (void)traceDroppedPacket:(UMSCCP_Packet *)packet options:(NSDictionary *)dict;
+- (void)traceSentPdu:(NSData *)mtp3pdu          options:(NSDictionary *)dict;
+- (void)traceReceivedPdu:(NSData *)mtp3pdu      options:(NSDictionary *)dict;
+- (void)traceDroppedPdu:(NSData *)mtp3pdu       options:(NSDictionary *)dict;
+- (void)traceUnroutablePdu:(NSData *)mtp3pdu    options:(NSDictionary *)dict;
+- (void)traceProblematicPdu:(NSData *)mtp3pdu   options:(NSDictionary *)dict;
+
 - (NSDictionary *)apiStatus;
 - (UMSynchronizedSortedDictionary *)routeStatus;
 - (UMSynchronizedSortedDictionary *)routingTableStatus;
@@ -522,5 +529,16 @@ qualityOfService:(int)qos
 - (void)reloadPluginConfigs;
 - (void)reloadPlugins;
 + (NSString *)causeValueToString:(SCCP_ReturnCause)causeValue;
+
++ (NSArray <UMSCCP_Segment *>*)splitDataIntoSegments:(NSData *)data
+                                    withSegmentSizes:(NSArray<NSNumber *>*)segmentSizes
+                                           reference:(unsigned int)ref
+                                              maxPdu:(NSUInteger)maxPdu
+                                       protocolClass:(SCCP_ServiceClass)pclass
+                                             logFeed:(UMLogFeed *)logFeed
+                                            logLevel:(UMLogLevel) logLevel;
+
+- (int)nextSLS;
++ (NSData *)mtp3Wrap:(NSData *)sccp_data opc:(UMMTP3PointCode *)opc dpc:(UMMTP3PointCode *)dpc ni:(int)ni si:(int)si;
 
 @end

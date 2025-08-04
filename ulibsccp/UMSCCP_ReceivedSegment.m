@@ -17,7 +17,10 @@
     return [NSString stringWithFormat:@"%@/%@/%u", _src.stringValueE164, _dst.stringValueE164,_reference];
 }
 
-- (UMSynchronizedSortedDictionary *)jsonObject
+
+
+
+- (UMSynchronizedSortedDictionary *)objectValue
 {
     UMSynchronizedSortedDictionary *r = [[UMSynchronizedSortedDictionary alloc]init];
     if(_src)
@@ -36,6 +39,10 @@
     {
         r[@"dpc"] = _dpc;
     }
+    if(_segment)
+    {
+        r[@"segment"] = _segment.objectValue;
+    }
     r[@"reference"] = @(_reference);
     r[@"sls"] = @(_sls);
     r[@"max"] = @(_max);
@@ -51,6 +58,11 @@
         r[@"options"] = _options;
     }
     return r;
+}
+
+- (NSString *)description
+{
+    return [[self objectValue] jsonString];
 }
 
 

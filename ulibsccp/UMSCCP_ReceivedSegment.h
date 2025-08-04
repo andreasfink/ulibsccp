@@ -50,7 +50,6 @@
 @property(readwrite,strong,atomic)  UMSCCP_Packet       *combinedPacket;
 @property(readwrite,strong,atomic)  UMSCCP_Packet       *segmentedPacket;
 
-
 - (NSString *)key;
 
 @end

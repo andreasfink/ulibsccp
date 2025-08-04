@@ -16,7 +16,7 @@
 #define    UMSCCP_FILTER_RESULT_MODIFIED        0x01    /* flag to indicate it has been altered */
 #define    UMSCCP_FILTER_RESULT_MONITOR         0x02    /* flag to send a copy to monitor         */
 #define    UMSCCP_FILTER_RESULT_DROP            0x04    /* dont process                         */
-#define    UMSCCP_FILTER_RESULT_STATUS          0x08    /* send UDTS / XUDTS etc                 */
+#define    UMSCCP_FILTER_RESULT_STATUS          0x08    /* send UDTS / XUDTS /LUDTS etc              */
 #define    UMSCCP_FILTER_RESULT_CAN_NOT_DECODE  0x10    /* set if the filter has problems decoding   */
 #define    UMSCCP_FILTER_RESULT_ADD_TO_TRACE1   0x20    /* set if the filter has problems decoding   */
 #define    UMSCCP_FILTER_RESULT_ADD_TO_TRACE2   0x40    /* set if the filter has problems decoding   */

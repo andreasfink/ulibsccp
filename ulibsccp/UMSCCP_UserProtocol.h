@@ -54,23 +54,14 @@
 
 @protocol UMSCCP_TraceProtocol <NSObject>
 
-- (void)sccpTraceSentPdu:(NSData *)data
+- (void)sccpTraceSentPdu:(NSData *)mtp3pdu
                  options:(NSDictionary *)options;
 
-- (void)sccpTraceReceivedPdu:(NSData *)data
+- (void)sccpTraceReceivedPdu:(NSData *)mtp3pdu
                      options:(NSDictionary *)options;
 
-- (void)sccpTraceDroppedPdu:(NSData *)data
+- (void)sccpTraceDroppedPdu:(NSData *)mtp3pdu
                     options:(NSDictionary *)options;
 
-
-- (void)sccpTraceSentSccpPacket:(UMSCCP_Packet *)packet
-                    options:(NSDictionary *)options;
-
-- (void)sccpTraceReceivedSccpPacket:(UMSCCP_Packet *)packet
-                        options:(NSDictionary *)options;
-
-- (void)sccpTraceDroppedSccpPacket:(UMSCCP_Packet *)packet
-                       options:(NSDictionary *)options;
 
 @end

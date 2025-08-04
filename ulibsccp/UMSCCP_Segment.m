@@ -62,4 +62,14 @@
     return s;
 }
 
+- (UMSynchronizedSortedDictionary *)objectValue
+{
+    UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
+    dict[@"first"] = @(_first);
+    dict[@"class1"] = @(_class1);
+    dict[@"remainingSegment"] = @(_remainingSegment);
+    dict[@"reference"] = @(_reference);
+    dict[@"data"] = _data.hexString;
+    return dict;
+}
 @end

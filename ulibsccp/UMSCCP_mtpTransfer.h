@@ -56,6 +56,7 @@
     NSString                        *_incomingLinksetName;
     SccpNumberTranslation           *_cga_number_translation_in;
     SccpNumberTranslation           *_cda_number_translation_in;
+    NSData                          *_rawMtp3;
 }
 
 @property(readwrite,strong,atomic)  UMSynchronizedSortedDictionary *decodedJson;
