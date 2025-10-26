@@ -15,6 +15,7 @@
 		A61571EF1CD4891200211137 /* UMSCCP_Segment.m in Sources */ = {isa = PBXBuildFile; fileRef = A61571ED1CD4891200211137 /* UMSCCP_Segment.m */; };
 		A61571F61CD4AADF00211137 /* UMSCCP_ReceivedSegments.h in Headers */ = {isa = PBXBuildFile; fileRef = A61571F41CD4AADF00211137 /* UMSCCP_ReceivedSegments.h */; };
 		A61571F71CD4AADF00211137 /* UMSCCP_ReceivedSegments.m in Sources */ = {isa = PBXBuildFile; fileRef = A61571F51CD4AADF00211137 /* UMSCCP_ReceivedSegments.m */; };
+		A61783CE2EAB864E00339E54 /* ulib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A61783CD2EAB864E00339E54 /* ulib.framework */; };
 		A64995152E2F7AF7006873AC /* UMSCCP_TcapSharingSession.h in Headers */ = {isa = PBXBuildFile; fileRef = A64995132E2F7AF7006873AC /* UMSCCP_TcapSharingSession.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A64995162E2F7AF7006873AC /* UMSCCP_TcapSharingSession.m in Sources */ = {isa = PBXBuildFile; fileRef = A64995142E2F7AF7006873AC /* UMSCCP_TcapSharingSession.m */; };
 		A64D452D2684893C00540708 /* UMSCCP_PrometheusData.h in Headers */ = {isa = PBXBuildFile; fileRef = A64D452B2684893C00540708 /* UMSCCP_PrometheusData.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -57,7 +58,6 @@
 		A6CF1AC22185AAA600F09659 /* UMSCCP_Statistics.m in Sources */ = {isa = PBXBuildFile; fileRef = A6CF1AC02185AAA600F09659 /* UMSCCP_Statistics.m */; };
 		A6CF1AC92185B96D00F09659 /* UMSCCP_StatisticSection.h in Headers */ = {isa = PBXBuildFile; fileRef = A6CF1AC72185B96D00F09659 /* UMSCCP_StatisticSection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A6DDA3F01CAD269000754B9E /* UMSCCP_UserProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = A6DDA3EE1CAD269000754B9E /* UMSCCP_UserProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		A6E3D78F22BABDEA00D5B1B6 /* ulib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6CEB97022BABC1500B2BD9D /* ulib.framework */; };
 		A6ED5C6D1B435A8A00854472 /* UMLayerSCCP.h in Headers */ = {isa = PBXBuildFile; fileRef = A6ED5C6B1B435A8A00854472 /* UMLayerSCCP.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A6ED5C6E1B435A8A00854472 /* UMLayerSCCP.m in Sources */ = {isa = PBXBuildFile; fileRef = A6ED5C6C1B435A8A00854472 /* UMLayerSCCP.m */; };
 		A6ED5C931B435F3600854472 /* ulibsccp.h in Headers */ = {isa = PBXBuildFile; fileRef = A604D14119B999BC0090FC94 /* ulibsccp.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -90,6 +90,7 @@
 		A61571ED1CD4891200211137 /* UMSCCP_Segment.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_Segment.m; sourceTree = "<group>"; };
 		A61571F41CD4AADF00211137 /* UMSCCP_ReceivedSegments.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_ReceivedSegments.h; sourceTree = "<group>"; };
 		A61571F51CD4AADF00211137 /* UMSCCP_ReceivedSegments.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_ReceivedSegments.m; sourceTree = "<group>"; };
+		A61783CD2EAB864E00339E54 /* ulib.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulib.framework; path = "/Library/Application Support/FinkTelecomServices/frameworks/ulib.framework"; sourceTree = "<absolute>"; };
 		A63259592BC7DA82001AA485 /* UMSCCP_Packet.asn.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_Packet.asn.h; sourceTree = "<group>"; };
 		A64995132E2F7AF7006873AC /* UMSCCP_TcapSharingSession.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_TcapSharingSession.h; sourceTree = "<group>"; };
 		A64995142E2F7AF7006873AC /* UMSCCP_TcapSharingSession.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_TcapSharingSession.m; sourceTree = "<group>"; };
@@ -132,7 +133,6 @@
 		A6C6052F207698DE002DEBDD /* q-711 SCCP Functional Description.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "q-711 SCCP Functional Description.pdf"; sourceTree = "<group>"; };
 		A6C60530207698DE002DEBDD /* q-713 SCCP Formats Codes.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "q-713 SCCP Formats Codes.pdf"; sourceTree = "<group>"; };
 		A6C60531207698DE002DEBDD /* q-716 SCCP Performance.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "q-716 SCCP Performance.pdf"; sourceTree = "<group>"; };
-		A6CEB97022BABC1500B2BD9D /* ulib.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulib.framework; path = "/Library/Application Support/FinkTelecomServices/frameworks/ulib.framework"; sourceTree = "<absolute>"; };
 		A6CEB97222BABC4700B2BD9D /* ulibmtp3.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibmtp3.framework; path = "/Library/Application Support/FinkTelecomServices/frameworks/ulibmtp3.framework"; sourceTree = "<absolute>"; };
 		A6CEB97322BABC4800B2BD9D /* ulibgt.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ulibgt.framework; path = "/Library/Application Support/FinkTelecomServices/frameworks/ulibgt.framework"; sourceTree = "<absolute>"; };
 		A6CF1ABB2185A41C00F09659 /* UMSCCP_StatisticData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_StatisticData.h; sourceTree = "<group>"; };
@@ -158,8 +158,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A61783CE2EAB864E00339E54 /* ulib.framework in Frameworks */,
 				A6CEB97422BABC4800B2BD9D /* ulibmtp3.framework in Frameworks */,
-				A6E3D78F22BABDEA00D5B1B6 /* ulib.framework in Frameworks */,
 				A6AA23CC248541FA008D5A57 /* ulibdb.framework in Frameworks */,
 				A6CEB97522BABC4800B2BD9D /* ulibgt.framework in Frameworks */,
 				A6604A4A2527136C00D978EF /* ulibasn1.framework in Frameworks */,
@@ -206,9 +206,9 @@
 		A604D13319B999BC0090FC94 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A61783CD2EAB864E00339E54 /* ulib.framework */,
 				A6604A492527136C00D978EF /* ulibasn1.framework */,
 				A6AA23CB248541FA008D5A57 /* ulibdb.framework */,
-				A6CEB97022BABC1500B2BD9D /* ulib.framework */,
 				A6CEB97222BABC4700B2BD9D /* ulibmtp3.framework */,
 				A6CEB97322BABC4800B2BD9D /* ulibgt.framework */,
 			);
@@ -397,7 +397,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1620;
+				LastUpgradeCheck = 2600;
 				ORGANIZATIONNAME = "Andreas Fink (andreas@fink.org)";
 				TargetAttributes = {
 					A604D13019B999BC0090FC94 = {
@@ -519,6 +519,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = (
+					"$(ARCHS_STANDARD)",
+					aarm64,
+					x86_64,
+				);
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
@@ -549,6 +554,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEPLOYMENT_LOCATION = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
+				DEVELOPMENT_TEAM = 38L827M334;
 				DSTROOT = "/Library/Application Support/";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -573,6 +579,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 13.1;
 				ONLY_ACTIVE_ARCH = NO;
 				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
 				WARNING_CFLAGS = "-Wimplicit-fallthrough";
 			};
@@ -582,6 +589,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = (
+					"$(ARCHS_STANDARD)",
+					aarm64,
+					x86_64,
+				);
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
@@ -613,6 +625,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEPLOYMENT_LOCATION = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
+				DEVELOPMENT_TEAM = 38L827M334;
 				DSTROOT = "/Library/Application Support/";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -630,6 +643,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 13.1;
 				ONLY_ACTIVE_ARCH = NO;
 				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
 				WARNING_CFLAGS = "-Wimplicit-fallthrough";
 			};
@@ -644,7 +658,6 @@
 				CURRENT_PROJECT_VERSION = 2.0.0;
 				DEAD_CODE_STRIPPING = YES;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 38L827M334;
 				DSTROOT = "/Library/Application Support";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -653,6 +666,8 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+					"$(LOCAL_LIBRARY_DIR)/Application\\ Support/FinkTelecomServices/frameworks",
+					"$(LOCAL_LIBRARY_DIR)/Application\\ Support/FinkTelecomServices/frameworks",
 					"$(LOCAL_LIBRARY_DIR)/Application\\ Support/FinkTelecomServices/frameworks",
 					"$(LOCAL_LIBRARY_DIR)/Application\\ Support/FinkTelecomServices/frameworks",
 					"$(LOCAL_LIBRARY_DIR)/Application\\ Support/FinkTelecomServices/frameworks",
@@ -690,7 +705,6 @@
 				CURRENT_PROJECT_VERSION = 2.0.0;
 				DEAD_CODE_STRIPPING = YES;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 38L827M334;
 				DSTROOT = "/Library/Application Support";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -699,6 +713,8 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+					"$(LOCAL_LIBRARY_DIR)/Application\\ Support/FinkTelecomServices/frameworks",
+					"$(LOCAL_LIBRARY_DIR)/Application\\ Support/FinkTelecomServices/frameworks",
 					"$(LOCAL_LIBRARY_DIR)/Application\\ Support/FinkTelecomServices/frameworks",
 					"$(LOCAL_LIBRARY_DIR)/Application\\ Support/FinkTelecomServices/frameworks",
 					"$(LOCAL_LIBRARY_DIR)/Application\\ Support/FinkTelecomServices/frameworks",
@@ -734,7 +750,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 38L827M334;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(DEVELOPER_FRAMEWORKS_DIR)",
 					"$(inherited)",
@@ -762,7 +777,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 38L827M334;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(DEVELOPER_FRAMEWORKS_DIR)",
 					"$(inherited)",
