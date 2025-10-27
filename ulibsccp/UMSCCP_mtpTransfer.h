@@ -68,6 +68,19 @@
 @property(readwrite,strong,atomic)  UMMTP3TranslationTableMap *calling_ttmap;
 @property(readwrite,strong,atomic)  NSString *incomingLinksetName;
 
+/* for backwards compatibility */
+- (UMSCCP_mtpTransfer *)initForSccp:(UMLayerSCCP *)layer
+                               mtp3:(UMLayerMTP3 *)mtp3
+                                opc:(UMMTP3PointCode *)xopc
+                                dpc:(UMMTP3PointCode *)xdpc
+                                 si:(int)xsi
+                                 ni:(int)xni
+                                sls:(int)sls
+                               data:(NSData *)xdata
+                            options:(NSDictionary *)xoptions
+                                map:(UMMTP3TranslationTableMap *)called_ttmap
+                incomingLinksetName:(NSString *)linksetName;
+
 - (UMSCCP_mtpTransfer *)initForSccp:(UMLayerSCCP *)layer
                                mtp3:(UMLayerMTP3 *)mtp3
                                 opc:(UMMTP3PointCode *)xopc

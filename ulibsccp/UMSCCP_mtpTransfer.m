@@ -18,8 +18,36 @@
 #import "UMSCCP_PrometheusData.h"
 #import "UMSCCP_Segment.h"
 
+
 @implementation UMSCCP_mtpTransfer
 
+- (UMSCCP_mtpTransfer *)initForSccp:(UMLayerSCCP *)layer
+                               mtp3:(UMLayerMTP3 *)mtp3
+                                opc:(UMMTP3PointCode *)xopc
+                                dpc:(UMMTP3PointCode *)xdpc
+                                 si:(int)xsi
+                                 ni:(int)xni
+                                sls:(int)sls
+                               data:(NSData *)xdata
+                            options:(NSDictionary *)xoptions
+                                map:(UMMTP3TranslationTableMap *)called_ttmap
+                incomingLinksetName:(NSString *)linksetName
+{
+   return [self initForSccp:layer
+                       mtp3:mtp3
+                        opc:xopc
+                        dpc:xdpc
+                         si:xsi
+                         ni:xni
+                        sls:sls
+                       data:xdata
+                    options:xoptions
+               called_ttmap:called_ttmap
+              calling_ttmap:NULL
+         called_translation:NULL
+        calling_translation:NULL
+        incomingLinksetName:linksetName];
+}
 
 - (UMSCCP_mtpTransfer *)initForSccp:(UMLayerSCCP *)layer
                                mtp3:(UMLayerMTP3 *)mtp3
