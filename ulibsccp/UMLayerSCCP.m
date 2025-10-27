@@ -568,27 +568,27 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     {
         [optionsdata appendData:xoptionsdata];
     }
-    SccpNumberTranslation *cga_number_translation_out = NULL;
-    SccpNumberTranslation *cda_number_translation_out = NULL;
+    SccpNumberTranslation *calling_number_translation_out = NULL;
+    SccpNumberTranslation *called_number_translation_out = NULL;
     
     if((*outgoingLinkset).length > 0)
     {
         UMMTP3InstanceRoute *route = [_mtp3 findRouteForDestination:dpc];
         *outgoingLinkset = route.linksetName;
-        cga_number_translation_out = route.cga_number_translation_out;
-        cda_number_translation_out = route.cda_number_translation_out;
+        calling_number_translation_out = route.calling_number_translation_out;
+        called_number_translation_out = route.called_number_translation_out;
     }
     else
     {
-        cga_number_translation_out = [_mtp3 callingPartyAddressTranslationOutForLinkset:*outgoingLinkset];
-        cda_number_translation_out = [_mtp3 calledPartyAddressTranslationOutForLinkset:*outgoingLinkset];
+        calling_number_translation_out = [_mtp3 callingPartyAddressTranslationOutForLinkset:*outgoingLinkset];
+        called_number_translation_out = [_mtp3 calledPartyAddressTranslationOutForLinkset:*outgoingLinkset];
         
     }
-    if(cga_number_translation_out)
+    if(calling_number_translation_out)
     {
         NSNumber *newCallingTT = NULL;
         NSNumber *newCalledTT = NULL;
-        src = [cga_number_translation_out translateAddress:src newCallingTT:&newCallingTT newCalledTT:&newCalledTT];
+        src = [calling_number_translation_out translateAddress:src newCallingTT:&newCallingTT newCalledTT:&newCalledTT];
         if(newCalledTT)
         {
             dst.tt.tt = newCalledTT.intValue;
@@ -598,11 +598,11 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
             src.tt.tt = newCallingTT.intValue;
         }
     }
-    if(cda_number_translation_out)
+    if(called_number_translation_out)
     {
         NSNumber *newCallingTT = NULL;
         NSNumber *newCalledTT = NULL;
-        src = [cda_number_translation_out translateAddress:src newCallingTT:&newCallingTT newCalledTT:&newCalledTT];
+        src = [called_number_translation_out translateAddress:src newCallingTT:&newCallingTT newCalledTT:&newCalledTT];
         if(newCalledTT)
         {
             dst.tt.tt = newCalledTT.intValue;
@@ -817,8 +817,8 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     {
         UMMTP3InstanceRoute *route = [_mtp3 findRouteForDestination:dpc];
         *outgoingLinkset = route.linksetName;
-        cga_number_translation_out = route.cga_number_translation_out;
-        cda_number_translation_out = route.cda_number_translation_out;
+        cga_number_translation_out = route.calling_number_translation_out;
+        cda_number_translation_out = route.called_number_translation_out;
     }
     else
     {
@@ -1418,15 +1418,15 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                 packet.incomingLinksetTcapSharingOutside = inst;
 
             }
-            if(ls.cga_number_translation_in)
+            if(ls.calling_number_translation_in)
             {
-                packet.cga_number_translation_in = ls.cga_number_translation_in;
-                dict[@"incoming-linkset-calling-number-translation-in"] = ls.cga_number_translation_in.name;
+                packet.cga_number_translation_in = ls.calling_number_translation_in;
+                dict[@"incoming-linkset-calling-number-translation-in"] = ls.calling_number_translation_in.name;
             }
             if(ls.cda_number_translation_in)
             {
-                packet.cda_number_translation_in = ls.cda_number_translation_in;
-                dict[@"incoming-linkset-called-number-translation-in"] = ls.cda_number_translation_in.name;
+                packet.cda_number_translation_in = ls.called_number_translation_in;
+                dict[@"incoming-linkset-called-number-translation-in"] = ls.called_number_translation_in.name;
 
             }
             [packet applyIncomingNumberTranslation];
@@ -1628,28 +1628,28 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
         UMMTP3LinkSet *ls = [_mtp3 getLinkSetByName:packet.outgoingLinksetName];
         if(ls)
         {
-            if(ls.cga_number_translation_in_name)
+            if(ls.calling_number_translation_out_name)
             {
-                dict[@"outgoing-linkset-cga-translation-out"] = ls.cga_number_translation_out_name;
+                dict[@"outgoing-linkset-cga-translation-out"] = ls.calling_number_translation_out_name;
                 if(ls.cga_number_translation_out==NULL)
                 {
-                    ls.cga_number_translation_out = [_mtp3.appContext getSccpNumberTransationByName:ls.cga_number_translation_out_name];
+                    ls.calling_number_translation_out = [_mtp3.appContext getSccpNumberTransationByName:ls.calling_number_translation_out_name];
                 }
-                packet.cga_number_translation_out = ls.cga_number_translation_out;
+                packet.cga_number_translation_out = ls.calling_number_translation_out;
             }
-            if(ls.cda_number_translation_out_name)
+            if(ls.called_number_translation_out_name)
             {
                 dict[@"outgoing-linkset-cda-translation-out"] = ls.cda_number_translation_out_name;
-                if(ls.cda_number_translation_out==NULL)
+                if(ls.called_number_translation_out==NULL)
                 {
-                    ls.cda_number_translation_out = [_mtp3.appContext getSccpNumberTransationByName:ls.cda_number_translation_out_name];
+                    ls.called_number_translation_out = [_mtp3.appContext getSccpNumberTransationByName:ls.cda_number_translation_out_name];
                 }
-                packet.cda_number_translation_out = ls.cda_number_translation_out;
+                packet.cda_number_translation_out = ls.called_number_translation_out;
 
             }
             [packet applyOutgoingNumberTranslation];
             
-            if((ls.cga_number_translation_out_name) || (ls.cda_number_translation_out_name))
+            if((ls.called_number_translation_out_name) || (ls.calling_number_translation_out_name))
             {
                 dict[@"outgoing-calling-address-before-translation"] = packet.outgoingCallingPartyAddressBeforeTranslation.address;
                 dict[@"outgoing-calling-nai-before-translation"] = @(packet.outgoingCallingPartyAddressBeforeTranslation.nai.nai);
@@ -3224,8 +3224,8 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     {
         UMMTP3InstanceRoute *route = [_mtp3 findRouteForDestination:dpc];
         *outgoingLinkset = route.linksetName;
-        cga_number_translation_out = route.cga_number_translation_out;
-        cda_number_translation_out = route.cda_number_translation_out;
+        cga_number_translation_out = route.calling_number_translation_out;
+        cda_number_translation_out = route.called_number_translation_out;
     }
     else
     {
@@ -3369,8 +3369,8 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     {
         UMMTP3InstanceRoute *route = [_mtp3 findRouteForDestination:dpc];
         *outgoingLinkset = route.linksetName;
-        cga_number_translation_out = route.cga_number_translation_out;
-        cda_number_translation_out = route.cda_number_translation_out;
+        cga_number_translation_out = route.calling_number_translation_out;
+        cda_number_translation_out = route.called_number_translation_out;
     }
     else
     {
