@@ -754,6 +754,7 @@
                 if(_dst.ssn.ssn!=SCCP_SSN_SCCP_MG)
                 {
                     UMSCCP_RoutingState *state = [_sccpLayer routePacket:_packet];
+#pragma unused(state)
                 }
                 switch(m_type)
                 {
