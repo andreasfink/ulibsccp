@@ -121,6 +121,32 @@
     return [super logFeed];
 }
 
+
+- (void)mtpTransfer:(NSData *)data
+       callingLayer:(id)mtp3Layer
+                opc:(UMMTP3PointCode *)opc
+                dpc:(UMMTP3PointCode *)dpc
+                 si:(int)si
+                 ni:(int)ni
+                sls:(int)sls
+        linksetName:(NSString *)linksetName
+            options:(NSDictionary *)options
+       called_ttmap:(UMMTP3TranslationTableMap *)called_ttmap
+      calling_ttmap:(UMMTP3TranslationTableMap *)calling_ttmap
+{
+    return [self mtpTransfer:data
+                callingLayer:mtp3Layer
+                         opc:opc
+                         dpc:dpc
+                          si:si
+                          ni:ni
+                         sls:sls
+                 linksetName:linksetName
+                     options:options
+                called_ttmap:NULL
+               calling_ttmap:NULL];
+}
+
 /* if MTP3 has a packet for us it will send us a mtpTransfer message */
 
 - (void)mtpTransfer:(NSData *)data
