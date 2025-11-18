@@ -132,6 +132,61 @@
                 sls:(int)sls
         linksetName:(NSString *)linksetName
             options:(NSDictionary *)xoptions
+              ttmap:(UMMTP3TranslationTableMap *)map
+{
+    [self   mtpTransfer:data
+           callingLayer:mtp3Layer
+                    opc:opc
+                    dpc:dpc
+                     si:si
+                     ni:ni
+                    sls:sls
+            linksetName:linksetName
+                options:xoptions
+           called_ttmap:map
+          calling_ttmap:NULL
+     called_translation:NULL
+    calling_translation:NULL];
+}
+
+
+- (void)mtpTransfer:(NSData *)data
+       callingLayer:(id)mtp3Layer
+                opc:(UMMTP3PointCode *)opc
+                dpc:(UMMTP3PointCode *)dpc
+                 si:(int)si
+                 ni:(int)ni
+                sls:(int)sls
+        linksetName:(NSString *)linksetName
+            options:(NSDictionary *)xoptions
+       called_ttmap:(UMMTP3TranslationTableMap *)called_ttmap
+      calling_ttmap:(UMMTP3TranslationTableMap *)calling_ttmap
+{
+    [self   mtpTransfer:data
+           callingLayer:mtp3Layer
+                    opc:opc
+                    dpc:dpc
+                     si:si
+                     ni:ni
+                    sls:sls
+            linksetName:linksetName
+                options:xoptions
+           called_ttmap:called_ttmap
+          calling_ttmap:calling_ttmap
+     called_translation:NULL
+    calling_translation:NULL];
+}
+
+
+- (void)mtpTransfer:(NSData *)data
+       callingLayer:(id)mtp3Layer
+                opc:(UMMTP3PointCode *)opc
+                dpc:(UMMTP3PointCode *)dpc
+                 si:(int)si
+                 ni:(int)ni
+                sls:(int)sls
+        linksetName:(NSString *)linksetName
+            options:(NSDictionary *)xoptions
        called_ttmap:(UMMTP3TranslationTableMap *)called_ttmap
       calling_ttmap:(UMMTP3TranslationTableMap *)calling_ttmap
  called_translation:(SccpNumberTranslation *)cga_number_translation_in
