@@ -242,6 +242,17 @@ typedef enum UMSccpScreening_result
                 sls:(int)sls
         linksetName:(NSString *)linksetName
             options:(NSDictionary *)options
+              ttmap:(UMMTP3TranslationTableMap *)map;
+
+- (void)mtpTransfer:(NSData *)data
+       callingLayer:(id)mtp3Layer
+                opc:(UMMTP3PointCode *)opc
+                dpc:(UMMTP3PointCode *)dpc
+                 si:(int)si
+                 ni:(int)ni
+                sls:(int)sls
+        linksetName:(NSString *)linksetName
+            options:(NSDictionary *)xoptions
        called_ttmap:(UMMTP3TranslationTableMap *)called_ttmap
       calling_ttmap:(UMMTP3TranslationTableMap *)calling_ttmap;
 
