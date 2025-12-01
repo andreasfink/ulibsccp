@@ -4459,13 +4459,13 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     }
 }
 
-- (void)traceUnrouteablePdu:(NSData *)mtp3pdu options:(NSDictionary *)o
+- (void)traceUnroutablePdu:(NSData *)mtp3pdu options:(NSDictionary *)o
 {
     NSInteger n = [_traceUnroutableDestinations count];
     for (NSInteger i=0;i<n;i++)
     {
         id a = [_traceUnroutableDestinations objectAtIndex:i];
-        [a traceUnrouteablePdu:mtp3pdu options:o];
+        [a traceUnroutablePdu:mtp3pdu options:o];
     }
 }
 
@@ -5300,14 +5300,12 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     @autoreleasepool
     {
         NSDictionary *p = req.params;
-        int pcount=0;
         for(NSString *n in p.allKeys)
         {
             if(([n isEqualToString:@"user"])  || ([n isEqualToString:@"pass"]))
             {
                 continue;
             }
-            pcount++;
         }
         @try
         {

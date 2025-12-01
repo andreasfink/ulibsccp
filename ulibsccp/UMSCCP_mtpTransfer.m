@@ -725,7 +725,7 @@
                 _packet.incomingOptions = _options;
                 if(_dst.ssn.ssn!=SCCP_SSN_SCCP_MG)
                 {
-                    UMSCCP_RoutingState *state = [_sccpLayer routePacket:_packet];
+                    /* UMSCCP_RoutingState *state =*/ [_sccpLayer routePacket:_packet];
                 }
                 switch(m_type)
                 {
