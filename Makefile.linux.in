@@ -48,6 +48,8 @@ install: ${LIB} ${SLIB}
 	cp $(HFILES) ${DESTDIR}/usr/local/include/@PROJECT_NAME@
 	ldconfig
 
+headers:
+
 clean:
 	rm -f $(LIB) $(OFILES) ${SLIB}
 
