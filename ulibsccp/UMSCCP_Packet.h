@@ -232,7 +232,6 @@ typedef enum UMSCCP_Packet_Tag_enum
     SCCP_ReturnCause            _errorCauseValue;
     BOOL                        _candidateForTcapSharing;
     UMLogLevel                  _tcapSharingTraceLevel;
-
 }
 
 @property(readwrite,strong,atomic)  NSString                    *instance;

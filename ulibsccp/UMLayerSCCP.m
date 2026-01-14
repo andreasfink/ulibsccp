@@ -59,7 +59,8 @@
 {
 
     _last_sls = 0;
-    _tcapSharingTraceLevel = UMLOG_PANIC;
+    _logLevel = UMLOG_MINOR;
+    _tcapSharingTraceLevel = UMLOG_MINOR;
     _slsLock = [[UMMutex alloc]initWithName:@"sls-lock"];
     _subsystemUsers = [[UMSynchronizedDictionary alloc]init];
     _dpcAvailability = [[UMSynchronizedDictionary alloc]init];
