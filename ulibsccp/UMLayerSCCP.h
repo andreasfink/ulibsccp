@@ -70,6 +70,7 @@ typedef enum UMSccpScreening_result
     
     UMSynchronizedArray         *_traceSendDestinations;
     UMSynchronizedArray         *_traceReceiveDestinations;
+    UMSynchronizedArray         *_traceReceivePacketDestinations;
     UMSynchronizedArray         *_traceDroppedDestinations;
     UMSynchronizedArray         *_traceUnroutableDestinations;
     UMSynchronizedArray         *_traceProblematicDestinations;
@@ -497,11 +498,12 @@ sls:(int)sls;
 - (void)startUp;
 
 - (id)decodePdu:(NSData *)data;
-- (void)traceSentPdu:(NSData *)mtp3pdu          options:(NSDictionary *)dict;
-- (void)traceReceivedPdu:(NSData *)mtp3pdu      options:(NSDictionary *)dict;
-- (void)traceDroppedPdu:(NSData *)mtp3pdu       options:(NSDictionary *)dict;
-- (void)traceUnroutablePdu:(NSData *)mtp3pdu    options:(NSDictionary *)dict;
-- (void)traceProblematicPdu:(NSData *)mtp3pdu   options:(NSDictionary *)dict;
+- (void)traceSentPdu:(NSData *)mtp3pdu              options:(NSDictionary *)dict;
+- (void)traceReceivedPdu:(NSData *)mtp3pdu          options:(NSDictionary *)dict;
+- (void)traceReceivedPacket:(UMSCCP_Packet *)packet options:(NSDictionary *)dict;
+- (void)traceDroppedPdu:(NSData *)mtp3pdu           options:(NSDictionary *)dict;
+- (void)traceUnroutablePdu:(NSData *)mtp3pdu        options:(NSDictionary *)dict;
+- (void)traceProblematicPdu:(NSData *)mtp3pdu       options:(NSDictionary *)dict;
 
 - (NSDictionary *)apiStatus;
 - (UMSynchronizedSortedDictionary *)routeStatus;

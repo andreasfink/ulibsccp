@@ -84,6 +84,7 @@ typedef enum UMTCAP_Command
         _tags = [[UMSynchronizedDictionary alloc]init];
         _incomingReturnCause = SCCP_ReturnCause_not_set;
         _outgoingReturnCause = SCCP_ReturnCause_not_set;
+        _tcapSharingTraceLevel = UMLOG_MINOR;
 	}
 	return self;
 }

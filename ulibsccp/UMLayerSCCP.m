@@ -4439,6 +4439,18 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     }
 }
 
+
+- (void)traceReceivedPacket:(UMSCCP_Packet *)packet
+                 options:(NSDictionary *)o
+{
+    NSInteger n = [_traceReceivePacketDestinations count];
+    for (NSInteger i=0;i<n;i++)
+    {
+        id a = [_traceReceivePacketDestinations objectAtIndex:i];
+        [a sccpTraceReceivedPacket:packet options:o];
+    }
+}
+
 - (void)traceDroppedPdu:(NSData *)mtp3pdu options:(NSDictionary *)o
 {
     NSInteger n = [_traceDroppedDestinations count];
