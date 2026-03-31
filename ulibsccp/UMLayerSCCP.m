@@ -1383,16 +1383,16 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     }
 }
 
-
 - (UMSynchronizedSortedDictionary *) routeTestForMSISDN:(NSString *)msisdn
                                         translationType:(int)tt
                                               fromLocal:(BOOL)fromLocal
                                       transactionNumber:(NSNumber *)tid
                                               operation:(NSNumber *)op
                                      applicationContext:(NSString *)ac
-                                        incomingLinkset:(NSString *)linksetName
+                                        incomingLinkset:(NSString *)linkset
                                           sourceAddress:(NSString *)source
-                                             packetType:(NSString *)packetType
+                                             packetType:(NSString *)packetType;
+
 {
     UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
     int causeValue = -1;
