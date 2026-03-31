@@ -479,7 +479,8 @@ sls:(int)sls;
                                               operation:(NSNumber *)op
                                      applicationContext:(NSString *)ac
                                         incomingLinkset:(NSString *)linkset
-                                          sourceAddress:(NSString *)source;
+                                          sourceAddress:(NSString *)source
+                                             packetType:(NSString *)packetType;
 
 
 - (UMSCCP_RoutingState *)routePacket:(UMSCCP_Packet *)packet;

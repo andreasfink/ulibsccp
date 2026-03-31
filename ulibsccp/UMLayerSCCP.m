@@ -1392,6 +1392,7 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                                      applicationContext:(NSString *)ac
                                         incomingLinkset:(NSString *)linksetName
                                           sourceAddress:(NSString *)source
+                                             packetType:(NSString *)packetType
 {
     UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
     int causeValue = -1;
@@ -1424,6 +1425,9 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     packet.incomingCallingPartyAddress = [[SccpAddress alloc]initWithHumanReadableString:source sccpVariant:_sccpVariant mtp3Variant:_mtp3.variant];
     packet.incomingCalledPartyAddress = [[SccpAddress alloc]initWithHumanReadableString:msisdn sccpVariant:_sccpVariant mtp3Variant:_mtp3.variant];
     packet.incomingCalledPartyAddress.tt.tt = tt;
+    
+    packet.incomingServiceType = [UMSCCP_Packet stringToSccpServiceType:packetType];
+
     if(linksetName.length > 0)
     {
         UMMTP3LinkSet *ls = [_mtp3 getLinkSetByName:linksetName];
@@ -2636,6 +2640,7 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     BOOL processSegmentedDelivery = (segments.count > 0) ? YES : NO;
     UMMTP3_Error e = UMMTP3_no_error;
     NSString *outgoingLinkset = routingPacket.outgoingLinksetName;
+    
     if(routingPacket.forcedLinkset)
     {
         outgoingLinkset = routingPacket.forcedLinkset;
@@ -3290,7 +3295,6 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
             src.tt.tt = newCallingTT.intValue;
         }
     }
-    
     NSData *srcEncoded = [src encode:_sccpVariant];
     NSData *dstEncoded = [dst encode:_sccpVariant];
 
