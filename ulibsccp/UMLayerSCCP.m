@@ -1389,10 +1389,9 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                                       transactionNumber:(NSNumber *)tid
                                               operation:(NSNumber *)op
                                      applicationContext:(NSString *)ac
-                                        incomingLinkset:(NSString *)linkset
+                                        incomingLinkset:(NSString *)linksetName
                                           sourceAddress:(NSString *)source
-                                             packetType:(NSString *)packetType;
-
+                                             packetType:(NSString *)packetType
 {
     UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
     int causeValue = -1;
