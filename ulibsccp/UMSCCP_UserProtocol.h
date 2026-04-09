@@ -60,8 +60,7 @@
 - (void)sccpTraceReceivedPdu:(NSData *)mtp3pdu
                      options:(NSDictionary *)options;
 
-- (void)sccpTraceReceivedPacket:(UMSCCP_Packet *)packet
-                        options:(NSDictionary *)options;
+- (void)sccpTraceReceivedPacket:(UMSCCP_Packet *)packet options:(NSDictionary *)options;
 
 - (void)sccpTraceDroppedPdu:(NSData *)mtp3pdu
                     options:(NSDictionary *)options;
