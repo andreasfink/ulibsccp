@@ -1426,7 +1426,7 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     packet.incomingCalledPartyAddress.tt.tt = tt;
     
     packet.incomingServiceType = [UMSCCP_Packet stringToSccpServiceType:packetType];
-
+    [packet copyIncomingToOutgoing];    
     if(linksetName.length > 0)
     {
         UMMTP3LinkSet *ls = [_mtp3 getLinkSetByName:linksetName];
@@ -2647,6 +2647,7 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     switch(routingPacket.outgoingServiceType)
     {
         case SCCP_UDT:
+        {
             if(self.logLevel <=UMLOG_DEBUG)
             {
                 [self.logFeed debugText:@"processDelivery: Sending UDT"];
@@ -2663,7 +2664,9 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
               routedToLinkset:&outgoingLinkset
                           sls:routingPacket.sls];
             break;
+        }
         case SCCP_UDTS:
+        {
             if(self.logLevel <=UMLOG_DEBUG)
             {
                 [self.logFeed debugText:@"processDelivery: sending UDTS"];
@@ -2680,8 +2683,9 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                routedToLinkset:&outgoingLinkset
                            sls:routingPacket.sls];
             break;
+        }
         case SCCP_XUDT:
-
+        {
             if(processSegmentedDelivery)
             {
                 if(self.logLevel <=UMLOG_DEBUG)
@@ -2739,11 +2743,13 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                        optionsData:routingPacket.outgoingOptionalData
                            options:routingPacket.outgoingOptions
                           provider:routingPacket.outgoingMtp3Layer
-                       routedToLinkset:&outgoingLinkset
+                   routedToLinkset:&outgoingLinkset
                                sls:routingPacket.sls];
             }
             break;
+        }
         case SCCP_XUDTS:
+        {
             if(self.logLevel <=UMLOG_DEBUG)
             {
                 [self.logFeed debugText:@"processDelivery: sending XUDTS"];
@@ -2762,6 +2768,7 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                 routedToLinkset:&outgoingLinkset
                             sls:routingPacket.sls];
             break;
+        }
         case SCCP_LUDT:
         {
             if(processSegmentedDelivery)
