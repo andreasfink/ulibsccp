@@ -1677,7 +1677,6 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                     ls.called_number_translation_out = [_mtp3.appContext getSccpNumberTransationByName:ls.called_number_translation_out_name];
                 }
                 packet.cda_number_translation_out = ls.called_number_translation_out;
-
             }
             [packet applyOutgoingNumberTranslation];
             

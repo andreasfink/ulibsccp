@@ -659,7 +659,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEAD_CODE_STRIPPING = YES;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 38L827M334;
+				DEVELOPMENT_TEAM = HG8655K94F;
 				DSTROOT = "/Library/Application Support";
 				DYLIB_INSTALL_NAME_BASE = "$(DSTROOT)/$(INSTALL_PATH)";
 				ENABLE_MODULE_VERIFIER = NO;
@@ -681,7 +681,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/SupportingFiles/ulibsccp-Info.plist";
 				INSTALL_PATH = FinkTelecomServices/frameworks;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu99 gnu++11";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.fink-telecom.ulibsccp";
+				PRODUCT_BUNDLE_IDENTIFIER = org.fink.ulibsccp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTS_MACCATALYST = NO;
@@ -698,7 +698,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEAD_CODE_STRIPPING = YES;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 38L827M334;
+				DEVELOPMENT_TEAM = HG8655K94F;
 				DSTROOT = "/Library/Application Support";
 				DYLIB_INSTALL_NAME_BASE = "$(DSTROOT)/$(INSTALL_PATH)";
 				ENABLE_MODULE_VERIFIER = NO;
@@ -720,7 +720,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/SupportingFiles/ulibsccp-Info.plist";
 				INSTALL_PATH = FinkTelecomServices/frameworks;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu99 gnu++11";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.fink-telecom.ulibsccp";
+				PRODUCT_BUNDLE_IDENTIFIER = org.fink.ulibsccp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTS_MACCATALYST = NO;
