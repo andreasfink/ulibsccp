@@ -73,6 +73,7 @@
     _lxudt_max_hop_count = 16;
     _lxudts_max_hop_count = 16;
     _gttSelectorRegistry = [[SccpGttRegistry alloc]init];
+    _gttSecondarySelectorRegistry = NULL;
     _gttSelectorRegistry.logLevel = self.logLevel;
     _gttSelectorRegistry.logFeed = self.logFeed;
     _loggingLock = [[UMMutex alloc]initWithName:@"logging-lock"];

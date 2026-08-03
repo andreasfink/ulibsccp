@@ -63,6 +63,7 @@ typedef enum UMSccpScreening_result
     SccpDestinationGroup        *_defaultNextHop;
 
     SccpGttRegistry             *_gttSelectorRegistry;
+    SccpGttRegistry             *_gttSecondarySelectorRegistry;
     UMSynchronizedDictionary    *_subsystemUsers;
     NSString                    *_mtp3_name;
     UMLayerMTP3                 *_mtp3;
@@ -122,6 +123,7 @@ typedef enum UMSccpScreening_result
 @property(readwrite,assign) SccpVariant sccpVariant;
 @property(readwrite,strong) SccpDestinationGroup *defaultNextHop;
 @property(readwrite,strong) SccpGttRegistry *gttSelectorRegistry;
+@property(readwrite,strong) SccpGttRegistry *gttSecondarySelectorRegistry;
 @property(readwrite,strong) NSMutableDictionary *pendingSegments;
 @property(readwrite,strong) SccpL3RoutingTable *sccpL3RoutingTable;
 @property(readwrite,assign) int lxudt_max_hop_count;
