@@ -1626,6 +1626,8 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
 
     if(dict[@"cause-value"])
     {
+        int i = [dict[@"cause-value"] intValue];
+        dict[@"cause-value-description"] = [UMLayerSCCP causeValueToString:i];
     }
     dict[@"new-number"] = called_out.stringValueE164;
     dict[@"new-tt"] = @(called_out.tt.tt);
