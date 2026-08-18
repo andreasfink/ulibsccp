@@ -77,7 +77,10 @@
     }
     if(_cause)
     {
-        dict[@"cause"] = [NSString stringWithFormat:@"%@: %@",_cause,[UMLayerSCCP causeValueToString: _cause.intValue]];
+        if(_cause.intValue!=SCCP_ReturnCause_not_set)
+        {
+            dict[@"cause"] = [NSString stringWithFormat:@"%@: %@",_cause,[UMLayerSCCP causeValueToString: _cause.intValue]];
+        }
     }
     
     if(_destinationGroup)
@@ -96,11 +99,11 @@
     if(_outgoingSlc)
     {
         dict[@"outgoing-slc"] = _outgoingSlc;
-    }
+    }/*
     if(_packetToDeliver)
     {
         dict[@"packet-to-deliver"] = _packetToDeliver;
-    }
+    }*/
     if(_packetSegmentsToDeliver)
     {
         dict[@"packet-segments-to-deliver"] = _packetSegmentsToDeliver;
@@ -121,6 +124,45 @@
     {
         dict[@"forced-dpc"] = _forcedDpc.objectValue;
     }
+    if(_mtp3DeliveryError != UMMTP3_no_error)
+    {
+        switch(_mtp3DeliveryError)
+        {
+            case  UMMTP3_error_pdu_too_big:
+                dict[@"mtp3-delivery-error"] = @"pdu-too-big";
+                break;
+            case UMMTP3_error_no_route_to_destination:
+                dict[@"mtp3-delivery-error"] = @"no-route-to-destination";
+                break;
+            case UMMTP3_error_invalid_variant:
+                dict[@"mtp3-delivery-error"] = @"invalid-variant";
+                break;
+            case UMMTP3_error_unsupported_pdu_type:
+                dict[@"mtp3-delivery-error"] = @"unsupported-pdu-type";
+                break;
+            case UMMTP3_error_internal_error:
+                dict[@"mtp3-delivery-error"] = @"internal-error";
+                break;
+            default:
+                break;
+        }
+    }
+    switch(_status)
+    {
+        case UMSCCP_RoutingStatus_success:
+            dict[@"status"] = @"success";
+            break;
+        case UMSCCP_RoutingStatus_failed:
+            dict[@"status"] = @"failed";
+            break;
+        case UMSCCP_RoutingStatus_dropPacket:
+            dict[@"status"] = @"dropped";
+            break;
+        case UMSCCP_RoutingStatus_awaitingSegments:
+            dict[@"status"] = @"awaiting-segments";
+            break;
+    }
+
     return dict;
 }
 
