@@ -473,17 +473,6 @@ sls:(int)sls;
                       sls:(int)sls;
 
 
-
-- (UMSynchronizedSortedDictionary *) routeTestForMSISDN:(NSString *)msisdn
-                                        translationType:(int)tt
-                                              fromLocal:(BOOL)fromLocal
-                                      transactionNumber:(NSNumber *)tid
-                                              operation:(NSNumber *)op
-                                     applicationContext:(NSString *)ac
-                                        incomingLinkset:(NSString *)linkset
-                                          sourceAddress:(NSString *)source
-                                             packetType:(NSString *)packetType;
-
 - (UMSynchronizedSortedDictionary *) routeTestForMSISDN:(NSString *)msisdn
                                         translationType:(int)tt
                                               fromLocal:(BOOL)fromLocal
@@ -493,7 +482,8 @@ sls:(int)sls;
                                         incomingLinkset:(NSString *)linkset
                                           sourceAddress:(NSString *)source
                                              packetType:(NSString *)packetType
-                                                  debug:(NSMutableString *)debug;
+                                                  debug:(NSMutableString *)debug
+                                                   sccp:(UMLayerSCCP *)sccp;
 
 
 

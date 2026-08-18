@@ -1476,27 +1476,7 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     }
 }
 
-- (UMSynchronizedSortedDictionary *) routeTestForMSISDN:(NSString *)msisdn
-                                        translationType:(int)tt
-                                              fromLocal:(BOOL)fromLocal
-                                      transactionNumber:(NSNumber *)tid
-                                              operation:(NSNumber *)op
-                                     applicationContext:(NSString *)ac
-                                        incomingLinkset:(NSString *)linksetName
-                                          sourceAddress:(NSString *)source
-                                             packetType:(NSString *)packetType
-{
-    return [self routeTestForMSISDN:msisdn
-                    translationType:tt
-                          fromLocal:fromLocal
-                  transactionNumber:tid
-                          operation:op
-                 applicationContext:ac
-                    incomingLinkset:linksetName
-                      sourceAddress:source
-                         packetType:packetType
-                              debug:NULL];
-}
+
 - (UMSynchronizedSortedDictionary *) routeTestForMSISDN:(NSString *)msisdn
                                         translationType:(int)tt
                                               fromLocal:(BOOL)fromLocal
@@ -1507,6 +1487,7 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                                           sourceAddress:(NSString *)source
                                              packetType:(NSString *)packetType
                                                   debug:(NSMutableString *)debug
+                                                   sccp:(UMLayerSCCP *)sccp
 {
     UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
     UMSynchronizedSortedDictionary *dict2 = [[UMSynchronizedSortedDictionary alloc]init];
@@ -1526,6 +1507,8 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     
     
     UMSCCP_Packet *packet = [[UMSCCP_Packet alloc]init];
+    packet.sccp = sccp;
+    packet.incomingMtp3Layer = sccp.mtp3;
     packet.routingTest = YES;
     packet.routingTestApplicationContext = ac;
     packet.routingTestTcapTransactionId = tid;
@@ -1539,18 +1522,20 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     packet.incomingCallingPartyAddress = [[SccpAddress alloc]initWithHumanReadableString:source sccpVariant:_sccpVariant mtp3Variant:_mtp3.variant];
     packet.incomingCalledPartyAddress = [[SccpAddress alloc]initWithHumanReadableString:msisdn sccpVariant:_sccpVariant mtp3Variant:_mtp3.variant];
     packet.incomingCalledPartyAddress.tt.tt = tt;
-    
+
     packet.incomingServiceType = [UMSCCP_Packet stringToSccpServiceType:packetType];
     [packet copyIncomingToOutgoing];    
     if(linksetName.length > 0)
     {
         UMMTP3LinkSet *ls = [_mtp3 getLinkSetByName:linksetName];
+
         if(ls == NULL)
         {
             dict[@"incoming-linkset-error"]   = [NSString stringWithFormat:@"linkset %@ not found in mtp3 %@",linksetName, _mtp3.layerName];
         }
         else
         {
+            packet.incomingMtp3Layer = ls.mtp3;
             packet.incomingLinksetTcapSharingInsideName    = ls.tcapSharingInsideName;
             packet.incomingLinksetTcapSharingOutsideName   = ls.tcapSharingOutsideName;
             packet.incomingLinksetTcapSharingPriority      = ls.tcapSharingPriority;
@@ -1652,6 +1637,10 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                 }
             }
         }
+    }
+    else
+    {
+        
     }
     /* SCCP level plugin */
     if(_sccp_screeningPluginName)

@@ -24,7 +24,6 @@
 
 - (UMSynchronizedSortedDictionary *)objectValue
 {
-    
     UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc] init];
     if(_dpcForErrors)
     {
