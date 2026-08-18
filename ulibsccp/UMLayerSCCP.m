@@ -2337,7 +2337,12 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     {
         [self.logFeed majorErrorText:[NSString stringWithFormat:@"Exception:%@",e]];
     }
-    
+    if(routingPacket.routingTest==YES)
+    {
+        tid = routingPacket.routingTestTcapTransactionId;
+        op = routingPacket.routingTestMapOperation;
+        ac = routingPacket.routingTestApplicationContext;
+    }
     if(self.logLevel <=UMLOG_DEBUG)
     {
         [self.logFeed debugText:@" calling find routes"];
