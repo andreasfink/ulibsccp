@@ -6,7 +6,7 @@
 //  Copyright © 2018 Andreas Fink (andreas@fink.org). All rights reserved.
 //
 
-#import "SccpNumberTranslationEntry.h"
+#import <ulibsccp/SccpNumberTranslationEntry.h>
 
 
 #define SET_DICT_INTEGER(dict,name,value) \

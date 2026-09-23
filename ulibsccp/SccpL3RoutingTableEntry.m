@@ -6,7 +6,7 @@
 //  Copyright © 2018 Andreas Fink (andreas@fink.org). All rights reserved.
 //
 
-#import "SccpL3RoutingTableEntry.h"
+#import <ulibsccp/SccpL3RoutingTableEntry.h>
 
 
 @implementation SccpL3RoutingTableEntry

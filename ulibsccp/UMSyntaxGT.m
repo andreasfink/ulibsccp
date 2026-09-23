@@ -8,7 +8,7 @@
 //
 #import <ulibmtp3/ulibmtp3.h>
 
-#import "UMSyntaxGT.h"
+#import <ulibsccp/UMSyntaxGT.h>
 
 @implementation UMSyntaxGT
 

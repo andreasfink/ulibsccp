@@ -6,7 +6,7 @@
 //  Copyright © 2019 Andreas Fink (andreas@fink.org). All rights reserved.
 //
 
-#import "UMSCCP_Filter.h"
+#import <ulibsccp/UMSCCP_Filter.h>
 
 
 int         plugin_init(NSDictionary *dict);

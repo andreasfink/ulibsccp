@@ -8,9 +8,9 @@
 // Version 3 from 29 June 2007 and other commercial licenses available by
 // the author.
 
-#import "SccpAddress.h"
+#import <ulibsccp/SccpAddress.h>
 #import <ulibmtp3/ulibmtp3.h>
-#import "SccpCountry.h"
+#import <ulibsccp/SccpCountry.h>
 
 static int is_all_digits(const char *text, int startpos, unsigned long len);
 

@@ -9,7 +9,7 @@
 // Version 3 from 29 June 2007 and other commercial licenses available by
 // the author.
 
-#import <ulib/ulib.h>
+#import <ulibmtp3/ulibmtp3.h>
 
 #define SCCP_NAI_UNKNOWN 		0
 #define SCCP_NAI_SUBSCRIBER     1

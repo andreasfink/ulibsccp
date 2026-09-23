@@ -9,7 +9,7 @@
 // Version 3 from 29 June 2007 and other commercial licenses available by
 // the author.
 
-#import <ulib/ulib.h>
+#import <ulibmtp3/ulibmtp3.h>
 
 #define SCCP_TON_UNKNOWN            0
 #define SCCP_TON_INTERNATIONAL      1

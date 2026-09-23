@@ -6,9 +6,9 @@
 //  Copyright © 2018 Andreas Fink (andreas@fink.org). All rights reserved.
 //
 
-#import "SccpNumberTranslation.h"
-#import "SccpAddress.h"
-#import "SccpNumberTranslationEntry.h"
+#import <ulibsccp/SccpNumberTranslation.h>
+#import <ulibsccp/SccpAddress.h>
+#import <ulibsccp/SccpNumberTranslationEntry.h>
 
 @implementation SccpNumberTranslation
 

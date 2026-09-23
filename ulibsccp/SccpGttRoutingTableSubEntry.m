@@ -6,7 +6,7 @@
 //  Copyright © 2020 Andreas Fink (andreas@fink.org). All rights reserved.
 //
 
-#import "SccpGttRoutingTableSubEntry.h"
+#import <ulibsccp/SccpGttRoutingTableSubEntry.h>
 
 @implementation SccpGttRoutingTableSubEntry
 

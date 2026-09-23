@@ -9,7 +9,7 @@
 // Version 3 from 29 June 2007 and other commercial licenses available by
 // the author.
 
-#import <ulib/ulib.h>
+#import <ulibmtp3/ulibmtp3.h>
 
 #import <ulibsccp/SccpVariant.h>
 #import <ulibsccp/SccpAddressIndicator.h>
@@ -31,7 +31,6 @@
 #import <ulibsccp/SccpNumberTranslation.h>
 #import <ulibsccp/SccpNumberTranslationEntry.h>
 #import <ulibsccp/SccpCountry.h>
-
 #import <ulibsccp/UMSyntaxGT.h>
 #import <ulibsccp/UMSyntaxGT_addressConversion.h>
 #import <ulibsccp/UMSyntaxGT_applicationGroup.h>

@@ -9,13 +9,12 @@
 // Version 3 from 29 June 2007 and other commercial licenses available by
 // the author.
 
-#import "UMSCCP_sccpNUnitdata.h"
-#import <ulibmtp3/ulibmtp3.h>
+#import <ulibsccp/UMSCCP_sccpNUnitdata.h>
 #import <ulibsccp/ulibgt.h>
-#import "UMLayerSCCP.h"
-#import "UMSCCP_StatisticSection.h"
-#import "UMSCCP_Packet.h"
-#import "UMSCCP_PrometheusData.h"
+#import <ulibsccp/UMLayerSCCP.h>
+#import <ulibsccp/UMSCCP_StatisticSection.h>
+#import <ulibsccp/UMSCCP_Packet.h>
+#import <ulibsccp/UMSCCP_PrometheusData.h>
 
 static int segmentReferenceId;
 

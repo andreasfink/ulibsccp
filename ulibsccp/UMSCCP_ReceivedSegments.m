@@ -9,8 +9,8 @@
 // Version 3 from 29 June 2007 and other commercial licenses available by
 // the author.
 
-#import "UMSCCP_ReceivedSegments.h"
-#import "UMSCCP_ReceivedSegment.h"
+#import <ulibsccp/UMSCCP_ReceivedSegments.h>
+#import <ulibsccp/UMSCCP_ReceivedSegment.h>
 
 #define SEGMENTATION_DEBUG  1
 

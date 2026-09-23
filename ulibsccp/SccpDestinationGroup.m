@@ -6,11 +6,11 @@
 //  Copyright © 2018 Andreas Fink (andreas@fink.org). All rights reserved.
 //
 
-#import "SccpDestinationGroup.h"
-#import "SccpL3RouteStatus.h"
-#import "SccpL3RoutingTableEntry.h"
-#import "SccpSubSystemNumber.h"
-#import "SccpL3RouteStatus.h"
+#import <ulibsccp/SccpDestinationGroup.h>
+#import <ulibsccp/SccpL3RouteStatus.h>
+#import <ulibsccp/SccpL3RoutingTableEntry.h>
+#import <ulibsccp/SccpSubSystemNumber.h>
+#import <ulibsccp/SccpL3RouteStatus.h>
 
 @implementation SccpDestinationGroup
 {

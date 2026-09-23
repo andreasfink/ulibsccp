@@ -6,13 +6,13 @@
 //  Copyright © 2018 Andreas Fink (andreas@fink.org). All rights reserved.
 //
 
-#import "SccpDestinationEntry.h"
-#import "SccpDestinationGroup.h"
-#import "SccpL3RoutingTable.h"
 #import <ulibmtp3/ulibmtp3.h>
-#import "SccpL3RouteStatus.h"
-#import "SccpL3RoutingTableEntry.h"
-#import "SccpSubSystemNumber.h"
+#import <ulibsccp/SccpDestinationEntry.h>
+#import <ulibsccp/SccpDestinationGroup.h>
+#import <ulibsccp/SccpL3RoutingTable.h>
+#import <ulibsccp/SccpL3RouteStatus.h>
+#import <ulibsccp/SccpL3RoutingTableEntry.h>
+#import <ulibsccp/SccpSubSystemNumber.h>
 
 @implementation SccpDestinationEntry
 

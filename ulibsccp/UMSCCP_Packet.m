@@ -6,9 +6,9 @@
 //  Copyright © 2019 Andreas Fink (andreas@fink.org). All rights reserved.
 //
 
-#import "UMSCCP_Packet.h"
-#import "UMLayerSCCP.h"
-#import "UMSCCP_Segment.h"
+#import <ulibsccp/UMSCCP_Packet.h>
+#import <ulibsccp/UMLayerSCCP.h>
+#import <ulibsccp/UMSCCP_Segment.h>
 
 #if !defined(UMTCAP_Command)
 typedef enum UMTCAP_Command

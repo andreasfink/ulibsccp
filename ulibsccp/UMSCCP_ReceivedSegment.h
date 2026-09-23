@@ -6,7 +6,6 @@
 //  Copyright © 2022 Andreas Fink (andreas@fink.org). All rights reserved.
 //
 
-#import <ulib/ulib.h>
 #import <ulibmtp3/ulibmtp3.h>
 #import <ulibsccp/ulibgt.h>
 #import <ulibsccp/UMSCCP_Segment.h>

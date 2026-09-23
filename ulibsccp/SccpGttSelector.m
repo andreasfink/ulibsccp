@@ -9,12 +9,12 @@
 // Version 3 from 29 June 2007 and other commercial licenses available by
 // the author.
 
-#import "SccpGttSelector.h"
-#import "SccpDestinationEntry.h"
-#import "SccpGttRoutingTable.h"
-#import "SccpNumberTranslation.h"
-#import "SccpAddress.h"
-#import "SccpDestinationGroup.h"
+#import <ulibsccp/SccpGttSelector.h>
+#import <ulibsccp/SccpDestinationEntry.h>
+#import <ulibsccp/SccpGttRoutingTable.h>
+#import <ulibsccp/SccpNumberTranslation.h>
+#import <ulibsccp/SccpAddress.h>
+#import <ulibsccp/SccpDestinationGroup.h>
 
 @implementation SccpGttSelector
 

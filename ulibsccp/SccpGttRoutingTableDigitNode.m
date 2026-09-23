@@ -6,9 +6,9 @@
 //  Copyright © 2017 Andreas Fink (andreas@fink.org). All rights reserved.
 //
 
-#import "SccpGttRoutingTableDigitNode.h"
-#import "SccpAddress.h"
-#import "SccpGttRoutingTableEntry.h"
+#import <ulibsccp/SccpGttRoutingTableDigitNode.h>
+#import <ulibsccp/SccpAddress.h>
+#import <ulibsccp/SccpGttRoutingTableEntry.h>
 
 @implementation SccpGttRoutingTableDigitNode
 

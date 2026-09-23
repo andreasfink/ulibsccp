@@ -6,7 +6,6 @@
 //  Copyright © 2017 Andreas Fink (andreas@fink.org). All rights reserved.
 //
 
-#import <ulib/ulib.h>
 #import <ulibmtp3/ulibmtp3.h>
 
 @interface UMSyntaxGT_selector : UMSyntaxToken

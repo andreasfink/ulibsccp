@@ -51,7 +51,6 @@
 		A643D7A03063B3CE00F9798D /* SccpNumberTranslation.h in Headers */ = {isa = PBXBuildFile; fileRef = A643D7673063B3CE00F9798D /* SccpNumberTranslation.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A643D7A13063B3CE00F9798D /* SccpNatureOfAddressIndicator.h in Headers */ = {isa = PBXBuildFile; fileRef = A643D7633063B3CE00F9798D /* SccpNatureOfAddressIndicator.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A643D7A23063B3CE00F9798D /* SccpNumberPlanIndicator.h in Headers */ = {isa = PBXBuildFile; fileRef = A643D7653063B3CE00F9798D /* SccpNumberPlanIndicator.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		A643D7A33063B3CE00F9798D /* ulibgt_config.h in Headers */ = {isa = PBXBuildFile; fileRef = A643D7753063B3CE00F9798D /* ulibgt_config.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A643D7A43063B3CE00F9798D /* UMSyntaxGT.h in Headers */ = {isa = PBXBuildFile; fileRef = A643D7773063B3CE00F9798D /* UMSyntaxGT.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A643D7A53063B3CE00F9798D /* UMSyntaxGT_applicationGroup.h in Headers */ = {isa = PBXBuildFile; fileRef = A643D77B3063B3CE00F9798D /* UMSyntaxGT_applicationGroup.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A643D7A63063B3CE00F9798D /* SccpAddressIndicator.h in Headers */ = {isa = PBXBuildFile; fileRef = A643D7483063B3CE00F9798D /* SccpAddressIndicator.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -193,8 +192,6 @@
 		A643D7723063B3CE00F9798D /* SccpTypeOfNumberIndicator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SccpTypeOfNumberIndicator.m; sourceTree = "<group>"; };
 		A643D7733063B3CE00F9798D /* SccpVariant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SccpVariant.h; sourceTree = "<group>"; };
 		A643D7743063B3CE00F9798D /* ulibgt.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ulibgt.h; sourceTree = "<group>"; };
-		A643D7753063B3CE00F9798D /* ulibgt_config.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ulibgt_config.h; sourceTree = "<group>"; };
-		A643D7763063B3CE00F9798D /* ulibgt_config.h.in */ = {isa = PBXFileReference; lastKnownFileType = text; path = ulibgt_config.h.in; sourceTree = "<group>"; };
 		A643D7773063B3CE00F9798D /* UMSyntaxGT.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSyntaxGT.h; sourceTree = "<group>"; };
 		A643D7783063B3CE00F9798D /* UMSyntaxGT.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UMSyntaxGT.m; sourceTree = "<group>"; };
 		A643D7793063B3CE00F9798D /* UMSyntaxGT_addressConversion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSyntaxGT_addressConversion.h; sourceTree = "<group>"; };
@@ -371,8 +368,6 @@
 				A643D7723063B3CE00F9798D /* SccpTypeOfNumberIndicator.m */,
 				A643D7733063B3CE00F9798D /* SccpVariant.h */,
 				A643D7743063B3CE00F9798D /* ulibgt.h */,
-				A643D7753063B3CE00F9798D /* ulibgt_config.h */,
-				A643D7763063B3CE00F9798D /* ulibgt_config.h.in */,
 				A643D7773063B3CE00F9798D /* UMSyntaxGT.h */,
 				A643D7783063B3CE00F9798D /* UMSyntaxGT.m */,
 				A643D7793063B3CE00F9798D /* UMSyntaxGT_addressConversion.h */,
@@ -499,7 +494,6 @@
 				A643D7A03063B3CE00F9798D /* SccpNumberTranslation.h in Headers */,
 				A643D7A13063B3CE00F9798D /* SccpNatureOfAddressIndicator.h in Headers */,
 				A643D7A23063B3CE00F9798D /* SccpNumberPlanIndicator.h in Headers */,
-				A643D7A33063B3CE00F9798D /* ulibgt_config.h in Headers */,
 				A643D7A43063B3CE00F9798D /* UMSyntaxGT.h in Headers */,
 				A643D7A53063B3CE00F9798D /* UMSyntaxGT_applicationGroup.h in Headers */,
 				A643D7A63063B3CE00F9798D /* SccpAddressIndicator.h in Headers */,

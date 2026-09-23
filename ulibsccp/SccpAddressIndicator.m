@@ -9,7 +9,7 @@
 // Version 3 from 29 June 2007 and other commercial licenses available by
 // the author.
 
-#import "SccpAddressIndicator.h"
+#import <ulibsccp/SccpAddressIndicator.h>
 
 @implementation SccpAddressIndicator
 

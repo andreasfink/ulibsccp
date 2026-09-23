@@ -6,7 +6,7 @@
 //  Copyright © 2017 Andreas Fink (andreas@fink.org). All rights reserved.
 //
 
-#import "UMSyntaxGT_selector.h"
+#import <ulibsccp/UMSyntaxGT_selector.h>
 
 @implementation UMSyntaxGT_selector
 

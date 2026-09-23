@@ -6,8 +6,8 @@
 //  Copyright © 2017 Andreas Fink (andreas@fink.org). All rights reserved.
 //
 
-#import "UMSyntaxGT_applicationGroup.h"
 #import <ulibmtp3/ulibmtp3.h>
+#import <ulibsccp/UMSyntaxGT_applicationGroup.h>
 
 @implementation UMSyntaxGT_applicationGroup
 

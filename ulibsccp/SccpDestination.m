@@ -6,7 +6,7 @@
 //  Copyright © 2022 Andreas Fink (andreas@fink.org). All rights reserved.
 //
 
-#import "SccpDestination.h"
+#import <ulibsccp/SccpDestination.h>
 
 /* for backwards compatibility */
 

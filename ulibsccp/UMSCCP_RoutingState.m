@@ -6,9 +6,9 @@
 //  Copyright © 2025 Andreas Fink (andreas@fink.org). All rights reserved.
 //
 
-#import "UMSCCP_RoutingState.h"
-#import "UMSCCP_Packet.h"
-#import "UMLayerSCCP.h"
+#import <ulibsccp/UMSCCP_RoutingState.h>
+#import <ulibsccp/UMSCCP_Packet.h>
+#import <ulibsccp/UMLayerSCCP.h>
 
 @implementation UMSCCP_RoutingState
 

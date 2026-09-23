@@ -9,11 +9,11 @@
 // Version 3 from 29 June 2007 and other commercial licenses available by
 // the author.
 
-#import "SccpGttRegistry.h"
-#import "SccpGttSelector.h"
-#import "SccpGttRoutingTable.h"
-#import "SccpDestinationGroup.h"
-#import "SccpDestinationEntry.h"
+#import <ulibsccp/SccpGttRegistry.h>
+#import <ulibsccp/SccpGttSelector.h>
+#import <ulibsccp/SccpGttRoutingTable.h>
+#import <ulibsccp/SccpDestinationGroup.h>
+#import <ulibsccp/SccpDestinationEntry.h>
 
 static SccpGttRegistry *g_registry;
 

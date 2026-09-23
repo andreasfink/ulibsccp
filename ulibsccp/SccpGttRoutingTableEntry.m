@@ -6,10 +6,10 @@
 //  Copyright © 2017 Andreas Fink (andreas@fink.org). All rights reserved.
 //
 
-#import "SccpGttRoutingTableEntry.h"
-#import "SccpDestinationGroup.h"
-#import "SccpL3RoutingTable.h"
-#import "SccpSubSystemNumber.h"
+#import <ulibsccp/SccpGttRoutingTableEntry.h>
+#import <ulibsccp/SccpDestinationGroup.h>
+#import <ulibsccp/SccpL3RoutingTable.h>
+#import <ulibsccp/SccpSubSystemNumber.h>
 
 @implementation SccpGttRoutingTableEntry
 
