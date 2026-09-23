@@ -10,7 +10,6 @@
 // the author.
 
 #import <ulib/ulib.h>
-#import <ulibasn1/ulibasn1.h>
 
 @interface UMSCCPConnection : UMObject
 

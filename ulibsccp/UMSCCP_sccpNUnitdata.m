@@ -11,7 +11,7 @@
 
 #import "UMSCCP_sccpNUnitdata.h"
 #import <ulibmtp3/ulibmtp3.h>
-#import <ulibgt/ulibgt.h>
+#import <ulibsccp/ulibgt.h>
 #import "UMLayerSCCP.h"
 #import "UMSCCP_StatisticSection.h"
 #import "UMSCCP_Packet.h"

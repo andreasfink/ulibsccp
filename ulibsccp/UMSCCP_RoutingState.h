@@ -7,7 +7,7 @@
 //
 
 #import <ulib/ulib.h>
-#import <ulibgt/ulibgt.h>
+#import <ulibsccp/ulibgt.h>
 #import <ulibsccp/UMSCCP_Defs.h>
 #import <ulibsccp/UMSCCP_TcapSharingInstance.h>
 

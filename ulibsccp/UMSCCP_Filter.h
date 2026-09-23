@@ -7,7 +7,7 @@
 //
 
 #import <ulib/ulib.h>
-#import <ulibgt/ulibgt.h>
+#import <ulibsccp/ulibgt.h>
 #import <ulibsccp/UMSCCP_Packet.h>
 #import <ulibsccp/UMSCCP_FilterProtocol.h>
 

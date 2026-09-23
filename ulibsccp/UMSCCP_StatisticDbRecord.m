@@ -7,7 +7,6 @@
 //
 
 #import "UMSCCP_StatisticDbRecord.h"
-#import <ulibdb/ulibdb.h>
 
 @implementation UMSCCP_StatisticDbRecord
 

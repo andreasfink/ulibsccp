@@ -7,8 +7,7 @@
 //
 
 #import <ulib/ulib.h>
-#import <ulibgt/ulibgt.h>
-#import <ulibasn1/ulibasn1.h>
+#import <ulibsccp/ulibgt.h>
 
 #import <ulibsccp/UMSCCP_Defs.h>
 #import <ulibsccp/UMSCCP_UserProtocol.h>

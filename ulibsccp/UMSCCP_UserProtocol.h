@@ -9,7 +9,7 @@
 // Version 3 from 29 June 2007 and other commercial licenses available by
 // the author.
 
-#import <ulibgt/ulibgt.h>
+#import <ulibsccp/ulibgt.h>
 
 #import <ulibsccp/UMSCCP_UserProtocol.h>
 #import <ulibsccp/UMSCCPConnection.h>

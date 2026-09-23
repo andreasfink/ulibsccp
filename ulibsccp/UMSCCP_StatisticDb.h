@@ -7,7 +7,6 @@
 //
 
 #import <ulib/ulib.h>
-#import <ulibdb/ulibdb.h>
 #import <ulibsccp/UMLayerSCCPApplicationContextProtocol.h>
 #import <ulibsccp/UMSCCP_Defs.h>
 

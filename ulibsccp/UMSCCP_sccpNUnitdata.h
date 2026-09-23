@@ -10,7 +10,7 @@
 // the author.
 
 #import <ulib/ulib.h>
-#import <ulibgt/ulibgt.h>
+#import <ulibsccp/ulibgt.h>
 #import <ulibsccp/UMSCCP_UserProtocol.h>
 #import <ulibsccp/UMLayerSCCP.h>
 #import <ulibsccp/UMSCCP_StatisticSection.h>

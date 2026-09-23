@@ -10,9 +10,8 @@
 // the author.
 
 #import <ulibsccp/ulibsccp.h>
-#import <ulibm2pa/ulibm2pa.h>
 #import <ulibmtp3/ulibmtp3.h>
-#import <ulibgt/ulibgt.h>
+#import <ulibsccp/ulibgt.h>
 
 #import <ulibsccp/UMSCCP_UserProtocol.h>
 #import <ulibsccp/UMSCCPConnection.h>

@@ -7,7 +7,7 @@
 //
 
 #import <ulib/ulib.h>
-#import <ulibgt/ulibgt.h>
+#import <ulibsccp/ulibgt.h>
 
 @class UMSCCP_Packet;
 

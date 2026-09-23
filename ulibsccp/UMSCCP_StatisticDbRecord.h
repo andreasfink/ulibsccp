@@ -7,7 +7,6 @@
 //
 
 #import <ulib/ulib.h>
-#import <ulibdb/ulibdb.h>
 
 @interface UMSCCP_StatisticDbRecord : UMObject
 {
