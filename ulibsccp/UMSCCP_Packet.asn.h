@@ -1,5 +1,6 @@
+#if 0
 //
-//  UMSCCP_Packet.h
+//  UMSCCP_Packet.asn.h
 //  ulibsccp
 //
 //  Created by Andreas Fink on 11.01.19.
@@ -254,4 +255,6 @@ typedef enum UMSCCP_Packet_Tag_enum
 - (void)applyIncomingNumberTranslation;
 - (void)applyOutgoingNumberTranslation;
 @end
+
+#endif
 
