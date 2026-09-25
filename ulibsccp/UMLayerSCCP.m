@@ -1486,7 +1486,6 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                                           sourceAddress:(NSString *)source
                                              packetType:(NSString *)packetType
                                                   debug:(NSMutableString *)debug
-                                                   sccp:(UMLayerSCCP *)sccp
 {
     UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
     UMSynchronizedSortedDictionary *dict2 = [[UMSynchronizedSortedDictionary alloc]init];
@@ -1506,8 +1505,8 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     
     
     UMSCCP_Packet *packet = [[UMSCCP_Packet alloc]init];
-    packet.sccp = sccp;
-    packet.incomingMtp3Layer = sccp.mtp3;
+    packet.sccp = self;
+    packet.incomingMtp3Layer = _mtp3;
     packet.routingTest = YES;
     packet.routingTestApplicationContext = ac;
     packet.routingTestTcapTransactionId = tid;

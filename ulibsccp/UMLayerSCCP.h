@@ -481,9 +481,7 @@ sls:(int)sls;
                                         incomingLinkset:(NSString *)linkset
                                           sourceAddress:(NSString *)source
                                              packetType:(NSString *)packetType
-                                                  debug:(NSMutableString *)debug
-                                                   sccp:(UMLayerSCCP *)sccp;
-
+                                                  debug:(NSMutableString *)debug;
 
 
 - (UMSCCP_RoutingState *)routePacket:(UMSCCP_Packet *)packet;
