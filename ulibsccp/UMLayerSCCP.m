@@ -72,6 +72,7 @@
     _lxudt_max_hop_count = 16;
     _lxudts_max_hop_count = 16;
     _gttSelectorRegistry = [[SccpGttRegistry alloc]init];
+    _gttSecondarySelectorRegistry = NULL;
     _gttSelectorRegistry.logLevel = self.logLevel;
     _gttSelectorRegistry.logFeed = self.logFeed;
     _loggingLock = [[UMMutex alloc]initWithName:@"logging-lock"];
@@ -991,7 +992,6 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     return result;
 }
 
-
 - (SccpDestinationGroup *)findRoutes:(SccpAddress *)called
                                cause:(SCCP_ReturnCause *)cause
                     newCalledAddress:(SccpAddress **)called_out
@@ -1002,20 +1002,55 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                            operation:(NSNumber *)op
                   applicationContext:(NSString *)ac
 {
+    return [self findRoutes:called
+                      cause:cause
+           newCalledAddress:called_out
+                  localUser:localUser
+              fromLocalUser:fromLocalUser
+               usedSelector:usedSelector
+          transactionNumber:tid
+                  operation:op
+         applicationContext:ac
+                      debug:NULL];
+}
+                        
+- (SccpDestinationGroup *)findRoutes:(SccpAddress *)called
+                               cause:(SCCP_ReturnCause *)cause
+                    newCalledAddress:(SccpAddress **)called_out
+                           localUser:(id<UMSCCP_UserProtocol> *)localUser
+                       fromLocalUser:(BOOL)fromLocalUser
+                        usedSelector:(NSString **)usedSelector
+                   transactionNumber:(NSNumber *)tid
+                           operation:(NSNumber *)op
+                  applicationContext:(NSString *)ac
+                               debug:(NSMutableString *)debug
+{
     SccpDestinationGroup *destination = NULL;
     SccpAddress *called1 = [called copy];
 
-    if(self.logLevel <=UMLOG_DEBUG)
+    if((self.logLevel <=UMLOG_DEBUG) || (debug!=NULL))
     {
-        [self.logFeed debugText:
-         [NSString stringWithFormat:@"entering findRoutes:(called=%@,tid=%@) cause:newCalledAddress:localUser:fromLocalUser:(%@)",
-          called.description,tid,(fromLocalUser ? @"YES":@"NO")]];
+        NSString *s = [NSString stringWithFormat:@"entering findRoutes:(called=%@,tid=%@) cause:newCalledAddress:localUser:fromLocalUser:(%@)",
+                       called.description,tid,(fromLocalUser ? @"YES":@"NO")];
+        [self.logFeed debugText:s];
+        if(debug)
+        {
+            [debug appendFormat:@"%@\n",s];
+        }
     }
 
     if(_stpMode==NO)
     {
+        if(debug)
+        {
+            [debug appendFormat:@"SSP-MODE\n"];
+        }
         if(!fromLocalUser)
         {
+            if(debug)
+            {
+                [debug appendFormat:@"from-local=NO\n"];
+            }
             /* routed by subsystem */
             if(self.logLevel <=UMLOG_DEBUG)
             {
@@ -1025,14 +1060,18 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
             id<UMSCCP_UserProtocol> upperLayer = [self getUserForSubsystem:called1.ssn number:called1];
             if(upperLayer == NULL)
             {
-                [self.logFeed majorErrorText:[NSString stringWithFormat:@"no upper layer found for %@",called1.debugDescription]];
+                NSString *s = [NSString stringWithFormat:@"no upper layer found for %@",called1.debugDescription];
+                [self.logFeed majorErrorText:s];
+                [debug appendFormat:@"%@\n",s];
                 *cause = SCCP_ReturnCause_Unequipped;
             }
             else
             {
                 if(self.logLevel <=UMLOG_DEBUG)
                 {
-                    [self.logFeed debugText:@" Route to upper layer"];
+                    NSString *s=@" Route to upper layer";
+                    [self.logFeed debugText:s];
+                    [debug appendFormat:@"%@\n",s];
                 }
                 if(localUser)
                 {
@@ -1042,15 +1081,24 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                 {
                     NSString *s = [NSString stringWithFormat:@" local user = %@",upperLayer.layerName];
                     [self.logFeed debugText:s];
+                    [debug appendFormat:@"%@\n",s];
                 }
             }
         }
         else if(_default_destination_group)
         {
             destination = _default_destination_group;
+            if(debug)
+            {
+                [debug appendFormat:@"_default_destination_group=%@\n",_default_destination_group.name];
+            }
         }
         else if(_next_pcs.count > 0)
         {
+            if(debug)
+            {
+                [debug appendFormat:@"_next_pcs=%@\n",_next_pcs];
+            }
             destination = [[SccpDestinationGroup alloc]init];
             for(UMMTP3PointCode *pc in _next_pcs)
             {
@@ -1063,6 +1111,10 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
         {
             if(cause)
             {
+                if(debug)
+                {
+                    [debug appendFormat:@" no default route found in SSP mode -> NoTranslationForAnAddressOfSuchNature\n"];
+                }
                 *cause = SCCP_ReturnCause_NoTranslationForAnAddressOfSuchNature;
             }
         }
@@ -1073,12 +1125,18 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     }
     else /* STP mode */
     {
+        if(debug)
+        {
+            [debug appendFormat:@"STP-MODE\n"];
+        }
+
         if(called1.ai.routingIndicatorBit == ROUTE_BY_GLOBAL_TITLE)
         {
             if(self.logLevel <=UMLOG_DEBUG)
             {
                 [self.logFeed debugText:@" Route by global title (STP mode)"];
             }
+            [debug appendFormat:@" ROUTE-BY-GLOBAL-TITLE\n"];
 
             SccpGttRegistry *registry = self.gttSelectorRegistry;
             SccpGttSelector *gttSelector = [registry selectorForInstance:self.layerName
@@ -1086,26 +1144,33 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                                                                      gti:called1.ai.globalTitleIndicator
                                                                       np:called1.npi.npi
                                                                      nai:called1.nai.nai];
-            if(self.logLevel <=UMLOG_DEBUG)
+
+            if((self.logLevel <=UMLOG_DEBUG) || (debug))
             {
-                [self.logFeed debugText:[NSString stringWithFormat:@" gtt-selector=%@",gttSelector.name]];
+                NSString *s = [NSString stringWithFormat:@" gtt-selector=%@",gttSelector.name];
+                [self.logFeed debugText:s];
+                [debug appendFormat:@" %@\n",s];
             }
 
             if(gttSelector == NULL)
             {
                 /* we send a UDTS back as we have no forward route */
-                if(self.logLevel <=UMLOG_DEBUG)
+                if((self.logLevel <=UMLOG_DEBUG)|| (debug))
                 {
-                    [self.logFeed debugText:[NSString stringWithFormat:@" SCCP selector is null for tt=%d, gti=%d, np:%d nai:%d. Returning NoTranslationForThisSpecificAddress" ,called1.tt.tt,
-                                             called1.ai.globalTitleIndicator,
-                                             called1.npi.npi,
-                                             called1.nai.nai]];
+                    NSString *s = [NSString stringWithFormat:@" SCCP selector is null for tt=%d, gti=%d, np:%d nai:%d. Returning NoTranslationForThisSpecificAddress" ,called1.tt.tt,
+                                   called1.ai.globalTitleIndicator,
+                                   called1.npi.npi,
+                                   called1.nai.nai];
+                    [self.logFeed debugText:s];
+                    [debug appendFormat:@" %@\n",s];
                 }
                 if(cause)
                 {
-                    if(self.logLevel <=UMLOG_DEBUG)
+                    if((self.logLevel <=UMLOG_DEBUG) || (debug))
                     {
-                        [self.logFeed debugText:@"setting cause to NoTranslationForAnAddressOfSuchNature"];
+                        NSString *s = @"setting cause to NoTranslationForAnAddressOfSuchNature";
+                        [self.logFeed debugText:s];
+                        [debug appendFormat:@" %@\n",s];
                     }
                     *cause = SCCP_ReturnCause_NoTranslationForAnAddressOfSuchNature;
                 }
@@ -1127,16 +1192,20 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                     {
                         called1.tt.tt = newCalledTT.intValue;
                     }
-                    if(self.logLevel <= UMLOG_DEBUG)
+                    if((self.logLevel <= UMLOG_DEBUG)|| (debug))
                     {
-                        [self.logFeed debugText:[NSString stringWithFormat:@"pre-translation: ->%@",called1]];
+                        NSString *s=[NSString stringWithFormat:@"pre-translation: ->%@",called1];
+                        [self.logFeed debugText:s];
+                        [debug appendFormat:@" %@\n",s];
                     }
                 }
-                if(self.logLevel <=UMLOG_DEBUG)
+                if((self.logLevel <= UMLOG_DEBUG)|| (debug))
                 {
-                    [self.logFeed debugText:@"calling findNextHopForDestination:"];
+                    NSString *s=@"calling findNextHopForDestination:";
+                    [self.logFeed debugText:s];
+                    [debug appendFormat:@" %@\n",s];
                 }
-                
+
                 SccpGttRoutingTableEntry *rte = [gttSelector findNextHopForDestination:called1
                                                                      transactionNumber:tid
                                                                                    ssn:@(called1.ssn.ssn)
@@ -1144,9 +1213,11 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                                                                             appContext:ac];
                 if(rte.deliverLocal)
                 {
-                    if(self.logLevel <=UMLOG_DEBUG)
+                    if((self.logLevel <=UMLOG_DEBUG)|| (debug))
                     {
-                        [self.logFeed debugText:@" Route by GT to local"];
+                        NSString *s=@" Route by GT to local";
+                        [self.logFeed debugText:s];
+                        [debug appendFormat:@" %@\n",s];
                     }
 
                     id<UMSCCP_UserProtocol> upperLayer = [self getUserForSubsystem:called1.ssn number:called1];
@@ -1157,18 +1228,23 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                     }
                     else
                     {
-                        if(self.logLevel <=UMLOG_DEBUG)
+                        if((self.logLevel <=UMLOG_DEBUG)||(debug))
                         {
-                            [self.logFeed debugText:@" Route to upper layer"];
+                            NSString *s = @" Route to upper layer";
+                            [self.logFeed debugText:s];
+                            [debug appendFormat:@" %@\n",s];
+
                         }
                         if(gttSelector.postTranslation)
                         {
                             NSNumber *newCallingTT = NULL;
                             NSNumber *newCalledTT = NULL;
                             called1 = [gttSelector.postTranslation translateAddress:called1 newCallingTT:&newCallingTT newCalledTT:&newCalledTT];
-                            if(self.logLevel <= UMLOG_DEBUG)
+                            if((self.logLevel <= UMLOG_DEBUG) ||(debug))
                             {
-                                [self.logFeed debugText:[NSString stringWithFormat:@"post-translation(gtt-table): ->%@",called1]];
+                                NSString *s = [NSString stringWithFormat:@"post-translation(gtt-table): -> %@",called1];
+                                [self.logFeed debugText:s];
+                                [debug appendFormat:@" %@\n",s];
                             }
                             if(newCalledTT)
                             {
@@ -1187,9 +1263,12 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                                 NSNumber *newCallingTT = NULL;
                                 NSNumber *newCalledTT = NULL;
                                 called1 = [gttSelector.postTranslation translateAddress:called1 newCallingTT:&newCallingTT newCalledTT:&newCalledTT];
-                                if(self.logLevel <= UMLOG_DEBUG)
+                                if((self.logLevel <= UMLOG_DEBUG) || (debug))
                                 {
-                                    [self.logFeed debugText:[NSString stringWithFormat:@"post-translation(gtt-table): ->%@",called1]];
+                                    NSString *s = [NSString stringWithFormat:@"post-translation(gtt-table): ->%@",called1];
+                                    [self.logFeed debugText:s];
+                                    [debug appendFormat:@" %@\n",s];
+
                                 }
                                 if(newCalledTT)
                                 {
@@ -1200,9 +1279,11 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                         if(called_out)
                         {
                             *called_out = called1;
-                            if(self.logLevel <=UMLOG_DEBUG)
+                            if((self.logLevel <=UMLOG_DEBUG)|| (debug))
                             {
-                                [self.logFeed debugText:@" *called out is set"];
+                                NSString *s = @" *called out is set";
+                                [self.logFeed debugText:s];
+                                [debug appendFormat:@" %@\n",s];
                             }
                         }
                         if(localUser)
@@ -1215,24 +1296,30 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                 {
                     if(rte.routeTo == NULL)
                     {
-                        if(self.logLevel <=UMLOG_DEBUG)
+                        if((self.logLevel <=UMLOG_DEBUG)|| (debug))
                         {
-                            [self.logFeed debugText:[NSString stringWithFormat:@"routeTo is NULL, lets use routeToName:%@ instead",rte.routeToName]];
+                            NSString *s = [NSString stringWithFormat:@"routeTo is NULL, lets use routeToName:%@ instead",rte.routeToName];
+                            [self.logFeed debugText:s];
+                            [debug appendFormat:@" %@\n",s];
                         }
                         rte.routeTo = [registry getDestinationGroupByName:rte.routeToName];
                     }
 
                     destination = rte.routeTo;
-                    if(self.logLevel <= UMLOG_DEBUG)
+                    if((self.logLevel <= UMLOG_DEBUG)|| (debug))
                     {
-                        [self.logFeed debugText:[NSString stringWithFormat:@" destination is set to %@",destination.description]];
+                        NSString *s = [NSString stringWithFormat:@" destination is set to %@",destination.description];
+                        [self.logFeed debugText:s];
+                        [debug appendFormat:@" %@\n",s];
                     }
 
                     if(destination == NULL)
                     {
-                        if(self.logLevel <=UMLOG_DEBUG)
+                        if((self.logLevel <=UMLOG_DEBUG)|| (debug))
                         {
-                            [self.logFeed debugText:@"setting cause to MTP Failure"];
+                            NSString *s = @"setting cause to MTP Failure";
+                            [self.logFeed debugText:s];
+                            [debug appendFormat:@" %@\n",s];
                         }
                         *cause = SCCP_ReturnCause_MTPFailure; /* we do have a route but the next hop is not available */
                     }
@@ -1253,9 +1340,11 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                     if(called_out)
                     {
                         *called_out = called1;
-                        if(self.logLevel <=UMLOG_DEBUG)
+                        if((self.logLevel <=UMLOG_DEBUG)|| (debug))
                         {
-                            [self.logFeed debugText:@" *called out is set"];
+                            NSString *s = @" *called out is set";
+                            [self.logFeed debugText:s];
+                            [debug appendFormat:@" %@\n",s];
                         }
                     }
                 }
@@ -1264,9 +1353,11 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
         else /* ROUTE_BY_SUBSYSTEM */
         {
             /* routed by subsystem */
-            if(self.logLevel <=UMLOG_DEBUG)
+            if((self.logLevel <=UMLOG_DEBUG)|| (debug))
             {
-                [self.logFeed debugText:@" Route by subsystem (STP mode)"];
+                NSString *s = @" Route by subsystem (STP mode)";
+                [self.logFeed debugText:s];
+                [debug appendFormat:@" %@\n",s];
             }
 
             id<UMSCCP_UserProtocol> upperLayer = [self getUserForSubsystem:called1.ssn number:called1];
@@ -1277,9 +1368,11 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
             }
             else
             {
-                if(self.logLevel <=UMLOG_DEBUG)
+                if((self.logLevel <=UMLOG_DEBUG)|| (debug))
                 {
-                    [self.logFeed debugText:@" Route to upper layer"];
+                    NSString *s = @" Route to upper layer";
+                    [self.logFeed debugText:s];
+                    [debug appendFormat:@" %@\n",s];
                 }
                 if(localUser)
                 {
@@ -1382,6 +1475,7 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     }
 }
 
+
 - (UMSynchronizedSortedDictionary *) routeTestForMSISDN:(NSString *)msisdn
                                         translationType:(int)tt
                                               fromLocal:(BOOL)fromLocal
@@ -1390,33 +1484,36 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                                      applicationContext:(NSString *)ac
                                         incomingLinkset:(NSString *)linksetName
                                           sourceAddress:(NSString *)source
-                                             packetType:(NSString *)packetType;
-
+                                             packetType:(NSString *)packetType
+                                                  debug:(NSMutableString *)debug
+                                                   sccp:(UMLayerSCCP *)sccp
 {
     UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
-    int causeValue = -1;
-    id<UMSCCP_UserProtocol> localUser = NULL;
-    UMMTP3PointCode *pc             = NULL;
-    
-    dict[@"original-number"]        = msisdn;
-    dict[@"original-tt"]            = @(tt);
-    dict[@"from-local"]             = fromLocal ? @"YES" : @"NO";
-    dict[@"transaction-id"]         = tid ? tid : @"<null>";
-    dict[@"operation"]              = op ? op : @"<null>";
-    dict[@"application-context"]    = ac  ? ac : @"<null>";
-    dict[@"incoming-linkset"]       = linksetName ? linksetName : @"<null>";
-    dict[@"source-address"]         = source ? source : @"<null>";
+    UMSynchronizedSortedDictionary *dict2 = [[UMSynchronizedSortedDictionary alloc]init];
+    dict[@"routing-test-request"] = dict2;
+    dict2[@"original-number"]        = msisdn;
+    dict2[@"original-tt"]            = @(tt);
+    dict2[@"from-local"]             = fromLocal ? @"YES" : @"NO";
+    dict2[@"transaction-id"]         = tid ? tid : @"<null>";
+    dict2[@"operation"]              = op ? op : @"<null>";
+    dict2[@"application-context"]    = ac  ? ac : @"<null>";
+    dict2[@"incoming-linkset"]       = linksetName ? linksetName : @"<null>";
+    dict2[@"source-address"]         = source ? source : @"<null>";
     
     SccpAddress *dst = [[SccpAddress alloc]initWithHumanReadableString:msisdn variant:_mtp3.variant];
     dst.tt.tt = tt;
     dst.ssn.ssn = SCCP_SSN_HLR;
     
-    SCCP_ReturnCause cause = SCCP_ReturnCause_not_set;
-    SccpAddress *called_out = dst;
-    NSString *m3ua_as = NULL;
-    NSString *usedSelector=@"";
     
     UMSCCP_Packet *packet = [[UMSCCP_Packet alloc]init];
+    packet.sccp = sccp;
+    packet.incomingMtp3Layer = sccp.mtp3;
+    packet.routingTest = YES;
+    packet.routingTestApplicationContext = ac;
+    packet.routingTestTcapTransactionId = tid;
+    packet.routingTestMapOperation = op;
+    packet.routingTestDebug = debug;
+
     packet.tcapSharingTraceLevel = _tcapSharingTraceLevel;
     packet.instance = _appDelegate.instanceName;
     packet.incomingLinksetName = linksetName;
@@ -1424,18 +1521,20 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     packet.incomingCallingPartyAddress = [[SccpAddress alloc]initWithHumanReadableString:source sccpVariant:_sccpVariant mtp3Variant:_mtp3.variant];
     packet.incomingCalledPartyAddress = [[SccpAddress alloc]initWithHumanReadableString:msisdn sccpVariant:_sccpVariant mtp3Variant:_mtp3.variant];
     packet.incomingCalledPartyAddress.tt.tt = tt;
-    
-    packet.incomingServiceType = [UMSCCP_Packet stringToSccpServiceType:packetType];
 
+    packet.incomingServiceType = [UMSCCP_Packet stringToSccpServiceType:packetType];
+    [packet copyIncomingToOutgoing];    
     if(linksetName.length > 0)
     {
         UMMTP3LinkSet *ls = [_mtp3 getLinkSetByName:linksetName];
+
         if(ls == NULL)
         {
             dict[@"incoming-linkset-error"]   = [NSString stringWithFormat:@"linkset %@ not found in mtp3 %@",linksetName, _mtp3.layerName];
         }
         else
         {
+            packet.incomingMtp3Layer = ls.mtp3;
             packet.incomingLinksetTcapSharingInsideName    = ls.tcapSharingInsideName;
             packet.incomingLinksetTcapSharingOutsideName   = ls.tcapSharingOutsideName;
             packet.incomingLinksetTcapSharingPriority      = ls.tcapSharingPriority;
@@ -1538,6 +1637,10 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
             }
         }
     }
+    else
+    {
+        
+    }
     /* SCCP level plugin */
     if(_sccp_screeningPluginName)
     {
@@ -1588,69 +1691,7 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     }
 
     /****/
-    SccpDestinationGroup *grp = [self findRoutes:dst
-                                           cause:&cause
-                                newCalledAddress:&called_out
-                                       localUser:&localUser
-                                   fromLocalUser:fromLocal
-                                    usedSelector:&usedSelector
-                               transactionNumber:tid
-                                       operation:op
-                              applicationContext:ac];
-    if(grp)
-    {
-        [self chooseRouteFromGroup:grp
-                             cause:&cause
-                         localUser:&localUser
-                               dpc:&pc
-                           m3ua_as:&m3ua_as
-                     calledAddress:dst];
-    }
-    if(causeValue >= 0)
-    {
-        dict[@"cause-value"] = @(causeValue);
-    }
-    else if(pc)
-    {
-        dict[@"destination-point-code"] = pc;
-    }
-    else if(localUser)
-    {
-        dict[@"local-user"] = @"yes";
-    }
-    else
-    {
-        dict[@"cause-value"] = @(SCCP_ReturnCause_Unequipped);
-    }
-
-    if(dict[@"cause-value"])
-    {
-    }
-    dict[@"new-number"] = called_out.stringValueE164;
-    dict[@"new-tt"] = @(called_out.tt.tt);
-    dict[@"destination-group"] = [grp statusForL3RoutingTable:_sccpL3RoutingTable];
-    if(m3ua_as)
-    {
-        dict[@"routed-to-m3ua-as"] = m3ua_as;
-    }
-    if(pc)
-    {
-        dict[@"routed-to-dpc"] = pc;
-    }
-    if(localUser)
-    {
-        dict[@"routed-to-local-user"] = localUser.layerName;
-    }
-    if(usedSelector)
-    {
-        dict[@"used-selector"] = usedSelector;
-    }
-
-    NSString * s = [_statisticDb e164prefixOf:called_out.address];
-    if(s)
-    {
-        dict[@"sccp-statistic-prefix"] = s;
-    }
+    
     UMSCCP_RoutingState *routingState   = [self routePacket:packet];
     dict[@"routing-result"]             = routingState.objectValue;
     if(packet.outgoingLinksetName)
@@ -1677,7 +1718,6 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                     ls.called_number_translation_out = [_mtp3.appContext getSccpNumberTransationByName:ls.called_number_translation_out_name];
                 }
                 packet.cda_number_translation_out = ls.called_number_translation_out;
-
             }
             [packet applyOutgoingNumberTranslation];
             
@@ -2296,7 +2336,12 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     {
         [self.logFeed majorErrorText:[NSString stringWithFormat:@"Exception:%@",e]];
     }
-    
+    if(routingPacket.routingTest==YES)
+    {
+        tid = routingPacket.routingTestTcapTransactionId;
+        op = routingPacket.routingTestMapOperation;
+        ac = routingPacket.routingTestApplicationContext;
+    }
     if(self.logLevel <=UMLOG_DEBUG)
     {
         [self.logFeed debugText:@" calling find routes"];
@@ -2312,9 +2357,11 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                                     usedSelector:&usedSelector
                                transactionNumber:tid
                                        operation:op
-                                applicationContext:ac];
+                                applicationContext:ac
+                                           debug:routingState.routingTestDebug];
     routingState.destinationGroup = grp;
     routingPacket.errorCauseValue = causeValue;
+    routingState.cause = @(causeValue);
     
     if(self.logLevel <=UMLOG_DEBUG)
     {
@@ -2322,7 +2369,7 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     }
 
     routingPacket.routingSelector = usedSelector;
-    if(self.logLevel <=UMLOG_DEBUG)
+    if((self.logLevel <=UMLOG_DEBUG) || (routingPacket.routingTest))
     {
         NSMutableString *s = [[NSMutableString alloc]init];
         [s appendFormat:@"findRoutes(%@) returns:\n", dst];
@@ -2339,6 +2386,15 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
         [s appendFormat:@"    localUser: %@\n", localUser ? localUser.name : @"(null)"];
         [s appendFormat:@"    fromLocal: %@\n",routingPacket.incomingFromLocal ? @"YES" : @"NO"];
         [self logDebug:s];
+        if(routingPacket.routingTest)
+        {
+            [self logMinorError:s];
+        }
+        else
+        {
+            [self logDebug:s];
+        }
+        [routingPacket.routingTestDebug appendFormat:@"%@\n",s];
     }
 
     if(called_out!=NULL)
@@ -2348,14 +2404,23 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     
     if(causeValue != SCCP_ReturnCause_not_set)
     {
-        NSString *s = [NSString stringWithFormat:@"Can not forward %@. Sending no route to destination to PC=%@. SRC=%@ DST=%@ DATA=%@ cause=%d",
-                       routingPacket.incomingPacketType,
-                       routingPacket.outgoingDpc,
-                       routingPacket.incomingCallingPartyAddress,
-                       routingPacket.incomingCalledPartyAddress,
-                       routingPacket.incomingSccpData,
-                       causeValue];
-        [self logMinorError:s];
+        if(routingPacket.routingTest)
+        {
+            NSString *s = [NSString stringWithFormat:@"  would send UDT back to sender with cause=%d %@\n",causeValue,[UMSCCP_Packet sccpReturnCauseString:causeValue]];
+            [routingPacket.routingTestDebug appendFormat:@"%@\n",s];
+            [self logMinorError:s];
+        }
+        else
+        {
+            NSString *s = [NSString stringWithFormat:@"Can not forward %@. Sending no route to destination to PC=%@. SRC=%@ DST=%@ DATA=%@ cause=%d",
+                           routingPacket.incomingPacketType,
+                           routingPacket.outgoingDpc,
+                           routingPacket.incomingCallingPartyAddress,
+                           routingPacket.incomingCalledPartyAddress,
+                           routingPacket.incomingSccpData,
+                           causeValue];
+            [self logMinorError:s];
+        }
         [self traceDroppedPdu:routingPacket.incomingMtp3Data options:@{ @"timestamp" : [NSDate date],
                                                                         @"linkset"   : routingPacket.incomingLinksetName }];
     }
@@ -2609,6 +2674,13 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     UMSCCP_Packet   *routingPacket      = routingState.inboundReassembledPacket;
     if(routingPacket.outgoingToLocal ==YES)
     {
+        if(routingPacket.routingTest)
+        {
+            routingPacket.outgoingLinksetName = @"local";
+            routingState.mtp3DeliveryError = UMMTP3_no_error;
+            routingState.status = UMSCCP_RoutingStatus_success;
+            return;
+        }
         id<UMSCCP_UserProtocol> localUser = routingPacket.outgoingLocalUser;
         
         SCCP_ReturnCause causeValue = SCCP_ReturnCause_not_set;
@@ -2639,14 +2711,28 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     BOOL processSegmentedDelivery = (segments.count > 0) ? YES : NO;
     UMMTP3_Error e = UMMTP3_no_error;
     NSString *outgoingLinkset = routingPacket.outgoingLinksetName;
-    
     if(routingPacket.forcedLinkset)
     {
         outgoingLinkset = routingPacket.forcedLinkset;
     }
+    if(routingPacket.routingTest)
+    {
+        UMMTP3InstanceRoute *route = [_mtp3 findRouteForDestination:routingPacket.outgoingDpc];
+        routingPacket.outgoingLinksetName = route.linksetName;
+        routingState.outgoingDpc = routingPacket.outgoingDpc;
+        routingState.outgoingLinksetName = route.linksetName;
+        routingState.mtp3DeliveryError = UMMTP3_no_error;
+        routingState.status = UMSCCP_RoutingStatus_success;
+        if(route==NULL)
+        {
+            routingState.mtp3DeliveryError = UMMTP3_error_no_route_to_destination;
+        }
+        return;
+    }
     switch(routingPacket.outgoingServiceType)
     {
         case SCCP_UDT:
+        {
             if(self.logLevel <=UMLOG_DEBUG)
             {
                 [self.logFeed debugText:@"processDelivery: Sending UDT"];
@@ -2663,7 +2749,9 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
               routedToLinkset:&outgoingLinkset
                           sls:routingPacket.sls];
             break;
+        }
         case SCCP_UDTS:
+        {
             if(self.logLevel <=UMLOG_DEBUG)
             {
                 [self.logFeed debugText:@"processDelivery: sending UDTS"];
@@ -2680,8 +2768,9 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                routedToLinkset:&outgoingLinkset
                            sls:routingPacket.sls];
             break;
+        }
         case SCCP_XUDT:
-
+        {
             if(processSegmentedDelivery)
             {
                 if(self.logLevel <=UMLOG_DEBUG)
@@ -2739,11 +2828,13 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                        optionsData:routingPacket.outgoingOptionalData
                            options:routingPacket.outgoingOptions
                           provider:routingPacket.outgoingMtp3Layer
-                       routedToLinkset:&outgoingLinkset
+                   routedToLinkset:&outgoingLinkset
                                sls:routingPacket.sls];
             }
             break;
+        }
         case SCCP_XUDTS:
+        {
             if(self.logLevel <=UMLOG_DEBUG)
             {
                 [self.logFeed debugText:@"processDelivery: sending XUDTS"];
@@ -2762,6 +2853,7 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
                 routedToLinkset:&outgoingLinkset
                             sls:routingPacket.sls];
             break;
+        }
         case SCCP_LUDT:
         {
             if(processSegmentedDelivery)
@@ -2941,6 +3033,8 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     }
     packet.outgoingOpc = _mtp3.opc;
     UMSCCP_RoutingState *routingState = [[UMSCCP_RoutingState alloc]init];
+    routingState.routingTestDebug = packet.routingTestDebug;
+    
     if(packet.incomingHandling & SCCP_HANDLING_RETURN_ON_ERROR)
     {
         routingState.inboundPacket = packet;
@@ -5632,6 +5726,15 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
 
 - (NSArray *)extractTransactionNumbers:(UMSCCP_Packet *)packet /* returns an array with otid/dtid as strings or NSNull placeholders */
 {
+    if(packet.routingTest)
+    {
+        if(packet.routingTestTcapTransactionId)
+        {
+            NSUInteger tid = [packet.routingTestTcapTransactionId unsignedIntegerValue];
+            NSString *s = [NSString stringWithFormat:@"%lu",tid];
+            return @[s,s];
+        }
+    }
     NSData *data = packet.outgoingSccpData;
     id otid = [NSNull null];
     id dtid = [NSNull null];
