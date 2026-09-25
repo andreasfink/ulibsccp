@@ -3106,8 +3106,13 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
             {                                                           \
                 if(self.logLevel <=UMLOG_DEBUG)                         \
                 {                                                       \
-                    NSString *s = [UMLayerSCCP causeValueToString:routingState.cause];       \
-                    [self.logFeed debugText:[NSString stringWithFormat:@" failed (%@"),s]];  \
+                    NSString *s = @" failed";                          \
+                    NSNumber *n = routingState.cause;                   \
+                    if(n)                                               \
+                    {                                                   \
+                        s = [NSString stringWithFormat:@" failed (cause %@:%@",n,[UMLayerSCCP causeValueToString:n.intValue]];  \
+                    }                                                   \
+                    [self.logFeed debugText:s] ;                        \
                 }                                                       \
                 [self sendStatusBack:routingState];                     \
                 break;                                                  \
