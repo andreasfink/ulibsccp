@@ -2311,8 +2311,15 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
             if(self.logLevel <=UMLOG_DEBUG)
             {
                 [self.logFeed debugText:@" we do not have a payload. WTF?"];
-                routingState.status = UMSCCP_RoutingStatus_failed;
-                routingState.cause =  @(SCCP_ReturnCause_DestinationCannotPerformReassembly);
+                if(routingPacket.routingTest==NO)
+                {
+                    routingState.status = UMSCCP_RoutingStatus_failed;
+                    routingState.cause =  @(SCCP_ReturnCause_DestinationCannotPerformReassembly);
+                }
+                else
+                {
+                    [self.logFeed debugText:@" ignoring due to route test message"];
+                }
             }
         }
         if(self.logLevel <=UMLOG_DEBUG)
@@ -2386,7 +2393,7 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
         [s appendFormat:@"    localUser: %@\n", localUser ? localUser.name : @"(null)"];
         [s appendFormat:@"    fromLocal: %@\n",routingPacket.incomingFromLocal ? @"YES" : @"NO"];
         [self logDebug:s];
-        if(routingPacket.routingTest)
+        if(routingPacket.routingTest==YES)
         {
             [self logMinorError:s];
         }
@@ -2404,7 +2411,7 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     
     if(causeValue != SCCP_ReturnCause_not_set)
     {
-        if(routingPacket.routingTest)
+        if(routingPacket.routingTest==YES)
         {
             NSString *s = [NSString stringWithFormat:@"  would send UDT back to sender with cause=%d %@\n",causeValue,[UMSCCP_Packet sccpReturnCauseString:causeValue]];
             [routingPacket.routingTestDebug appendFormat:@"%@\n",s];
@@ -2674,7 +2681,7 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     UMSCCP_Packet   *routingPacket      = routingState.inboundReassembledPacket;
     if(routingPacket.outgoingToLocal ==YES)
     {
-        if(routingPacket.routingTest)
+        if(routingPacket.routingTest==YES)
         {
             routingPacket.outgoingLinksetName = @"local";
             routingState.mtp3DeliveryError = UMMTP3_no_error;
@@ -2715,7 +2722,7 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     {
         outgoingLinkset = routingPacket.forcedLinkset;
     }
-    if(routingPacket.routingTest)
+    if(routingPacket.routingTest==YES)
     {
         UMMTP3InstanceRoute *route = [_mtp3 findRouteForDestination:routingPacket.outgoingDpc];
         routingPacket.outgoingLinksetName = route.linksetName;
@@ -3099,7 +3106,8 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
             {                                                           \
                 if(self.logLevel <=UMLOG_DEBUG)                         \
                 {                                                       \
-                    [self.logFeed debugText:@" failed"];                \
+                    NSString *s = [UMLayerSCCP causeValueToString:routingState.cause];       \
+                    [self.logFeed debugText:[NSString stringWithFormat:@" failed (%@"),s]];  \
                 }                                                       \
                 [self sendStatusBack:routingState];                     \
                 break;                                                  \
