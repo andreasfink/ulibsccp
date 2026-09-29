@@ -6,7 +6,7 @@
 //  Copyright © 2017 Andreas Fink (andreas@fink.org). All rights reserved.
 //
 
-#import <ulib/ulib.h>
+#import <ulibmtp3/ulibmtp3.h>
 #import <ulibsccp/UMSCCP_FilterProtocol.h>
 
 @class UMLayerMTP3;
@@ -20,6 +20,5 @@
 - (UMPrometheus *)prometheus;
 - (NSString *)instanceName;
 - (UMSCCP_TcapSharingInstance *)getTcapSharingInstance:(NSString *)name;
-
 @end
 

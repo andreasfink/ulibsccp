@@ -9,14 +9,14 @@
 // Version 3 from 29 June 2007 and other commercial licenses available by
 // the author.
 
-#import "UMSCCP_mtpTransfer.h"
-#import "UMLayerSCCP.h"
-#import "UMSCCP_Defs.h"
-#import "UMSCCP_ReceivedSegments.h"
-#import "UMSCCP_Packet.h"
-#import "UMSCCP_StatisticDb.h"
-#import "UMSCCP_PrometheusData.h"
-#import "UMSCCP_Segment.h"
+#import <ulibsccp/UMSCCP_mtpTransfer.h>
+#import <ulibsccp/UMLayerSCCP.h>
+#import <ulibsccp/UMSCCP_Defs.h>
+#import <ulibsccp/UMSCCP_ReceivedSegments.h>
+#import <ulibsccp/UMSCCP_Packet.h>
+#import <ulibsccp/UMSCCP_StatisticDb.h>
+#import <ulibsccp/UMSCCP_PrometheusData.h>
+#import <ulibsccp/UMSCCP_Segment.h>
 
 
 @implementation UMSCCP_mtpTransfer

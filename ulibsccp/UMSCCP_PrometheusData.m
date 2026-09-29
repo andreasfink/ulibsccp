@@ -6,8 +6,8 @@
 //  Copyright © 2021 Andreas Fink (andreas@fink.org). All rights reserved.
 //
 
-#import "UMSCCP_PrometheusData.h"
-#import "UMSCCP_StatisticSection.h"
+#import <ulibsccp/UMSCCP_PrometheusData.h>
+#import <ulibsccp/UMSCCP_StatisticSection.h>
 
 @implementation UMSCCP_PrometheusData
 

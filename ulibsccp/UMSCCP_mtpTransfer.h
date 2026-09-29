@@ -9,9 +9,8 @@
 // Version 3 from 29 June 2007 and other commercial licenses available by
 // the author.
 
-#import <ulib/ulib.h>
 #import <ulibmtp3/ulibmtp3.h>
-#import <ulibgt/ulibgt.h>
+#import <ulibsccp/ulibgt.h>
 
 #import <ulibsccp/UMSCCP_Defs.h>
 #import <ulibsccp/UMSCCP_StatisticSection.h>

@@ -6,10 +6,10 @@
 //  Copyright © 2020 Andreas Fink (andreas@fink.org). All rights reserved.
 //
 
-#import "UMSCCP_StatisticDb.h"
-#import "UMSCCP_StatisticDbRecord.h"
-#import "UMLayerSCCPApplicationContextProtocol.h"
-#import "UMSCCP_Defs.h"
+#import <ulibsccp/UMSCCP_StatisticDb.h>
+#import <ulibsccp/UMSCCP_StatisticDbRecord.h>
+#import <ulibsccp/UMLayerSCCPApplicationContextProtocol.h>
+#import <ulibsccp/UMSCCP_Defs.h>
 
 // #define UMSCCP_STATISTICS_DEBUG 1
 

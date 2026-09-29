@@ -28,7 +28,6 @@ typedef enum SCCP_ServiceType
     SCCP_LUDTS				= 		0x14,
 } SCCP_ServiceType;
 
-
 typedef	enum SCCP_State
 {
     SCCP_STATE_IDLE								= 0,

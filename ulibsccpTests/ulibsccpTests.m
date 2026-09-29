@@ -10,8 +10,8 @@
 // the author.
 
 #import <XCTest/XCTest.h>
-#import <ulib/ulib.h>
-#import <ulibgt/ulibgt.h>
+#import <ulibmtp3/ulibmtp3.h>
+#import <ulibsccp/ulibgt.h>
 
 @interface ulibsccpTests : XCTestCase
 

@@ -6,7 +6,7 @@
 //  Copyright © 2022 Andreas Fink (andreas@fink.org). All rights reserved.
 //
 
-#import <ulib/ulib.h>
+#import <ulibmtp3/ulibmtp3.h>
 
 @class UMSCCP_ReceivedSegments;
 @class UMSCCP_ReceivedSegment;

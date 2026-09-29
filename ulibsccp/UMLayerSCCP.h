@@ -10,9 +10,8 @@
 // the author.
 
 #import <ulibsccp/ulibsccp.h>
-#import <ulibm2pa/ulibm2pa.h>
 #import <ulibmtp3/ulibmtp3.h>
-#import <ulibgt/ulibgt.h>
+#import <ulibsccp/ulibgt.h>
 
 #import <ulibsccp/UMSCCP_UserProtocol.h>
 #import <ulibsccp/UMSCCPConnection.h>
@@ -63,6 +62,7 @@ typedef enum UMSccpScreening_result
     SccpDestinationGroup        *_defaultNextHop;
 
     SccpGttRegistry             *_gttSelectorRegistry;
+    SccpGttRegistry             *_gttSecondarySelectorRegistry;
     UMSynchronizedDictionary    *_subsystemUsers;
     NSString                    *_mtp3_name;
     UMLayerMTP3                 *_mtp3;
@@ -70,6 +70,7 @@ typedef enum UMSccpScreening_result
     
     UMSynchronizedArray         *_traceSendDestinations;
     UMSynchronizedArray         *_traceReceiveDestinations;
+    UMSynchronizedArray         *_traceReceivePacketDestinations;
     UMSynchronizedArray         *_traceDroppedDestinations;
     UMSynchronizedArray         *_traceUnroutableDestinations;
     UMSynchronizedArray         *_traceProblematicDestinations;
@@ -121,6 +122,7 @@ typedef enum UMSccpScreening_result
 @property(readwrite,assign) SccpVariant sccpVariant;
 @property(readwrite,strong) SccpDestinationGroup *defaultNextHop;
 @property(readwrite,strong) SccpGttRegistry *gttSelectorRegistry;
+@property(readwrite,strong) SccpGttRegistry *gttSecondarySelectorRegistry;
 @property(readwrite,strong) NSMutableDictionary *pendingSegments;
 @property(readwrite,strong) SccpL3RoutingTable *sccpL3RoutingTable;
 @property(readwrite,assign) int lxudt_max_hop_count;
@@ -470,7 +472,6 @@ sls:(int)sls;
                       sls:(int)sls;
 
 
-
 - (UMSynchronizedSortedDictionary *) routeTestForMSISDN:(NSString *)msisdn
                                         translationType:(int)tt
                                               fromLocal:(BOOL)fromLocal
@@ -478,7 +479,9 @@ sls:(int)sls;
                                               operation:(NSNumber *)op
                                      applicationContext:(NSString *)ac
                                         incomingLinkset:(NSString *)linkset
-                                          sourceAddress:(NSString *)source;
+                                          sourceAddress:(NSString *)source
+                                             packetType:(NSString *)packetType
+                                                  debug:(NSMutableString *)debug;
 
 
 - (UMSCCP_RoutingState *)routePacket:(UMSCCP_Packet *)packet;
@@ -497,11 +500,12 @@ sls:(int)sls;
 - (void)startUp;
 
 - (id)decodePdu:(NSData *)data;
-- (void)traceSentPdu:(NSData *)mtp3pdu          options:(NSDictionary *)dict;
-- (void)traceReceivedPdu:(NSData *)mtp3pdu      options:(NSDictionary *)dict;
-- (void)traceDroppedPdu:(NSData *)mtp3pdu       options:(NSDictionary *)dict;
-- (void)traceUnroutablePdu:(NSData *)mtp3pdu    options:(NSDictionary *)dict;
-- (void)traceProblematicPdu:(NSData *)mtp3pdu   options:(NSDictionary *)dict;
+- (void)traceSentPdu:(NSData *)mtp3pdu              options:(NSDictionary *)dict;
+- (void)traceReceivedPdu:(NSData *)mtp3pdu          options:(NSDictionary *)dict;
+- (void)traceReceivedPacket:(UMSCCP_Packet *)packet options:(NSDictionary *)dict;
+- (void)traceDroppedPdu:(NSData *)mtp3pdu           options:(NSDictionary *)dict;
+- (void)traceUnroutablePdu:(NSData *)mtp3pdu        options:(NSDictionary *)dict;
+- (void)traceProblematicPdu:(NSData *)mtp3pdu       options:(NSDictionary *)dict;
 
 - (NSDictionary *)apiStatus;
 - (UMSynchronizedSortedDictionary *)routeStatus;

@@ -6,10 +6,10 @@
 //  Copyright © 2025 Andreas Fink (andreas@fink.org). All rights reserved.
 //
 
-#import "UMSCCP_TcapSharingInstance.h"
-#import "UMSCCP_Packet.h"
-#import "UMLayerSCCP.h"
-#import "UMSCCP_TcapSharingSession.h"
+#import <ulibsccp/UMSCCP_TcapSharingInstance.h>
+#import <ulibsccp/UMSCCP_Packet.h>
+#import <ulibsccp/UMLayerSCCP.h>
+#import <ulibsccp/UMSCCP_TcapSharingSession.h>
 
 #if !defined(UMTCAP_Command)
 typedef enum UMTCAP_Command

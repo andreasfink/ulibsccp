@@ -6,9 +6,8 @@
 //  Copyright © 2019 Andreas Fink (andreas@fink.org). All rights reserved.
 //
 
-#import <ulib/ulib.h>
-#import <ulibgt/ulibgt.h>
-#import <ulibasn1/ulibasn1.h>
+#import <ulibmtp3/ulibmtp3.h>
+#import <ulibsccp/ulibgt.h>
 
 #import <ulibsccp/UMSCCP_Defs.h>
 #import <ulibsccp/UMSCCP_UserProtocol.h>
@@ -232,6 +231,11 @@ typedef enum UMSCCP_Packet_Tag_enum
     SCCP_ReturnCause            _errorCauseValue;
     BOOL                        _candidateForTcapSharing;
     UMLogLevel                  _tcapSharingTraceLevel;
+    BOOL                        _routingTest;
+    NSNumber                    *_routingTestTcapTransactionId;
+    NSString                    *_routingTestApplicationContext;
+    NSNumber                    *_routingTestMapOperation;
+    NSMutableString             *_routingTestDebug;
 
 }
 
@@ -348,6 +352,11 @@ typedef enum UMSCCP_Packet_Tag_enum
 @property(readwrite,strong,atomic)  UMMTP3PointCode             *forcedDpc;
 @property(readwrite,assign,atomic)  BOOL                        candidateForTcapSharing;
 @property(readwrite,assign,atomic)  UMLogLevel                  tcapSharingTraceLevel;
+@property(readwrite,assign,atomic) BOOL                         routingTest;
+@property(readwrite,strong,atomic)  NSNumber                    *routingTestTcapTransactionId;
+@property(readwrite,strong,atomic)  NSString                    *routingTestApplicationContext;
+@property(readwrite,strong,atomic)  NSNumber                    *routingTestMapOperation;
+@property(readwrite,strong,atomic)  NSMutableString             *routingTestDebug;
 
 
 - (NSString *) incomingPacketType;
@@ -370,6 +379,7 @@ typedef enum UMSCCP_Packet_Tag_enum
 + (SCCP_ServiceType) stringToSccpServiceType:(NSString *)str;
 + (NSString *) sccpStatToString:(SCCP_State)state;
 + (NSString *) sccpServiceClassToString:(SCCP_ServiceClass)serviceClass;
++ (NSString *) sccpReturnCauseString:(SCCP_ReturnCause)cause;
 
 @end
 

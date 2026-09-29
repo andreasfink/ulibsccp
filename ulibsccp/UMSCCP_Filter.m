@@ -6,7 +6,7 @@
 //  Copyright © 2019 Andreas Fink (andreas@fink.org). All rights reserved.
 //
 
-#import "UMSCCP_Filter.h"
+#import <ulibsccp/UMSCCP_Filter.h>
 
 
 int         plugin_init(NSDictionary *dict);
@@ -107,7 +107,6 @@ NSDictionary *plugin_info(void);
     return @"undefined";
 }
 
-
 - (UMSCCP_FilterResult) filterInbound:(UMSCCP_Packet *)packet;
 {
 	return UMSCCP_FILTER_RESULT_UNMODIFIED;
@@ -130,28 +129,28 @@ NSDictionary *plugin_info(void);
 @end
 
 
-int plugin_init(NSDictionary *dict)
+int sccp_plugin_init(NSDictionary *dict)
 {
     return 0;
 }
 
-int plugin_exit(void)
+int sccp_plugin_exit(void)
 {
     return 0;
 }
 
-NSString *  plugin_name(void)
+NSString *  sccp_plugin_name(void)
 {
     return @"sccp-filter";
 }
 
-UMPlugin *  plugin_create(void)
+UMPlugin *  sccp_plugin_create(void)
 {
     UMPlugin *plugin = [[UMSCCP_Filter alloc]init];
     return plugin;
 }
 
-NSDictionary *plugin_info(void)
+NSDictionary *sccp_plugin_info(void)
 {
     return @{ @"name" : @"sccp-filter" };
 }

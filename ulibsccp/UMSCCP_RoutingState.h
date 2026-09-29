@@ -6,8 +6,8 @@
 //  Copyright © 2025 Andreas Fink (andreas@fink.org). All rights reserved.
 //
 
-#import <ulib/ulib.h>
-#import <ulibgt/ulibgt.h>
+#import <ulibmtp3/ulibmtp3.h>
+#import <ulibsccp/ulibgt.h>
 #import <ulibsccp/UMSCCP_Defs.h>
 #import <ulibsccp/UMSCCP_TcapSharingInstance.h>
 
@@ -75,6 +75,7 @@ typedef enum UMSCCP_RoutingErrorProcessing
     UMMTP3PointCode         *_forcedDpc;
     BOOL                    _mustResegment;
     UMSCCP_TcapSharing_result _tcapSharingResult;
+    NSMutableString         *_routingTestDebug;
 }
 
 @property(readwrite,atomic,assign)  UMSCCP_RoutingStatus            status;
@@ -114,6 +115,8 @@ typedef enum UMSCCP_RoutingErrorProcessing
 @property(readwrite,atomic,strong)  UMMTP3PointCode         *forcedDpc;
 @property(readwrite,atomic,assign) BOOL                     mustResegment;
 @property(readwrite,atomic,assign) UMSCCP_TcapSharing_result tcapSharingResult;
+@property(readwrite,atomic,strong) NSMutableString         *routingTestDebug;
+
 
 - (BOOL)forceRouted;
 - (UMSynchronizedSortedDictionary *)objectValue;

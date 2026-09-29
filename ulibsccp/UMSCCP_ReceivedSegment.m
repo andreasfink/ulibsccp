@@ -6,8 +6,8 @@
 //  Copyright © 2022 Andreas Fink (andreas@fink.org). All rights reserved.
 //
 
-#import "UMSCCP_ReceivedSegment.h"
-#import "UMSCCP_Packet.h"
+#import <ulibsccp/UMSCCP_ReceivedSegment.h>
+#import <ulibsccp/UMSCCP_Packet.h>
 
 @implementation UMSCCP_ReceivedSegment
 

@@ -9,8 +9,8 @@
 // Version 3 from 29 June 2007 and other commercial licenses available by
 // the author.
 
-#import "UMSCCP_mtpStatus.h"
-#import "UMLayerSCCP.h"
+#import <ulibsccp/UMSCCP_mtpStatus.h>
+#import <ulibsccp/UMLayerSCCP.h>
 
 @implementation UMSCCP_mtpStatus
 

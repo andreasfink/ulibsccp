@@ -6,9 +6,9 @@
 //  Copyright © 2019 Andreas Fink (andreas@fink.org). All rights reserved.
 //
 
-#import "UMSCCP_Packet.h"
-#import "UMLayerSCCP.h"
-#import "UMSCCP_Segment.h"
+#import <ulibsccp/UMSCCP_Packet.h>
+#import <ulibsccp/UMLayerSCCP.h>
+#import <ulibsccp/UMSCCP_Segment.h>
 
 #if !defined(UMTCAP_Command)
 typedef enum UMTCAP_Command
@@ -84,6 +84,7 @@ typedef enum UMTCAP_Command
         _tags = [[UMSynchronizedDictionary alloc]init];
         _incomingReturnCause = SCCP_ReturnCause_not_set;
         _outgoingReturnCause = SCCP_ReturnCause_not_set;
+        _tcapSharingTraceLevel = UMLOG_MINOR;
 	}
 	return self;
 }
@@ -222,6 +223,12 @@ typedef enum UMTCAP_Command
     cpy.forcedDpc                               = _forcedDpc;
     cpy.forcedLocalUser                         = _forcedLocalUser;
     cpy.tcapSharingTraceLevel                   = _tcapSharingTraceLevel;
+    
+    cpy.routingTest = _routingTest;
+    cpy.routingTestTcapTransactionId = _routingTestTcapTransactionId;
+    cpy.routingTestApplicationContext = _routingTestApplicationContext;
+    cpy.routingTestMapOperation = _routingTestMapOperation;
+    cpy.routingTestDebug = _routingTestDebug;
     return cpy;
 }
 
@@ -283,59 +290,11 @@ typedef enum UMTCAP_Command
     [s appendFormat:@"\t_incomingSccpData: %@\n",_incomingSccpData.hexString];
     [s appendFormat:@"\t_incomingOptionalData: %@\n",_incomingOptionalData.hexString];
 
-    switch(_incomingReturnCause)
+    if(_incomingReturnCause!=SCCP_ReturnCause_not_set)
     {
-        case SCCP_ReturnCause_not_set:
-            break;
-        case SCCP_ReturnCause_NoTranslationForAnAddressOfSuchNature:
-            [s appendFormat:@"\t_incomingReturnCause: NoTranslationForAnAddressOfSuchNature\n"];
-            break;
-        case    SCCP_ReturnCause_NoTranslationForThisSpecificAddress :
-            [s appendFormat:@"\t_incomingReturnCause: NoTranslationForThisSpecificAddress\n"];
-            break;
-        case    SCCP_ReturnCause_SubsystemCongestion:
-            [s appendFormat:@"\t_incomingReturnCause: SubsystemCongestion\n"];
-            break;
-        case    SCCP_ReturnCause_SubsystemFailure:
-            [s appendFormat:@"\t_incomingReturnCause: SubsystemFailure\n"];
-            break;
-        case    SCCP_ReturnCause_Unequipped:
-            [s appendFormat:@"\t_incomingReturnCause: Unequipped\n"];
-            break;
-        case   SCCP_ReturnCause_MTPFailure:
-            [s appendFormat:@"\t_incomingReturnCause: MTPFailure\n"];
-            break;
-        case   SCCP_ReturnCause_NetworkCongestion:
-            [s appendFormat:@"\t_incomingReturnCause: NetworkCongestion\n"];
-            break;
-        case   SCCP_ReturnCause_Unqualified:
-            [s appendFormat:@"\t_incomingReturnCause: Unqualified\n"];
-            break;
-        case    SCCP_ReturnCause_ErrorInMessageTransport:
-            [s appendFormat:@"\t_incomingReturnCause: ErrorInMessageTransport\n"];
-            break;
-        case   SCCP_ReturnCause_ErrorInLocalProcessing:
-            [s appendFormat:@"\t_incomingReturnCause: ErrorInLocalProcessing\n"];
-            break;
-        case    SCCP_ReturnCause_DestinationCannotPerformReassembly:
-            [s appendFormat:@"\t_incomingReturnCause: DestinationCannotPerformReassembly\n"];
-            break;
-        case    SCCP_ReturnCause_SCCPFailure:
-            [s appendFormat:@"\t_incomingReturnCause: SCCPFailure\n"];
-            break;
-        case    SCCP_ReturnCause_HopCounterViolation:
-            [s appendFormat:@"\t_incomingReturnCause: HopCounterViolation\n"];
-            break;
-        case   SCCP_ReturnCause_SegmentationNotSupported:
-            [s appendFormat:@"\t_incomingReturnCause: SegmentationNotSupported\n"];
-            break;
-        case    SCCP_ReturnCause_SegmentationFailure:
-            [s appendFormat:@"\t_incomingReturnCause: SegmentationFailure\n"];
-            break;
-        default:
-            [s appendFormat:@"\t_incomingReturnCause: %d\n",_incomingReturnCause];
-            break;
+        [s appendFormat:@"\t_incomingReturnCause: %@\n",[UMSCCP_Packet sccpReturnCauseString:_incomingReturnCause]];
     }
+   
     switch(_incomingTcapCommand)
     {
         case 1:
@@ -461,6 +420,29 @@ typedef enum UMTCAP_Command
         [s appendFormat:@"\t\t%@=%@\n",var,_vars[var]];
     }
     [s appendFormat:@"\t_rerouteDestinationGroup: %@\n", _rerouteDestinationGroup ? _rerouteDestinationGroup.name : @"NULL"];
+    
+    if(_routingTest)
+    {
+        [s appendFormat:@"\t_routingTest: YES"];
+    }
+    if(_routingTestTcapTransactionId)
+    {
+        [s appendFormat:@"\t_routingTestTcapTransactionId: %@",_routingTestTcapTransactionId];
+    }
+    if(_routingTestApplicationContext)
+    {
+        [s appendFormat:@"\t_routingTestApplicationContext: %@",_routingTestApplicationContext];
+    }
+    if(_routingTestMapOperation)
+    {
+        [s appendFormat:@"\t_routingTestMapOperation: %@",_routingTestMapOperation];
+    }
+    if(_routingTestDebug)
+    {
+        [s appendFormat:@"\t__routingTestDebug: YES"];
+    }
+
+
     return s;
 }
 
@@ -836,4 +818,61 @@ typedef enum UMTCAP_Command
     return s;
 }
 
++ (NSString *) sccpReturnCauseString:(SCCP_ReturnCause)cause
+{
+    switch(cause)
+    {
+        case SCCP_ReturnCause_not_set:
+            return @"ReturnCause_not_set";
+            break;
+        case SCCP_ReturnCause_NoTranslationForAnAddressOfSuchNature:
+            return @"NoTranslationForAnAddressOfSuchNature";
+            break;
+        case    SCCP_ReturnCause_NoTranslationForThisSpecificAddress :
+            return @"NoTranslationForThisSpecificAddress";
+            break;
+        case    SCCP_ReturnCause_SubsystemCongestion:
+            return @"SubsystemCongestion";
+            break;
+        case    SCCP_ReturnCause_SubsystemFailure:
+            return @"SubsystemFailure";
+            break;
+        case    SCCP_ReturnCause_Unequipped:
+            return @"Unequipped";
+            break;
+        case   SCCP_ReturnCause_MTPFailure:
+            return @"MTPFailure";
+            break;
+        case   SCCP_ReturnCause_NetworkCongestion:
+           return @"NetworkCongestion";
+            break;
+        case   SCCP_ReturnCause_Unqualified:
+            return @"Unqualified";
+            break;
+        case    SCCP_ReturnCause_ErrorInMessageTransport:
+            return @"ErrorInMessageTransport";
+            break;
+        case   SCCP_ReturnCause_ErrorInLocalProcessing:
+            return @"ErrorInLocalProcessing";
+            break;
+        case    SCCP_ReturnCause_DestinationCannotPerformReassembly:
+            return @"DestinationCannotPerformReassembly";
+            break;
+        case    SCCP_ReturnCause_SCCPFailure:
+            return @"SCCPFailure";
+            break;
+        case    SCCP_ReturnCause_HopCounterViolation:
+            return @"HopCounterViolation";
+            break;
+        case   SCCP_ReturnCause_SegmentationNotSupported:
+            return @"SegmentationNotSupported";
+            break;
+        case    SCCP_ReturnCause_SegmentationFailure:
+            return @"SegmentationFailure";
+            break;
+        default:
+            return [NSString stringWithFormat:@"UnknownReturnCause_%d",cause];
+            break;
+    }
+}
 @end

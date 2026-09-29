@@ -6,9 +6,9 @@
 //  Copyright © 2022 Andreas Fink (andreas@fink.org). All rights reserved.
 //
 
-#import "UMSCCP_PendingSegmentsStorage.h"
-#import "UMSCCP_ReceivedSegments.h"
-#import "UMSCCP_ReceivedSegment.h"
+#import <ulibsccp/UMSCCP_PendingSegmentsStorage.h>
+#import <ulibsccp/UMSCCP_ReceivedSegments.h>
+#import <ulibsccp/UMSCCP_ReceivedSegment.h>
 
 
 //#define PENDING_SEGMENTS_DEBUG   1

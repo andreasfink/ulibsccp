@@ -6,7 +6,7 @@
 //  Copyright © 2018 Andreas Fink (andreas@fink.org). All rights reserved.
 //
 
-#import "UMSCCP_StatisticData.h"
+#import <ulibsccp/UMSCCP_StatisticData.h>
 
 @implementation UMSCCP_StatisticData
 
