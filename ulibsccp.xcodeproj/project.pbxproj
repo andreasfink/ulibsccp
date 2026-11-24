@@ -224,6 +224,7 @@
 		A68494E11CB320BF00211137 /* UMSCCP_mtpResume.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_mtpResume.m; sourceTree = "<group>"; };
 		A68494E41CB320C800211137 /* UMSCCP_mtpStatus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_mtpStatus.h; sourceTree = "<group>"; };
 		A68494E51CB320C800211137 /* UMSCCP_mtpStatus.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_mtpStatus.m; sourceTree = "<group>"; };
+		A69F0FE930B6048C007B3A9C /* Makefile.in */ = {isa = PBXFileReference; lastKnownFileType = text; path = Makefile.in; sourceTree = "<group>"; };
 		A6AA23C324853F09008D5A57 /* UMSCCP_StatisticDbRecord.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_StatisticDbRecord.h; sourceTree = "<group>"; };
 		A6AA23C424853F09008D5A57 /* UMSCCP_StatisticDbRecord.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_StatisticDbRecord.m; sourceTree = "<group>"; };
 		A6AA23CF24854F80008D5A57 /* UMSCCP_StatisticDb.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_StatisticDb.h; sourceTree = "<group>"; };
@@ -252,8 +253,6 @@
 		A6EE01B422E834FB003BA2A5 /* UMSCCP_FilterProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_FilterProtocol.h; sourceTree = "<group>"; };
 		A6F442B01CB2595000C2B472 /* UMSCCPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCPConnection.h; sourceTree = "<group>"; };
 		A6F442B11CB2595000C2B472 /* UMSCCPConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCPConnection.m; sourceTree = "<group>"; };
-		A6F694001B4E84120090FC94 /* Makefile.linux.in */ = {isa = PBXFileReference; lastKnownFileType = text; path = Makefile.linux.in; sourceTree = "<group>"; };
-		A6F694011B4E84120090FC94 /* Makefile.osx.in */ = {isa = PBXFileReference; lastKnownFileType = text; path = Makefile.osx.in; sourceTree = "<group>"; };
 		A6F694021B4E84120090FC94 /* ulibsccp.pc.in */ = {isa = PBXFileReference; lastKnownFileType = text; path = ulibsccp.pc.in; sourceTree = "<group>"; };
 		A6F694031B4E84120090FC94 /* VERSION */ = {isa = PBXFileReference; lastKnownFileType = text; path = VERSION; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -285,8 +284,7 @@
 			isa = PBXGroup;
 			children = (
 				A6C6052B207698DE002DEBDD /* doc */,
-				A6F694001B4E84120090FC94 /* Makefile.linux.in */,
-				A6F694011B4E84120090FC94 /* Makefile.osx.in */,
+				A69F0FE930B6048C007B3A9C /* Makefile.in */,
 				A6F694021B4E84120090FC94 /* ulibsccp.pc.in */,
 				A6F694031B4E84120090FC94 /* VERSION */,
 				A604D13A19B999BC0090FC94 /* ulibsccp */,
