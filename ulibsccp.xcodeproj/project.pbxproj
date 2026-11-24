@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A60422B330B5F0510028F87D /* UMSCCPPacketTracerProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = A60422B230B5F0510028F87D /* UMSCCPPacketTracerProtocol.h */; };
 		A604D14E19B999BD0090FC94 /* ulibsccp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A604D13119B999BC0090FC94 /* ulibsccp.framework */; };
 		A604D15419B999BD0090FC94 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A604D15219B999BD0090FC94 /* InfoPlist.strings */; };
 		A604D15619B999BD0090FC94 /* ulibsccpTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A604D15519B999BD0090FC94 /* ulibsccpTests.m */; };
@@ -131,6 +132,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A60422B230B5F0510028F87D /* UMSCCPPacketTracerProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCPPacketTracerProtocol.h; sourceTree = "<group>"; };
 		A604D13119B999BC0090FC94 /* ulibsccp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ulibsccp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A604D13C19B999BC0090FC94 /* ulibsccp-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "ulibsccp-Info.plist"; sourceTree = "<group>"; };
 		A604D13E19B999BC0090FC94 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -421,6 +423,7 @@
 				A6BA06BC2E21348C00EEB4E7 /* UMSCCP_TcapSharingInstance.m */,
 				A64995132E2F7AF7006873AC /* UMSCCP_TcapSharingSession.h */,
 				A64995142E2F7AF7006873AC /* UMSCCP_TcapSharingSession.m */,
+				A60422B230B5F0510028F87D /* UMSCCPPacketTracerProtocol.h */,
 			);
 			path = ulibsccp;
 			sourceTree = "<group>";
@@ -473,6 +476,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A60422B330B5F0510028F87D /* UMSCCPPacketTracerProtocol.h in Headers */,
 				A68494DE1CB320B600211137 /* UMSCCP_mtpPause.h in Headers */,
 				A6ED5C931B435F3600854472 /* ulibsccp.h in Headers */,
 				A6827E1A1E380FC900F3048B /* UMLayerSCCPApplicationContextProtocol.h in Headers */,

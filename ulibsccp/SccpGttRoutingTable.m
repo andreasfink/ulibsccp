@@ -81,7 +81,7 @@
         SccpGttRoutingTableEntry *entry = _entries[key];
         
         NSString *digits = entry.digits;
-        if(([digits isEqualToString:@""]) || ([digits isEqualToString:@"default"]))
+        if(([digits isEqualToString:@""]) || ([digits isEqualToString:@"default"]) || (digits==NULL))
         {
             entry.digits=@"";
             if(newRoot.entries==NULL)
