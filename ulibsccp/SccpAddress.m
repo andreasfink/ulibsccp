@@ -65,15 +65,6 @@ int sccp_digit_to_nibble(unichar digit, int def)
 
 @implementation SccpAddress
 
-@synthesize ai;
-@synthesize nai;
-//@synthesize ton;
-@synthesize npi;
-@synthesize ssn;
-@synthesize pc;
-@synthesize address;
-@synthesize tt;
-
 - (SccpAddress *)init
 {
     self = [super init];
@@ -86,13 +77,13 @@ int sccp_digit_to_nibble(unichar digit, int def)
 
 - (void)genericIntialisation
 {
-    ai = [[SccpAddressIndicator alloc]init];
-    nai = [[SccpNatureOfAddressIndicator alloc]init];
-    npi = [[SccpNumberPlanIndicator alloc]init];
-    ssn = [[SccpSubSystemNumber alloc]init];
-    tt = [[SccpTranslationTableNumber alloc]init];
-    address = @"";
-    pc = NULL;
+    _ai = [[SccpAddressIndicator alloc]init];
+    _nai = [[SccpNatureOfAddressIndicator alloc]init];
+    _npi = [[SccpNumberPlanIndicator alloc]init];
+    _ssn = [[SccpSubSystemNumber alloc]init];
+    _tt = [[SccpTranslationTableNumber alloc]init];
+    _address = @"";
+    _pc = NULL;
 }
 - (SccpAddress *)initWithItuData:(NSData *)data
 {
@@ -129,40 +120,40 @@ int sccp_digit_to_nibble(unichar digit, int def)
 
 - (void)setAiFromInt:(int)i
 {
-    ai = [[SccpAddressIndicator alloc]initWithInt:i];
+    _ai = [[SccpAddressIndicator alloc]initWithInt:i];
 }
 
 - (void)setNaiFromInt:(int)i
 {
-    nai = [[SccpNatureOfAddressIndicator alloc]initWithInt:i];
+    _nai = [[SccpNatureOfAddressIndicator alloc]initWithInt:i];
 
 }
 
 - (void)setNpiFromInt:(int)i
 {
-    if((npi) && (npi.npi != i))
+    if((_npi) && (_npi.npi != i))
     {
-        npi = [[SccpNumberPlanIndicator alloc]initWithInt:i];
+        _npi = [[SccpNumberPlanIndicator alloc]initWithInt:i];
     }
 }
 
 - (void)setSsnFromInt:(int)i
 {
-    if((ssn) && (ssn.ssn !=i))
+    if((_ssn) && (_ssn.ssn !=i))
     {
-        ssn = [[SccpSubSystemNumber alloc]initWithInt:i];
+        _ssn = [[SccpSubSystemNumber alloc]initWithInt:i];
     }
-    ai.subSystemIndicator = YES;
+    _ai.subSystemIndicator = YES;
 }
 
 - (void)setTtFromInt:(int)i
 {
-    tt = [[SccpTranslationTableNumber alloc]initWithInt:i];
+    _tt = [[SccpTranslationTableNumber alloc]initWithInt:i];
 }
 
 - (NSData *)encoded
 {
-    if(ai.nationalReservedBit)
+    if(_ai.nationalReservedBit)
     {
         return [self encode:SCCP_VARIANT_ANSI];
     }
@@ -188,51 +179,51 @@ int sccp_digit_to_nibble(unichar digit, int def)
     
     NSMutableData *packet = [[NSMutableData alloc]init];
 
-    if(nai)
+    if(_nai)
     {
         nai_pres=1;
     }
-    if(npi)
+    if(_npi)
     {
         np_pres = 1;
     }
-    if(tt)
+    if(_tt)
     {
         tt_pres = 1;
     }
-    if(address)
+    if(_address)
     {
         gt_pres=1;
-        ai.routingIndicatorBit = NO;
+        _ai.routingIndicatorBit = NO;
     }
-    if(ssn)
+    if(_ssn)
     {
-        ai.subSystemIndicator = YES;
+        _ai.subSystemIndicator = YES;
     }
     else
     {
-        ai.subSystemIndicator = NO;
+        _ai.subSystemIndicator = NO;
     }
     
     if((variant==SCCP_VARIANT_ITU) && (nai_pres) && (np_pres) && (gt_pres) &&(tt_pres) )
     {
-        ai.nationalReservedBit=NO;
-        ai.globalTitleIndicator = SCCP_GTI_ITU_NAI_TT_NPI_ENCODING;
+        _ai.nationalReservedBit=NO;
+        _ai.globalTitleIndicator = SCCP_GTI_ITU_NAI_TT_NPI_ENCODING;
     }
     else if((variant==SCCP_VARIANT_ITU) && (np_pres) && (gt_pres) &&(tt_pres) )
     {
-        ai.nationalReservedBit=NO;
-        ai.globalTitleIndicator = SCCP_GTI_ITU_TT_NP_ENCODING;
+        _ai.nationalReservedBit=NO;
+        _ai.globalTitleIndicator = SCCP_GTI_ITU_TT_NP_ENCODING;
     }
     else if((variant==SCCP_VARIANT_ITU) && (tt_pres))
     {
-        ai.nationalReservedBit=NO;
-        ai.globalTitleIndicator = SCCP_GTI_ITU_TT_ONLY;
+        _ai.nationalReservedBit=NO;
+        _ai.globalTitleIndicator = SCCP_GTI_ITU_TT_ONLY;
     }
     else if((variant==SCCP_VARIANT_ITU) && (nai_pres))
     {
-        ai.nationalReservedBit=NO;
-        ai.globalTitleIndicator = SCCP_GTI_ITU_NAI_ONLY;
+        _ai.nationalReservedBit=NO;
+        _ai.globalTitleIndicator = SCCP_GTI_ITU_NAI_ONLY;
     }
 /* this seems not a standard case.
     else if((variant==SCCP_VARIANT_ANSI) && (np_pres))
@@ -243,31 +234,31 @@ int sccp_digit_to_nibble(unichar digit, int def)
  */
     else if(variant==SCCP_VARIANT_ANSI)
     {
-        ai.nationalReservedBit=YES;
-        ai.globalTitleIndicator = SCCP_GTI_ANSI_TT_ONLY;
+        _ai.nationalReservedBit=YES;
+        _ai.globalTitleIndicator = SCCP_GTI_ANSI_TT_ONLY;
     }
 
-    if(pc)
+    if(_pc)
     {
-        ai.pointCodeIndicator = YES;
+        _ai.pointCodeIndicator = YES;
     }
-    if((ssn) && (ssn.ssn != -1))
+    if((_ssn) && (_ssn.ssn != -1))
     {
-        ai.subSystemIndicator = YES;
+        _ai.subSystemIndicator = YES;
     }
 
     if(variant==SCCP_VARIANT_ANSI)
     {
-        ai.nationalReservedBit=YES;
-        [packet appendByte:[ai addressIndicatorANSI]];
+        _ai.nationalReservedBit=YES;
+        [packet appendByte:[_ai addressIndicatorANSI]];
     }
     else
     {
-        ai.nationalReservedBit=NO;
-        [packet appendByte:[ai addressIndicatorITU]];
+        _ai.nationalReservedBit=NO;
+        [packet appendByte:[_ai addressIndicatorITU]];
     }
 
-    int gti = ai.globalTitleIndicator;
+    int gti = _ai.globalTitleIndicator;
 
     if(variant == SCCP_VARIANT_ITU)
     {
@@ -336,9 +327,9 @@ int sccp_digit_to_nibble(unichar digit, int def)
 #pragma unused(gt_pres)
 
     /* pointcode */
-    if(ai.pointCodeIndicator)
+    if(_ai.pointCodeIndicator)
     {
-        int dpc = pc.pc;
+        int dpc = _pc.pc;
         if(variant == SCCP_VARIANT_ITU)
         {
             [packet appendByte:(dpc & 0xFF)];
@@ -353,20 +344,20 @@ int sccp_digit_to_nibble(unichar digit, int def)
     }
     
     /* subsystem number */
-    if(ai.subSystemIndicator)
+    if(_ai.subSystemIndicator)
     {
-        uint8_t byte = ssn.ssn;
+        uint8_t byte = _ssn.ssn;
         [packet appendByte:byte];
     }
     
     /* translation type */
     if(tt_pres)
     {
-        uint8_t byte = tt.tt;
+        uint8_t byte = _tt.tt;
         [packet appendByte:byte];
     }
-    len = [address length];
-    const char *addr = (const char *)address.UTF8String;
+    len = [_address length];
+    const char *addr = (const char *)_address.UTF8String;
     
     odd = len % 2;
     
@@ -375,17 +366,17 @@ int sccp_digit_to_nibble(unichar digit, int def)
     {
         if(_encodingScheme)
         {
-            [packet appendByte:(((npi.npi & 0x0F) << 4) | ([_encodingScheme intValue] & 0x0F))]; /* encoding BCD odd */
+            [packet appendByte:(((_npi.npi & 0x0F) << 4) | ([_encodingScheme intValue] & 0x0F))]; /* encoding BCD odd */
         }
         else
         {
             if(odd)
             {
-                [packet appendByte:(((npi.npi & 0x0F) << 4) | 0x01)]; /* encoding BCD odd */
+                [packet appendByte:(((_npi.npi & 0x0F) << 4) | 0x01)]; /* encoding BCD odd */
             }
             else
             {
-                [packet appendByte:(((npi.npi & 0x0F) << 4) | 0x02)]; /* encoding BCD even */
+                [packet appendByte:(((_npi.npi & 0x0F) << 4) | 0x02)]; /* encoding BCD even */
             }
         }
     }
@@ -395,17 +386,17 @@ int sccp_digit_to_nibble(unichar digit, int def)
     {
         if((odd==1) & !np_pres)
         {
-            [packet appendByte:((nai.nai & 0x7F) | 0x80)];
+            [packet appendByte:((_nai.nai & 0x7F) | 0x80)];
         }
         else
         {
-            [packet appendByte:(nai.nai & 0x7F)];
+            [packet appendByte:(_nai.nai & 0x7F)];
         }
     }
 
-    if(nai.nai == SCCP_NAI_ALPHANUMERIC)
+    if(_nai.nai == SCCP_NAI_ALPHANUMERIC)
     {
-        NSData *addressData = [address unhexedData];
+        NSData *addressData = [_address unhexedData];
         [packet appendData:addressData];
     }
     else
@@ -474,44 +465,44 @@ int sccp_digit_to_nibble(unichar digit, int def)
     [self setAiFromInt:aibyte];
 
     /* first in order is pointcode if present */
-    if(ai.pointCodeIndicator)	/* pointcode present */
+    if(_ai.pointCodeIndicator)	/* pointcode present */
     {
         int pc1 = bytes[p++];
         int pc2 = bytes[p++];
         int pc0 = pc1 + ((pc2 & 0x3F )<<8);
-        pc =[[UMMTP3PointCode alloc]initWithPc:pc0 variant:UMMTP3Variant_ITU];
+        _pc =[[UMMTP3PointCode alloc]initWithPc:pc0 variant:UMMTP3Variant_ITU];
     }
     else
     {
-        pc = NULL;
+        _pc = NULL;
     }
 
-    if(ai.subSystemIndicator)	/* ssn present */
+    if(_ai.subSystemIndicator)	/* ssn present */
     {
-        ssn = [[SccpSubSystemNumber alloc]initWithInt:bytes[p++]];
+        _ssn = [[SccpSubSystemNumber alloc]initWithInt:bytes[p++]];
     }
     else
     {
-        ssn = NULL;
+        _ssn = NULL;
     }
 
-    if(ai.nationalReservedBit)
+    if(_ai.nationalReservedBit)
     {
         /* this is now ANSI stuff */
-        switch(ai.globalTitleIndicator)
+        switch(_ai.globalTitleIndicator)
         {
             case 0:	/* no GTT present */
                 break;
             case 1: /* GTT includes translation type , numbering plan & encoding, digits */
-                tt = [[SccpTranslationTableNumber alloc]initWithInt:bytes[p++]];
+                _tt = [[SccpTranslationTableNumber alloc]initWithInt:bytes[p++]];
                 x = bytes[p++];
-                npi = [[SccpNumberPlanIndicator alloc]initWithInt:((x & 0xF0) > 4)];
+                _npi = [[SccpNumberPlanIndicator alloc]initWithInt:((x & 0xF0) > 4)];
                 int encoding = (x & 0x0F);
                 odd = (encoding & 0x01);
 #pragma unused(odd)
                 return;
             case 2: /* GT include tt only */
-                tt = [[SccpTranslationTableNumber alloc]initWithInt:bytes[p++]];
+                _tt = [[SccpTranslationTableNumber alloc]initWithInt:bytes[p++]];
                 /* the number encoding is national specific */
                 /* so we simply get the digits as usual and read including filler F's */
                 odd = 0;
@@ -520,7 +511,7 @@ int sccp_digit_to_nibble(unichar digit, int def)
     }
     else
     {
-        switch(ai.globalTitleIndicator)
+        switch(_ai.globalTitleIndicator)
         {
             case 0:	/* no GTT present */
                 break;
@@ -532,10 +523,10 @@ int sccp_digit_to_nibble(unichar digit, int def)
                 /* 4 = international number 		*/
                 x = bytes[p++];
                 odd = (x & 0x80);
-                nai = [[SccpNatureOfAddressIndicator alloc]initWithInt:( bytes[p++] & 0x7F)];
+                _nai = [[SccpNatureOfAddressIndicator alloc]initWithInt:( bytes[p++] & 0x7F)];
                 return;
             case 2: /* GT include tt only */
-                tt = [[SccpTranslationTableNumber alloc]initWithInt:bytes[p++]];
+                _tt = [[SccpTranslationTableNumber alloc]initWithInt:bytes[p++]];
 
                 /* the number encoding is national specific */
                 /* so we simply get the digits as usual and read including filler F's */
@@ -543,18 +534,18 @@ int sccp_digit_to_nibble(unichar digit, int def)
                 break;
 
             case 3: /* GT include tt npi and encoding */
-                tt = [[SccpTranslationTableNumber alloc]initWithInt:bytes[p++]];
+                _tt = [[SccpTranslationTableNumber alloc]initWithInt:bytes[p++]];
                 x = bytes[p++];
-                npi = [[SccpNumberPlanIndicator alloc]initWithInt:((x & 0xF0) >> 4)];
+                _npi = [[SccpNumberPlanIndicator alloc]initWithInt:((x & 0xF0) >> 4)];
                 odd = ((x & 0x0F) == 1);
                 break;
 
             case 4: /* GT include tt npi encoding and nai(ton) */
-                tt = [[SccpTranslationTableNumber alloc]initWithInt:bytes[p++]];
+                _tt = [[SccpTranslationTableNumber alloc]initWithInt:bytes[p++]];
                 x = bytes[p++];
-                npi = [[SccpNumberPlanIndicator alloc]initWithInt:((x & 0xF0) >> 4)];
+                _npi = [[SccpNumberPlanIndicator alloc]initWithInt:((x & 0xF0) >> 4)];
                 odd = ((x & 0x0F) == 1);
-                nai = [[SccpNatureOfAddressIndicator alloc]initWithInt:( bytes[p++] & 0x7F)];
+                _nai = [[SccpNatureOfAddressIndicator alloc]initWithInt:( bytes[p++] & 0x7F)];
                 break;
         }
     }
@@ -582,7 +573,7 @@ int sccp_digit_to_nibble(unichar digit, int def)
     {
         addr[--k] = '\0';
     }
-    address = [NSString stringWithUTF8String:(const char *)&addr[0]];
+    _address = [NSString stringWithUTF8String:(const char *)&addr[0]];
 }
 
 - (void)decodeAnsi:(NSData *)pdu
@@ -612,48 +603,48 @@ int sccp_digit_to_nibble(unichar digit, int def)
     [self setAiFromInt:bytes[p++]];
     
     /* first in order is pointcode if present */
-    if(ai.pointCodeIndicator)	/* pointcode present */
+    if(_ai.pointCodeIndicator)	/* pointcode present */
     {
         int pc1 = bytes[p++];
         int pc2 = bytes[p++];
         int pc3 = bytes[p++];
         int pc0 = pc1 | (pc2<<8) | (pc3 << 16);
-        pc =[[UMMTP3PointCode alloc]initWithPc:pc0 variant:UMMTP3Variant_ANSI];
+        _pc =[[UMMTP3PointCode alloc]initWithPc:pc0 variant:UMMTP3Variant_ANSI];
     }
     else
     {
-        pc = NULL;
+        _pc = NULL;
     }
     
-    if(ai.subSystemIndicator)	/* pointcode present */
+    if(_ai.subSystemIndicator)	/* pointcode present */
     {
-        ssn = [[SccpSubSystemNumber alloc]initWithInt:bytes[p++]];
+        _ssn = [[SccpSubSystemNumber alloc]initWithInt:bytes[p++]];
     }
     else
     {
-        ssn = NULL;
+        _ssn = NULL;
     }
     
-    if(ai.nationalReservedBit != YES)
+    if(_ai.nationalReservedBit != YES)
     {
         NSLog(@"huh. decodeANSI returns non national reserved bit being set?!?");
     }
 
     /* this is now ANSI stuff */
-    switch(ai.globalTitleIndicator)
+    switch(_ai.globalTitleIndicator)
     {
         case 0:	/* no GTT present */
             break;
         case 1: /* GTT includes translation type , numbering plan & encoding, digits */
-            tt = [[SccpTranslationTableNumber alloc]initWithInt:bytes[p++]];
+            _tt = [[SccpTranslationTableNumber alloc]initWithInt:bytes[p++]];
             x = bytes[p++];
-            npi = [[SccpNumberPlanIndicator alloc]initWithInt:((x & 0xF0) > 4)];
+            _npi = [[SccpNumberPlanIndicator alloc]initWithInt:((x & 0xF0) > 4)];
             int encoding = (x & 0x0F);
             odd = (encoding & 0x01);
             _encodingScheme = @(encoding);
             return;
         case 2: /* GT include tt only */
-            tt = [[SccpTranslationTableNumber alloc]initWithInt:bytes[p++]];
+            _tt = [[SccpTranslationTableNumber alloc]initWithInt:bytes[p++]];
             /* the number encoding is national specific */
             /* so we simply get the digits as usual and read including filler F's */
             odd = 0;
@@ -685,7 +676,7 @@ int sccp_digit_to_nibble(unichar digit, int def)
     {
         addr[--k] = '\0';
     }
-    address = [NSString stringWithUTF8String:(const char *)&addr[0]];
+    _address = [NSString stringWithUTF8String:(const char *)&addr[0]];
 }
 
 - (SccpAddress *)initWithHumanReadableString:(NSString *)msisdn variant:(UMMTP3Variant)mvar
@@ -711,10 +702,10 @@ int sccp_digit_to_nibble(unichar digit, int def)
 
         if([msisdn isEqualToString:@"any"])
         {
-            nai.nai = SCCP_NAI_INTERNATIONAL;
-            npi.npi = SCCP_NPI_ISDN_E164;
-            ai.globalTitleIndicator = SCCP_GTI_ITU_NAI_TT_NPI_ENCODING;
-            address = @"any";
+            _nai.nai = SCCP_NAI_INTERNATIONAL;
+            _npi.npi = SCCP_NPI_ISDN_E164;
+            _ai.globalTitleIndicator = SCCP_GTI_ITU_NAI_TT_NPI_ENCODING;
+            _address = @"any";
         }
         else
         {
@@ -725,91 +716,91 @@ int sccp_digit_to_nibble(unichar digit, int def)
                 char c1 = str[0];
                 if(c1 == '+')
                 {
-                    nai.nai = SCCP_NAI_INTERNATIONAL;
-                    npi.npi = SCCP_NPI_ISDN_E164;
+                    _nai.nai = SCCP_NAI_INTERNATIONAL;
+                    _npi.npi = SCCP_NPI_ISDN_E164;
                     if(svar==SCCP_VARIANT_ANSI)
                     {
-                        ai.globalTitleIndicator = SCCP_GTI_ITU_TT_ONLY;
+                        _ai.globalTitleIndicator = SCCP_GTI_ITU_TT_ONLY;
                     }
                     else
                     {
-                        ai.globalTitleIndicator = SCCP_GTI_ITU_NAI_TT_NPI_ENCODING;
+                        _ai.globalTitleIndicator = SCCP_GTI_ITU_NAI_TT_NPI_ENCODING;
                     }
-                    address = [msisdn substringFromIndex:1];
+                    _address = [msisdn substringFromIndex:1];
                 }
                 else if(len > 2)
                 {
                     char c2 = str[1];
                     if((c1 == '0') && (c2 == '0'))
                     {
-                        nai.nai = SCCP_NAI_INTERNATIONAL;
-                        npi.npi = SCCP_NPI_ISDN_E164;
+                        _nai.nai = SCCP_NAI_INTERNATIONAL;
+                        _npi.npi = SCCP_NPI_ISDN_E164;
                         if(svar==SCCP_VARIANT_ANSI)
                         {
-                            ai.globalTitleIndicator = SCCP_GTI_ITU_TT_ONLY;
+                            _ai.globalTitleIndicator = SCCP_GTI_ITU_TT_ONLY;
                         }
                         else
                         {
-                            ai.globalTitleIndicator = SCCP_GTI_ITU_NAI_TT_NPI_ENCODING;
+                            _ai.globalTitleIndicator = SCCP_GTI_ITU_NAI_TT_NPI_ENCODING;
                         }
-                        address = [msisdn substringFromIndex:2];
+                        _address = [msisdn substringFromIndex:2];
                     }
                     else if(c1 == '0')
                     {
-                        nai.nai = SCCP_NAI_INTERNATIONAL;
-                        npi.npi = SCCP_NPI_ISDN_E164;
+                        _nai.nai = SCCP_NAI_INTERNATIONAL;
+                        _npi.npi = SCCP_NPI_ISDN_E164;
                         if(svar==SCCP_VARIANT_ANSI)
                         {
-                            ai.globalTitleIndicator = SCCP_GTI_ITU_TT_ONLY;
+                            _ai.globalTitleIndicator = SCCP_GTI_ITU_TT_ONLY;
                         }
                         else
                         {
-                            ai.globalTitleIndicator = SCCP_GTI_ITU_NAI_TT_NPI_ENCODING;
+                            _ai.globalTitleIndicator = SCCP_GTI_ITU_NAI_TT_NPI_ENCODING;
                         }
-                        address = [msisdn substringFromIndex:1];
+                        _address = [msisdn substringFromIndex:1];
                     }
 
                     else if(is_all_digits(str,0,len))
                     {
-                        nai.nai = SCCP_NAI_UNKNOWN;
-                        npi.npi = SCCP_NPI_ISDN_E164;
+                        _nai.nai = SCCP_NAI_UNKNOWN;
+                        _npi.npi = SCCP_NPI_ISDN_E164;
                         if(svar==SCCP_VARIANT_ANSI)
                         {
-                            ai.globalTitleIndicator = SCCP_GTI_ITU_TT_ONLY;
+                            _ai.globalTitleIndicator = SCCP_GTI_ITU_TT_ONLY;
                         }
                         else
                         {
-                            ai.globalTitleIndicator = SCCP_GTI_ITU_NAI_TT_NPI_ENCODING;
+                            _ai.globalTitleIndicator = SCCP_GTI_ITU_NAI_TT_NPI_ENCODING;
                         }
-                        address = msisdn;
+                        _address = msisdn;
                     }
                     else if([msisdn hasPrefix:@"imsi:"])
                     {
                         if(svar==SCCP_VARIANT_ANSI)
                         {
-                            ai.globalTitleIndicator = SCCP_GTI_ITU_TT_ONLY;
+                            _ai.globalTitleIndicator = SCCP_GTI_ITU_TT_ONLY;
                         }
                         else
                         {
-                            ai.globalTitleIndicator = SCCP_GTI_ITU_NAI_TT_NPI_ENCODING;
+                            _ai.globalTitleIndicator = SCCP_GTI_ITU_NAI_TT_NPI_ENCODING;
                         }
-                        npi.npi = SCCP_NPI_LAND_MOBILE_E212;
-                        nai.nai= SCCP_NAI_INTERNATIONAL;
-                        address = [msisdn substringFromIndex:5];
+                        _npi.npi = SCCP_NPI_LAND_MOBILE_E212;
+                        _nai.nai= SCCP_NAI_INTERNATIONAL;
+                        _address = [msisdn substringFromIndex:5];
                     }
                     else if([msisdn hasPrefix:@"mgt:"])
                     {
                         if(svar==SCCP_VARIANT_ANSI)
                         {
-                            ai.globalTitleIndicator = SCCP_GTI_ITU_TT_ONLY;
+                            _ai.globalTitleIndicator = SCCP_GTI_ITU_TT_ONLY;
                         }
                         else
                         {
-                            ai.globalTitleIndicator = SCCP_GTI_ITU_NAI_TT_NPI_ENCODING;
+                            _ai.globalTitleIndicator = SCCP_GTI_ITU_NAI_TT_NPI_ENCODING;
                         }
-                        npi.npi = SCCP_NPI_ISDN_MOBILE_E214;
-                        nai.nai= SCCP_NAI_INTERNATIONAL;
-                        address = [msisdn substringFromIndex:4];
+                        _npi.npi = SCCP_NPI_ISDN_MOBILE_E214;
+                        _nai.nai= SCCP_NAI_INTERNATIONAL;
+                        _address = [msisdn substringFromIndex:4];
                     }
                     else if([msisdn hasPrefix:@"pc:"]) /* pointcode only */
                     {
@@ -827,7 +818,7 @@ int sccp_digit_to_nibble(unichar digit, int def)
                             pc:6283:0:1:173518158
                           */
 
-                        address = NULL;
+                        _address = NULL;
                         NSString *pcString = NULL;
                         msisdn = [msisdn substringFromIndex:3];
                         NSArray *components = [msisdn componentsSeparatedByString:@":"];
@@ -836,13 +827,13 @@ int sccp_digit_to_nibble(unichar digit, int def)
                             /* syntax 1 pointcode */
                             if(svar == SCCP_VARIANT_ANSI)
                             {
-                                ai.globalTitleIndicator = SCCP_GTI_ANSI_TT_ONLY;
+                                _ai.globalTitleIndicator = SCCP_GTI_ANSI_TT_ONLY;
                             }
                             else
                             {
-                                ai.globalTitleIndicator = SCCP_GTI_ITU_TT_ONLY;
+                                _ai.globalTitleIndicator = SCCP_GTI_ITU_TT_ONLY;
                             }
-                            pc = [[UMMTP3PointCode alloc]initWithString:components[0] variant: mvar];
+                            _pc = [[UMMTP3PointCode alloc]initWithString:components[0] variant: mvar];
                         }
                         else if([components count]==2)
                         {
@@ -850,40 +841,40 @@ int sccp_digit_to_nibble(unichar digit, int def)
                             pcString = components[0];
                             if(svar == SCCP_VARIANT_ANSI)
                             {
-                                ai.globalTitleIndicator = SCCP_GTI_ANSI_TT_NP_ENCODING;
+                                _ai.globalTitleIndicator = SCCP_GTI_ANSI_TT_NP_ENCODING;
                             }
                             else
                             {
-                                ai.globalTitleIndicator = SCCP_GTI_ITU_NAI_TT_NPI_ENCODING;
-                                pc = [[UMMTP3PointCode alloc]initWithString:pcString variant: mvar];
+                                _ai.globalTitleIndicator = SCCP_GTI_ITU_NAI_TT_NPI_ENCODING;
+                                _pc = [[UMMTP3PointCode alloc]initWithString:pcString variant: mvar];
                             }
-                            address = components[1];
-                            if([address hasPrefix:@"+"])
+                            _address = components[1];
+                            if([_address hasPrefix:@"+"])
                             {
-                                address = [address substringFromIndex:1];
+                                _address = [_address substringFromIndex:1];
                                 if(svar == SCCP_VARIANT_ANSI)
                                 {
-                                    ai.globalTitleIndicator = SCCP_GTI_ANSI_TT_NP_ENCODING;
+                                    _ai.globalTitleIndicator = SCCP_GTI_ANSI_TT_NP_ENCODING;
                                 }
                                 else
                                 {
-                                    ai.globalTitleIndicator = SCCP_GTI_ITU_NAI_TT_NPI_ENCODING;
+                                    _ai.globalTitleIndicator = SCCP_GTI_ITU_NAI_TT_NPI_ENCODING;
                                 }
-                                nai.nai = SCCP_NAI_INTERNATIONAL;
-                                npi.npi = SCCP_NPI_ISDN_E164;
+                                _nai.nai = SCCP_NAI_INTERNATIONAL;
+                                _npi.npi = SCCP_NPI_ISDN_E164;
                             }
                             else
                             {
                                 if(svar == SCCP_VARIANT_ANSI)
                                 {
-                                    ai.globalTitleIndicator = SCCP_GTI_ANSI_TT_NP_ENCODING;
+                                    _ai.globalTitleIndicator = SCCP_GTI_ANSI_TT_NP_ENCODING;
                                 }
                                 else
                                 {
-                                    ai.globalTitleIndicator = SCCP_GTI_ITU_NAI_TT_NPI_ENCODING;
+                                    _ai.globalTitleIndicator = SCCP_GTI_ITU_NAI_TT_NPI_ENCODING;
                                 }
-                                nai.nai = SCCP_NAI_UNKNOWN;
-                                npi.npi = SCCP_NPI_ISDN_E164;
+                                _nai.nai = SCCP_NAI_UNKNOWN;
+                                _npi.npi = SCCP_NPI_ISDN_E164;
                             }
                         }
                         else if([components count]==3)
@@ -891,33 +882,33 @@ int sccp_digit_to_nibble(unichar digit, int def)
                             /* syntax 3: pointcode,nai,npi,address */
                             if(svar == SCCP_VARIANT_ANSI)
                             {
-                                ai.globalTitleIndicator = SCCP_GTI_ANSI_TT_NP_ENCODING;
+                                _ai.globalTitleIndicator = SCCP_GTI_ANSI_TT_NP_ENCODING;
                             }
                             else
                             {
-                                ai.globalTitleIndicator = SCCP_GTI_ITU_TT_NP_ENCODING;
+                                _ai.globalTitleIndicator = SCCP_GTI_ITU_TT_NP_ENCODING;
                             }
-                            pc = [[UMMTP3PointCode alloc]initWithString:components[0] variant: mvar];
-                            npi.npi = [components[1] intValue];
-                            address = components[2];
+                            _pc = [[UMMTP3PointCode alloc]initWithString:components[0] variant: mvar];
+                            _npi.npi = [components[1] intValue];
+                            _address = components[2];
                         }
                         else if([components count]>3)
                         {
                             if(svar == SCCP_VARIANT_ANSI)
                             {
-                                ai.globalTitleIndicator = SCCP_GTI_ANSI_TT_NP_ENCODING;
+                                _ai.globalTitleIndicator = SCCP_GTI_ANSI_TT_NP_ENCODING;
                             }
                             else
                             {
-                                ai.globalTitleIndicator = SCCP_GTI_ITU_NAI_TT_NPI_ENCODING;
+                                _ai.globalTitleIndicator = SCCP_GTI_ITU_NAI_TT_NPI_ENCODING;
                             }
-                                pc = [[UMMTP3PointCode alloc]initWithString:components[0] variant: mvar];
+                                _pc = [[UMMTP3PointCode alloc]initWithString:components[0] variant: mvar];
                             /* syntax 3: pointcode,nai,npi,address */
-                            nai.nai = [components[1] intValue];
-                            npi.npi = [components[2] intValue];
-                            address = components[3];
+                            _nai.nai = [components[1] intValue];
+                            _npi.npi = [components[2] intValue];
+                            _address = components[3];
                         }
-                        ai.pointCodeIndicator=YES;
+                        _ai.pointCodeIndicator=YES;
                     }
 
                     else if(    (c1 =='{')  /* ITU Encoding of the style { ai : nai : npi : digits : pointcode } */
@@ -928,11 +919,11 @@ int sccp_digit_to_nibble(unichar digit, int def)
 
                         if(ansi)
                         {
-                            ai.globalTitleIndicator = SCCP_GTI_ANSI_TT_ONLY;
+                            _ai.globalTitleIndicator = SCCP_GTI_ANSI_TT_ONLY;
                         }
                         else
                         {
-                            ai.globalTitleIndicator = SCCP_GTI_ITU_NAI_TT_NPI_ENCODING;
+                            _ai.globalTitleIndicator = SCCP_GTI_ITU_NAI_TT_NPI_ENCODING;
                         }
                         NSArray *components = [msisdn componentsSeparatedByString:@":"];
                         if(components.count > 0)
@@ -940,7 +931,7 @@ int sccp_digit_to_nibble(unichar digit, int def)
                             NSString *s = components[0];
                             if(s.length > 0)
                             {
-                                ai.globalTitleIndicator  = [s intValue];
+                                _ai.globalTitleIndicator  = [s intValue];
                             }
                         }
                         if(components.count > 1)
@@ -948,7 +939,7 @@ int sccp_digit_to_nibble(unichar digit, int def)
                             NSString *s = components[1];
                             if(s.length > 0)
                             {
-                                nai.nai = [s intValue];
+                                _nai.nai = [s intValue];
                             }
                         }
                         if(components.count > 2)
@@ -956,12 +947,12 @@ int sccp_digit_to_nibble(unichar digit, int def)
                             NSString *s = components[2];
                             if(s.length > 0)
                             {
-                                npi.npi = [s intValue];
+                                _npi.npi = [s intValue];
                                 if(ansi)
                                 {
-                                    if(ai.globalTitleIndicator == SCCP_GTI_ANSI_TT_ONLY)
+                                    if(_ai.globalTitleIndicator == SCCP_GTI_ANSI_TT_ONLY)
                                     {
-                                        ai.globalTitleIndicator = SCCP_GTI_ANSI_TT_NP_ENCODING;
+                                        _ai.globalTitleIndicator = SCCP_GTI_ANSI_TT_NP_ENCODING;
                                     }
                                 }
                             }
@@ -971,11 +962,11 @@ int sccp_digit_to_nibble(unichar digit, int def)
                             NSString *s = components[3];
                             if(s.length > 0)
                             {
-                                address = s;
+                                _address = s;
                             }
                             else
                             {
-                                address = @"";
+                                _address = @"";
                             }
                         }
                         if(components.count > 4)
@@ -985,28 +976,28 @@ int sccp_digit_to_nibble(unichar digit, int def)
                             {
                                 if(ansi)
                                 {
-                                    pc = [[UMMTP3PointCode alloc]initWithString:s variant: UMMTP3Variant_ANSI];
+                                    _pc = [[UMMTP3PointCode alloc]initWithString:s variant: UMMTP3Variant_ANSI];
                                 }
                                 else
                                 {
-                                    pc = [[UMMTP3PointCode alloc]initWithString:s variant: UMMTP3Variant_ITU];
+                                    _pc = [[UMMTP3PointCode alloc]initWithString:s variant: UMMTP3Variant_ITU];
                                 }
-                                ai.pointCodeIndicator = YES;
+                                _ai.pointCodeIndicator = YES;
                             }
                         }
                     }
                     else if(c1 =='$') /* direct pointcode entry */
                     {
                         const char *pcstr = &msisdn.UTF8String[1];
-                        pc = [[UMMTP3PointCode alloc] initWithString:@(pcstr) variant:mvar];
-                        ai.globalTitleIndicator = SCCP_GTI_NONE;
-                        ai.pointCodeIndicator = YES;
+                        _pc = [[UMMTP3PointCode alloc] initWithString:@(pcstr) variant:mvar];
+                        _ai.globalTitleIndicator = SCCP_GTI_NONE;
+                        _ai.pointCodeIndicator = YES;
                     }
                     else
                     {
-                        nai.nai= SCCP_NAI_ALPHANUMERIC;
-                        npi.npi = SCCP_NPI_UNKNOWN;
-                        address = msisdn;
+                        _nai.nai= SCCP_NAI_ALPHANUMERIC;
+                        _npi.npi = SCCP_NPI_UNKNOWN;
+                        _address = msisdn;
                     }
                 }
             }
@@ -1020,13 +1011,13 @@ int sccp_digit_to_nibble(unichar digit, int def)
     SccpAddress *g = [[SccpAddress allocWithZone:zone]init];
     if(g)
     {
-        g->ai       = [ai copy];
-        g->nai      = [nai copy];
-        g->npi      = [npi copy];
-        g->ssn      = [ssn copy];
-        g->tt       = [tt copy];
-        g->address  = [address copy];
-        g->pc       = [pc copy];
+        g->_ai       = [_ai copy];
+        g->_nai      = [_nai copy];
+        g->_npi      = [_npi copy];
+        g->_ssn      = [_ssn copy];
+        g->_tt       = [_tt copy];
+        g->_address  = [_address copy];
+        g->_pc       = [_pc copy];
     }
     return g;
 }
@@ -1040,39 +1031,39 @@ int sccp_digit_to_nibble(unichar digit, int def)
 - (UMSynchronizedSortedDictionary *)objectValue
 {
     UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
-    if(ai)
+    if(_ai)
     {
-        dict[@"ai"] = [ai dictionaryValue];
+        dict[@"ai"] = [_ai dictionaryValue];
     }
-    if(pc)
+    if(_pc)
     {
-        dict[@"point-code"] = [pc stringValue];
+        dict[@"point-code"] = [_pc stringValue];
     }
-    if(ssn)
+    if(_ssn)
     {
-        dict[@"ssn"] = @(ssn.ssn);
+        dict[@"ssn"] = @(_ssn.ssn);
     }
-    if(tt)
+    if(_tt)
     {
-        dict[@"tt"] = @(tt.tt);
+        dict[@"tt"] = @(_tt.tt);
     }
 
-    if(nai)
+    if(_nai)
     {
-        dict[@"nai"] = @(nai.nai);
+        dict[@"nai"] = @(_nai.nai);
     }
 /*    if(ton)
     {
         dict[@"ton"] = @(ton.ton);
     }
 */
-    if(npi)
+    if(_npi)
     {
-        dict[@"npi"] = @(npi.npi);
+        dict[@"npi"] = @(_npi.npi);
     }
-    if(address)
+    if(_address)
     {
-        dict[@"address"] = address;
+        dict[@"address"] = _address;
     }
     return dict;
 }
@@ -1081,36 +1072,36 @@ int sccp_digit_to_nibble(unichar digit, int def)
 {
 
     NSMutableString *s = [[NSMutableString alloc]init];
-    [s appendFormat:@"ai=%d",ai.addressIndicator];
-    if(ai.globalTitleIndicator==2)
+    [s appendFormat:@"ai=%d",_ai.addressIndicator];
+    if(_ai.globalTitleIndicator==2)
     {
-        [s appendFormat:@" gti=2 tt=%d",tt.tt];
+        [s appendFormat:@" gti=2 tt=%d",_tt.tt];
     }
-    else if(ai.globalTitleIndicator==4)
+    else if(_ai.globalTitleIndicator==4)
     {
-        [s appendFormat:@" gti=4 tt=%d np=%d nai=%d",(int)tt.tt,(int)npi.npi,(int)nai.nai];
+        [s appendFormat:@" gti=4 tt=%d np=%d nai=%d",(int)_tt.tt,(int)_npi.npi,(int)_nai.nai];
     }
     else
     {
-        [s appendFormat:@" gti=%d",(int)ai.globalTitleIndicator];
+        [s appendFormat:@" gti=%d",(int)_ai.globalTitleIndicator];
     }
-    if(ai.pointCodeIndicator)
+    if(_ai.pointCodeIndicator)
     {
-        if(pc)
+        if(_pc)
         {
-            [s appendFormat:@" pc=%@",pc.stringValue];
+            [s appendFormat:@" pc=%@",_pc.stringValue];
         }
     }
-    if(ai.subSystemIndicator)
+    if(_ai.subSystemIndicator)
     {
-        if(ssn.ssn)
+        if(_ssn.ssn)
         {
-            [s appendFormat:@" ssn=%d",ssn.ssn];
+            [s appendFormat:@" ssn=%d",_ssn.ssn];
         }
     }
-    if(address)
+    if(_address)
     {
-        [s appendFormat:@" gta=%@",address];
+        [s appendFormat:@" gta=%@",_address];
     }
     return s;
 }
@@ -1118,26 +1109,26 @@ int sccp_digit_to_nibble(unichar digit, int def)
 
 - (NSString *)stringValueE164
 {
-    switch(npi.npi)
+    switch(_npi.npi)
     {
         case SCCP_NPI_ISDN_E164:
         {
-            if(nai.nai == SCCP_NAI_INTERNATIONAL)
+            if(_nai.nai == SCCP_NAI_INTERNATIONAL)
             {
-                return [NSString stringWithFormat:@"+%@",address];
+                return [NSString stringWithFormat:@"+%@",_address];
             }
-            return address;
+            return _address;
             break;
         }
 
         case SCCP_NPI_LAND_MOBILE_E212:
         {
-            return [NSString stringWithFormat:@"imsi:%@",address];
+            return [NSString stringWithFormat:@"imsi:%@",_address];
             break;
         }
         case SCCP_NPI_ISDN_MOBILE_E214:
         {
-            return [NSString stringWithFormat:@"mgt:%@",address];
+            return [NSString stringWithFormat:@"mgt:%@",_address];
             break;
         }
     }
@@ -1148,38 +1139,38 @@ int sccp_digit_to_nibble(unichar digit, int def)
 {
     NSMutableString *s = [[NSMutableString alloc]init];
     
-    if(ai)
+    if(_ai)
     {
-        [s appendFormat:@"   ai=%@\r\n",[ai debugDescription]];
+        [s appendFormat:@"   ai=%@\r\n",[_ai debugDescription]];
     }
-    if(nai)
+    if(_nai)
     {
-        [s appendFormat:@"   nai=%d\r\n",(int)nai.nai];
+        [s appendFormat:@"   nai=%d\r\n",(int)_nai.nai];
     }
 /*    if(ton)
     {
         [s appendFormat:@"   ton=%d\r\n",(int)ton.ton];
     }
 */
-    if(npi)
+    if(_npi)
     {
-        [s appendFormat:@"   npi=%d\r\n",(int)npi.npi];
+        [s appendFormat:@"   npi=%d\r\n",(int)_npi.npi];
     }
-    if(ssn)
+    if(_ssn)
     {
-        [s appendFormat:@"   ssn=%d\r\n",(int)ssn.ssn];
+        [s appendFormat:@"   ssn=%d\r\n",(int)_ssn.ssn];
     }
-    if(tt)
+    if(_tt)
     {
-        [s appendFormat:@"   tt=%d\r\n",(int)tt.tt];
+        [s appendFormat:@"   tt=%d\r\n",(int)_tt.tt];
     }
-    if(address)
+    if(_address)
     {
-        [s appendFormat:@"   address=%@\r\n",address];
+        [s appendFormat:@"   address=%@\r\n",_address];
     }
-    if(pc)
+    if(_pc)
     {
-        [s appendFormat:@"   point-code=%@\r\n",pc.stringValue];
+        [s appendFormat:@"   point-code=%@\r\n",_pc.stringValue];
     }
     return s;
 }
@@ -1188,13 +1179,13 @@ int sccp_digit_to_nibble(unichar digit, int def)
 {
     SccpAddress * a = [[SccpAddress alloc]init];
 
-    [a setAiFromInt: ai.addressIndicator];
-    [a setNaiFromInt: nai.nai];
-    [a setNpiFromInt: npi.npi];
-    [a setSsnFromInt: ssn.ssn];
-    [a setTtFromInt: tt.tt];
+    [a setAiFromInt: _ai.addressIndicator];
+    [a setNaiFromInt: _nai.nai];
+    [a setNpiFromInt: _npi.npi];
+    [a setSsnFromInt: _ssn.ssn];
+    [a setTtFromInt: _tt.tt];
     [a setAddress:@"any"];
-    [a setPc:pc];
+    [a setPc:_pc];
     return a;
 }
 
@@ -1210,13 +1201,13 @@ int sccp_digit_to_nibble(unichar digit, int def)
 {
     SccpAddress * a = [[SccpAddress alloc]init];
 
-    [a setAiFromInt: ai.addressIndicator];
-    [a setNaiFromInt: nai.nai];
-    [a setNpiFromInt: npi.npi];
+    [a setAiFromInt: _ai.addressIndicator];
+    [a setNaiFromInt: _nai.nai];
+    [a setNpiFromInt: _npi.npi];
     [a setSsnFromInt: 0];
-    [a setTtFromInt: tt.tt];
-    [a setAddress:address];
-    [a setPc:pc];
+    [a setTtFromInt: _tt.tt];
+    [a setAddress:_address];
+    [a setPc:_pc];
     return a;
 }
 
@@ -1225,11 +1216,11 @@ int sccp_digit_to_nibble(unichar digit, int def)
 {
     NSString *s = @"UNK";
 
-    if(nai.nai == SCCP_NAI_INTERNATIONAL)
+    if(_nai.nai == SCCP_NAI_INTERNATIONAL)
     {
-        if((npi.npi == SCCP_NPI_ISDN_E164) || (npi.npi == SCCP_NPI_ISDN_MOBILE_E214))
+        if((_npi.npi == SCCP_NPI_ISDN_E164) || (_npi.npi == SCCP_NPI_ISDN_MOBILE_E214))
         {
-            NSString *s2 = SccpCountryFromMSISDN(address);
+            NSString *s2 = SccpCountryFromMSISDN(_address);
             if(s2.length > 0)
             {
                 s = s2;
@@ -1243,37 +1234,76 @@ int sccp_digit_to_nibble(unichar digit, int def)
 - (id)proxyForJson
 {
     NSMutableDictionary *dict = [[NSMutableDictionary alloc]init];
-    if(ai)
+    if(_ai)
     {
-        dict[@"ai"] = ai.dictionaryValue;
+        dict[@"ai"] = _ai.dictionaryValue;
     }
-    if(nai)
+    if(_nai)
     {
-        dict[@"nai"] = @(nai.nai);
+        dict[@"nai"] = @(_nai.nai);
     }
-    if(npi)
+    if(_npi)
     {
-        dict[@"npi"] = @(npi.npi);
+        dict[@"npi"] = @(_npi.npi);
     }
-    if(ssn)
+    if(_ssn)
     {
-        dict[@"ssn"] = @(ssn.ssn);
+        dict[@"ssn"] = @(_ssn.ssn);
     }
-    if(tt)
+    if(_tt)
     {
-        dict[@"tt"] = @(tt.tt);
+        dict[@"tt"] = @(_tt.tt);
     }
-    if(address)
+    if(_address)
     {
-        dict[@"address"] = address;
+        dict[@"address"] = _address;
     }
-    if(pc)
+    if(_pc)
     {
-        dict[@"pc"] = pc.description;
+        dict[@"pc"] = _pc.description;
     }
     return dict;
 }
 
+
+
+- (void)processBeforeEncode
+{
+#define ASN1_INT(list,var,val,tag) \
+if(var) \
+{   \
+    UMASN1Integer *o = [[UMASN1Integer alloc]initWithValue:val]; \
+    o.asn1_tag.tagClass = UMASN1Class_ContextSpecific; \
+    o.asn1_tag.tagNumber = tag;\
+    [list addObject:o]; \
+}
+
+#define ASN1_STRING(list,var,val,tag) \
+if(var) \
+{   \
+    UMASN1UTF8String *o = [[UMASN1UTF8String alloc]initWithString:val]; \
+    o.asn1_tag.tagClass = UMASN1Class_ContextSpecific; \
+    o.asn1_tag.tagNumber = tag;\
+    [list addObject:o]; \
+}
+    [super processBeforeEncode];
+    _asn1_list = [[NSMutableArray alloc]init];
+    ASN1_INT(_asn1_list,_ai,_ai.addressIndicator,SccpAddress_TAG_AI);
+    ASN1_INT(_asn1_list,_nai,_nai.nai,SccpAddress_TAG_NAI);
+    ASN1_INT(_asn1_list,_npi,_npi.npi,SccpAddress_TAG_NPI);
+    ASN1_INT(_asn1_list,_ssn,_ssn.ssn,SccpAddress_TAG_SSN);
+    ASN1_INT(_asn1_list,_tt,_tt.tt,SccpAddress_TAG_TT);
+    ASN1_STRING(_asn1_list,_address,_address,SccpAddress_TAG_ADDRESS);
+    ASN1_INT(_asn1_list,_pc,_pc.pc,SccpAddress_TAG_PC);
+    ASN1_INT(_asn1_list,_encodingScheme,_encodingScheme.intValue,SccpAddress_TAG_ENCODING);
+}
+#undef ASN1_STRING
+#undef ASN1_INT
+
+- (SccpAddress *)processAfterDecode:(context)
+{
+    
+}
 @end
 
 static int is_all_digits(const char *text, int startpos, unsigned long len)
@@ -1283,19 +1313,19 @@ static int is_all_digits(const char *text, int startpos, unsigned long len)
     {
         switch(text[i])
         {
-            case	'0':
-            case	'1':
-            case	'2':
-            case	'3':
-            case	'4':
-            case	'5':
-            case	'6':
-            case	'7':
-            case	'8':
-            case	'9':
-            case	'*':
-            case	'#':
-            case	'a':
+            case    '0':
+            case    '1':
+            case    '2':
+            case    '3':
+            case    '4':
+            case    '5':
+            case    '6':
+            case    '7':
+            case    '8':
+            case    '9':
+            case    '*':
+            case    '#':
+            case    'a':
                 break;
             default:
                 return 0;

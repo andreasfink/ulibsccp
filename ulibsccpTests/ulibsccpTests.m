@@ -38,15 +38,15 @@
     SccpAddress *addr = [[SccpAddress alloc]initWithData:d];
 
 
-    if(addr.ai.nationalReservedBit)
+    if(addr._ai.nationalReservedBit)
     {
         XCTFail(@"National bit should not be set \"%s\"", __PRETTY_FUNCTION__);
     }
-    if(addr.ai.routingIndicatorBit)
+    if(addr._ai.routingIndicatorBit)
     {
         XCTFail(@"routingIndicatorBit is wrong \"%s\"", __PRETTY_FUNCTION__);
     }
-    if(addr.ai.globalTitleIndicator !=4)
+    if(addr._ai.globalTitleIndicator !=4)
     {
         XCTFail(@"gti is not 4 \"%s\"", __PRETTY_FUNCTION__);
     }
@@ -54,7 +54,7 @@
     {
         XCTFail(@"ssn is not 1 \"%s\"", __PRETTY_FUNCTION__);
     }
-    if(addr.ai.pointCodeIndicator)
+    if(addr._ai.pointCodeIndicator)
     {
         XCTFail(@"ai.pc is not 1 \"%s\"", __PRETTY_FUNCTION__);
     }
