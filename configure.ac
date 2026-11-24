@@ -123,7 +123,7 @@ case "$host" in
     INSTALL_NAME_TOOL="install_name_tool"
     SHARED_FLAGS="-dynamiclib -Wl,-dylib"
     LDFLAGS="$LDFLAGS ${ARCH}"
-    LIBTOOL="libtool -static -o"
+    LIBTOOL="/usr/bin/libtool -static -o"
     ;;
   *-linux-*)
 	CFLAGS="${CFLAGS} -fobjc-arc -fPIC -DLINUX -D_XOPEN_SOURCE=700 -D_DEFAULT_SOURCE"
