@@ -2600,11 +2600,7 @@ case "$host" in
     INSTALL_NAME_TOOL="install_name_tool"
     SHARED_FLAGS="-dynamiclib -Wl,-dylib"
     LDFLAGS="$LDFLAGS ${ARCH}"
-<<<<<<< HEAD
-    LIBTOOL="/usr/bin/libtool -static -o"
-=======
     LIBTOOL="/usr/bin/libtool -static -no_warning_for_no_symbols -o"
->>>>>>> 95c1e2e46a033204d6d16d8b8d7e2849c4ca23cd
     ;;
   *-linux-*)
 	CFLAGS="${CFLAGS} -fobjc-arc -fPIC -DLINUX -D_XOPEN_SOURCE=700 -D_DEFAULT_SOURCE"
