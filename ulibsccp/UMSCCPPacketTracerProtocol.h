@@ -5,8 +5,11 @@
 //  Created by Andreas Fink on 24.11.2026.
 //
 
-#ifndef UMSCCPPacketTracerProtocol_h
-#define UMSCCPPacketTracerProtocol_h
 
+#import <ulib/ulib.h>
 
-#endif /* UMSCCPPacketTracerProtocol_h */
+@class UMSCCP_Packet;
+
+@protocol UMSCCPPacketTracerProtocol<NSObject>
+- (void)tracePacket:(UMSCCP_Packet *)p;
+@end

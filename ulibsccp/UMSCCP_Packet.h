@@ -23,7 +23,8 @@
 
 typedef enum UMSCCP_Packet_Tag_enum
 {
-    UMSCCP_Packet_Tag_instance                                      = 1,
+    UMSCCP_Packet_Tag_instance                                      = 0,
+    UMSCCP_Packet_Tag_sccp_instance                                 = 1,
     UMSCCP_Packet_Tag_layer                                         = 2,
     UMSCCP_Packet_Tag_created                                       = 3,
     UMSCCP_Packet_Tag_afterFilter1                                  = 4,
@@ -114,13 +115,12 @@ typedef enum UMSCCP_Packet_Tag_enum
     UMSCCP_Packet_Tag_incomingLinksetInboundName                    = 91,
  //   UMSCCP_Packet_Tag_outgoingLocalTransactionId                    = 92,
  //   UMSCCP_Packet_Tag_outgoingRemoteTransactionId                   = 93,
-
-
 } UMSCCP_Packet_Tag_enum;
 
 @interface UMSCCP_Packet : UMASN1Sequence
 {
     NSString                    *_instance;
+    NSString                    *_sccpInstance;
     UMLayerSCCP                 *_sccp;
     NSDate                      *_created;
     NSDate                      *_afterFilter1;
@@ -236,10 +236,10 @@ typedef enum UMSCCP_Packet_Tag_enum
     NSString                    *_routingTestApplicationContext;
     NSNumber                    *_routingTestMapOperation;
     NSMutableString             *_routingTestDebug;
-
 }
 
 @property(readwrite,strong,atomic)  NSString                    *instance;
+@property(readwrite,strong,atomic)  NSString                    *sccpInstance;
 @property(readwrite,strong,atomic)  UMLayerSCCP                 *sccp;
 @property(readwrite,strong,atomic)  NSDate                      *created;
 @property(readwrite,strong,atomic)  NSDate                      *reassembled;

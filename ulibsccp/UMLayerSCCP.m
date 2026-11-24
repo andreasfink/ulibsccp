@@ -5506,10 +5506,32 @@ calling_translation:(SccpNumberTranslation *)cda_number_translation_in
     [s appendString:@"<body>\n"];
 }
 
+
++ (UMWebObjectHTML *)webObjectIndexForm
+{
+    UMWebObjectHTML *html = [UMWebObject webDocumentWithTitle:@"SCCP"
+                                                          css:@"/css/style.css"
+                                                      charset:@"UTF-8"];
+    UMWebObjectH2 *h2 = [[UMWebObjectH2 alloc]initWithString:@"SCCP Debug Main Menu"];
+    UMWebObjectA *a0 = [[UMWebObjectA alloc]initWithURL:@"/" text:@"main menu"];
+    UMWebObjectUL *ul = [[UMWebObjectUL alloc]init];
+    UMWebObjectLI *li = [[UMWebObjectLI alloc]init];
+    UMWebObjectA *a1 = [[UMWebObjectA alloc]initWithURL:@"/sccp/list-e164" text:@"list-e164"];
+    UMWebObjectA *a2 = [[UMWebObjectA alloc]initWithURL:@"/sccp/list-e212" text:@"list-e212"];
+    UMWebObjectA *a3 = [[UMWebObjectA alloc]initWithURL:@"/sccp/list-e214" text:@"list-e214"];
+    [li addChild:a1];
+    [li addChild:a2];
+    [li addChild:a3];
+    [ul addChild:li];
+    [html.body addChild:h2];
+    [html.body addChild:a0];
+    [html.body addChild:ul];
+    return html;
+}
+
 - (NSString *)webIndexForm
 {
     static NSMutableString *s = NULL;
-
     if(s)
     {
         return s;

@@ -228,8 +228,8 @@ int sccp_digit_to_nibble(unichar digit, int def)
 /* this seems not a standard case.
     else if((variant==SCCP_VARIANT_ANSI) && (np_pres))
     {
-        ai.nationalReservedBit=YES;
-        ai.globalTitleIndicator = SCCP_GTI_ANSI_TT_NP_ENCODING;
+        _ai.nationalReservedBit=YES;
+        _ai.globalTitleIndicator = SCCP_GTI_ANSI_TT_NP_ENCODING;
     }
  */
     else if(variant==SCCP_VARIANT_ANSI)
@@ -802,20 +802,20 @@ int sccp_digit_to_nibble(unichar digit, int def)
                         _nai.nai= SCCP_NAI_INTERNATIONAL;
                         _address = [msisdn substringFromIndex:4];
                     }
-                    else if([msisdn hasPrefix:@"pc:"]) /* pointcode only */
+                    else if([msisdn hasPrefix:@"_pc:"]) /* pointcode only */
                     {
                         /*
-                            SYNTAX1:  pc:{pointcode}
-                            SYNTAX2:  pc:{pointcode}:{address}
-                            SYNTAX2b:  pc:{pointcode}:{+address}
-                            SYNTAX3:  pc:{pointcode}:{npi}:{address}
-                            SYNTAX4:  pc:{pointcode}:{nai}:{npi}:{address}
+                            SYNTAX1:  _pc:{pointcode}
+                            SYNTAX2:  _pc:{pointcode}:{address}
+                            SYNTAX2b:  _pc:{pointcode}:{+address}
+                            SYNTAX3:  _pc:{pointcode}:{npi}:{address}
+                            SYNTAX4:  _pc:{pointcode}:{nai}:{npi}:{address}
 
                         examples:
-                            pc:1-99-1
-                            pc:6283
-                            pc:1-99-1:+173518158
-                            pc:6283:0:1:173518158
+                            _pc:1-99-1
+                            _pc:6283
+                            _pc:1-99-1:+173518158
+                            _pc:6283:0:1:173518158
                           */
 
                         _address = NULL;
@@ -902,7 +902,7 @@ int sccp_digit_to_nibble(unichar digit, int def)
                             {
                                 _ai.globalTitleIndicator = SCCP_GTI_ITU_NAI_TT_NPI_ENCODING;
                             }
-                                _pc = [[UMMTP3PointCode alloc]initWithString:components[0] variant: mvar];
+                            _pc = [[UMMTP3PointCode alloc]initWithString:components[0] variant: mvar];
                             /* syntax 3: pointcode,nai,npi,address */
                             _nai.nai = [components[1] intValue];
                             _npi.npi = [components[2] intValue];
@@ -1054,7 +1054,7 @@ int sccp_digit_to_nibble(unichar digit, int def)
     }
 /*    if(ton)
     {
-        dict[@"ton"] = @(ton.ton);
+        dict[@"ton"] = @(_ton.ton);
     }
 */
     if(_npi)
@@ -1149,7 +1149,7 @@ int sccp_digit_to_nibble(unichar digit, int def)
     }
 /*    if(ton)
     {
-        [s appendFormat:@"   ton=%d\r\n",(int)ton.ton];
+        [s appendFormat:@"   ton=%d\r\n",(int)_ton.ton];
     }
 */
     if(_npi)
@@ -1300,10 +1300,64 @@ if(var) \
 #undef ASN1_STRING
 #undef ASN1_INT
 
-- (SccpAddress *)processAfterDecode:(context)
+
+- (SccpAddress *) processAfterDecodeWithContext:(id)context
 {
-    
+    int p=0;
+
+    UMASN1Object *o = [self getObjectAtPosition:p++];
+    while(o)
+    {
+        if((o) && (o.asn1_tag.tagNumber == SccpAddress_TAG_AI) && (o.asn1_tag.tagClass == UMASN1Class_ContextSpecific))
+        {
+            UMASN1Integer *i = [[UMASN1Integer alloc]initWithASN1Object:o context:context];
+            _ai = [[SccpAddressIndicator alloc]initWithInt:(int)i.value];
+        }
+        else if((o) && (o.asn1_tag.tagNumber == SccpAddress_TAG_AI) && (o.asn1_tag.tagClass == UMASN1Class_ContextSpecific))
+        {
+            UMASN1Integer *i = [[UMASN1Integer alloc]initWithASN1Object:o context:context];
+            _nai.nai = (int)i.value;
+        }
+        else if((o) && (o.asn1_tag.tagNumber == SccpAddress_TAG_NPI) && (o.asn1_tag.tagClass == UMASN1Class_ContextSpecific))
+        {
+            UMASN1Integer *i = [[UMASN1Integer alloc]initWithASN1Object:o context:context];
+            _npi.npi = (int)i.value;
+        }
+        else if((o) && (o.asn1_tag.tagNumber == SccpAddress_TAG_SSN) && (o.asn1_tag.tagClass == UMASN1Class_ContextSpecific))
+        {
+            UMASN1Integer *i = [[UMASN1Integer alloc]initWithASN1Object:o context:context];
+            _ssn.ssn = (int)i.value;
+        }
+        else if((o) && (o.asn1_tag.tagNumber == SccpAddress_TAG_TT) && (o.asn1_tag.tagClass == UMASN1Class_ContextSpecific))
+        {
+            UMASN1Integer *i = [[UMASN1Integer alloc]initWithASN1Object:o context:context];
+            _tt.tt = (int)i.value;
+        }
+        else if((o) && (o.asn1_tag.tagNumber == SccpAddress_TAG_ADDRESS) && (o.asn1_tag.tagClass == UMASN1Class_ContextSpecific))
+        {
+            UMASN1UTF8String *u = [[UMASN1UTF8String alloc]initWithASN1Object:o context:context];
+            _address = u.stringValue;
+        }
+        else if((o) && (o.asn1_tag.tagNumber == SccpAddress_TAG_PC) && (o.asn1_tag.tagClass == UMASN1Class_ContextSpecific))
+        {
+            UMASN1Integer *i = [[UMASN1Integer alloc]initWithASN1Object:o context:context];
+            _pc.pc = (int)i.value;
+        }
+        else if((o) && (o.asn1_tag.tagNumber == SccpAddress_TAG_ENCODING) && (o.asn1_tag.tagClass == UMASN1Class_ContextSpecific))
+        {
+            UMASN1Integer *i = [[UMASN1Integer alloc]initWithASN1Object:o context:context];
+            _encodingScheme = i.number;
+        }
+        o = [self getObjectAtPosition:p++];
+    }
+    return self;
 }
+
+- (NSString *) objectName
+{
+    return @"SccpAddress";
+}
+
 @end
 
 static int is_all_digits(const char *text, int startpos, unsigned long len)
@@ -1333,4 +1387,3 @@ static int is_all_digits(const char *text, int startpos, unsigned long len)
     }
     return 1;
 }
-

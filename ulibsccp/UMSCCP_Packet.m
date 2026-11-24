@@ -130,6 +130,7 @@ typedef enum UMTCAP_Command
 {
     UMSCCP_Packet *cpy = [[UMSCCP_Packet alloc]init];
     cpy.instance = _instance;
+    cpy.sccpInstance = _sccpInstance;
     cpy.sccp = _sccp;
     cpy.created = _created;
     cpy.afterFilter1 = _afterFilter1;
@@ -875,4 +876,116 @@ typedef enum UMTCAP_Command
             break;
     }
 }
+
+#if 0
+#define ADD(list,o,tagType,classType) \
+    if(o) \
+    { \
+        o.asn1_tag.tagNumber = tagType; \
+        o.asn1_tag.tagClass = classType; \
+        [list addObject:o]; \
+    }
+- (void) processBeforeEncode
+{
+    [super processBeforeEncode];
+    [_asn1_tag setTagIsConstructed];
+    _asn1_list = [[NSMutableArray alloc]init];
+    ADD(_asn1_list,_instance,UMMTP3LogPacket_INSTANCE,UMASN1Class_ContextSpecific);
+    ADD(_asn1_list,_mtp3_instance,UMMTP3LogPacket_MTP3_INSTANCE,UMASN1Class_ContextSpecific);
+    ADD(_asn1_list,_linkset,UMMTP3LogPacket_LINKSET,UMASN1Class_ContextSpecific);
+    ADD(_asn1_list,_direction,UMMTP3LogPacket_DIRECTION,UMASN1Class_ContextSpecific);
+    ADD(_asn1_list,_opc,UMMTP3LogPacket_OPC,UMASN1Class_ContextSpecific);
+    ADD(_asn1_list,_dpc,UMMTP3LogPacket_DPC,UMASN1Class_ContextSpecific);
+    ADD(_asn1_list,_ni,UMMTP3LogPacket_NI,UMASN1Class_ContextSpecific);
+    ADD(_asn1_list,_si,UMMTP3LogPacket_SI,UMASN1Class_ContextSpecific);
+    ADD(_asn1_list,_slc,UMMTP3LogPacket_SLC,UMASN1Class_ContextSpecific);
+    ADD(_asn1_list,_sls,UMMTP3LogPacket_SLS,UMASN1Class_ContextSpecific);
+    ADD(_asn1_list,_priority,UMMTP3LogPacket_PRIORITY,UMASN1Class_ContextSpecific);
+    ADD(_asn1_list,_packetType,UMMTP3LogPacket_PACKET_TYPE,UMASN1Class_ContextSpecific);
+    ADD(_asn1_list,_affectedPointcodes,UMMTP3LogPacket_AFFECTED_POINTCODES,UMASN1Class_ContextSpecific);
+    ADD(_asn1_list,_payload,UMMTP3LogPacket_PAYLOAD,UMASN1Class_ContextSpecific);
+    ADD(_asn1_list,_raw,UMMTP3LogPacket_RAW,UMASN1Class_ContextSpecific);
+    ADD(_asn1_list,_networkAppearance,UMMTP3LogPacket_NETWORK_APPEARANCE,UMASN1Class_ContextSpecific);
+    ADD(_asn1_list,_correlationId,UMMTP3LogPacket_CORRELATION_ID,UMASN1Class_ContextSpecific);
+    ADD(_asn1_list,_routingContext,UMMTP3LogPacket_ROUTING_CONTEXT,UMASN1Class_ContextSpecific);
+    ADD(_asn1_list,_error,UMMTP3LogPacket_ERROR,UMASN1Class_ContextSpecific);
+}
+#undef ADD
+
+
+- (UMSCCP_Packet *) processAfterDecodeWithContext:(id)context
+{
+    int p=0;
+#define     ASSIGN(o,tag,class,type,var)    \
+    if((o) && (o.asn1_tag.tagNumber == tag) && (o.asn1_tag.tagClass == class))  \
+    {   \
+        var = [[type alloc]initWithASN1Object:o context:context];   \
+    }
+    
+    UMASN1Object *o = [self getObjectAtPosition:p++];
+    while(o)
+    {
+        ASSIGN(o,UMMTP3LogPacket_INSTANCE,UMASN1Class_ContextSpecific,UMASN1UTF8String,_instance);
+        ASSIGN(o,UMMTP3LogPacket_MTP3_INSTANCE,UMASN1Class_ContextSpecific,UMASN1UTF8String,_mtp3_instance);
+        ASSIGN(o,UMMTP3LogPacket_LINKSET,UMASN1Class_ContextSpecific,UMASN1UTF8String,_linkset);
+        ASSIGN(o,UMMTP3LogPacket_DIRECTION,UMASN1Class_ContextSpecific,UMASN1UTF8String,_direction);
+        ASSIGN(o,UMMTP3LogPacket_OPC,UMASN1Class_ContextSpecific,UMASN1Integer,_opc);
+        ASSIGN(o,UMMTP3LogPacket_DPC,UMASN1Class_ContextSpecific,UMASN1Integer,_dpc);
+        ASSIGN(o,UMMTP3LogPacket_NI,UMASN1Class_ContextSpecific,UMASN1Integer,_ni);
+        ASSIGN(o,UMMTP3LogPacket_SI,UMASN1Class_ContextSpecific,UMASN1Integer,_si);
+        ASSIGN(o,UMMTP3LogPacket_SLC,UMASN1Class_ContextSpecific,UMASN1Integer,_slc);
+        ASSIGN(o,UMMTP3LogPacket_SLS,UMASN1Class_ContextSpecific,UMASN1Integer,_sls);
+        ASSIGN(o,UMMTP3LogPacket_PRIORITY,UMASN1Class_ContextSpecific,UMASN1Integer,_priority);
+        ASSIGN(o,UMMTP3LogPacket_PACKET_TYPE,UMASN1Class_ContextSpecific,UMASN1UTF8String,_packetType);
+        ASSIGN(o,UMMTP3LogPacket_AFFECTED_POINTCODES,UMASN1Class_ContextSpecific,UMASN1UTF8String,_affectedPointcodes);
+        ASSIGN(o,UMMTP3LogPacket_PAYLOAD,UMASN1Class_ContextSpecific,UMASN1OctetString,_payload);
+        ASSIGN(o,UMMTP3LogPacket_RAW,UMASN1Class_ContextSpecific,UMASN1OctetString,_raw);
+        ASSIGN(o,UMMTP3LogPacket_NETWORK_APPEARANCE,UMASN1Class_ContextSpecific,UMASN1Integer,_networkAppearance);
+        ASSIGN(o,UMMTP3LogPacket_CORRELATION_ID,UMASN1Class_ContextSpecific,UMASN1Integer,_correlationId);
+        ASSIGN(o,UMMTP3LogPacket_ROUTING_CONTEXT,UMASN1Class_ContextSpecific,UMASN1OctetString,_routingContext);
+        ASSIGN(o,UMMTP3LogPacket_ERROR,UMASN1Class_ContextSpecific,UMASN1UTF8String,_error);
+        o = [self getObjectAtPosition:p++];
+    }
+    return self;
+#undef  ASSIGN
+}
+
+- (NSString *) objectName
+{
+    return @"UMSCCP_Packet";
+}
+
+- (id) objectValue
+{
+    UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
+#define     SET(dict,var,name)    \
+    if(var) \
+    {   \
+        dict[name] = var.objectValue;   \
+    }
+    SET(dict,_instance,@"instance");
+    SET(dict,_mtp3_instance,@"mtp3-instance");
+    SET(dict,_linkset,@"linkset");
+    SET(dict,_direction,@"direction");
+    SET(dict,_opc,@"opc");
+    SET(dict,_dpc,@"dpc");
+    SET(dict,_ni,@"ni");
+    SET(dict,_si,@"si");
+    SET(dict,_slc,@"slc");
+    SET(dict,_sls,@"sls");
+    SET(dict,_priority,@"priority");
+    SET(dict,_packetType,@"packet-type");
+    SET(dict,_affectedPointcodes,@"affected-pointcodes");
+    SET(dict,_payload,@"payload");
+    SET(dict,_raw,@"raw");
+    SET(dict,_networkAppearance,@"network-appearance");
+    SET(dict,_correlationId,@"correlation-id");
+    SET(dict,_routingContext,@"routing-context");
+    SET(dict,_error,@"error");
+    return dict;
+#undef SET
+}
+
+#endif
 @end
+
