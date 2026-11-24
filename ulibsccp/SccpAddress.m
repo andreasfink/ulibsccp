@@ -1297,7 +1297,7 @@ static int is_all_digits(const char *text, int startpos, unsigned long len)
 
 - (void) processBeforeEncode
 {
-    [super processBeforeEncode];
+    [super processBeforeEncode]; 
     [_asn1_tag setTagIsConstructed];
     _asn1_list = [[NSMutableArray alloc]init];
 
