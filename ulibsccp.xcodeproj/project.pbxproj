@@ -226,6 +226,7 @@
 		A68494E11CB320BF00211137 /* UMSCCP_mtpResume.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_mtpResume.m; sourceTree = "<group>"; };
 		A68494E41CB320C800211137 /* UMSCCP_mtpStatus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_mtpStatus.h; sourceTree = "<group>"; };
 		A68494E51CB320C800211137 /* UMSCCP_mtpStatus.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_mtpStatus.m; sourceTree = "<group>"; };
+		A69F0FE930B6048C007B3A9C /* Makefile.in */ = {isa = PBXFileReference; lastKnownFileType = text; path = Makefile.in; sourceTree = "<group>"; };
 		A6AA23C324853F09008D5A57 /* UMSCCP_StatisticDbRecord.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_StatisticDbRecord.h; sourceTree = "<group>"; };
 		A6AA23C424853F09008D5A57 /* UMSCCP_StatisticDbRecord.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_StatisticDbRecord.m; sourceTree = "<group>"; };
 		A6AA23CF24854F80008D5A57 /* UMSCCP_StatisticDb.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_StatisticDb.h; sourceTree = "<group>"; };
@@ -285,6 +286,10 @@
 			isa = PBXGroup;
 			children = (
 				A6C6052B207698DE002DEBDD /* doc */,
+<<<<<<< HEAD
+=======
+				A69F0FE930B6048C007B3A9C /* Makefile.in */,
+>>>>>>> c5ddf77959e071c6dd56c9cc1817cdb5b1e23b96
 				A6F694021B4E84120090FC94 /* ulibsccp.pc.in */,
 				A6F694031B4E84120090FC94 /* VERSION */,
 				A604D13A19B999BC0090FC94 /* ulibsccp */,
