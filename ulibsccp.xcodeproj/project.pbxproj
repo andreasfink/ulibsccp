@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A60422B330B5F0510028F87D /* UMSCCPPacketTracerProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = A60422B230B5F0510028F87D /* UMSCCPPacketTracerProtocol.h */; };
+		A60422B330B5F0510028F87D /* UMSCCPPacketTracerProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = A60422B230B5F0510028F87D /* UMSCCPPacketTracerProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A604D14E19B999BD0090FC94 /* ulibsccp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A604D13119B999BC0090FC94 /* ulibsccp.framework */; };
 		A604D15419B999BD0090FC94 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A604D15219B999BD0090FC94 /* InfoPlist.strings */; };
 		A604D15619B999BD0090FC94 /* ulibsccpTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A604D15519B999BD0090FC94 /* ulibsccpTests.m */; };
@@ -146,7 +146,7 @@
 		A61571ED1CD4891200211137 /* UMSCCP_Segment.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_Segment.m; sourceTree = "<group>"; };
 		A61571F41CD4AADF00211137 /* UMSCCP_ReceivedSegments.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_ReceivedSegments.h; sourceTree = "<group>"; };
 		A61571F51CD4AADF00211137 /* UMSCCP_ReceivedSegments.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_ReceivedSegments.m; sourceTree = "<group>"; };
-		A63259592BC7DA82001AA485 /* UMSCCP_Packet.asn.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_Packet.asn.h; sourceTree = "<group>"; };
+		A63259592BC7DA82001AA485 /* UMSCCP_Packet.asn */ = {isa = PBXFileReference; lastKnownFileType = text; path = UMSCCP_Packet.asn; sourceTree = "<group>"; };
 		A643D7463063B3CE00F9798D /* SccpAddress.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SccpAddress.h; sourceTree = "<group>"; };
 		A643D7473063B3CE00F9798D /* SccpAddress.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SccpAddress.m; sourceTree = "<group>"; };
 		A643D7483063B3CE00F9798D /* SccpAddressIndicator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SccpAddressIndicator.h; sourceTree = "<group>"; };
@@ -254,8 +254,6 @@
 		A6EE01B422E834FB003BA2A5 /* UMSCCP_FilterProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_FilterProtocol.h; sourceTree = "<group>"; };
 		A6F442B01CB2595000C2B472 /* UMSCCPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCPConnection.h; sourceTree = "<group>"; };
 		A6F442B11CB2595000C2B472 /* UMSCCPConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCPConnection.m; sourceTree = "<group>"; };
-		A6F694001B4E84120090FC94 /* Makefile.linux.in */ = {isa = PBXFileReference; lastKnownFileType = text; path = Makefile.linux.in; sourceTree = "<group>"; };
-		A6F694011B4E84120090FC94 /* Makefile.osx.in */ = {isa = PBXFileReference; lastKnownFileType = text; path = Makefile.osx.in; sourceTree = "<group>"; };
 		A6F694021B4E84120090FC94 /* ulibsccp.pc.in */ = {isa = PBXFileReference; lastKnownFileType = text; path = ulibsccp.pc.in; sourceTree = "<group>"; };
 		A6F694031B4E84120090FC94 /* VERSION */ = {isa = PBXFileReference; lastKnownFileType = text; path = VERSION; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -287,8 +285,6 @@
 			isa = PBXGroup;
 			children = (
 				A6C6052B207698DE002DEBDD /* doc */,
-				A6F694001B4E84120090FC94 /* Makefile.linux.in */,
-				A6F694011B4E84120090FC94 /* Makefile.osx.in */,
 				A6F694021B4E84120090FC94 /* ulibsccp.pc.in */,
 				A6F694031B4E84120090FC94 /* VERSION */,
 				A604D13A19B999BC0090FC94 /* ulibsccp */,
@@ -387,7 +383,7 @@
 				A6827E181E380FC900F3048B /* UMLayerSCCPApplicationContextProtocol.h */,
 				A6DDA3EE1CAD269000754B9E /* UMSCCP_UserProtocol.h */,
 				A6ADC5E31CAE8C7600211137 /* UMSCCP_Defs.h */,
-				A63259592BC7DA82001AA485 /* UMSCCP_Packet.asn.h */,
+				A63259592BC7DA82001AA485 /* UMSCCP_Packet.asn */,
 				A658E20321E8863700825E4A /* UMSCCP_Packet.h */,
 				A658E20421E8863700825E4A /* UMSCCP_Packet.m */,
 				A6BA06CA2E2620F200EEB4E7 /* UMSCCP_RoutingState.h */,

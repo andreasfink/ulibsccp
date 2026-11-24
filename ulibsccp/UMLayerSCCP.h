@@ -25,6 +25,7 @@
 #import <ulibsccp/UMSCCP_TracefileProtocol.h>
 #import <ulibsccp/UMSCCP_StatisticDb.h>
 #import <ulibsccp/UMSCCP_RoutingState.h>
+#import <ulibsccp/UMSCCPPacketTracerProtocol.h>
 
 @class UMSCCP_Statistics;
 @class UMSCCP_PrometheusData;
@@ -117,6 +118,8 @@ typedef enum UMSccpScreening_result
     UMLogLevel                              _tcapSharingTraceLevel;
     UMMutex                                 *_slsLock;
     int                                     _last_sls;
+    id<UMSCCPPacketTracerProtocol>          _packetTracer;
+    
 }
 
 @property(readwrite,assign) SccpVariant sccpVariant;
@@ -154,6 +157,7 @@ typedef enum UMSccpScreening_result
 @property(readwrite,strong,atomic) UMSynchronizedArray         *traceDroppedDestinations;
 @property(readwrite,strong,atomic) UMSynchronizedArray         *traceUnroutableDestinations;
 @property(readwrite,strong,atomic) UMSynchronizedArray         *traceProblematicDestinations;
+@property(readwrite,strong,atomic) id<UMSCCPPacketTracerProtocol>   packetTracer;
 
 - (void)increaseThroughputCounter:(UMSCCP_StatisticSection)section;
 

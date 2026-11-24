@@ -19,15 +19,28 @@
 #import <ulibsccp/SccpTranslationTableNumber.h>
 #import <ulibsccp/SccpVariant.h>
 
-@interface SccpAddress : UMObject
+typedef enum SccpAddress_TAG_enum
 {
-    SccpAddressIndicator            *ai;
-    SccpNatureOfAddressIndicator    *nai;
-    SccpNumberPlanIndicator         *npi;
-    SccpSubSystemNumber             *ssn;
-    SccpTranslationTableNumber      *tt;
-    NSString                        *address;
-    UMMTP3PointCode                 *pc;
+    SccpAddress_TAG_ai  = 1,
+    SccpAddress_TAG_nai = 2,
+    SccpAddress_TAG_npi = 3,
+    SccpAddress_TAG_ssn = 4,
+    SccpAddress_TAG_tt = 5,
+    SccpAddress_TAG_address = 6,
+    SccpAddress_TAG_pc = 7,
+    SccpAddress_TAG_encoding = 8,
+} SccpAddress_TAG_enum;
+
+
+@interface SccpAddress : UMASN1Sequence
+{
+    SccpAddressIndicator            *_ai;
+    SccpNatureOfAddressIndicator    *_nai;
+    SccpNumberPlanIndicator         *_npi;
+    SccpSubSystemNumber             *_ssn;
+    SccpTranslationTableNumber      *_tt;
+    NSString                        *_address;
+    UMMTP3PointCode                 *_pc;
     NSNumber                        *_encodingScheme;
 }
 
