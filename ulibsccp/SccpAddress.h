@@ -21,14 +21,14 @@
 
 typedef enum SccpAddress_TAG_enum
 {
-    SccpAddress_TAG_AI  = 1,
-    SccpAddress_TAG_NAI = 2,
-    SccpAddress_TAG_NPI = 3,
-    SccpAddress_TAG_SSN = 4,
-    SccpAddress_TAG_TT = 5,
-    SccpAddress_TAG_ADDRESS = 6,
-    SccpAddress_TAG_PC = 7,
-    SccpAddress_TAG_ENCODING = 8,
+    SccpAddress_TAG_AI          = 1,
+    SccpAddress_TAG_NAI         = 2,
+    SccpAddress_TAG_NPI         = 3,
+    SccpAddress_TAG_SSN         = 4,
+    SccpAddress_TAG_TT          = 5,
+    SccpAddress_TAG_ADDRESS     = 6,
+    SccpAddress_TAG_PC          = 7,
+    SccpAddress_TAG_ENCODING    = 8,
 } SccpAddress_TAG_enum;
 
 @interface SccpAddress : UMASN1Sequence
