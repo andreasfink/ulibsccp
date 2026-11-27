@@ -1304,7 +1304,6 @@ if(var) \
 - (SccpAddress *) processAfterDecodeWithContext:(id)context
 {
     int p=0;
-
     UMASN1Object *o = [self getObjectAtPosition:p++];
     while(o)
     {
@@ -1313,7 +1312,7 @@ if(var) \
             UMASN1Integer *i = [[UMASN1Integer alloc]initWithASN1Object:o context:context];
             _ai = [[SccpAddressIndicator alloc]initWithInt:(int)i.value];
         }
-        else if((o) && (o.asn1_tag.tagNumber == SccpAddress_TAG_AI) && (o.asn1_tag.tagClass == UMASN1Class_ContextSpecific))
+        else if((o) && (o.asn1_tag.tagNumber == SccpAddress_TAG_NAI) && (o.asn1_tag.tagClass == UMASN1Class_ContextSpecific))
         {
             UMASN1Integer *i = [[UMASN1Integer alloc]initWithASN1Object:o context:context];
             _nai.nai = (int)i.value;

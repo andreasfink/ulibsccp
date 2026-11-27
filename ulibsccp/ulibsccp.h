@@ -28,3 +28,6 @@
 #import <ulibsccp/UMSCCP_mtpStatus.h>
 #import <ulibsccp/UMSCCP_TcapSharingInstance.h>
 #import <ulibsccp/UMSCCP_TcapSharingSession.h>
+#import <ulibsccp/UMSCCP_TracePacket.h>
+#import <ulibsccp/UMSCCP_RpcMessageTypes.h>
+

@@ -87,6 +87,9 @@
 		A664143127BD09AE00DFF263 /* UMSCCP_ReceivedSegment.m in Sources */ = {isa = PBXBuildFile; fileRef = A664142F27BD09AE00DFF263 /* UMSCCP_ReceivedSegment.m */; };
 		A664143427BD159600DFF263 /* UMSCCP_PendingSegmentsStorage.h in Headers */ = {isa = PBXBuildFile; fileRef = A664143227BD159600DFF263 /* UMSCCP_PendingSegmentsStorage.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A664143527BD159600DFF263 /* UMSCCP_PendingSegmentsStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = A664143327BD159600DFF263 /* UMSCCP_PendingSegmentsStorage.m */; };
+		A678315730B6D35300D20BBD /* UMSCCP_Defs_m.h in Headers */ = {isa = PBXBuildFile; fileRef = A678315430B6D35300D20BBD /* UMSCCP_Defs_m.h */; };
+		A678315A30B6FA5900D20BBD /* UMSCCP_TracePacket.m in Sources */ = {isa = PBXBuildFile; fileRef = A678315930B6FA5900D20BBD /* UMSCCP_TracePacket.m */; };
+		A678315B30B6FA5900D20BBD /* UMSCCP_TracePacket.h in Headers */ = {isa = PBXBuildFile; fileRef = A678315830B6FA5900D20BBD /* UMSCCP_TracePacket.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A6827E1A1E380FC900F3048B /* UMLayerSCCPApplicationContextProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = A6827E181E380FC900F3048B /* UMLayerSCCPApplicationContextProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A68494DA1CB320AB00211137 /* UMSCCP_mtpTransfer.h in Headers */ = {isa = PBXBuildFile; fileRef = A68494D81CB320AB00211137 /* UMSCCP_mtpTransfer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A68494DB1CB320AB00211137 /* UMSCCP_mtpTransfer.m in Sources */ = {isa = PBXBuildFile; fileRef = A68494D91CB320AB00211137 /* UMSCCP_mtpTransfer.m */; };
@@ -113,6 +116,11 @@
 		A6CF1AC22185AAA600F09659 /* UMSCCP_Statistics.m in Sources */ = {isa = PBXBuildFile; fileRef = A6CF1AC02185AAA600F09659 /* UMSCCP_Statistics.m */; };
 		A6CF1AC92185B96D00F09659 /* UMSCCP_StatisticSection.h in Headers */ = {isa = PBXBuildFile; fileRef = A6CF1AC72185B96D00F09659 /* UMSCCP_StatisticSection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A6DDA3F01CAD269000754B9E /* UMSCCP_UserProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = A6DDA3EE1CAD269000754B9E /* UMSCCP_UserProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A6E322E030B96EDB000C482A /* UMRpcMessage_InsertSCCPRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = A6E322DF30B96EDB000C482A /* UMRpcMessage_InsertSCCPRequest.m */; };
+		A6E322E130B96EDB000C482A /* UMRpcMessage_InsertSCCPRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = A6E322DE30B96EDB000C482A /* UMRpcMessage_InsertSCCPRequest.h */; };
+		A6E322E430B96EE4000C482A /* UMRpcMessage_InsertSCCPResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = A6E322E330B96EE4000C482A /* UMRpcMessage_InsertSCCPResponse.m */; };
+		A6E322E530B96EE4000C482A /* UMRpcMessage_InsertSCCPResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = A6E322E230B96EE4000C482A /* UMRpcMessage_InsertSCCPResponse.h */; };
+		A6E322E730B96F59000C482A /* UMSCCP_RpcMessageTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = A6E322E630B96F59000C482A /* UMSCCP_RpcMessageTypes.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A6ED5C6D1B435A8A00854472 /* UMLayerSCCP.h in Headers */ = {isa = PBXBuildFile; fileRef = A6ED5C6B1B435A8A00854472 /* UMLayerSCCP.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A6ED5C6E1B435A8A00854472 /* UMLayerSCCP.m in Sources */ = {isa = PBXBuildFile; fileRef = A6ED5C6C1B435A8A00854472 /* UMLayerSCCP.m */; };
 		A6ED5C931B435F3600854472 /* ulibsccp.h in Headers */ = {isa = PBXBuildFile; fileRef = A604D14119B999BC0090FC94 /* ulibsccp.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -146,7 +154,7 @@
 		A61571ED1CD4891200211137 /* UMSCCP_Segment.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_Segment.m; sourceTree = "<group>"; };
 		A61571F41CD4AADF00211137 /* UMSCCP_ReceivedSegments.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_ReceivedSegments.h; sourceTree = "<group>"; };
 		A61571F51CD4AADF00211137 /* UMSCCP_ReceivedSegments.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_ReceivedSegments.m; sourceTree = "<group>"; };
-		A63259592BC7DA82001AA485 /* UMSCCP_Packet.asn */ = {isa = PBXFileReference; lastKnownFileType = text; path = UMSCCP_Packet.asn; sourceTree = "<group>"; };
+		A63259592BC7DA82001AA485 /* UMSCCP_TracePacket.asn */ = {isa = PBXFileReference; lastKnownFileType = text; path = UMSCCP_TracePacket.asn; sourceTree = "<group>"; };
 		A643D7463063B3CE00F9798D /* SccpAddress.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SccpAddress.h; sourceTree = "<group>"; };
 		A643D7473063B3CE00F9798D /* SccpAddress.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SccpAddress.m; sourceTree = "<group>"; };
 		A643D7483063B3CE00F9798D /* SccpAddressIndicator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SccpAddressIndicator.h; sourceTree = "<group>"; };
@@ -217,6 +225,9 @@
 		A664142F27BD09AE00DFF263 /* UMSCCP_ReceivedSegment.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_ReceivedSegment.m; sourceTree = "<group>"; };
 		A664143227BD159600DFF263 /* UMSCCP_PendingSegmentsStorage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_PendingSegmentsStorage.h; sourceTree = "<group>"; };
 		A664143327BD159600DFF263 /* UMSCCP_PendingSegmentsStorage.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_PendingSegmentsStorage.m; sourceTree = "<group>"; };
+		A678315430B6D35300D20BBD /* UMSCCP_Defs_m.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = UMSCCP_Defs_m.h; path = ulibsccp/UMSCCP_Defs_m.h; sourceTree = "<group>"; };
+		A678315830B6FA5900D20BBD /* UMSCCP_TracePacket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_TracePacket.h; sourceTree = "<group>"; };
+		A678315930B6FA5900D20BBD /* UMSCCP_TracePacket.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_TracePacket.m; sourceTree = "<group>"; };
 		A6827E181E380FC900F3048B /* UMLayerSCCPApplicationContextProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMLayerSCCPApplicationContextProtocol.h; sourceTree = "<group>"; };
 		A68494D81CB320AB00211137 /* UMSCCP_mtpTransfer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_mtpTransfer.h; sourceTree = "<group>"; };
 		A68494D91CB320AB00211137 /* UMSCCP_mtpTransfer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_mtpTransfer.m; sourceTree = "<group>"; };
@@ -250,6 +261,11 @@
 		A6CF1AC02185AAA600F09659 /* UMSCCP_Statistics.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UMSCCP_Statistics.m; sourceTree = "<group>"; };
 		A6CF1AC72185B96D00F09659 /* UMSCCP_StatisticSection.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_StatisticSection.h; sourceTree = "<group>"; };
 		A6DDA3EE1CAD269000754B9E /* UMSCCP_UserProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMSCCP_UserProtocol.h; sourceTree = "<group>"; };
+		A6E322DE30B96EDB000C482A /* UMRpcMessage_InsertSCCPRequest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMRpcMessage_InsertSCCPRequest.h; sourceTree = "<group>"; };
+		A6E322DF30B96EDB000C482A /* UMRpcMessage_InsertSCCPRequest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UMRpcMessage_InsertSCCPRequest.m; sourceTree = "<group>"; };
+		A6E322E230B96EE4000C482A /* UMRpcMessage_InsertSCCPResponse.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMRpcMessage_InsertSCCPResponse.h; sourceTree = "<group>"; };
+		A6E322E330B96EE4000C482A /* UMRpcMessage_InsertSCCPResponse.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UMRpcMessage_InsertSCCPResponse.m; sourceTree = "<group>"; };
+		A6E322E630B96F59000C482A /* UMSCCP_RpcMessageTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_RpcMessageTypes.h; sourceTree = "<group>"; };
 		A6ED5C6B1B435A8A00854472 /* UMLayerSCCP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMLayerSCCP.h; sourceTree = "<group>"; };
 		A6ED5C6C1B435A8A00854472 /* UMLayerSCCP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMLayerSCCP.m; sourceTree = "<group>"; };
 		A6EE01B422E834FB003BA2A5 /* UMSCCP_FilterProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UMSCCP_FilterProtocol.h; sourceTree = "<group>"; };
@@ -285,6 +301,7 @@
 		A604D12719B999BC0090FC94 = {
 			isa = PBXGroup;
 			children = (
+				A678315430B6D35300D20BBD /* UMSCCP_Defs_m.h */,
 				A6C6052B207698DE002DEBDD /* doc */,
 				A69F0FE930B6048C007B3A9C /* Makefile.in */,
 				A6F694021B4E84120090FC94 /* ulibsccp.pc.in */,
@@ -319,6 +336,7 @@
 			isa = PBXGroup;
 			children = (
 				A604D14119B999BC0090FC94 /* ulibsccp.h */,
+				A6E322E630B96F59000C482A /* UMSCCP_RpcMessageTypes.h */,
 				A643D7463063B3CE00F9798D /* SccpAddress.h */,
 				A643D7473063B3CE00F9798D /* SccpAddress.m */,
 				A643D7483063B3CE00F9798D /* SccpAddressIndicator.h */,
@@ -385,9 +403,11 @@
 				A6827E181E380FC900F3048B /* UMLayerSCCPApplicationContextProtocol.h */,
 				A6DDA3EE1CAD269000754B9E /* UMSCCP_UserProtocol.h */,
 				A6ADC5E31CAE8C7600211137 /* UMSCCP_Defs.h */,
-				A63259592BC7DA82001AA485 /* UMSCCP_Packet.asn */,
 				A658E20321E8863700825E4A /* UMSCCP_Packet.h */,
 				A658E20421E8863700825E4A /* UMSCCP_Packet.m */,
+				A63259592BC7DA82001AA485 /* UMSCCP_TracePacket.asn */,
+				A678315830B6FA5900D20BBD /* UMSCCP_TracePacket.h */,
+				A678315930B6FA5900D20BBD /* UMSCCP_TracePacket.m */,
 				A6BA06CA2E2620F200EEB4E7 /* UMSCCP_RoutingState.h */,
 				A6BA06CB2E2620F200EEB4E7 /* UMSCCP_RoutingState.m */,
 				A6ED5C6B1B435A8A00854472 /* UMLayerSCCP.h */,
@@ -424,6 +444,10 @@
 				A64995132E2F7AF7006873AC /* UMSCCP_TcapSharingSession.h */,
 				A64995142E2F7AF7006873AC /* UMSCCP_TcapSharingSession.m */,
 				A60422B230B5F0510028F87D /* UMSCCPPacketTracerProtocol.h */,
+				A6E322DE30B96EDB000C482A /* UMRpcMessage_InsertSCCPRequest.h */,
+				A6E322DF30B96EDB000C482A /* UMRpcMessage_InsertSCCPRequest.m */,
+				A6E322E230B96EE4000C482A /* UMRpcMessage_InsertSCCPResponse.h */,
+				A6E322E330B96EE4000C482A /* UMRpcMessage_InsertSCCPResponse.m */,
 			);
 			path = ulibsccp;
 			sourceTree = "<group>";
@@ -484,8 +508,11 @@
 				A6AA23D124854F80008D5A57 /* UMSCCP_StatisticDb.h in Headers */,
 				A6ED5C6D1B435A8A00854472 /* UMLayerSCCP.h in Headers */,
 				A6CF1AC12185AAA600F09659 /* UMSCCP_Statistics.h in Headers */,
+				A678315730B6D35300D20BBD /* UMSCCP_Defs_m.h in Headers */,
 				A643D7993063B3CE00F9798D /* SccpDestination.h in Headers */,
+				A6E322E730B96F59000C482A /* UMSCCP_RpcMessageTypes.h in Headers */,
 				A643D79A3063B3CE00F9798D /* SccpL3RoutingTableEntry.h in Headers */,
+				A678315B30B6FA5900D20BBD /* UMSCCP_TracePacket.h in Headers */,
 				A643D79B3063B3CE00F9798D /* SccpDestinationGroup.h in Headers */,
 				A643D79C3063B3CE00F9798D /* SccpNumberTranslationEntry.h in Headers */,
 				A643D79D3063B3CE00F9798D /* UMSyntaxGT_addressConversion.h in Headers */,
@@ -499,6 +526,7 @@
 				A643D7A63063B3CE00F9798D /* SccpAddressIndicator.h in Headers */,
 				A643D7A73063B3CE00F9798D /* SccpL3RouteStatus.h in Headers */,
 				A643D7A83063B3CE00F9798D /* SccpSubSystemNumber.h in Headers */,
+				A6E322E530B96EE4000C482A /* UMRpcMessage_InsertSCCPResponse.h in Headers */,
 				A643D7A93063B3CE00F9798D /* SccpGttSelector.h in Headers */,
 				A643D7AA3063B3CE00F9798D /* SccpDestinationEntry.h in Headers */,
 				A643D7AB3063B3CE00F9798D /* SccpVariant.h in Headers */,
@@ -527,6 +555,7 @@
 				A6BA06BD2E21348C00EEB4E7 /* UMSCCP_TcapSharingInstance.h in Headers */,
 				A64D452D2684893C00540708 /* UMSCCP_PrometheusData.h in Headers */,
 				A61571EE1CD4891200211137 /* UMSCCP_Segment.h in Headers */,
+				A6E322E130B96EDB000C482A /* UMRpcMessage_InsertSCCPRequest.h in Headers */,
 				A658E20521E8863700825E4A /* UMSCCP_Packet.h in Headers */,
 				A6CF1ABD2185A41C00F09659 /* UMSCCP_StatisticData.h in Headers */,
 				A6EE01B622E834FB003BA2A5 /* UMSCCP_FilterProtocol.h in Headers */,
@@ -583,7 +612,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 2710;
+				LastUpgradeCheck = 2720;
 				ORGANIZATIONNAME = "";
 				TargetAttributes = {
 					A604D13019B999BC0090FC94 = {
@@ -639,6 +668,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A678315A30B6FA5900D20BBD /* UMSCCP_TracePacket.m in Sources */,
 				A6F442B31CB2595000C2B472 /* UMSCCPConnection.m in Sources */,
 				A61571EF1CD4891200211137 /* UMSCCP_Segment.m in Sources */,
 				A6BA06CD2E2620F200EEB4E7 /* UMSCCP_RoutingState.m in Sources */,
@@ -673,6 +703,7 @@
 				A643D7943063B3CE00F9798D /* SccpAddressIndicator.m in Sources */,
 				A643D7953063B3CE00F9798D /* SccpGttRegistry.m in Sources */,
 				A643D7963063B3CE00F9798D /* SccpTTMap.m in Sources */,
+				A6E322E030B96EDB000C482A /* UMRpcMessage_InsertSCCPRequest.m in Sources */,
 				A643D7973063B3CE00F9798D /* SccpGttRoutingTableDigitNode.m in Sources */,
 				A643D7983063B3CE00F9798D /* UMSyntaxGT_selector.m in Sources */,
 				A6BA06BE2E21348C00EEB4E7 /* UMSCCP_TcapSharingInstance.m in Sources */,
@@ -685,6 +716,7 @@
 				A6AA23D224854F80008D5A57 /* UMSCCP_StatisticDb.m in Sources */,
 				A6CF1AC22185AAA600F09659 /* UMSCCP_Statistics.m in Sources */,
 				A6ED5C6E1B435A8A00854472 /* UMLayerSCCP.m in Sources */,
+				A6E322E430B96EE4000C482A /* UMRpcMessage_InsertSCCPResponse.m in Sources */,
 				A68494DB1CB320AB00211137 /* UMSCCP_mtpTransfer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

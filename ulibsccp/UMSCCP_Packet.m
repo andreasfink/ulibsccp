@@ -273,7 +273,7 @@ typedef enum UMTCAP_Command
     [s appendFormat:@"\t_segmented: %@\n", _segmented ? _segmented : @"NULL"];
     [s appendFormat:@"\t_afterFilter4: %@\n", _afterFilter4 ? _afterFilter4 : @"NULL"];
     [s appendFormat:@"\t_queuedForDelivery: %@\n", _queuedForDelivery ? _queuedForDelivery : @"NULL"];
-    [s appendFormat:@"\t_state: %@\n", [UMSCCP_Packet sccpStatToString:_state]];
+    [s appendFormat:@"\t_state: %@\n", [UMSCCP_Packet sccpStateToString:_state]];
     [s appendFormat:@"\t_incomingLocalUser: %@\n", _incomingLocalUser ? _incomingLocalUser.layerName : @"NULL"];
     [s appendFormat:@"\t_incomingMtp3Layer: %@\n", _incomingMtp3Layer ? _incomingMtp3Layer.layerName : @"NULL"];
     [s appendFormat:@"\t_incomingOptions: %@\n", _incomingOptions ? _incomingOptions : @"NULL"];
@@ -519,7 +519,7 @@ typedef enum UMTCAP_Command
     DICT_SET_STRING(dict2,@"queuedForDelivery",[_queuedForDelivery stringValue]);
     DICT_SET_STRING(dict,@"sccp_debug",[dict2 jsonCompactString]);
 
-    dict[@"sccp_state"] = [UMSCCP_Packet sccpStatToString:_state];
+    dict[@"sccp_state"] = [UMSCCP_Packet sccpStateToString:_state];
 
     switch(_incomingServiceClass)
     {
@@ -757,39 +757,57 @@ typedef enum UMTCAP_Command
 }
 
 
-+ (NSString *) sccpStatToString:(SCCP_State)state
++ (NSString *) sccpStateToString:(SCCP_State)state
 {
-    NSString *s;
     switch(state)
     {
         case SCCP_STATE_IDLE:
-            s = @"IDLE";
-            break;
-            
+            return @"IDLE";
         case SCCP_STATE_DATA_TRANSFER:
-            s = @"DATA_TRANSFER";
-            break;
-            
+            return @"DATA_TRANSFER";
         case SCCP_STATE_INCOMING_CONNECTION_PENDING:
-            s = @"INCOMING_CONNECTION_PENDING";
-            break;
-            
+            return @"INCOMING_CONNECTION_PENDING";
         case SCCP_STATE_PROVIDER_INITIATED_RESET_PENDING:
-            s = @"PROVIDER_INITIATED_RESET_PENDING";
-            break;
-            
+            return @"PROVIDER_INITIATED_RESET_PENDING";
         case SCCP_STATE_OUTGOING_CONNECTION_PENDING:
-            s = @"OUTGOING_CONNECTION_PENDING";
-            break;
-            
+            return @"OUTGOING_CONNECTION_PENDING";
         case SCCP_STATE_USER_REQUEST_RESET_PENDING:
-            s = @"USER_REQUEST_RESET_PENDING";
+            return @"USER_REQUEST_RESET_PENDING";
             break;
         default:
-            s = [NSString stringWithFormat:@"unknown(%d)",(int)state];
-            break;
+            return [NSString stringWithFormat:@"%d",(int)state];
     }
-    return s;
+}
+
+
+
++ (SCCP_State) stringToSccpState:(NSString *)str
+{
+    if([str isEqualToStringCaseInsensitive:@"IDLE"])
+    {
+        return SCCP_STATE_IDLE;
+    }
+    if([str isEqualToStringCaseInsensitive:@"DATA_TRANSFER"])
+    {
+        return SCCP_STATE_DATA_TRANSFER;
+    }
+    if([str isEqualToStringCaseInsensitive:@"SCCP_STATE_INCOMING_CONNECTION_PENDING"])
+    {
+        return SCCP_STATE_INCOMING_CONNECTION_PENDING;
+    }
+    if([str isEqualToStringCaseInsensitive:@"PROVIDER_INITIATED_RESET_PENDING"])
+    {
+        return SCCP_STATE_PROVIDER_INITIATED_RESET_PENDING;
+    }
+    if([str isEqualToStringCaseInsensitive:@"OUTGOING_CONNECTION_PENDING"])
+    {
+        return SCCP_STATE_OUTGOING_CONNECTION_PENDING;
+    }
+    if([str isEqualToStringCaseInsensitive:@"USER_REQUEST_RESET_PENDING"])
+    {
+        return SCCP_STATE_USER_REQUEST_RESET_PENDING;
+    }
+    return (SCCP_State)[str integerValue];
 }
 
 + (NSString *) sccpServiceClassToString:(SCCP_ServiceClass)serviceClass
@@ -818,6 +836,28 @@ typedef enum UMTCAP_Command
     }
     return s;
 }
+
++ (SCCP_ServiceClass) stringToSccpServiceClass:(NSString *)str;
+{
+    if([str isEqualToStringCaseInsensitive:@"UNDEFINED"])
+    {
+        return SCCP_CLASS_UNDEFINED;
+    }
+    if([str isEqualToStringCaseInsensitive:@"BASIC"])
+    {
+        return SCCP_CLASS_BASIC;
+    }
+    if([str isEqualToStringCaseInsensitive:@"CLASS_INSEQ_CL"])
+    {
+        return SCCP_CLASS_INSEQ_CL;
+    }
+    if([str isEqualToStringCaseInsensitive:@"BASIC_CO"])
+    {
+        return SCCP_CLASS_BASIC_CO;
+    }
+    return (SCCP_ServiceClass)[str integerValue];
+}
+
 
 + (NSString *) sccpReturnCauseString:(SCCP_ReturnCause)cause
 {
@@ -872,120 +912,97 @@ typedef enum UMTCAP_Command
             return @"SegmentationFailure";
             break;
         default:
-            return [NSString stringWithFormat:@"UnknownReturnCause_%d",cause];
+            return [NSString stringWithFormat:@"%d",cause];
             break;
     }
 }
 
-#if 0
-#define ADD(list,o,tagType,classType) \
-    if(o) \
-    { \
-        o.asn1_tag.tagNumber = tagType; \
-        o.asn1_tag.tagClass = classType; \
-        [list addObject:o]; \
-    }
-- (void) processBeforeEncode
++ (SCCP_ReturnCause) stringToSccpReturnCauseString:(NSString *)str
 {
-    [super processBeforeEncode];
-    [_asn1_tag setTagIsConstructed];
-    _asn1_list = [[NSMutableArray alloc]init];
-    ADD(_asn1_list,_instance,UMMTP3LogPacket_INSTANCE,UMASN1Class_ContextSpecific);
-    ADD(_asn1_list,_mtp3_instance,UMMTP3LogPacket_MTP3_INSTANCE,UMASN1Class_ContextSpecific);
-    ADD(_asn1_list,_linkset,UMMTP3LogPacket_LINKSET,UMASN1Class_ContextSpecific);
-    ADD(_asn1_list,_direction,UMMTP3LogPacket_DIRECTION,UMASN1Class_ContextSpecific);
-    ADD(_asn1_list,_opc,UMMTP3LogPacket_OPC,UMASN1Class_ContextSpecific);
-    ADD(_asn1_list,_dpc,UMMTP3LogPacket_DPC,UMASN1Class_ContextSpecific);
-    ADD(_asn1_list,_ni,UMMTP3LogPacket_NI,UMASN1Class_ContextSpecific);
-    ADD(_asn1_list,_si,UMMTP3LogPacket_SI,UMASN1Class_ContextSpecific);
-    ADD(_asn1_list,_slc,UMMTP3LogPacket_SLC,UMASN1Class_ContextSpecific);
-    ADD(_asn1_list,_sls,UMMTP3LogPacket_SLS,UMASN1Class_ContextSpecific);
-    ADD(_asn1_list,_priority,UMMTP3LogPacket_PRIORITY,UMASN1Class_ContextSpecific);
-    ADD(_asn1_list,_packetType,UMMTP3LogPacket_PACKET_TYPE,UMASN1Class_ContextSpecific);
-    ADD(_asn1_list,_affectedPointcodes,UMMTP3LogPacket_AFFECTED_POINTCODES,UMASN1Class_ContextSpecific);
-    ADD(_asn1_list,_payload,UMMTP3LogPacket_PAYLOAD,UMASN1Class_ContextSpecific);
-    ADD(_asn1_list,_raw,UMMTP3LogPacket_RAW,UMASN1Class_ContextSpecific);
-    ADD(_asn1_list,_networkAppearance,UMMTP3LogPacket_NETWORK_APPEARANCE,UMASN1Class_ContextSpecific);
-    ADD(_asn1_list,_correlationId,UMMTP3LogPacket_CORRELATION_ID,UMASN1Class_ContextSpecific);
-    ADD(_asn1_list,_routingContext,UMMTP3LogPacket_ROUTING_CONTEXT,UMASN1Class_ContextSpecific);
-    ADD(_asn1_list,_error,UMMTP3LogPacket_ERROR,UMASN1Class_ContextSpecific);
-}
-#undef ADD
-
-
-- (UMSCCP_Packet *) processAfterDecodeWithContext:(id)context
-{
-    int p=0;
-#define     ASSIGN(o,tag,class,type,var)    \
-    if((o) && (o.asn1_tag.tagNumber == tag) && (o.asn1_tag.tagClass == class))  \
-    {   \
-        var = [[type alloc]initWithASN1Object:o context:context];   \
-    }
-    
-    UMASN1Object *o = [self getObjectAtPosition:p++];
-    while(o)
+    if([str isEqualToStringCaseInsensitive:@"SubsystemCongestion"])
     {
-        ASSIGN(o,UMMTP3LogPacket_INSTANCE,UMASN1Class_ContextSpecific,UMASN1UTF8String,_instance);
-        ASSIGN(o,UMMTP3LogPacket_MTP3_INSTANCE,UMASN1Class_ContextSpecific,UMASN1UTF8String,_mtp3_instance);
-        ASSIGN(o,UMMTP3LogPacket_LINKSET,UMASN1Class_ContextSpecific,UMASN1UTF8String,_linkset);
-        ASSIGN(o,UMMTP3LogPacket_DIRECTION,UMASN1Class_ContextSpecific,UMASN1UTF8String,_direction);
-        ASSIGN(o,UMMTP3LogPacket_OPC,UMASN1Class_ContextSpecific,UMASN1Integer,_opc);
-        ASSIGN(o,UMMTP3LogPacket_DPC,UMASN1Class_ContextSpecific,UMASN1Integer,_dpc);
-        ASSIGN(o,UMMTP3LogPacket_NI,UMASN1Class_ContextSpecific,UMASN1Integer,_ni);
-        ASSIGN(o,UMMTP3LogPacket_SI,UMASN1Class_ContextSpecific,UMASN1Integer,_si);
-        ASSIGN(o,UMMTP3LogPacket_SLC,UMASN1Class_ContextSpecific,UMASN1Integer,_slc);
-        ASSIGN(o,UMMTP3LogPacket_SLS,UMASN1Class_ContextSpecific,UMASN1Integer,_sls);
-        ASSIGN(o,UMMTP3LogPacket_PRIORITY,UMASN1Class_ContextSpecific,UMASN1Integer,_priority);
-        ASSIGN(o,UMMTP3LogPacket_PACKET_TYPE,UMASN1Class_ContextSpecific,UMASN1UTF8String,_packetType);
-        ASSIGN(o,UMMTP3LogPacket_AFFECTED_POINTCODES,UMASN1Class_ContextSpecific,UMASN1UTF8String,_affectedPointcodes);
-        ASSIGN(o,UMMTP3LogPacket_PAYLOAD,UMASN1Class_ContextSpecific,UMASN1OctetString,_payload);
-        ASSIGN(o,UMMTP3LogPacket_RAW,UMASN1Class_ContextSpecific,UMASN1OctetString,_raw);
-        ASSIGN(o,UMMTP3LogPacket_NETWORK_APPEARANCE,UMASN1Class_ContextSpecific,UMASN1Integer,_networkAppearance);
-        ASSIGN(o,UMMTP3LogPacket_CORRELATION_ID,UMASN1Class_ContextSpecific,UMASN1Integer,_correlationId);
-        ASSIGN(o,UMMTP3LogPacket_ROUTING_CONTEXT,UMASN1Class_ContextSpecific,UMASN1OctetString,_routingContext);
-        ASSIGN(o,UMMTP3LogPacket_ERROR,UMASN1Class_ContextSpecific,UMASN1UTF8String,_error);
-        o = [self getObjectAtPosition:p++];
+        return SCCP_ReturnCause_SubsystemCongestion;
     }
-    return self;
-#undef  ASSIGN
-}
-
-- (NSString *) objectName
-{
-    return @"UMSCCP_Packet";
-}
-
-- (id) objectValue
-{
-    UMSynchronizedSortedDictionary *dict = [[UMSynchronizedSortedDictionary alloc]init];
-#define     SET(dict,var,name)    \
-    if(var) \
-    {   \
-        dict[name] = var.objectValue;   \
+    if([str isEqualToStringCaseInsensitive:@"SubsystemFailure"])
+    {
+        return SCCP_ReturnCause_SubsystemFailure;
     }
-    SET(dict,_instance,@"instance");
-    SET(dict,_mtp3_instance,@"mtp3-instance");
-    SET(dict,_linkset,@"linkset");
-    SET(dict,_direction,@"direction");
-    SET(dict,_opc,@"opc");
-    SET(dict,_dpc,@"dpc");
-    SET(dict,_ni,@"ni");
-    SET(dict,_si,@"si");
-    SET(dict,_slc,@"slc");
-    SET(dict,_sls,@"sls");
-    SET(dict,_priority,@"priority");
-    SET(dict,_packetType,@"packet-type");
-    SET(dict,_affectedPointcodes,@"affected-pointcodes");
-    SET(dict,_payload,@"payload");
-    SET(dict,_raw,@"raw");
-    SET(dict,_networkAppearance,@"network-appearance");
-    SET(dict,_correlationId,@"correlation-id");
-    SET(dict,_routingContext,@"routing-context");
-    SET(dict,_error,@"error");
-    return dict;
-#undef SET
+    if([str isEqualToStringCaseInsensitive:@"Unequipped"])
+    {
+        return SCCP_ReturnCause_Unequipped    ;
+    }
+    if([str isEqualToStringCaseInsensitive:@"MTPFailure"])
+    {
+        return SCCP_ReturnCause_MTPFailure    ;
+    }
+    if([str isEqualToStringCaseInsensitive:@"NetworkCongestion"])
+    {
+        return SCCP_ReturnCause_NetworkCongestion    ;
+    }
+    if([str isEqualToStringCaseInsensitive:@"Unqualified"])
+    {
+        return SCCP_ReturnCause_Unqualified;
+    }
+    if([str isEqualToStringCaseInsensitive:@"ErrorInMessageTransport"])
+    {
+        return SCCP_ReturnCause_ErrorInMessageTransport;
+    }
+    if([str isEqualToStringCaseInsensitive:@"ErrorInLocalProcessing"])
+    {
+        return SCCP_ReturnCause_ErrorInLocalProcessing;
+    }
+    if([str isEqualToStringCaseInsensitive:@"DestinationCannotPerformReassembly"])
+    {
+        return SCCP_ReturnCause_DestinationCannotPerformReassembly;
+    }
+    if([str isEqualToStringCaseInsensitive:@"SCCPFailure"])
+    {
+        return SCCP_ReturnCause_SCCPFailure;
+    }
+    if([str isEqualToStringCaseInsensitive:@"HopCounterViolation"])
+    {
+        return SCCP_ReturnCause_HopCounterViolation;
+    }
+    if([str isEqualToStringCaseInsensitive:@"SegmentationNotSupported"])
+    {
+        return SCCP_ReturnCause_SegmentationNotSupported;
+    }
+    if([str isEqualToStringCaseInsensitive:@"SegmentationFailure"])
+    {
+        return SCCP_ReturnCause_SegmentationFailure;
+    }
+    return (SCCP_ReturnCause)[str integerValue];
 }
 
-#endif
+
+
++ (NSString *) sccpHandlingToString:(SCCP_Handling)h
+{
+    switch(h)
+    {
+        case SCCP_HANDLING_NO_SPECIAL_OPTIONS:
+            return @"NO_SPECIAL_OPTIONS";
+        case SCCP_HANDLING_RETURN_ON_ERROR:
+            return @"RETURN_ON_ERROR";
+        default:
+            return [NSString stringWithFormat:@"%d",h];
+            break;
+    }
+}
+
++ (SCCP_Handling) stringToSccpHandling:(NSString *)str;
+{
+    if([str isEqualToStringCaseInsensitive:@"NO_SPECIAL_OPTIONS"])
+    {
+        return SCCP_HANDLING_NO_SPECIAL_OPTIONS;
+    }
+    if([str isEqualToStringCaseInsensitive:@"RETURN_ON_ERROR"])
+    {
+        return SCCP_HANDLING_RETURN_ON_ERROR;
+    }
+    return (SCCP_Handling)[str integerValue];
+}
+
+
 @end
 

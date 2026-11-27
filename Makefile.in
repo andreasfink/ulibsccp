@@ -28,7 +28,7 @@ INCLUDEDIRS= -I. -I @PROJECT_NAME@ -I/usr/local/include
 
 ${LIB}: ${OFILES}
 	./make_version
-	${CC} -shared -o ${LIB} ${LDFLAGS}  ${OFILES} ${LIBS} ${STATIC_LIBS}
+	${CC} -OjbC -shared -o ${LIB} ${LDFLAGS}  ${OFILES} ${LIBS} ${STATIC_LIBS}
 
 ${SLIB}: ${OFILES}
 	@LIBTOOL@ ${SLIB} ${OFILES}
@@ -65,6 +65,4 @@ clean:
 
 %.c.o:    %.c
 	${CC} ${INCLUDEDIRS} -c ${CFLAGS} -x c -std=c17 $<  -o $@
-
-
-
+ 

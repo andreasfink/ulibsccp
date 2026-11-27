@@ -20,7 +20,8 @@ typedef enum SCCP_ServiceClass
 
 typedef enum SCCP_ServiceType
 {
-    SCCP_UDT				= 		0x09,
+    SCCP_UNDEFINED          = -1,
+    SCCP_UDT                =         0x09,
     SCCP_UDTS				= 		0x0A,
     SCCP_XUDT				= 		0x11,
     SCCP_XUDTS				= 		0x12,
@@ -30,7 +31,8 @@ typedef enum SCCP_ServiceType
 
 typedef	enum SCCP_State
 {
-    SCCP_STATE_IDLE								= 0,
+    SCCP_STATE_UNDEFINED                        = -1,
+    SCCP_STATE_IDLE                             = 0,
     SCCP_STATE_DATA_TRANSFER					= 1,
     SCCP_STATE_INCOMING_CONNECTION_PENDING		= 2,
     SCCP_STATE_PROVIDER_INITIATED_RESET_PENDING	= 3,
